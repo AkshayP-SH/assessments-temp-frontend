@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Settings, User } from 'lucide-react';
+import { ArrowLeft, Settings, User, BookOpen } from 'lucide-react';
 import AdminLayout from '../../components/AdminLayout';
 import SystemSettingsTab from '../../components/admin/SystemSettingsTab';
 import ProfileTab from '../../components/admin/ProfileTab';
+import QuestionBankTab from '../../components/admin/QuestionBankTab';
 
 const AdminSettings = () => {
     const navigate = useNavigate();
@@ -21,6 +22,12 @@ const AdminSettings = () => {
             label: 'System Settings',
             icon: Settings,
             component: SystemSettingsTab
+        },
+        {
+            id: 'questionbank',
+            label: 'Question Bank',
+            icon: BookOpen,
+            component: QuestionBankTab
         }
     ];
 

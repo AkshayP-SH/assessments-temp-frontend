@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Upload, FileText, Plus, Save, Trash2, ArrowLeft, CheckCircle, AlertCircle, Loader2, Pencil, X, Eye, AlignLeft, List, Code } from 'lucide-react';
 import { apiFetch } from '../../config/api';
+import CodingQuestionSelector from './CodingQuestionSelector';
+import MCQBankSelector from './MCQBankSelector';
 
 // DISABLED: Code execution feature
 const ENABLE_CODE_EXECUTION = true;
@@ -49,6 +51,9 @@ const CreateTestSection = ({ onComplete, editingTest }) => {
     // DISABLED: Coding Question Logic
     const [showCodingModal, setShowCodingModal] = useState(false);
     const [showCodingViewModal, setShowCodingViewModal] = useState(false);
+    const [showCodingSelector, setShowCodingSelector] = useState(false);
+    const [questionInputMode, setQuestionInputMode] = useState('type'); // 'type' | 'bank'
+    const [bankSelectorKey, setBankSelectorKey] = useState(0);
     const [viewingCodingQuestion, setViewingCodingQuestion] = useState(null);
     const [editingCodingQuestionId, setEditingCodingQuestionId] = useState(null);
     const [currentCodingQuestion, setCurrentCodingQuestion] = useState({
@@ -310,6 +315,38 @@ const CreateTestSection = ({ onComplete, editingTest }) => {
         setQuestions(questions.filter(q => q.id !== id));
     };
 
+    const handleSelectMcqFromBank = (selectedBankQuestions) => {
+        const existingBankIds = new Set(questions.filter((q) => q.bankId).map((q) => q.bankId));
+        const converted = selectedBankQuestions
+            .filter((q) => !existingBankIds.has(q.id))
+            .map((q) => {
+                const correctLetter = (q.correct_option || 'A').toUpperCase();
+                const correctIdx = Math.max(0, 'ABCD'.indexOf(correctLetter));
+                return {
+                    id: Date.now() + Math.random(),
+                    bankId: q.id,
+                    fromBank: true,
+                    text: q.question_text,
+                    options: [q.option_a, q.option_b, q.option_c || '', q.option_d || ''],
+                    correctOption: correctIdx,
+                    marks: q.marks || 1,
+                    format: 'paragraph'
+                };
+            });
+
+        if (converted.length === 0) {
+            alert('These questions are already in your test list (see panel on the right).');
+            return;
+        }
+
+        setQuestions([...questions, ...converted]);
+        setBankSelectorKey((k) => k + 1);
+
+        if (converted.length < selectedBankQuestions.length) {
+            alert(`Added ${converted.length} question(s) to the list. ${selectedBankQuestions.length - converted.length} duplicate(s) skipped.`);
+        }
+    };
+
     // Coding Question Handlers
 
     const handleAddPublicTestCase = () => {
@@ -403,6 +440,73 @@ const CreateTestSection = ({ onComplete, editingTest }) => {
         setShowCodingModal(true);
     };
 
+    const handleSelectFromBank = (selectedQuestions) => {
+        const existingBankIds = new Set(codingQuestions.filter((q) => q.bankId).map((q) => q.bankId));
+        const newSelections = selectedQuestions.filter((q) => !existingBankIds.has(q.id));
+
+        if (newSelections.length === 0) {
+            alert('Selected questions are already added to this test.');
+            return;
+        }
+
+        if (newSelections.length < selectedQuestions.length) {
+            alert(`${selectedQuestions.length - newSelections.length} duplicate question(s) were skipped.`);
+        }
+
+        // Fetch full details including test cases for each question
+        const fetchQuestionDetails = async () => {
+            try {
+                const token = localStorage.getItem('adminToken');
+                const detailedQuestions = await Promise.all(
+                    newSelections.map(async (q) => {
+                        const response = await apiFetch(`api/question-bank/coding/${q.id}`, {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        const data = await response.json();
+                        if (data.success && data.question.testCases) {
+                            const publicTestCases = data.question.testCases
+                                .filter(tc => !tc.is_hidden)
+                                .map(tc => ({
+                                    input: tc.input,
+                                    output: tc.output,
+                                    explanation: tc.explanation || ''
+                                }));
+                            
+                            const hiddenTestCases = data.question.testCases
+                                .filter(tc => tc.is_hidden)
+                                .map(tc => ({
+                                    input: tc.input,
+                                    output: tc.output
+                                }));
+
+                            return {
+                                id: Date.now() + Math.random(),
+                                bankId: q.id,
+                                title: q.title,
+                                description: q.description,
+                                timeLimit: q.time_limit,
+                                memoryLimit: q.memory_limit,
+                                marks: q.marks,
+                                publicTestCases: publicTestCases.length > 0 ? publicTestCases : [{ input: '', output: '', explanation: '' }],
+                                hiddenTestCases: hiddenTestCases.length > 0 ? hiddenTestCases : [{ input: '', output: '' }],
+                                fromBank: true
+                            };
+                        }
+                        return null;
+                    })
+                );
+
+                const validQuestions = detailedQuestions.filter(q => q !== null);
+                setCodingQuestions([...codingQuestions, ...validQuestions]);
+            } catch (error) {
+                console.error('Error fetching question details:', error);
+                alert('Failed to load some question details');
+            }
+        };
+
+        fetchQuestionDetails();
+    };
+
 
     const convertISTToUTC = (dateTimeString) => {
         if (!dateTimeString) return null;
@@ -443,7 +547,7 @@ const CreateTestSection = ({ onComplete, editingTest }) => {
                 optiond: q.options[3],
                 correct_option: String.fromCharCode(65 + q.correctOption),
                 correctoption: String.fromCharCode(65 + q.correctOption),
-                marks: 1
+                marks: q.marks || 1
             }));
 
             let response, data;
@@ -996,25 +1100,34 @@ const CreateTestSection = ({ onComplete, editingTest }) => {
                         {/* Add Coding Question Button */}
                          {!viewMode && (
                             <div className="pt-4 border-t border-shnoor-mist">
-                                <button
-                                    onClick={() => {
-                                        setEditingCodingQuestionId(null);
-                                        setCurrentCodingQuestion({
-                                            title: '',
-                                            description: '',
-                                            publicTestCases: [{ input: '', output: '', explanation: '' }],
-                                            hiddenTestCases: [{ input: '', output: '' }],
-                                            timeLimit: 2,
-                                            memoryLimit: 256,
-                                            marks: 10
-                                        });
-                                        setShowCodingModal(true);
-                                    }}
-                                    className="w-full py-3 bg-white border-2 border-shnoor-mist hover:border-shnoor-indigo text-shnoor-navy hover:text-shnoor-indigo font-semibold rounded-lg transition-all flex items-center justify-center space-x-2"
-                                >
-                                    <Code size={20} />
-                                    <span>Add Coding Question</span>
-                                </button>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <button
+                                        onClick={() => {
+                                            setEditingCodingQuestionId(null);
+                                            setCurrentCodingQuestion({
+                                                title: '',
+                                                description: '',
+                                                publicTestCases: [{ input: '', output: '', explanation: '' }],
+                                                hiddenTestCases: [{ input: '', output: '' }],
+                                                timeLimit: 2,
+                                                memoryLimit: 256,
+                                                marks: 10
+                                            });
+                                            setShowCodingModal(true);
+                                        }}
+                                        className="py-3 bg-white border-2 border-shnoor-mist hover:border-shnoor-indigo text-shnoor-navy hover:text-shnoor-indigo font-semibold rounded-lg transition-all flex items-center justify-center space-x-2"
+                                    >
+                                        <Plus size={20} />
+                                        <span>Create New Coding Question</span>
+                                    </button>
+                                    <button
+                                        onClick={() => setShowCodingSelector(true)}
+                                        className="py-3 bg-shnoor-indigo hover:bg-shnoor-navy text-white font-semibold rounded-lg transition-all flex items-center justify-center space-x-2"
+                                    >
+                                        <List size={20} />
+                                        <span>Select from Question Bank</span>
+                                    </button>
+                                </div>
                             </div>
                         )} 
 
@@ -1224,6 +1337,43 @@ const CreateTestSection = ({ onComplete, editingTest }) => {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         {/* Form Side */}
                         <div className="lg:col-span-2 space-y-6">
+                            <div className="flex rounded-lg border border-shnoor-mist p-1 bg-shnoor-lavender">
+                                <button
+                                    type="button"
+                                    onClick={() => setQuestionInputMode('type')}
+                                    className={`flex-1 py-2.5 px-4 rounded-md text-sm font-semibold transition-colors flex items-center justify-center gap-2 ${
+                                        questionInputMode === 'type'
+                                            ? 'bg-white text-shnoor-indigo shadow-sm'
+                                            : 'text-shnoor-navy hover:text-shnoor-indigo'
+                                    }`}
+                                >
+                                    <FileText size={16} />
+                                    Type Manually
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setQuestionInputMode('bank')}
+                                    className={`flex-1 py-2.5 px-4 rounded-md text-sm font-semibold transition-colors flex items-center justify-center gap-2 ${
+                                        questionInputMode === 'bank'
+                                            ? 'bg-white text-shnoor-indigo shadow-sm'
+                                            : 'text-shnoor-navy hover:text-shnoor-indigo'
+                                    }`}
+                                >
+                                    <List size={16} />
+                                    From Question Bank
+                                </button>
+                            </div>
+
+                            {questionInputMode === 'bank' ? (
+                                <MCQBankSelector
+                                    key={bankSelectorKey}
+                                    variant="inline"
+                                    onSelect={handleSelectMcqFromBank}
+                                    selectedQuestionIds={questions.filter((q) => q.bankId).map((q) => q.bankId)}
+                                    selectedRoles={jobRoles}
+                                />
+                            ) : (
+                            <>
                             <div>
                                 <div className="flex items-center justify-between mb-2">
                                     <label className="block text-sm font-medium text-shnoor-navy">Question Text</label>
@@ -1307,12 +1457,15 @@ const CreateTestSection = ({ onComplete, editingTest }) => {
                             </div>
 
                             <button
+                                type="button"
                                 onClick={handleAddQuestion}
                                 className="w-full py-3 bg-theme-accent hover:bg-theme-accent2 text-white font-semibold rounded-lg transition-colors flex items-center justify-center space-x-2"
                             >
                                 <Plus size={20} />
                                 <span>Add Question to Test</span>
                             </button>
+                            </>
+                            )}
 
                             <div className="pt-6 border-t border-shnoor-mist">
                                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-3">
@@ -1348,7 +1501,8 @@ const CreateTestSection = ({ onComplete, editingTest }) => {
 
                         {/* Preview Side */}
                         <div className="bg-shnoor-lavender rounded-xl p-4 h-fit max-h-[600px] overflow-y-auto border border-shnoor-mist">
-                            <h3 className="font-bold text-shnoor-navy mb-4 sticky top-0 bg-shnoor-lavender pb-2">Added Questions</h3>
+                            <h3 className="font-bold text-shnoor-navy mb-1">Added Questions</h3>
+                            <p className="text-xs text-shnoor-navy mb-4">Questions you add appear here. Remove any with the trash icon before saving the test.</p>
                             {questions.length === 0 ? (
                                 <div className="text-center py-8 text-shnoor-navy">
                                     <FileText className="mx-auto h-10 w-10 mb-2 opacity-50" />
@@ -1357,12 +1511,19 @@ const CreateTestSection = ({ onComplete, editingTest }) => {
                             ) : (
                                 <div className="space-y-4">
                                     {questions.map((q, idx) => (
-                                        <div key={q.id} className="bg-white p-4 rounded-lg border border-shnoor-mist shadow-sm group">
-                                            <div className="flex justify-between items-start mb-2">
-                                                <span className="font-bold text-xs text-shnoor-navy bg-shnoor-lavender px-2 py-1 rounded">Q{idx + 1}</span>
+                                        <div key={q.id} className="bg-white p-4 rounded-lg border border-shnoor-mist shadow-sm">
+                                            <div className="flex justify-between items-start mb-2 gap-2">
+                                                <div className="flex flex-wrap items-center gap-1.5">
+                                                    <span className="font-bold text-xs text-shnoor-navy bg-shnoor-lavender px-2 py-1 rounded">Q{idx + 1}</span>
+                                                    {q.fromBank && (
+                                                        <span className="text-xs text-shnoor-indigo bg-shnoor-lavender px-2 py-0.5 rounded">Bank</span>
+                                                    )}
+                                                </div>
                                                 <button
+                                                    type="button"
                                                     onClick={() => handleRemoveQuestion(q.id)}
-                                                    className="text-shnoor-danger hover:text-shnoor-danger opacity-0 group-hover:opacity-100 transition-opacity"
+                                                    className="p-1.5 text-shnoor-danger hover:bg-shnoor-dangerLight rounded-lg flex-shrink-0"
+                                                    title="Remove question"
                                                 >
                                                     <Trash2 size={16} />
                                                 </button>
@@ -1825,6 +1986,17 @@ const CreateTestSection = ({ onComplete, editingTest }) => {
                     </div>
                 </div>
             )}
+
+            {/* Coding Question Selector Modal */}
+            {showCodingSelector && (
+                <CodingQuestionSelector
+                    onClose={() => setShowCodingSelector(false)}
+                    onSelect={handleSelectFromBank}
+                    selectedQuestionIds={codingQuestions.filter(q => q.bankId).map(q => q.bankId)}
+                    selectedRoles={jobRoles}
+                />
+            )}
+
         </div>
     );
 };
