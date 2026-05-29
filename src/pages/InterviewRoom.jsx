@@ -379,18 +379,14 @@ const InterviewRoom = () => {
       const isSecure = apiUrl.startsWith('https');
       
       let backendHost = 'localhost';
-      let backendPort = 5000;
+      // PeerJS runs on a dedicated port (see backend PEER_PORT) — not the main API port
+      let backendPort = parseInt(import.meta.env.VITE_PEER_PORT || '5002', 10);
       let peerPath = '/peerjs';
       
       try {
         const parsedUrl = new URL(apiUrl);
         backendHost = parsedUrl.hostname;
-        backendPort = parsedUrl.port ? parseInt(parsedUrl.port) : (isSecure ? 443 : 80);
-        // If API URL has a path (like /api), append /peerjs to it, otherwise just /peerjs
-        const basePath = parsedUrl.pathname === '/' ? '' : parsedUrl.pathname;
-        // The backend server mounts peerjs at /peerjs relative to the root, not /api/peerjs, 
-        // but if reverse proxy uses paths we need to be careful. Generally /peerjs is correct.
-        peerPath = '/peerjs'; 
+        peerPath = '/peerjs';
       } catch (e) {
         console.error('Error parsing API URL for PeerJS:', e);
       }

@@ -29,11 +29,24 @@ const ProfileTab = () => {
         fetchProfile();
     }, []);
 
+    const getStoredAdminUser = () => {
+        try {
+            const raw = localStorage.getItem('adminUser');
+            return raw ? JSON.parse(raw) : null;
+        } catch {
+            return null;
+        }
+    };
+
     const fetchProfile = async () => {
         setIsLoading(true);
         try {
+            const storedUser = getStoredAdminUser();
+            const isClientAdmin = storedUser?.role === 'client_admin';
             const token = localStorage.getItem('adminToken');
-            const response = await apiFetch('api/admin/me', {
+            const profileEndpoint = isClientAdmin ? 'api/client/auth/me' : 'api/admin/me';
+
+            const response = await apiFetch(profileEndpoint, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -42,9 +55,16 @@ const ProfileTab = () => {
             if (data.success && data.admin) {
                 setProfileData({
                     email: data.admin.email || '',
-                    full_name: data.admin.full_name || '',
+                    full_name: data.admin.full_name || data.admin.fullName || '',
                     phone: data.admin.phone || '',
                     address: data.admin.address || ''
+                });
+            } else if (isClientAdmin && storedUser) {
+                setProfileData({
+                    email: storedUser.email || '',
+                    full_name: storedUser.fullName || storedUser.full_name || '',
+                    phone: '',
+                    address: ''
                 });
             }
         } catch (error) {
@@ -82,6 +102,12 @@ const ProfileTab = () => {
         setIsSaving(true);
         setMessage({ type: '', text: '' });
         try {
+            const storedUser = getStoredAdminUser();
+            if (storedUser?.role === 'client_admin') {
+                setMessage({ type: 'error', text: 'Profile updates for client admins are managed by your organization contact.' });
+                return;
+            }
+
             const token = localStorage.getItem('adminToken');
             const response = await apiFetch('api/admin/profile', {
                 method: 'PUT',
@@ -127,17 +153,30 @@ const ProfileTab = () => {
         setIsSaving(true);
         setMessage({ type: '', text: '' });
         try {
+            const storedUser = getStoredAdminUser();
+            const isClientAdmin = storedUser?.role === 'client_admin';
             const token = localStorage.getItem('adminToken');
-            const response = await apiFetch('api/admin/change-password', {
-                method: 'PUT',
+            const passwordEndpoint = isClientAdmin
+                ? 'api/client/auth/change-password'
+                : 'api/admin/change-password';
+            const passwordBody = isClientAdmin
+                ? {
+                    email: profileData.email || storedUser?.email,
+                    currentPassword: passwordData.currentPassword,
+                    newPassword: passwordData.newPassword
+                }
+                : {
+                    currentPassword: passwordData.currentPassword,
+                    newPassword: passwordData.newPassword
+                };
+
+            const response = await apiFetch(passwordEndpoint, {
+                method: isClientAdmin ? 'POST' : 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    currentPassword: passwordData.currentPassword,
-                    newPassword: passwordData.newPassword
-                })
+                body: JSON.stringify(passwordBody)
             });
             const data = await response.json();
             if (data.success) {

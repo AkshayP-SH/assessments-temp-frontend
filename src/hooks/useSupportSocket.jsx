@@ -166,13 +166,16 @@ export const useSupportSocket = ({
     const MAX_ATTEMPTS = 3;
 
     try {
+      const adminToken = isAdmin ? localStorage.getItem('adminToken') : null;
+
       socket = io(SOCKET_URL, {
         transports: ['polling', 'websocket'],
         reconnection: true,
         reconnectionAttempts: MAX_ATTEMPTS,
         reconnectionDelay: 2000,
         timeout: 10000,
-        autoConnect: true
+        autoConnect: true,
+        auth: adminToken ? { token: adminToken } : undefined,
       });
 
       socketRef.current = socket;
