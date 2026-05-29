@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { apiFetch } from '../config/api';
 import Button from './Button';
 import InputField from './InputField';
@@ -104,7 +104,11 @@ const ReviewSection = ({ title, stepIndex, onEdit, children }) => (
 /* ─── Main Component ─────────────────────────────────────────────────────────── */
 const Register = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const clientToken = searchParams.get('clientToken') || null;
+
   const [step, setStep] = useState(0);
+  const [clientInfo, setClientInfo] = useState(null); // { name, company_name } if clientToken valid
   const [formData, setFormData] = useState({
     fullName: '', rollNumber: '', phone: '', address: '',
     institute: '', course: '', specialization: '', resumeLink: '',
@@ -131,12 +135,32 @@ const Register = () => {
   useEffect(() => {
     (async () => {
       try {
-        const res = await apiFetch('api/institutes/public', { method: 'GET' });
+        // If a clientToken is in the URL, validate it and filter institutes by client
+        const url = clientToken
+          ? `api/institutes/public?clientToken=${encodeURIComponent(clientToken)}`
+          : 'api/institutes/public';
+        const res = await apiFetch(url, { method: 'GET' });
         const data = await res.json();
         if (data.success && data.institutes) setInstitutes(data.institutes);
       } catch { }
     })();
-  }, []);
+
+    // Validate clientToken and fetch client info for display
+    if (clientToken) {
+      (async () => {
+        try {
+          const res = await apiFetch(
+            `api/validate-client-token?token=${encodeURIComponent(clientToken)}`,
+            { method: 'GET' }
+          );
+          const data = await res.json();
+          if (data.success) {
+            setClientInfo(data.client);
+          }
+        } catch { }
+      })();
+    }
+  }, [clientToken]);
 
   useEffect(() => {
     const close = (e) => {
@@ -362,6 +386,8 @@ const Register = () => {
           course: formData.course.trim(),
           specialization: formData.specialization.trim(),
           resume_link: formData.resumeLink.trim(),
+          // Pass clientToken so backend assigns client_id
+          ...(clientToken ? { clientToken } : {}),
         }),
       });
       const data = await response.json();
@@ -758,6 +784,22 @@ const Register = () => {
               <p className="text-[10px] text-shnoor-soft uppercase tracking-widest">Secure Examination Portal</p>
             </div>
           </div>
+
+          {/* Client org banner — shown when registering via a client token */}
+          {clientInfo && (
+            <div className="mb-5 flex items-center gap-3 bg-shnoor-indigo/10 border border-shnoor-indigo/30 rounded-xl px-4 py-3">
+              <div className="w-8 h-8 rounded-lg bg-shnoor-indigo flex items-center justify-center flex-shrink-0">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                  <polyline points="9 22 9 12 15 12 15 22" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-xs font-bold text-shnoor-indigo">Registering for</p>
+                <p className="text-sm font-semibold text-shnoor-navy">{clientInfo.company_name || clientInfo.name}</p>
+              </div>
+            </div>
+          )}
 
           {/* Progress bar */}
           <div className="mb-7">

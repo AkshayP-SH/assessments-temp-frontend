@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Video, LogOut, Settings, MessageSquare, X, Menu } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Video, LogOut, Settings, MessageSquare, X, Menu, Building2 } from 'lucide-react';
 import Button from './Button';
 import { useSupportSocket } from '../hooks/useSupportSocket';
 import shnoorLogo from '../assets/shnoor-logo.png';
@@ -10,7 +10,19 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const AdminHeader = ({ title = "Dashboard", userName = "Admin" }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [unreadCount, setUnreadCount] = useState(0);
+  const currentUser = (() => {
+    try {
+      return JSON.parse(localStorage.getItem('adminUser') || '{}');
+    } catch {
+      return {};
+    }
+  })();
+  const isClientPortal = location.pathname.startsWith('/client');
+  const isClientAdmin = currentUser?.role === 'client_admin' || !!localStorage.getItem('clientToken');
+  const basePath = isClientPortal ? '/client' : '/admin';
+
   const [toastNotification, setToastNotification] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const shownNotificationsRef = useRef(new Set());
@@ -98,6 +110,12 @@ const AdminHeader = ({ title = "Dashboard", userName = "Admin" }) => {
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
     localStorage.removeItem('adminUser');
+    if (isClientPortal || isClientAdmin) {
+      localStorage.removeItem('clientToken');
+      localStorage.removeItem('clientUser');
+      navigate('/client/login');
+      return;
+    }
     navigate('/admin/login');
   };
 
@@ -126,7 +144,7 @@ const AdminHeader = ({ title = "Dashboard", userName = "Admin" }) => {
             <Button
               variant="primary"
               className="admin-header-action !h-10 !px-5 text-sm hover:shadow-[0_0_15px_rgba(107,107,229,0.4)] hover:-translate-y-0.5 transition-all border-0 relative"
-              onClick={() => navigate('/admin/student-messages')}
+              onClick={() => navigate(`${basePath}/student-messages`)}
             >
               <MessageSquare size={16} className="mr-2" />
               <span>Messages</span>
@@ -136,10 +154,20 @@ const AdminHeader = ({ title = "Dashboard", userName = "Admin" }) => {
                 </span>
               )}
             </Button>
+            {!isClientAdmin && (
+              <Button
+                variant="primary"
+                className="admin-header-action !h-10 !px-5 text-sm hover:shadow-[0_0_15px_rgba(107,107,229,0.4)] hover:-translate-y-0.5 transition-all border-0"
+                onClick={() => navigate('/admin/clients')}
+              >
+                <Building2 size={16} className="mr-2" />
+                <span>Clients</span>
+              </Button>
+            )}
             <Button
               variant="primary"
               className="admin-header-action !h-10 !px-5 text-sm hover:shadow-[0_0_15px_rgba(107,107,229,0.4)] hover:-translate-y-0.5 transition-all border-0"
-              onClick={() => navigate('/admin/live-proctoring')}
+              onClick={() => navigate(`${basePath}/live-proctoring`)}
             >
               <Video size={16} className="mr-2" />
               <span>Live Proctoring</span>
@@ -147,7 +175,7 @@ const AdminHeader = ({ title = "Dashboard", userName = "Admin" }) => {
             <Button
               variant="primary"
               className="admin-header-action !h-10 !px-5 text-sm hover:shadow-[0_0_15px_rgba(107,107,229,0.4)] hover:-translate-y-0.5 transition-all border-0"
-              onClick={() => navigate('/admin/settings')}
+              onClick={() => navigate(`${basePath}/settings`)}
             >
               <Settings size={16} className="mr-2" />
               <span>Settings</span>
@@ -184,7 +212,7 @@ const AdminHeader = ({ title = "Dashboard", userName = "Admin" }) => {
               variant="primary"
               className="admin-header-action w-full justify-start !h-12 !px-4 text-sm border-0 relative"
               onClick={() => {
-                navigate('/admin/student-messages');
+                navigate(`${basePath}/student-messages`);
                 setMobileMenuOpen(false);
               }}
             >
@@ -196,11 +224,24 @@ const AdminHeader = ({ title = "Dashboard", userName = "Admin" }) => {
                 </span>
               )}
             </Button>
+            {!isClientAdmin && (
+              <Button
+                variant="primary"
+                className="admin-header-action w-full justify-start !h-12 !px-4 text-sm border-0"
+                onClick={() => {
+                  navigate('/admin/clients');
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <Building2 size={18} className="mr-3" />
+                <span>Clients</span>
+              </Button>
+            )}
             <Button
               variant="primary"
               className="admin-header-action w-full justify-start !h-12 !px-4 text-sm border-0"
               onClick={() => {
-                navigate('/admin/live-proctoring');
+                navigate(`${basePath}/live-proctoring`);
                 setMobileMenuOpen(false);
               }}
             >
@@ -211,7 +252,7 @@ const AdminHeader = ({ title = "Dashboard", userName = "Admin" }) => {
               variant="primary"
               className="admin-header-action w-full justify-start !h-12 !px-4 text-sm border-0"
               onClick={() => {
-                navigate('/admin/settings');
+                navigate(`${basePath}/settings`);
                 setMobileMenuOpen(false);
               }}
             >
@@ -240,7 +281,7 @@ const AdminHeader = ({ title = "Dashboard", userName = "Admin" }) => {
             className="bg-white rounded-xl shadow-2xl border border-gray-100 p-4 max-w-sm cursor-pointer hover:shadow-xl transition-shadow"
             onClick={() => {
               setToastNotification(null);
-              navigate('/admin/student-messages');
+              navigate(`${basePath}/student-messages`);
             }}
           >
             <div className="flex items-start gap-3">

@@ -3,7 +3,9 @@ import React, { Suspense, useEffect } from 'react';
 import './App.css';
 import ErrorBoundary from './components/ErrorBoundary';
 import { AdminAuthProvider } from './contexts/AdminAuthContext';
+import { ClientAuthProvider } from './contexts/ClientAuthContext';
 import AdminProtectedRoute from './components/AdminProtectedRoute';
+import ClientProtectedRoute from './components/ClientProtectedRoute';
 import GlobalThemeSelector from './components/GlobalThemeSelector';
 import { applyTheme, getSavedTheme } from './utils/theme';
 import LandingPage from './pages/LandingPage';
@@ -38,6 +40,10 @@ const PrivacyPolicy = React.lazy(() => import('./pages/PrivacyPolicy'));
 const TermsAndConditions = React.lazy(() => import('./pages/TermsAndConditions'));
 const JobBoard = React.lazy(() => import('./pages/JobBoard'));
 const MyApplications = React.lazy(() => import('./pages/MyApplications'));
+
+// Client portal (multi-tenant)
+const ClientLogin = React.lazy(() => import('./pages/client/ClientLogin'));
+const AdminClients = React.lazy(() => import('./pages/admin/AdminClients'));
 
 // Protected Route wrappers
 const StudentRoute = ({ children }) => {
@@ -91,6 +97,19 @@ const AppRoutes = () => {
         <Route path="/admin/job-applicants/:jobId" element={<AdminProtectedRoute><AdminJobApplicants /></AdminProtectedRoute>} />
         <Route path="/admin/interviews" element={<AdminProtectedRoute><InterviewsList /></AdminProtectedRoute>} />
         <Route path="/admin/interview-room/:interviewId" element={<AdminProtectedRoute><InterviewRoom /></AdminProtectedRoute>} />
+        <Route path="/admin/clients" element={<AdminProtectedRoute><AdminClients /></AdminProtectedRoute>} />
+
+        {/* Client Portal Routes (multi-tenant, admin UI parity) */}
+        <Route path="/client/login" element={<ClientLogin />} />
+        <Route path="/client/dashboard" element={<ClientProtectedRoute><AdminDashboard /></ClientProtectedRoute>} />
+        <Route path="/client/reports" element={<ClientProtectedRoute><AdminReports /></ClientProtectedRoute>} />
+        <Route path="/client/live-proctoring" element={<ClientProtectedRoute><LiveProctoring /></ClientProtectedRoute>} />
+        <Route path="/client/student-messages" element={<ClientProtectedRoute><StudentMessages /></ClientProtectedRoute>} />
+        <Route path="/client/settings" element={<ClientProtectedRoute><AdminSettings /></ClientProtectedRoute>} />
+        <Route path="/client/job-applicants/:jobId" element={<ClientProtectedRoute><AdminJobApplicants /></ClientProtectedRoute>} />
+        <Route path="/client/interviews" element={<ClientProtectedRoute><InterviewsList /></ClientProtectedRoute>} />
+        <Route path="/client/interview-room/:interviewId" element={<ClientProtectedRoute><InterviewRoom /></ClientProtectedRoute>} />
+        <Route path="/client" element={<Navigate to="/client/dashboard" replace />} />
 
         {/* Student Interview Route */}
         <Route path="/interview-room/:interviewId" element={<StudentRoute><InterviewRoom /></StudentRoute>} />
@@ -106,11 +125,13 @@ function App() {
   return (
     <ErrorBoundary>
       <AdminAuthProvider>
-        <Router>
-          <Suspense fallback={<LoadingFallback />}>
-            <AppRoutes />
-          </Suspense>
-        </Router>
+        <ClientAuthProvider>
+          <Router>
+            <Suspense fallback={<LoadingFallback />}>
+              <AppRoutes />
+            </Suspense>
+          </Router>
+        </ClientAuthProvider>
       </AdminAuthProvider>
     </ErrorBoundary>
   );

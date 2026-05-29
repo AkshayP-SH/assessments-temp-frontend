@@ -25,10 +25,30 @@ export const AdminAuthProvider = ({ children }) => {
 
     try {
       const token = localStorage.getItem('adminToken');
+      const storedAdminUser = localStorage.getItem('adminUser');
+      let parsedStoredUser = null;
+      if (storedAdminUser) {
+        try {
+          parsedStoredUser = JSON.parse(storedAdminUser);
+        } catch {
+          parsedStoredUser = null;
+        }
+      }
 
       if (!token) {
         setAdmin(null);
         setIsAuthenticated(false);
+        if (!silent) {
+          setLoading(false);
+        }
+        return;
+      }
+
+      // Client admin sessions are validated by client auth flow.
+      // Do not hit /api/admin/validate-token for client_admin tokens.
+      if (parsedStoredUser?.role === 'client_admin') {
+        setAdmin(parsedStoredUser);
+        setIsAuthenticated(true);
         if (!silent) {
           setLoading(false);
         }
@@ -72,11 +92,27 @@ export const AdminAuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('Auth check failed:', error);
-      // Token is invalid or network error, remove it
-      localStorage.removeItem('adminToken');
-      localStorage.removeItem('adminUser');
-      setAdmin(null);
-      setIsAuthenticated(false);
+      const storedAdminUser = localStorage.getItem('adminUser');
+      let parsedStoredUser = null;
+      if (storedAdminUser) {
+        try {
+          parsedStoredUser = JSON.parse(storedAdminUser);
+        } catch {
+          parsedStoredUser = null;
+        }
+      }
+
+      // Keep client-admin sessions intact on admin token validation failure.
+      if (parsedStoredUser?.role === 'client_admin') {
+        setAdmin(parsedStoredUser);
+        setIsAuthenticated(true);
+      } else {
+        // Token is invalid or network error, remove it
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminUser');
+        setAdmin(null);
+        setIsAuthenticated(false);
+      }
     } finally {
       if (!silent) {
         setLoading(false);
@@ -99,7 +135,9 @@ export const AdminAuthProvider = ({ children }) => {
         setAdmin(parsedAdmin);
         setIsAuthenticated(true);
         setLoading(false);
-        checkAuthStatus({ silent: true });
+        if (parsedAdmin?.role !== 'client_admin') {
+          checkAuthStatus({ silent: true });
+        }
         return;
       } catch (_error) {
         localStorage.removeItem('adminUser');
