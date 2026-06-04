@@ -37,7 +37,7 @@ const AdminSettings = () => {
         <AdminLayout title="Settings">
             <div className="mb-6">
                 <button
-                    onClick={() => navigate('/admin/dashboard')}
+                    onClick={() => navigate(-1)}
                     className="flex items-center gap-2 text-shnoor-indigo font-semibold hover:text-shnoor-navy transition-colors bg-white px-4 py-2 rounded-lg shadow-sm border border-shnoor-light hover:shadow-md w-fit"
                 >
                     <ArrowLeft size={16} />

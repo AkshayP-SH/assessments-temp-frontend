@@ -7,7 +7,7 @@ import MCQBankSelector from './MCQBankSelector';
 // DISABLED: Code execution feature
 const ENABLE_CODE_EXECUTION = true;
 
-const CreateTestSection = ({ onComplete, editingTest }) => {
+const CreateTestSection = ({ onComplete, editingTest, clientId }) => {
     const FALLBACK_DEFAULT_JOB_ROLE = 'General Assessment Candidate';
     const FALLBACK_DEFAULT_JOB_DESCRIPTION = 'This assessment evaluates candidate readiness across core technical and problem-solving skills relevant to the role.';
     const [step, setStep] = useState('init'); // init, manual, bulk, success
@@ -626,7 +626,8 @@ const CreateTestSection = ({ onComplete, editingTest }) => {
                         startDateTime: convertISTToUTC(startDateTime),
                         endDateTime: convertISTToUTC(endDateTime),
                         status: 'draft', // Save as draft initially
-                        questions: questionData
+                        questions: questionData,
+                        ...(clientId ? { client_id: clientId } : {})
                     })
                 });
 
@@ -713,6 +714,7 @@ const CreateTestSection = ({ onComplete, editingTest }) => {
                 formData.append('startDateTime', convertISTToUTC(startDateTime) || '');
                 formData.append('endDateTime', convertISTToUTC(endDateTime) || '');
                 formData.append('testId', uploadedTestId);
+                if (clientId) formData.append('client_id', clientId);
 
                 // FIX: Use native fetch instead of apiFetch to preserve FormData boundaries
                 const response = await fetch(`${cleanBaseUrl}/api/upload/questions/${uploadedTestId}`, {
@@ -795,6 +797,7 @@ const CreateTestSection = ({ onComplete, editingTest }) => {
                 formData.append('startDateTime', convertISTToUTC(startDateTime) || '');
                 formData.append('endDateTime', convertISTToUTC(endDateTime) || '');
                 formData.append('status', 'draft');
+                if (clientId) formData.append('client_id', clientId);
 
                 // FIX: Use native fetch instead of apiFetch
                 const response = await fetch(`${cleanBaseUrl}/api/upload/questions`, {

@@ -42,11 +42,11 @@ const LandingPage = () => (
       <div className="max-w-[1280px] mx-auto px-4 sm:px-8 flex flex-col sm:flex-row items-center justify-between h-auto py-4 sm:py-0 sm:h-[72px] gap-4 sm:gap-0">
         <div className="flex items-center gap-4">
           <div className="landing-brand-logo flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center overflow-hidden rounded-xl bg-white">
-            <img 
-              src={shnoorLogo} 
-              alt="Shnoor" 
-              className="h-10 w-10 sm:h-12 sm:w-12 object-contain" 
-              width="48" 
+            <img
+              src={shnoorLogo}
+              alt="Shnoor"
+              className="h-10 w-10 sm:h-12 sm:w-12 object-contain"
+              width="48"
               height="48"
               loading="eager"
               fetchPriority="high"

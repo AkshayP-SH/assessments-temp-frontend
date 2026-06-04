@@ -96,13 +96,13 @@ const LiveProctoring = () => {
     // Check admin authentication
     const token = localStorage.getItem('adminToken');
     if (!token) {
-      navigate('/admin/login');
+      navigate('/login');
       return;
     }
 
     console.log('[Admin] Initializing Socket.IO connection to:', SOCKET_URL);
 
-    // Prefer WebSocket in production so multi-instance deployments do not break long-polling sessions.
+    // Pass JWT in socket handshake so the server can verify identity and scope the room
     const socket = io(SOCKET_URL, {
       transports: ['polling', 'websocket'],
       reconnection: true,
@@ -110,7 +110,8 @@ const LiveProctoring = () => {
       reconnectionAttempts: 5,
       timeout: 30000,
       forceNew: true,
-      autoConnect: true
+      autoConnect: true,
+      auth: { token },
     });
 
     // Connection event handlers
@@ -120,9 +121,17 @@ const LiveProctoring = () => {
       console.log('[Admin] Transport:', socket.io.engine.transport.name);
       setIsConnected(true);
 
-      // Join monitoring room
+      // Join monitoring room — server verifies JWT from handshake auth
       socket.emit('admin:join-monitoring');
       console.log('[Admin] Sent admin:join-monitoring event');
+    });
+
+    // Server rejected the join (bad/expired token)
+    socket.on('admin:monitoring-joined', (data) => {
+      if (!data.success) {
+        console.error('[Admin] Monitoring join rejected:', data.error);
+        navigate('/login');
+      }
     });
 
     socket.on('connect_error', (error) => {

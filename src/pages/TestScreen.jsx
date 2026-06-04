@@ -346,6 +346,7 @@ int main() {
         studentName: studentName,
         testId: testId,
         testTitle: testDetails?.title || 'Test',
+        clientId: localStorage.getItem('clientId') || null,
       });
 
       if (proctoringResult.success) {
@@ -519,6 +520,7 @@ int main() {
                 studentName: studentName,
                 testId: testId,
                 testTitle: data.test.title,
+                clientId: localStorage.getItem('clientId') || null,
               });
 
               if (proctoringResult.success) {

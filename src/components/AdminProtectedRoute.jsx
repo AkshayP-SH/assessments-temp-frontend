@@ -37,7 +37,9 @@ const AdminProtectedRoute = ({ children }) => {
         </div>
       );
     }
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    // Check if this is a client route so we can pre-select the org tab
+    const isClientRoute = location.pathname.startsWith('/client/');
+    return <Navigate to={isClientRoute ? '/login?portal=org' : '/login'} state={{ from: location }} replace />;
   }
 
   // Render protected content if authenticated

@@ -84,7 +84,7 @@ const ClientDashboard = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/client/login');
+    navigate('/login?portal=org');
   };
 
   const copyRegistrationUrl = () => {

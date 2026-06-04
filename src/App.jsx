@@ -42,8 +42,8 @@ const JobBoard = React.lazy(() => import('./pages/JobBoard'));
 const MyApplications = React.lazy(() => import('./pages/MyApplications'));
 
 // Client portal (multi-tenant)
-const ClientLogin = React.lazy(() => import('./pages/client/ClientLogin'));
 const AdminClients = React.lazy(() => import('./pages/admin/AdminClients'));
+const OrganisationSignup = React.lazy(() => import('./pages/OrganisationSignup'));
 
 // Protected Route wrappers
 const StudentRoute = ({ children }) => {
@@ -75,6 +75,7 @@ const AppRoutes = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/register-organisation" element={<OrganisationSignup />} />
         <Route path="/admin/login" element={<Navigate to="/login" replace />} />
         <Route path="/server-down" element={<ServerDown />} />
         <Route path="/maintenance" element={<Maintenance />} />
@@ -100,7 +101,8 @@ const AppRoutes = () => {
         <Route path="/admin/clients" element={<AdminProtectedRoute><AdminClients /></AdminProtectedRoute>} />
 
         {/* Client Portal Routes (multi-tenant, admin UI parity) */}
-        <Route path="/client/login" element={<ClientLogin />} />
+        {/* /client/login redirects to unified login with org tab pre-selected */}
+        <Route path="/client/login" element={<Navigate to="/login?portal=org" replace />} />
         <Route path="/client/dashboard" element={<ClientProtectedRoute><AdminDashboard /></ClientProtectedRoute>} />
         <Route path="/client/reports" element={<ClientProtectedRoute><AdminReports /></ClientProtectedRoute>} />
         <Route path="/client/live-proctoring" element={<ClientProtectedRoute><LiveProctoring /></ClientProtectedRoute>} />

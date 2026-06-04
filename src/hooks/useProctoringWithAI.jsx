@@ -364,14 +364,18 @@ export const useProctoringWithAI = (onCameraLost, onAIViolation, onMessageReceiv
       return socketRef.current;
     }
 
+    // Pass student JWT in handshake so server can verify identity
+    const studentToken = localStorage.getItem('studentAuthToken');
+
     const socket = io(SOCKET_URL, {
       transports: ['polling', 'websocket'],
       reconnection: true,
       reconnectionDelay: 2000,
       reconnectionDelayMax: 10000,
-      reconnectionAttempts: 3, // Reduced from 10 to 3
-      timeout: 10000, // Reduced from 20000 to 10000
+      reconnectionAttempts: 3,
+      timeout: 10000,
       forceNew: true,
+      auth: { token: studentToken },
     });
 
     socket.on('connect', () => {

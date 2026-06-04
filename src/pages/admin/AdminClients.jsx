@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Copy, Plus, Eye, EyeOff, Trash2, RefreshCw, Users, Building2, CheckCircle, XCircle, ExternalLink, Pencil } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Copy, Plus, Eye, EyeOff, Trash2, RefreshCw, Users, Building2, CheckCircle, XCircle, ExternalLink, Pencil, ArrowLeft } from 'lucide-react';
 import AdminLayout from '../../components/AdminLayout';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -281,7 +282,7 @@ const CreatedModal = ({ client, onClose }) => {
           </div>
           <div className="bg-shnoor-lavender rounded-lg px-4 py-3">
             <p className="text-xs font-bold text-shnoor-navy mb-1">Client Admin Login</p>
-            <p className="text-xs text-shnoor-soft">URL: <span className="font-mono text-shnoor-navy">{window.location.origin}/client/login</span></p>
+            <p className="text-xs text-shnoor-soft">URL: <span className="font-mono text-shnoor-navy">{window.location.origin}/login?portal=org</span></p>
             <p className="text-xs text-shnoor-soft">Email: <span className="font-mono text-shnoor-navy">{client.email}</span></p>
           </div>
           <button onClick={onClose} className="w-full h-[46px] bg-shnoor-indigo text-white rounded-lg text-sm font-semibold hover:bg-shnoor-navy transition-colors">
@@ -415,6 +416,7 @@ const ClientDetailPanel = ({ client, onClose, onStatusChange, onDelete, onClient
 
 /* ─── Main AdminClients Page ──────────────────────────────────────────── */
 const AdminClients = () => {
+  const navigate = useNavigate();
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -475,9 +477,18 @@ const AdminClients = () => {
 
         {/* Page header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h2 className="text-xl font-bold text-shnoor-navy">Client Management</h2>
-            <p className="text-sm text-shnoor-soft mt-0.5">{clients.length} total · {activeCount} active</p>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center gap-1.5 h-9 px-3 border border-shnoor-mist text-shnoor-soft rounded-lg text-sm font-medium hover:bg-shnoor-lavender hover:text-shnoor-navy transition-colors flex-shrink-0"
+            >
+              <ArrowLeft size={15} />
+              Back
+            </button>
+            <div>
+              <h2 className="text-xl font-bold text-shnoor-navy">Client Management</h2>
+              <p className="text-sm text-shnoor-soft mt-0.5">{clients.length} total · {activeCount} active</p>
+            </div>
           </div>
           <div className="flex items-center gap-3">
             <button onClick={fetchClients} className="h-10 px-4 border border-shnoor-mist text-shnoor-soft rounded-lg text-sm hover:bg-shnoor-lavender transition-colors flex items-center gap-2">

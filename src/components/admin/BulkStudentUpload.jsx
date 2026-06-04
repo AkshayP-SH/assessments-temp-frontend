@@ -3,7 +3,7 @@ import Button from '../Button';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-function BulkStudentUpload() {
+function BulkStudentUpload({ clientId }) {
     const [file, setFile] = useState(null);
     const [uploading, setUploading] = useState(false);
     const [result, setResult] = useState(null);
@@ -40,6 +40,10 @@ function BulkStudentUpload() {
         try {
             const formData = new FormData();
             formData.append('file', file);
+            // Pass client_id so super admin uploads land in the right tenant
+            if (clientId) {
+                formData.append('client_id', clientId);
+            }
 
             const token = localStorage.getItem('adminToken');
             

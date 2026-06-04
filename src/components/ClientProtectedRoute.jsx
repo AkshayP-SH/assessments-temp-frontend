@@ -12,7 +12,7 @@ const ClientProtectedRoute = ({ children }) => {
     );
   }
 
-  return isAuthenticated ? children : <Navigate to="/client/login" replace />;
+  return isAuthenticated ? children : <Navigate to="/login?portal=org" replace />;
 };
 
 export default ClientProtectedRoute;

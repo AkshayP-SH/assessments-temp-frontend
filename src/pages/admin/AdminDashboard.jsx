@@ -163,6 +163,42 @@ const AdminDashboard = () => {
   const [showInterviewScheduleModal, setShowInterviewScheduleModal] = useState(false);
   const [selectedStudentForInterview, setSelectedStudentForInterview] = useState(null);
 
+  // Super admin client filter — lets super admin scope the dashboard to a specific client
+  const [clientsList, setClientsList] = useState([]);
+  const [viewAsClientId, setViewAsClientId] = useState(''); // '' = all clients (super admin default)
+  const [quota, setQuota] = useState(null); // plan quota for client admin
+  const isSuperAdmin = (() => {
+    try {
+      const u = JSON.parse(localStorage.getItem('adminUser') || '{}');
+      return u.role === 'super_admin' || u.role === 'admin';
+    } catch { return false; }
+  })();
+
+  // Fetch clients list for super admin selector
+  useEffect(() => {
+    if (!isSuperAdmin) return;
+    const token = localStorage.getItem('adminToken');
+    apiFetch('api/clients', { headers: { 'Authorization': `Bearer ${token}` } })
+      .then(r => r.json())
+      .then(d => { if (d.success) setClientsList(d.clients || []); })
+      .catch(() => {});
+  }, [isSuperAdmin]);
+
+  // Fetch quota for client admins (so they can see plan usage)
+  useEffect(() => {
+    if (isSuperAdmin) return;
+    const token = localStorage.getItem('adminToken');
+    if (!token) return;
+    apiFetch('api/clients/me/quota', { headers: { 'Authorization': `Bearer ${token}` } })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d?.success) setQuota(d.quota); })
+      .catch(() => {});
+  }, [isSuperAdmin]);
+
+  // Helper: build Authorization header + optional clientId query param for super admin
+  const buildHeaders = () => ({ 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` });
+  const clientParam = (isSuperAdmin && viewAsClientId) ? `?clientId=${viewAsClientId}` : '';
+
   // Derived state: Get students for the selected exam
   const selectedExamStudents = selectedExamId ? (studentsData[selectedExamId] || []) : [];
   const selectedExamDetails = tests.find(t => t.id === selectedExamId);
@@ -269,7 +305,7 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
-    if (!token) navigate('/admin/login');
+    if (!token) navigate('/login');
     else {
       fetchTests();
       if (activeTab === 'institutes') {
@@ -279,7 +315,7 @@ const AdminDashboard = () => {
         fetchViolations();
       }
     }
-  }, [navigate, activeTab, selectedTestForViolations]);
+  }, [navigate, activeTab, selectedTestForViolations, viewAsClientId]);
 
   // Auto-refresh institute counts every 30 s when on institutes tab (silent — no loading state, no alerts)
   useEffect(() => {
@@ -325,7 +361,7 @@ const AdminDashboard = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('adminToken');
-      const response = await apiFetch('api/tests', {
+      const response = await apiFetch(`api/tests${clientParam}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -461,7 +497,9 @@ const AdminDashboard = () => {
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
     localStorage.removeItem('adminUser');
-    navigate('/admin/login');
+    localStorage.removeItem('clientToken');
+    localStorage.removeItem('clientUser');
+    navigate('/login');
   };
 
   const handleDeleteTest = async (testId) => {
@@ -1213,24 +1251,16 @@ const AdminDashboard = () => {
     try {
       setIsLoadingAllInstitutes(true);
       const token = localStorage.getItem('adminToken');
-      console.log('=== FETCHING ALL INSTITUTES ===');
-      console.log('Token:', token ? 'Present' : 'Missing');
 
-      const response = await apiFetch('api/institutes', {
+      const response = await apiFetch(`api/institutes${clientParam}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
 
-      console.log('Response status:', response.status);
-      console.log('Response ok:', response.ok);
-
       const data = await response.json();
-      console.log('Response data:', data);
 
       if (response.ok && data.success) {
-        console.log('Institutes received:', data.institutes.length);
-        console.log('Institutes data:', data.institutes);
         setAllInstitutes(data.institutes);
       } else {
         console.error('Failed to fetch institutes:', data.message);
@@ -2165,6 +2195,79 @@ const AdminDashboard = () => {
       {/* Header */}
       <AdminHeader />
 
+      {/* Super Admin — Client Scope Selector */}
+      {isSuperAdmin && (
+        <div className="bg-white border-b border-shnoor-mist shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center gap-3">
+            <div className="flex items-center gap-2 text-xs font-semibold text-shnoor-indigoMedium uppercase tracking-wide flex-shrink-0">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              Viewing as:
+            </div>
+            <select
+              value={viewAsClientId}
+              onChange={e => {
+                setViewAsClientId(e.target.value);
+                setTests([]);
+                setAllInstitutes([]);
+              }}
+              className="h-8 pl-3 pr-8 rounded-lg border border-shnoor-mist bg-white text-sm text-shnoor-navy focus:outline-none focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo transition-colors"
+            >
+              <option value="">All Clients (Platform View)</option>
+              {clientsList.map(c => (
+                <option key={c.id} value={c.id}>
+                  {c.company_name || c.name} {c.status !== 'active' ? '(suspended)' : ''}
+                </option>
+              ))}
+            </select>
+            {viewAsClientId && (
+              <button
+                onClick={() => { setViewAsClientId(''); setTests([]); setAllInstitutes([]); }}
+                className="text-xs text-shnoor-danger hover:underline flex items-center gap-1"
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                Clear filter
+              </button>
+            )}
+            {viewAsClientId && (
+              <span className="ml-auto text-xs bg-shnoor-indigo text-white px-2.5 py-1 rounded-full font-medium">
+                Scoped to: {clientsList.find(c => String(c.id) === String(viewAsClientId))?.company_name || clientsList.find(c => String(c.id) === String(viewAsClientId))?.name || 'Client'}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Client Admin — Plan Quota Bar */}
+      {!isSuperAdmin && quota && (
+        <div className="bg-white border-b border-shnoor-mist">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-wrap items-center gap-4">
+            <span className="text-xs font-semibold text-shnoor-indigoMedium uppercase tracking-wide flex-shrink-0">
+              Plan: <span className="text-shnoor-navy capitalize">{quota.tier}</span>
+            </span>
+            {[
+              { label: 'Tests',      used: quota.limits?.tests?.used,      max: quota.limits?.tests?.max },
+              { label: 'Institutes', used: quota.limits?.institutes?.used, max: quota.limits?.institutes?.max },
+              { label: 'Students',   used: quota.limits?.students?.used,   max: quota.limits?.students?.max },
+            ].map(({ label, used, max }) => {
+              if (max == null || max <= 0) return null;
+              const pct = Math.min(100, Math.round((used / max) * 100));
+              const warn = pct >= 90;
+              return (
+                <div key={label} className="flex items-center gap-2 min-w-[140px]">
+                  <span className="text-xs text-shnoor-soft w-16 flex-shrink-0">{label}</span>
+                  <div className="flex-1 h-1.5 bg-shnoor-lavender rounded-full overflow-hidden">
+                    <div className={`h-full rounded-full transition-all ${warn ? 'bg-shnoor-danger' : 'bg-shnoor-indigo'}`} style={{ width: `${pct}%` }} />
+                  </div>
+                  <span className={`text-xs font-medium flex-shrink-0 ${warn ? 'text-shnoor-danger' : 'text-shnoor-indigoMedium'}`}>
+                    {used}/{max}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
@@ -2209,7 +2312,7 @@ const AdminDashboard = () => {
                 <ArrowLeft size={22} className="group-hover:-translate-x-1 transition-transform" />
               </button>
             </div>
-            <CreateTestSection onComplete={handleCreateTestComplete} editingTest={editingTest} />
+            <CreateTestSection onComplete={handleCreateTestComplete} editingTest={editingTest} clientId={viewAsClientId || null} />
           </div>
         ) : selectedExamId ? (
           /* Detail View: Student Results for a specific exam */
@@ -3565,7 +3668,7 @@ const AdminDashboard = () => {
             {/* Bulk Upload Students Tab */}
             {activeTab === 'bulk-upload' && (
               <div className="space-y-6">
-                <BulkStudentUpload />
+                <BulkStudentUpload clientId={viewAsClientId || null} />
               </div>
             )}
 

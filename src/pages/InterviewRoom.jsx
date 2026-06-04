@@ -317,9 +317,11 @@ const InterviewRoom = () => {
         return;
       }
 
-      // Initialize Socket.IO
+      // Initialize Socket.IO — pass JWT in handshake so server can verify identity
       const socketUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? window.location.origin : 'http://localhost:5000');
       console.log('Connecting to socket URL:', socketUrl);
+
+      const jwtToken = localStorage.getItem('adminToken') || localStorage.getItem('studentAuthToken');
 
       const socket = io(socketUrl, {
         transports: ['polling', 'websocket'],
@@ -328,7 +330,8 @@ const InterviewRoom = () => {
         reconnectionAttempts: 10,
         withCredentials: false,
         timeout: 20000,
-        forceNew: false
+        forceNew: false,
+        auth: { token: jwtToken },
       });
 
       socketRef.current = socket;

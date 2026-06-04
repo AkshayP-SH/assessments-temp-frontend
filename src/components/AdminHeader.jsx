@@ -110,13 +110,14 @@ const AdminHeader = ({ title = "Dashboard", userName = "Admin" }) => {
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
     localStorage.removeItem('adminUser');
+    localStorage.removeItem('clientToken');
+    localStorage.removeItem('clientUser');
+    // Always go to unified login; org tab pre-selected for client admins
     if (isClientPortal || isClientAdmin) {
-      localStorage.removeItem('clientToken');
-      localStorage.removeItem('clientUser');
-      navigate('/client/login');
+      navigate('/login?portal=org');
       return;
     }
-    navigate('/admin/login');
+    navigate('/login');
   };
 
   return (

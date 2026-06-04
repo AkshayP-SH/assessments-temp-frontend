@@ -48,14 +48,18 @@ export const useProctoringSimple = (onCameraLost) => {
       return socketRef.current;
     }
 
+    // Pass student JWT in handshake so server can verify identity
+    const studentToken = localStorage.getItem('studentAuthToken');
+
     const socket = io(SOCKET_URL, {
       transports: ['polling', 'websocket'],
       reconnection: true,
-      reconnectionDelay: 2000, // Start with 2 second delay
-      reconnectionDelayMax: 10000, // Max 10 seconds between attempts
-      reconnectionAttempts: 10, // Try 10 times before giving up
-      timeout: 20000, // 20 second connection timeout
-      forceNew: true, // Force new connection
+      reconnectionDelay: 2000,
+      reconnectionDelayMax: 10000,
+      reconnectionAttempts: 10,
+      timeout: 20000,
+      forceNew: true,
+      auth: { token: studentToken },
     });
 
     // Connection success

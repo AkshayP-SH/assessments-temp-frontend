@@ -109,6 +109,7 @@ const Register = () => {
 
   const [step, setStep] = useState(0);
   const [clientInfo, setClientInfo] = useState(null); // { name, company_name } if clientToken valid
+  const [noTokenError] = useState(!clientToken); // true when accessed without a registration link
   const [formData, setFormData] = useState({
     fullName: '', rollNumber: '', phone: '', address: '',
     institute: '', course: '', specialization: '', resumeLink: '',
@@ -708,6 +709,28 @@ const Register = () => {
     );
   };
   /* ─── Render ─────────────────────────────────────────────────────────────── */
+  // Guard: registration requires a valid organisation link
+  if (noTokenError) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center bg-shnoor-lavender font-['Plus_Jakarta_Sans',sans-serif] p-6">
+        <div className="bg-white rounded-2xl shadow-xl p-10 max-w-md w-full text-center">
+          <div className="w-14 h-14 rounded-full bg-shnoor-dangerLight flex items-center justify-center mx-auto mb-5">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-shnoor-danger">
+              <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+          </div>
+          <h1 className="text-xl font-extrabold text-shnoor-navy mb-2">Registration Link Required</h1>
+          <p className="text-sm text-shnoor-indigoMedium mb-6">
+            You need a valid organisation registration link to sign up. Please use the link provided by your organisation or contact your administrator.
+          </p>
+          <a href="/login" className="inline-block bg-shnoor-indigo text-white text-sm font-semibold px-6 py-3 rounded-xl hover:bg-shnoor-navy transition-colors">
+            Back to Sign In
+          </a>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen w-full flex font-['Plus_Jakarta_Sans',sans-serif] relative">
       <div className="absolute top-4 right-4 sm:top-6 sm:right-6 lg:top-8 lg:right-8 z-[100]">
