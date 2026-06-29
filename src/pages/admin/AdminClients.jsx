@@ -31,6 +31,11 @@ const EditClientModal = ({ client, onClose, onUpdated }) => {
     company_name: client.company_name || '',
     email: client.email || '',
     phone: client.phone || '',
+    company_website: client.company_website || '',
+    company_size: client.company_size || '',
+    industry: client.industry || '',
+    country: client.country || '',
+    use_case: client.use_case || '',
     subscription_tier: client.subscription_tier || 'basic',
     max_institutes: String(client.max_institutes ?? 10),
     max_tests: String(client.max_tests ?? 50),
@@ -53,6 +58,11 @@ const EditClientModal = ({ client, onClose, onUpdated }) => {
       company_name: form.company_name.trim(),
       email: form.email.trim().toLowerCase(),
       phone: form.phone.trim() || null,
+      company_website: form.company_website.trim() || null,
+      company_size: form.company_size.trim() || null,
+      industry: form.industry.trim() || null,
+      country: form.country.trim() || null,
+      use_case: form.use_case.trim() || null,
       status: client.status,
       subscription_tier: form.subscription_tier,
       max_institutes: Math.max(1, parseInt(form.max_institutes, 10) || 1),
@@ -104,12 +114,59 @@ const EditClientModal = ({ client, onClose, onUpdated }) => {
                 className="w-full h-[42px] px-3 rounded-lg border border-shnoor-mist text-sm focus:outline-none focus:border-shnoor-indigo" />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-shnoor-navy uppercase tracking-wide mb-1.5">Phone (optional)</label>
+              <label className="block text-xs font-semibold text-shnoor-navy uppercase tracking-wide mb-1.5">Phone</label>
               <input value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} disabled={loading}
+                className="w-full h-[42px] px-3 rounded-lg border border-shnoor-mist text-sm focus:outline-none focus:border-shnoor-indigo" />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-shnoor-navy uppercase tracking-wide mb-1.5">Website</label>
+              <input value={form.company_website} onChange={e => setForm(p => ({ ...p, company_website: e.target.value }))} disabled={loading}
+                className="w-full h-[42px] px-3 rounded-lg border border-shnoor-mist text-sm focus:outline-none focus:border-shnoor-indigo" />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-shnoor-navy uppercase tracking-wide mb-1.5">Country</label>
+              <input value={form.country} onChange={e => setForm(p => ({ ...p, country: e.target.value }))} disabled={loading}
                 className="w-full h-[42px] px-3 rounded-lg border border-shnoor-mist text-sm focus:outline-none focus:border-shnoor-indigo" />
             </div>
           </div>
 
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-shnoor-navy uppercase tracking-wide mb-1.5">Company Size</label>
+              <select value={form.company_size} onChange={e => setForm(p => ({ ...p, company_size: e.target.value }))} disabled={loading}
+                className="w-full h-[42px] px-3 rounded-lg border border-shnoor-mist text-sm focus:outline-none focus:border-shnoor-indigo bg-white">
+                <option value="">Select</option>
+                <option value="1-50">1-50</option>
+                <option value="51-200">51-200</option>
+                <option value="201-500">201-500</option>
+                <option value="500+">500+</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-shnoor-navy uppercase tracking-wide mb-1.5">Industry</label>
+              <select value={form.industry} onChange={e => setForm(p => ({ ...p, industry: e.target.value }))} disabled={loading}
+                className="w-full h-[42px] px-3 rounded-lg border border-shnoor-mist text-sm focus:outline-none focus:border-shnoor-indigo bg-white">
+                <option value="">Select</option>
+                <option value="IT/Software">IT/Software</option>
+                <option value="Education">Education</option>
+                <option value="Finance">Finance</option>
+                <option value="Healthcare">Healthcare</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-shnoor-navy uppercase tracking-wide mb-1.5">Use Case</label>
+              <select value={form.use_case} onChange={e => setForm(p => ({ ...p, use_case: e.target.value }))} disabled={loading}
+                className="w-full h-[42px] px-3 rounded-lg border border-shnoor-mist text-sm focus:outline-none focus:border-shnoor-indigo bg-white">
+                <option value="">Select</option>
+                <option value="Campus Hiring">Campus Hiring</option>
+                <option value="Lateral Hiring">Lateral Hiring</option>
+                <option value="Internal Assessment">Internal Assessment</option>
+                <option value="Education">Education</option>
+              </select>
+            </div>
+          </div>
+          
           <div>
             <label className="block text-xs font-semibold text-shnoor-navy uppercase tracking-wide mb-1.5">Subscription Tier</label>
             <select value={form.subscription_tier} onChange={e => setForm(p => ({ ...p, subscription_tier: e.target.value }))} disabled={loading}

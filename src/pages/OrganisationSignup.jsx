@@ -31,6 +31,12 @@ const OrganisationSignup = () => {
     orgName: '',
     email: '',
     password: '',
+    companyWebsite: '',
+    companySize: '',
+    industry: '',
+    country: '',
+    useCase: '',
+    phone: '',
   });
   
   const [showPassword, setShowPassword] = useState(false);
@@ -46,17 +52,37 @@ const OrganisationSignup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.orgName || !formData.email || !formData.password) {
-      setError('Please fill in all fields.');
+      setError('Please fill in required fields (Name, Email, Password).');
       return;
     }
     
     setLoading(true);
-    // TODO: Connect this to the actual API backend when ready.
-    // For now, simulate a network request.
-    setTimeout(() => {
-      setLoading(false);
+    
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/signup/organisation`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.orgName,
+          company_name: formData.orgName,
+          email: formData.email,
+          password: formData.password,
+          phone: formData.phone,
+          company_website: formData.companyWebsite,
+          company_size: formData.companySize,
+          industry: formData.industry,
+          country: formData.country,
+          use_case: formData.useCase
+        })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.message || 'Registration failed');
       setSuccess(true);
-    }, 1500);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -161,29 +187,94 @@ const OrganisationSignup = () => {
               </Link>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <InputField
-                label="Organisation Name"
-                name="orgName"
-                placeholder="e.g. Acme Corp"
-                value={formData.orgName}
-                onChange={handleChange}
-                required
-              />
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <InputField
+                  label="Organisation Name *"
+                  name="orgName"
+                  placeholder="e.g. Acme Corp"
+                  value={formData.orgName}
+                  onChange={handleChange}
+                  required
+                />
+                <InputField
+                  label="Work Email Address *"
+                  name="email"
+                  type="email"
+                  placeholder="admin@organisation.com"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
 
-              <InputField
-                label="Work Email Address"
-                name="email"
-                type="email"
-                placeholder="admin@organisation.com"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <InputField
+                  label="Phone Number"
+                  name="phone"
+                  placeholder="+1 234 567 890"
+                  value={formData.phone}
+                  onChange={handleChange}
+                />
+                <InputField
+                  label="Company Website"
+                  name="companyWebsite"
+                  placeholder="https://acme.com"
+                  value={formData.companyWebsite}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-shnoor-navy mb-1.5">Company Size</label>
+                  <select name="companySize" value={formData.companySize} onChange={handleChange}
+                    className="w-full h-[52px] px-4 rounded-xl border border-shnoor-mist bg-white text-sm focus:outline-none focus:border-shnoor-indigo focus:ring-2 focus:ring-shnoor-indigo/20 transition-all">
+                    <option value="">Select Size</option>
+                    <option value="1-50">1-50 employees</option>
+                    <option value="51-200">51-200 employees</option>
+                    <option value="201-500">201-500 employees</option>
+                    <option value="500+">500+ employees</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-shnoor-navy mb-1.5">Industry</label>
+                  <select name="industry" value={formData.industry} onChange={handleChange}
+                    className="w-full h-[52px] px-4 rounded-xl border border-shnoor-mist bg-white text-sm focus:outline-none focus:border-shnoor-indigo focus:ring-2 focus:ring-shnoor-indigo/20 transition-all">
+                    <option value="">Select Industry</option>
+                    <option value="IT/Software">IT/Software</option>
+                    <option value="Education">Education</option>
+                    <option value="Finance">Finance</option>
+                    <option value="Healthcare">Healthcare</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <InputField
+                  label="Country"
+                  name="country"
+                  placeholder="e.g. United States"
+                  value={formData.country}
+                  onChange={handleChange}
+                />
+                <div>
+                  <label className="block text-sm font-semibold text-shnoor-navy mb-1.5">Primary Use Case</label>
+                  <select name="useCase" value={formData.useCase} onChange={handleChange}
+                    className="w-full h-[52px] px-4 rounded-xl border border-shnoor-mist bg-white text-sm focus:outline-none focus:border-shnoor-indigo focus:ring-2 focus:ring-shnoor-indigo/20 transition-all">
+                    <option value="">Select Use Case</option>
+                    <option value="Campus Hiring">Campus Hiring</option>
+                    <option value="Lateral Hiring">Lateral Hiring</option>
+                    <option value="Internal Assessment">Internal Assessment</option>
+                    <option value="Education">Education</option>
+                  </select>
+                </div>
+              </div>
 
               <div className="relative">
                 <InputField
-                  label="Password"
+                  label="Password *"
                   name="password"
                   type={showPassword ? 'text' : 'password'}
                   placeholder="••••••••"

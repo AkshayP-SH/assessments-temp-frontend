@@ -3084,15 +3084,14 @@ const AdminDashboard = () => {
                               >
                                 {/* Checkbox for selection */}
                                 <div className="absolute top-4 left-4 z-10">
-                                  <input
-                                    type="checkbox"
-                                    checked={selectedTests.includes(test.id)}
-                                    onChange={(e) => {
-                                      e.stopPropagation();
-                                      toggleTestSelection(test.id);
-                                    }}
-                                    className="w-5 h-5 text-shnoor-indigo border-shnoor-mist rounded focus:ring-2 focus:ring-shnoor-indigo cursor-pointer"
-                                  />
+                                  <label onClick={(e) => e.stopPropagation()}>
+                                    <input
+                                      type="checkbox"
+                                      checked={selectedTests.includes(test.id)}
+                                      onChange={() => toggleTestSelection(test.id)}
+                                      className="w-5 h-5 text-shnoor-indigo border-shnoor-mist rounded focus:ring-2 focus:ring-shnoor-indigo cursor-pointer"
+                                    />
+                                  </label>
                                 </div>
 
                                 {/* Status Badge and 3-Dot Menu */}

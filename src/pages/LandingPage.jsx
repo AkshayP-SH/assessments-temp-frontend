@@ -125,11 +125,17 @@ const LandingPage = () => {
   const scrollToSection = (e, href) => {
     e.preventDefault();
     setMobileMenuOpen(false);
-    if (href === '#home') { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+    if (href === '#home') { 
+      window.scrollTo({ top: 0, behavior: 'smooth' }); 
+      document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
+      document.body.scrollTo({ top: 0, behavior: 'smooth' });
+      const rootEl = document.getElementById('root');
+      if (rootEl) rootEl.scrollTo({ top: 0, behavior: 'smooth' });
+      return; 
+    }
     const el = document.querySelector(href);
     if (el) {
-      const navH = navRef.current?.offsetHeight || 72;
-      window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - navH - 16, behavior: 'smooth' });
+      el.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
