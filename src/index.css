@@ -25,6 +25,31 @@ html, body {
   overflow-x: hidden;
 }
 
+/* Custom Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9; /* shnoor-mist equivalent */
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #4f46e5; /* shnoor-indigo */
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #312e81; /* shnoor-navy */
+}
+
+/* Custom Checkbox Accent */
+input[type="checkbox"], input[type="radio"] {
+  accent-color: #4f46e5; /* shnoor-indigo */
+}
+
 /* Landing page sections: offset for sticky navbar */
 .landing-root section[id] {
   scroll-margin-top: 88px;

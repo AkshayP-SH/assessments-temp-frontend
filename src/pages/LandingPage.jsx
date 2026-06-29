@@ -229,11 +229,12 @@ const LandingPage = () => {
                   <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                 </button>
               </Link>
-              <a href="#how-it-works" onClick={(e) => scrollToSection(e, '#how-it-works')}>
-                <button className="already-registered-btn text-sm font-bold px-7 py-3.5 rounded-xl text-shnoor-navy border-2 border-shnoor-mist hover:border-shnoor-indigo hover:bg-shnoor-lavender/40 transition-all">
-                  Explore Platform
-                </button>
-              </a>
+              <button 
+                onClick={(e) => scrollToSection(e, '#how-it-works')}
+                className="already-registered-btn text-sm font-bold px-7 py-3.5 rounded-xl text-shnoor-navy border-2 border-shnoor-mist hover:border-shnoor-indigo hover:bg-shnoor-lavender/40 transition-all"
+              >
+                Explore Platform
+              </button>
             </div>
 
             {/* Stats */}
