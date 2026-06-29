@@ -7,6 +7,7 @@ import Button from './Button';
 import InputField from './InputField';
 import ThemeSelector from './ThemeSelector';
 import shnoorLogo from '../assets/shnoor-logo.png';
+import { useSEO } from '../hooks/useSEO';
 
 // ── Icons ──────────────────────────────────────────────────────────────────
 const EyeOpen = () => (
@@ -84,6 +85,11 @@ const PortalTabs = ({ active, onChange }) => (
 
 // ── Main Login Component ───────────────────────────────────────────────────
 const Login = () => {
+  useSEO({
+    title: "Sign In - SHNOOR Assessments",
+    description: "Sign in to access your assessments"
+  });
+
   const navigate = useNavigate();
   const location = useLocation();
   const { setAdminSession } = useAdminAuth();

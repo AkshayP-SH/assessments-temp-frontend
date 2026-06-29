@@ -1,9 +1,11 @@
 // src/pages/JobBoard.jsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, Briefcase, Building2, Clock, ArrowLeft, Loader2, RefreshCw, Search, CheckCircle2, CheckCircle, X } from 'lucide-react';
 import { apiFetch } from '../config/api';
 import ThemeSelector from '../components/ThemeSelector';
+import { useSEO } from '../hooks/useSEO';
+import { useDebounce } from '../hooks/useDebounce';
 
 const fmtDeadline = (iso) =>
     iso
@@ -31,9 +33,14 @@ const isRegistrationClosed = (iso) => {
 
 
 export default function JobBoard({ isEmbedded = false }) {
+    useSEO({
+        title: "Job Board - SHNOOR Assessments",
+        description: "View and apply to active job openings",
+        canonical: "https://assessments.shnoor.com/job-board"
+    });
+
     const navigate = useNavigate();
     const [jobs, setJobs] = useState([]);
-    const [filtered, setFiltered] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [error, setError] = useState('');
@@ -123,7 +130,6 @@ export default function JobBoard({ isEmbedded = false }) {
             }
 
             setJobs(allJobs);
-            setFiltered(allJobs);
         } catch {
             setError('Network error — could not reach the server.');
         } finally {
@@ -143,17 +149,18 @@ export default function JobBoard({ isEmbedded = false }) {
         navigate('/login');
     };
 
-    // Search filter
-    useEffect(() => {
-        const term = search.toLowerCase();
-        setFiltered(
-            jobs.filter(j =>
-                (j.company_name || '').toLowerCase().includes(term) ||
-                (j.job_role || '').toLowerCase().includes(term) ||
-                (j.eligibility_criteria || '').toLowerCase().includes(term)
-            )
+    // Debounce search — only re-filter 300ms after user stops typing
+    const debouncedSearch = useDebounce(search, 300);
+
+    // Memoized filtered list — recomputes only when jobs or debouncedSearch changes
+    const filtered = useMemo(() => {
+        const term = debouncedSearch.toLowerCase();
+        return jobs.filter(j =>
+            (j.company_name || '').toLowerCase().includes(term) ||
+            (j.job_role || '').toLowerCase().includes(term) ||
+            (j.eligibility_criteria || '').toLowerCase().includes(term)
         );
-    }, [search, jobs]);
+    }, [debouncedSearch, jobs]);
 
     const handleEnrollClick = async (job) => {
         const token = localStorage.getItem('studentAuthToken');

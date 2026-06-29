@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { LogOut, Clock, BookOpen, AlertCircle, FileText, X, Video, Briefcase } from 'lucide-react';
 import ExamSearchFilter from '../components/ExamSearchFilter';
 import StudentInterviews from '../components/StudentInterviews';
@@ -9,10 +9,17 @@ import StudentSupportChatbot from '../components/chatbot/StudentSupportChatbot';
 import ThemeSelector from '../components/ThemeSelector';
 import { apiFetch } from '../config/api';
 import shnoorLogo from '../assets/shnoor-logo.png';
+import { useSEO } from '../hooks/useSEO';
 
 const STUDENT_DASHBOARD_TABS = ['tests', 'interviews', 'job-board', 'my-applications'];
 
 const Dashboard = () => {
+  useSEO({
+    title: "Student Dashboard - SHNOOR Assessments",
+    description: "View and take your assigned tests",
+    canonical: "https://assessments.shnoor.com/dashboard"
+  });
+
   const navigate = useNavigate();
   const [studentName, setStudentName] = useState('');
   const [studentId, setStudentId] = useState('');
@@ -181,19 +188,14 @@ const Dashboard = () => {
     navigate('/instructions');
   };
 
-  const handleViewJobDescription = (test) => {
-    console.log('=== VIEW JOB DESCRIPTION ===');
-    console.log('Test data:', test);
-    console.log('Job Roles:', test.jobRoles);
-    console.log('Job Roles length:', test.jobRoles?.length);
-    console.log('Job Role (old):', test.jobRole);
+  const handleViewJobDescription = useCallback((test) => {
     setSelectedTest(test);
-    setSelectedJobRoleIndex(0); // Reset to first role
+    setSelectedJobRoleIndex(0);
     setShowJobModal(true);
-  };
+  }, []);
 
-  // Filter and Sort Tests
-  const getFilteredAndSortedTests = () => {
+  // Filter and Sort Tests — memoized so it only recomputes when inputs change
+  const filteredTests = useMemo(() => {
     let filtered = [...availableTests];
 
     // Search filter
@@ -262,9 +264,7 @@ const Dashboard = () => {
     }
 
     return filtered;
-  };
-
-  const filteredTests = getFilteredAndSortedTests();
+  }, [availableTests, searchTerm, filters, sortBy, testsWithProgress]);
 
   return (
     <div className="min-h-screen bg-[#F8F8FB]">

@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useCallback, memo } from 'react';
 import { Search, Filter, X, ChevronDown } from 'lucide-react';
 import InputField from './InputField';
+import { useDebounce } from '../hooks/useDebounce';
 
-const ExamSearchFilter = ({
+const ExamSearchFilter = memo(({
   onSearchChange,
   onFilterChange,
   onSortChange,
@@ -20,39 +21,43 @@ const ExamSearchFilter = ({
   });
   const [sortBy, setSortBy] = useState('latest');
 
-  const handleSearchChange = (e) => {
-    const value = e.target.value;
-    setSearchTerm(value);
-    onSearchChange(value);
-  };
+  // Debounce search so onSearchChange fires 300ms after user stops typing
+  const debouncedSearch = useDebounce(searchTerm, 300);
 
-  const handleFilterChange = (filterType, value) => {
-    const newFilters = { ...filters, [filterType]: value };
-    setFilters(newFilters);
-    onFilterChange(newFilters);
-  };
+  // Notify parent whenever debounced value settles
+  // We use a separate effect rather than inline so parent re-renders are minimized
+  const [prevDebounced, setPrevDebounced] = useState('');
+  if (debouncedSearch !== prevDebounced) {
+    setPrevDebounced(debouncedSearch);
+    onSearchChange(debouncedSearch);
+  }
 
-  const handleSortChange = (value) => {
+  const handleSearchChange = useCallback((e) => {
+    setSearchTerm(e.target.value);
+  }, []);
+
+  const handleFilterChange = useCallback((filterType, value) => {
+    setFilters(prev => {
+      const newFilters = { ...prev, [filterType]: value };
+      onFilterChange(newFilters);
+      return newFilters;
+    });
+  }, [onFilterChange]);
+
+  const handleSortChange = useCallback((value) => {
     setSortBy(value);
     onSortChange(value);
-  };
+  }, [onSortChange]);
 
-  const clearFilters = () => {
+  const clearFilters = useCallback(() => {
     setSearchTerm('');
-    setFilters({
-      published: 'all',
-      attempted: 'all',
-      dateRange: 'all'
-    });
+    const defaultFilters = { published: 'all', attempted: 'all', dateRange: 'all' };
+    setFilters(defaultFilters);
     setSortBy('latest');
     onSearchChange('');
-    onFilterChange({
-      published: 'all',
-      attempted: 'all',
-      dateRange: 'all'
-    });
+    onFilterChange(defaultFilters);
     onSortChange('latest');
-  };
+  }, [onSearchChange, onFilterChange, onSortChange]);
 
   const hasActiveFilters = searchTerm || filters.published !== 'all' || filters.attempted !== 'all' || filters.dateRange !== 'all' || sortBy !== 'latest';
 
@@ -216,6 +221,8 @@ const ExamSearchFilter = ({
       )}
     </div>
   );
-};
+});
+
+ExamSearchFilter.displayName = 'ExamSearchFilter';
 
 export default ExamSearchFilter;

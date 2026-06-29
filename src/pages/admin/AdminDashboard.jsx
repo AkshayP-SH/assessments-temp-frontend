@@ -1,5 +1,5 @@
 // src/pages/admin/AdminDashboard.jsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Plus, FileSpreadsheet, LogOut, Download, ArrowLeft,
@@ -7,16 +7,6 @@ import {
 } from 'lucide-react';
 
 import axios from 'axios';
-import CreateTestSection from '../../components/admin/CreateTestSection';
-import ExamSearchFilter from '../../components/ExamSearchFilter';
-import ViewTestDetailsModal from '../../components/admin/ViewTestDetailsModal';
-import EditTestDetailsModal from '../../components/admin/EditTestDetailsModal';
-import BulkStudentUpload from '../../components/admin/BulkStudentUpload';
-import InstituteRegistrationControl from '../../components/admin/InstituteRegistrationControl';
-import InterviewsList from './InterviewsList';
-import InterviewSchedule from './InterviewSchedule';
-import AdminJobOpenings from '../../components/admin/AdminJobOpenings';
-import AdminReports from './AdminReports';
 import { apiFetch } from '../../config/api';
 import AdminHeader from '../../components/AdminHeader';
 import AdminLayout from '../../components/AdminLayout';
@@ -24,8 +14,28 @@ import Card from '../../components/Card';
 import Badge from '../../components/Badge';
 import InputField from '../../components/InputField';
 import Button from '../../components/Button';
+import { useSEO } from '../../hooks/useSEO';
+import { lazy, Suspense } from 'react';
+
+// Lazy load large sections and modals to reduce the initial bundle size
+const CreateTestSection = lazy(() => import('../../components/admin/CreateTestSection'));
+const ExamSearchFilter = lazy(() => import('../../components/ExamSearchFilter'));
+const ViewTestDetailsModal = lazy(() => import('../../components/admin/ViewTestDetailsModal'));
+const EditTestDetailsModal = lazy(() => import('../../components/admin/EditTestDetailsModal'));
+const BulkStudentUpload = lazy(() => import('../../components/admin/BulkStudentUpload'));
+const InstituteRegistrationControl = lazy(() => import('../../components/admin/InstituteRegistrationControl'));
+const InterviewsList = lazy(() => import('./InterviewsList'));
+const InterviewSchedule = lazy(() => import('./InterviewSchedule'));
+const AdminJobOpenings = lazy(() => import('../../components/admin/AdminJobOpenings'));
+const AdminReports = lazy(() => import('./AdminReports'));
+const SubscriptionPlansSettings = lazy(() => import('./SubscriptionPlansSettings'));
 
 const AdminDashboard = () => {
+  useSEO({
+    title: "Admin Dashboard - SHNOOR Assessments",
+    description: "Manage tests, users, and settings"
+  });
+
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('exams');
   const [showCreateTest, setShowCreateTest] = useState(false);
@@ -189,7 +199,7 @@ const AdminDashboard = () => {
     if (isSuperAdmin) return;
     const token = localStorage.getItem('adminToken');
     if (!token) return;
-    apiFetch('api/clients/me/quota', { headers: { 'Authorization': `Bearer ${token}` } })
+    apiFetch('api/client/auth/me/quota', { headers: { 'Authorization': `Bearer ${token}` } })
       .then(r => r.ok ? r.json() : null)
       .then(d => { if (d?.success) setQuota(d.quota); })
       .catch(() => {});
@@ -231,8 +241,8 @@ const AdminDashboard = () => {
     }
   };
 
-  // Filter and Sort Tests
-  const getFilteredAndSortedTests = () => {
+  // Filter and Sort Tests — memoized so it only recomputes when deps change
+  const filteredTests = useMemo(() => {
     let filtered = [...tests];
 
     // Search filter
@@ -264,9 +274,10 @@ const AdminDashboard = () => {
         switch (filters.dateRange) {
           case 'today':
             return testDate.toDateString() === now.toDateString();
-          case 'week':
+          case 'week': {
             const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
             return testDate >= weekAgo;
+          }
           case 'month':
             return testDate.getMonth() === now.getMonth() && testDate.getFullYear() === now.getFullYear();
           case 'year':
@@ -299,9 +310,7 @@ const AdminDashboard = () => {
     }
 
     return filtered;
-  };
-
-  const filteredTests = getFilteredAndSortedTests();
+  }, [tests, searchTerm, filters, sortBy]);
 
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
@@ -2191,7 +2200,8 @@ const AdminDashboard = () => {
   const filteredViolations = getFilteredViolations();
 
   return (
-    <div className="admin-dashboard-root min-h-screen bg-shnoor-lavender">
+    <Suspense fallback={<div className="flex h-screen items-center justify-center bg-shnoor-lavender"><Loader2 className="animate-spin h-12 w-12 text-shnoor-indigo" /></div>}>
+      <div className="admin-dashboard-root min-h-screen bg-shnoor-lavender">
       {/* Header */}
       <AdminHeader />
 
@@ -2283,6 +2293,7 @@ const AdminDashboard = () => {
                 { id: 'violations', label: 'Violations', icon: AlertCircle },
                 { id: 'interviews', label: 'Interviews', icon: Video },
                 { id: 'job-openings', label: 'Job Openings', icon: Briefcase },
+                ...(isSuperAdmin ? [{ id: 'subscription-plans', label: 'Subscription Plans', icon: FileSpreadsheet }] : [])
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -3866,6 +3877,13 @@ const AdminDashboard = () => {
                 <AdminJobOpenings />
               </div>
             )}
+
+            {/* Subscription Plans Tab */}
+            {activeTab === 'subscription-plans' && isSuperAdmin && (
+              <div className="space-y-6">
+                <SubscriptionPlansSettings />
+              </div>
+            )}
           </>
         )}
 
@@ -5049,7 +5067,8 @@ const AdminDashboard = () => {
           />
         )}
       </div>
-    </div>
+      </div>
+    </Suspense>
   );
 };
 

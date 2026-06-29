@@ -35,9 +35,22 @@ const ClientDashboard = () => {
   const [tests, setTests] = useState([]);
   const [institutes, setInstitutes] = useState([]);
   const [students, setStudents] = useState([]);
+  const [subscriptionPlans, setSubscriptionPlans] = useState([]);
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [currentPlanId, setCurrentPlanId] = useState(clientUser?.planId || null);
+
+  const loadRazorpay = () => {
+    return new Promise((resolve) => {
+      if (window.Razorpay) return resolve(true);
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
 
   // Registration URL for sharing
   const registrationUrl = `${window.location.origin}/register?clientToken=${clientUser?.registrationToken || ''}`;
@@ -48,20 +61,26 @@ const ClientDashboard = () => {
     try {
       const headers = authHeaders();
 
-      const [testsRes, institutesRes, studentsRes] = await Promise.all([
+      const [testsRes, institutesRes, studentsRes, plansRes, profileRes] = await Promise.all([
         apiFetch('api/tests', { headers }),
         apiFetch('api/institutes', { headers }),
         apiFetch('api/export/students', { headers }),
+        apiFetch('api/subscription-plans/all', { headers }),
+        apiFetch('api/client/auth/me', { headers }),
       ]);
 
-      const [testsData, institutesData, studentsData] = await Promise.all([
+      const [testsData, institutesData, studentsData, plansData, profileData] = await Promise.all([
         testsRes.json(),
         institutesRes.json(),
         studentsRes.ok ? studentsRes.json() : { success: false, data: [] },
+        plansRes.json(),
+        profileRes.ok ? profileRes.json() : { success: false },
       ]);
 
       if (testsData.success) setTests(testsData.tests || []);
       if (institutesData.success) setInstitutes(institutesData.institutes || []);
+      if (plansData.success) setSubscriptionPlans(plansData.plans.filter(p => p.is_active));
+      if (profileData.success && profileData.admin) setCurrentPlanId(profileData.admin.plan_id);
 
       // Build stats
       setStats({
@@ -99,8 +118,78 @@ const ClientDashboard = () => {
     { id: 'tests', label: 'Tests', icon: '📝' },
     { id: 'institutes', label: 'Institutes', icon: '🏫' },
     { id: 'students', label: 'Students', icon: '👥' },
+    { id: 'subscription', label: 'Subscription', icon: '💳' },
     { id: 'registration', label: 'Registration Link', icon: '🔗' },
   ];
+
+  const handlePurchaseSubscription = async (plan) => {
+    try {
+      const res = await loadRazorpay();
+      if (!res) {
+        alert('Razorpay SDK failed to load. Are you online?');
+        return;
+      }
+
+      const orderRes = await apiFetch('api/settings/purchase-subscription', {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ plan_id: plan.plan_id }),
+      });
+      const orderData = await orderRes.json();
+      
+      if (!orderData.success) {
+        alert(orderData.message || 'Failed to initiate purchase');
+        return;
+      }
+
+      const options = {
+        key: orderData.key_id,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: 'SHNOOR Assessments',
+        description: `Subscription - ${plan.name}`,
+        order_id: orderData.order_id,
+        handler: async function (response) {
+          try {
+            const verifyRes = await apiFetch('api/settings/verify-payment', {
+              method: 'POST',
+              headers: authHeaders(),
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                plan_id: plan.plan_id
+              })
+            });
+            const verifyData = await verifyRes.json();
+            if (verifyData.success) {
+              alert('Subscription purchased successfully! You can now create tests.');
+              fetchData();
+            } else {
+              alert(verifyData.message || 'Payment verification failed');
+            }
+          } catch (err) {
+            alert('Error verifying payment');
+          }
+        },
+        prefill: {
+          name: clientUser?.fullName || '',
+          email: clientUser?.email || '',
+        },
+        theme: {
+          color: '#4F46E5'
+        }
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', function (response) {
+        alert(response.error.description);
+      });
+      rzp.open();
+    } catch (err) {
+      alert('Error purchasing subscription');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-shnoor-lavender flex">
@@ -387,6 +476,55 @@ const ClientDashboard = () => {
                       </table>
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* ── SUBSCRIPTION ────────────────────────────────────────────── */}
+              {activeTab === 'subscription' && (
+                <div className="bg-white rounded-xl border border-shnoor-mist p-6 shadow-sm">
+                  <SectionTitle>Manage Subscription</SectionTitle>
+                  <p className="text-sm text-shnoor-soft mb-6">
+                    Activate or renew your organization's subscription to enable test creation and other premium features.
+                  </p>
+                  
+                  <div className="grid md:grid-cols-3 gap-6">
+                    {subscriptionPlans.map(plan => {
+                      const isCurrentPlan = plan.plan_id === currentPlanId;
+                      return (
+                        <div key={plan.id} className={`bg-white rounded-xl border ${isCurrentPlan ? 'border-shnoor-indigo ring-2 ring-shnoor-indigo/20' : 'border-shnoor-mist'} p-6 shadow-sm flex flex-col relative`}>
+                          {isCurrentPlan && (
+                            <div className="absolute top-0 right-0 bg-shnoor-indigo text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg rounded-tr-lg uppercase tracking-wide">
+                              Current Plan
+                            </div>
+                          )}
+                          <h3 className="text-lg font-bold text-shnoor-navy mb-2">{plan.name}</h3>
+                          <div className="mb-4 pb-4 border-b border-shnoor-mist">
+                            <span className="text-3xl font-extrabold text-shnoor-navy">₹{plan.price_monthly}</span>
+                            <span className="text-sm text-shnoor-soft">/month</span>
+                          </div>
+                          <p className="text-sm text-shnoor-soft mb-4 flex-1">{plan.description}</p>
+                          <ul className="text-sm text-shnoor-soft mb-6 space-y-2">
+                            {(plan.features || []).map((feature, i) => (
+                              <li key={i} className="flex items-start gap-2">
+                                <span className="text-shnoor-success">✓</span> {feature}
+                              </li>
+                            ))}
+                          </ul>
+                          <button
+                            onClick={() => handlePurchaseSubscription(plan)}
+                            disabled={isCurrentPlan}
+                            className={`w-full px-4 py-3 font-bold rounded-xl transition-colors shadow-sm ${
+                              isCurrentPlan 
+                                ? 'bg-shnoor-lavender text-shnoor-indigo cursor-not-allowed' 
+                                : 'bg-shnoor-indigo text-white hover:bg-shnoor-navy'
+                            }`}
+                          >
+                            {isCurrentPlan ? 'Active' : `Purchase ${plan.name}`}
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
 

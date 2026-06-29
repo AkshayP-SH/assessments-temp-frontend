@@ -73,6 +73,11 @@ export const AdminAuthProvider = ({ children }) => {
           );
           break; // Success, exit retry loop
         } catch (error) {
+          // If it's an authentication error (401 or 403), don't retry. The token is invalid.
+          if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+            throw error;
+          }
+          
           retries--;
           if (retries === 0) throw error;
           // Wait 1 second before retry

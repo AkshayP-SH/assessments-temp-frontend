@@ -5,18 +5,38 @@
     <link rel="icon" type="image/png" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SHNOOR Assessments - Secure Examination Portal</title>
-    <meta name="description" content="Secure Examination Portal for Shnoor Assessments. Sign in to access assigned assessments and track progress." />
-    
+    <meta name="description" content="AI-powered secure examination portal. Conduct and manage online assessments with live proctoring, coding challenges, and real-time analytics." />
+
+    <!-- Mobile browser chrome color -->
+    <meta name="theme-color" content="#4f46e5" />
+    <meta name="color-scheme" content="light dark" />
+
+    <!-- Open Graph — base tags (per-page tags are injected by useSEO hook) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="SHNOOR Assessments" />
+    <meta property="og:title" content="SHNOOR Assessments - Secure Examination Portal" />
+    <meta property="og:description" content="AI-powered secure examination portal. Conduct and manage online assessments with live proctoring, coding challenges, and real-time analytics." />
+    <meta property="og:image" content="/og-image.png" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="SHNOOR Assessments - Secure Examination Portal" />
+    <meta name="twitter:description" content="AI-powered secure examination portal with live proctoring." />
+    <meta name="twitter:image" content="/og-image.png" />
+
+    <!-- Robots -->
+    <meta name="robots" content="index, follow" />
+
     <!-- DNS prefetch for external domains -->
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
     <link rel="dns-prefetch" href="https://fonts.gstatic.com">
     <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
-    
+
     <!-- Preconnect to external domains for faster loading -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://identitytoolkit.googleapis.com">
-    
+
     <!-- Load font stylesheet without blocking initial render -->
     <link
       rel="preload"
@@ -30,7 +50,7 @@
         href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
       >
     </noscript>
-    
+
     <!-- Critical CSS to prevent flash of unstyled content -->
     <style>
       body {
@@ -39,18 +59,18 @@
         padding: 0;
         min-height: 100vh;
       }
-      
+
       /* Prevent layout shift by reserving space for images */
       img {
         max-width: 100%;
         height: auto;
       }
-      
+
       /* Loading state */
       #root {
         min-height: 100vh;
       }
-      
+
       /* Prevent flash of unstyled content */
       .loading {
         display: flex;

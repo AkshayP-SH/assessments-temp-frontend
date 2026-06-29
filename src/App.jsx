@@ -8,7 +8,6 @@ import AdminProtectedRoute from './components/AdminProtectedRoute';
 import ClientProtectedRoute from './components/ClientProtectedRoute';
 import GlobalThemeSelector from './components/GlobalThemeSelector';
 import { applyTheme, getSavedTheme } from './utils/theme';
-import LandingPage from './pages/LandingPage';
 
 // Eagerly load Loading Spinner to show while chunks are fetched
 const LoadingFallback = () => (
@@ -17,7 +16,8 @@ const LoadingFallback = () => (
   </div>
 );
 
-// Lazy loaded routes
+// All routes are lazy-loaded — LandingPage included (it was the only eager one)
+const LandingPage = React.lazy(() => import('./pages/LandingPage'));
 const Login = React.lazy(() => import('./components/Login'));
 const Register = React.lazy(() => import('./components/Register'));
 const ForgotPassword = React.lazy(() => import('./components/ForgotPassword'));
@@ -68,53 +68,57 @@ const AppRoutes = () => {
     <>
       <GlobalThemeSelector />
       <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-        <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/register-organisation" element={<OrganisationSignup />} />
+        {/* Public Routes — each group has its own Suspense so a failure in one
+            section doesn't block the rest of the app from rendering */}
+        <Route path="/" element={
+          <ErrorBoundary>
+            <Suspense fallback={<LoadingFallback />}>
+              <LandingPage />
+            </Suspense>
+          </ErrorBoundary>
+        } />
+        <Route path="/privacy-policy" element={<Suspense fallback={<LoadingFallback />}><PrivacyPolicy /></Suspense>} />
+        <Route path="/terms-and-conditions" element={<Suspense fallback={<LoadingFallback />}><TermsAndConditions /></Suspense>} />
+        <Route path="/login" element={<Suspense fallback={<LoadingFallback />}><Login /></Suspense>} />
+        <Route path="/register" element={<Suspense fallback={<LoadingFallback />}><Register /></Suspense>} />
+        <Route path="/forgot-password" element={<Suspense fallback={<LoadingFallback />}><ForgotPassword /></Suspense>} />
+        <Route path="/register-organisation" element={<Suspense fallback={<LoadingFallback />}><OrganisationSignup /></Suspense>} />
         <Route path="/admin/login" element={<Navigate to="/login" replace />} />
-        <Route path="/server-down" element={<ServerDown />} />
-        <Route path="/maintenance" element={<Maintenance />} />
+        <Route path="/server-down" element={<Suspense fallback={<LoadingFallback />}><ServerDown /></Suspense>} />
+        <Route path="/maintenance" element={<Suspense fallback={<LoadingFallback />}><Maintenance /></Suspense>} />
 
         {/* Student Routes */}
-        <Route path="/dashboard" element={<StudentRoute><Dashboard /></StudentRoute>} />
-        <Route path="/instructions" element={<TestRoute><Instructions /></TestRoute>} />
-        <Route path="/test" element={<TestRoute><TestScreen /></TestRoute>} />
-        <Route path="/result" element={<StudentRoute><Result /></StudentRoute>} />
-        <Route path="/feedback" element={<StudentRoute><Feedback /></StudentRoute>} />
-        <Route path="/job-board" element={<StudentRoute><JobBoard /></StudentRoute>} />
-        <Route path="/student/my-applications" element={<StudentRoute><MyApplications /></StudentRoute>} />
+        <Route path="/dashboard" element={<StudentRoute><Suspense fallback={<LoadingFallback />}><Dashboard /></Suspense></StudentRoute>} />
+        <Route path="/instructions" element={<TestRoute><Suspense fallback={<LoadingFallback />}><Instructions /></Suspense></TestRoute>} />
+        <Route path="/test" element={<TestRoute><Suspense fallback={<LoadingFallback />}><TestScreen /></Suspense></TestRoute>} />
+        <Route path="/result" element={<StudentRoute><Suspense fallback={<LoadingFallback />}><Result /></Suspense></StudentRoute>} />
+        <Route path="/feedback" element={<StudentRoute><Suspense fallback={<LoadingFallback />}><Feedback /></Suspense></StudentRoute>} />
+        <Route path="/job-board" element={<StudentRoute><Suspense fallback={<LoadingFallback />}><JobBoard /></Suspense></StudentRoute>} />
+        <Route path="/student/my-applications" element={<StudentRoute><Suspense fallback={<LoadingFallback />}><MyApplications /></Suspense></StudentRoute>} />
+        <Route path="/interview-room/:interviewId" element={<StudentRoute><Suspense fallback={<LoadingFallback />}><InterviewRoom /></Suspense></StudentRoute>} />
 
-        {/* Admin Routes - Now with Enhanced Protection */}
-        <Route path="/admin/dashboard" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
-        <Route path="/admin/reports" element={<AdminProtectedRoute><AdminReports /></AdminProtectedRoute>} />
-        <Route path="/admin/live-proctoring" element={<AdminProtectedRoute><LiveProctoring /></AdminProtectedRoute>} />
-        <Route path="/admin/student-messages" element={<AdminProtectedRoute><StudentMessages /></AdminProtectedRoute>} />
-        <Route path="/admin/settings" element={<AdminProtectedRoute><AdminSettings /></AdminProtectedRoute>} />
-        <Route path="/admin/job-applicants/:jobId" element={<AdminProtectedRoute><AdminJobApplicants /></AdminProtectedRoute>} />
-        <Route path="/admin/interviews" element={<AdminProtectedRoute><InterviewsList /></AdminProtectedRoute>} />
-        <Route path="/admin/interview-room/:interviewId" element={<AdminProtectedRoute><InterviewRoom /></AdminProtectedRoute>} />
-        <Route path="/admin/clients" element={<AdminProtectedRoute><AdminClients /></AdminProtectedRoute>} />
+        {/* Admin Routes */}
+        <Route path="/admin/dashboard" element={<AdminProtectedRoute><Suspense fallback={<LoadingFallback />}><AdminDashboard /></Suspense></AdminProtectedRoute>} />
+        <Route path="/admin/reports" element={<AdminProtectedRoute><Suspense fallback={<LoadingFallback />}><AdminReports /></Suspense></AdminProtectedRoute>} />
+        <Route path="/admin/live-proctoring" element={<AdminProtectedRoute><Suspense fallback={<LoadingFallback />}><LiveProctoring /></Suspense></AdminProtectedRoute>} />
+        <Route path="/admin/student-messages" element={<AdminProtectedRoute><Suspense fallback={<LoadingFallback />}><StudentMessages /></Suspense></AdminProtectedRoute>} />
+        <Route path="/admin/settings" element={<AdminProtectedRoute><Suspense fallback={<LoadingFallback />}><AdminSettings /></Suspense></AdminProtectedRoute>} />
+        <Route path="/admin/job-applicants/:jobId" element={<AdminProtectedRoute><Suspense fallback={<LoadingFallback />}><AdminJobApplicants /></Suspense></AdminProtectedRoute>} />
+        <Route path="/admin/interviews" element={<AdminProtectedRoute><Suspense fallback={<LoadingFallback />}><InterviewsList /></Suspense></AdminProtectedRoute>} />
+        <Route path="/admin/interview-room/:interviewId" element={<AdminProtectedRoute><Suspense fallback={<LoadingFallback />}><InterviewRoom /></Suspense></AdminProtectedRoute>} />
+        <Route path="/admin/clients" element={<AdminProtectedRoute><Suspense fallback={<LoadingFallback />}><AdminClients /></Suspense></AdminProtectedRoute>} />
 
         {/* Client Portal Routes (multi-tenant, admin UI parity) */}
-        {/* /client/login redirects to unified login with org tab pre-selected */}
         <Route path="/client/login" element={<Navigate to="/login?portal=org" replace />} />
-        <Route path="/client/dashboard" element={<ClientProtectedRoute><AdminDashboard /></ClientProtectedRoute>} />
-        <Route path="/client/reports" element={<ClientProtectedRoute><AdminReports /></ClientProtectedRoute>} />
-        <Route path="/client/live-proctoring" element={<ClientProtectedRoute><LiveProctoring /></ClientProtectedRoute>} />
-        <Route path="/client/student-messages" element={<ClientProtectedRoute><StudentMessages /></ClientProtectedRoute>} />
-        <Route path="/client/settings" element={<ClientProtectedRoute><AdminSettings /></ClientProtectedRoute>} />
-        <Route path="/client/job-applicants/:jobId" element={<ClientProtectedRoute><AdminJobApplicants /></ClientProtectedRoute>} />
-        <Route path="/client/interviews" element={<ClientProtectedRoute><InterviewsList /></ClientProtectedRoute>} />
-        <Route path="/client/interview-room/:interviewId" element={<ClientProtectedRoute><InterviewRoom /></ClientProtectedRoute>} />
+        <Route path="/client/dashboard" element={<ClientProtectedRoute><Suspense fallback={<LoadingFallback />}><AdminDashboard /></Suspense></ClientProtectedRoute>} />
+        <Route path="/client/reports" element={<ClientProtectedRoute><Suspense fallback={<LoadingFallback />}><AdminReports /></Suspense></ClientProtectedRoute>} />
+        <Route path="/client/live-proctoring" element={<ClientProtectedRoute><Suspense fallback={<LoadingFallback />}><LiveProctoring /></Suspense></ClientProtectedRoute>} />
+        <Route path="/client/student-messages" element={<ClientProtectedRoute><Suspense fallback={<LoadingFallback />}><StudentMessages /></Suspense></ClientProtectedRoute>} />
+        <Route path="/client/settings" element={<ClientProtectedRoute><Suspense fallback={<LoadingFallback />}><AdminSettings /></Suspense></ClientProtectedRoute>} />
+        <Route path="/client/job-applicants/:jobId" element={<ClientProtectedRoute><Suspense fallback={<LoadingFallback />}><AdminJobApplicants /></Suspense></ClientProtectedRoute>} />
+        <Route path="/client/interviews" element={<ClientProtectedRoute><Suspense fallback={<LoadingFallback />}><InterviewsList /></Suspense></ClientProtectedRoute>} />
+        <Route path="/client/interview-room/:interviewId" element={<ClientProtectedRoute><Suspense fallback={<LoadingFallback />}><InterviewRoom /></Suspense></ClientProtectedRoute>} />
         <Route path="/client" element={<Navigate to="/client/dashboard" replace />} />
-
-        {/* Student Interview Route */}
-        <Route path="/interview-room/:interviewId" element={<StudentRoute><InterviewRoom /></StudentRoute>} />
 
         {/* Default */}
         <Route path="*" element={<Navigate to="/" replace />} />
@@ -129,9 +133,8 @@ function App() {
       <AdminAuthProvider>
         <ClientAuthProvider>
           <Router>
-            <Suspense fallback={<LoadingFallback />}>
-              <AppRoutes />
-            </Suspense>
+            {/* Per-route Suspense boundaries are defined inside AppRoutes */}
+            <AppRoutes />
           </Router>
         </ClientAuthProvider>
       </AdminAuthProvider>

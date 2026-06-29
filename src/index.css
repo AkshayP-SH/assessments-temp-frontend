@@ -15,10 +15,22 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 html, body {
   width: 100%;
   height: 100%;
   overflow-x: hidden;
+}
+
+/* Landing page sections: offset for sticky navbar */
+.landing-root section[id] {
+  scroll-margin-top: 88px;
+}
+.landing-root footer[id] {
+  scroll-margin-top: 88px;
 }
 
 body {

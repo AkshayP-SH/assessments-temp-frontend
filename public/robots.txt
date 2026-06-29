@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /$
+Allow: /login
+Allow: /register
+Allow: /job-board
+Allow: /privacy-policy
+Allow: /terms-and-conditions
+
+Disallow: /admin/
+Disallow: /client/
+Disallow: /dashboard
+Disallow: /test
+Disallow: /result
+
+Sitemap: https://yourdomain.com/sitemap.xml

@@ -1,5 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 
+let globalFaceDetector = null;
+let globalObjectDetector = null;
+let isGlobalModelsLoaded = false;
+let globalLoadPromise = null;
+
 export const useAICheatingDetection = (onViolation) => {
   const [isModelLoaded, setIsModelLoaded] = useState(false);
   const [violations, setViolations] = useState({
@@ -26,74 +31,97 @@ export const useAICheatingDetection = (onViolation) => {
 
   // Load MediaPipe models with retry logic
   const loadModels = useCallback(async () => {
+    if (isGlobalModelsLoaded) {
+      faceDetectorRef.current = globalFaceDetector;
+      objectDetectorRef.current = globalObjectDetector;
+      setIsModelLoaded(true);
+      return true;
+    }
+
+    if (globalLoadPromise) {
+      await globalLoadPromise;
+      faceDetectorRef.current = globalFaceDetector;
+      objectDetectorRef.current = globalObjectDetector;
+      setIsModelLoaded(true);
+      return true;
+    }
+
     console.log('[AI Detection] 🚀 loadModels() called');
-    const maxRetries = 3;
-    let retryCount = 0;
     
-    while (retryCount < maxRetries) {
-      try {
-        console.log(`[AI Detection] Loading models... (Attempt ${retryCount + 1}/${maxRetries})`);
-        
-        // Dynamically import MediaPipe to reduce initial bundle size
-        const { FaceDetector, FilesetResolver, ObjectDetector } = await import('@mediapipe/tasks-vision');
-        
-        const vision = await FilesetResolver.forVisionTasks(
-          'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm'
-        );
+    globalLoadPromise = (async () => {
+      const maxRetries = 3;
+      let retryCount = 0;
+      
+      while (retryCount < maxRetries) {
+        try {
+          console.log(`[AI Detection] Loading models... (Attempt ${retryCount + 1}/${maxRetries})`);
+          
+          // Dynamically import MediaPipe to reduce initial bundle size
+          const { FaceDetector, FilesetResolver, ObjectDetector } = await import('@mediapipe/tasks-vision');
+          
+          const vision = await FilesetResolver.forVisionTasks(
+            'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm'
+          );
 
-        // Load face detector with retry
-        console.log('[AI Detection] Loading face detector...');
-        const faceDetector = await FaceDetector.createFromOptions(vision, {
-          baseOptions: {
-            modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite',
-            delegate: 'CPU' // Changed from GPU to CPU for better compatibility
-          },
-          runningMode: 'VIDEO',
-          minDetectionConfidence: 0.4 // Lowered from 0.5 for better multi-face detection
-        });
-        faceDetectorRef.current = faceDetector;
-        console.log('[AI Detection] ✅ Face detector loaded');
+          // Load face detector with retry
+          console.log('[AI Detection] Loading face detector...');
+          const faceDetector = await FaceDetector.createFromOptions(vision, {
+            baseOptions: {
+              modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite',
+              delegate: 'CPU' // Changed from GPU to CPU for better compatibility
+            },
+            runningMode: 'VIDEO',
+            minDetectionConfidence: 0.4 // Lowered from 0.5 for better multi-face detection
+          });
+          globalFaceDetector = faceDetector;
+          console.log('[AI Detection] ✅ Face detector loaded');
 
-        // Load object detector with retry
-        console.log('[AI Detection] Loading object detector...');
-        const objectDetector = await ObjectDetector.createFromOptions(vision, {
-          baseOptions: {
-            modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float16/1/efficientdet_lite0.tflite',
-            delegate: 'CPU' // Changed from GPU to CPU for better compatibility
-          },
-          runningMode: 'VIDEO',
-          scoreThreshold: 0.3, // Increased from 0.2 for fewer false positives
-          maxResults: 5
-        });
-        objectDetectorRef.current = objectDetector;
-        console.log('[AI Detection] ✅ Object detector loaded');
+          // Load object detector with retry
+          console.log('[AI Detection] Loading object detector...');
+          const objectDetector = await ObjectDetector.createFromOptions(vision, {
+            baseOptions: {
+              modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float16/1/efficientdet_lite0.tflite',
+              delegate: 'CPU' // Changed from GPU to CPU for better compatibility
+            },
+            runningMode: 'VIDEO',
+            scoreThreshold: 0.3, // Increased from 0.2 for fewer false positives
+            maxResults: 5
+          });
+          globalObjectDetector = objectDetector;
+          console.log('[AI Detection] ✅ Object detector loaded');
 
-        console.log('[AI Detection] ✅✅ All models loaded successfully');
-        setIsModelLoaded(true);
-        return true; // Success - exit retry loop
-        
-      } catch (error) {
-        retryCount++;
-        console.error(`[AI Detection] ❌ Failed to load models (Attempt ${retryCount}/${maxRetries}):`, error);
-        console.error('[AI Detection] Error details:', {
-          message: error.message,
-          stack: error.stack,
-          name: error.name
-        });
-        
-        if (retryCount < maxRetries) {
-          // Wait before retrying (exponential backoff)
-          const waitTime = Math.min(1000 * Math.pow(2, retryCount), 5000);
-          console.log(`[AI Detection] Retrying in ${waitTime}ms...`);
-          await new Promise(resolve => setTimeout(resolve, waitTime));
-        } else {
-          console.error('[AI Detection] ❌❌ Failed to load models after all retries. AI detection disabled.');
-          console.error('[AI Detection] Final error:', error);
-          setIsModelLoaded(false);
-          return false;
+          console.log('[AI Detection] ✅✅ All models loaded successfully');
+          isGlobalModelsLoaded = true;
+          return true; // Success - exit retry loop
+          
+        } catch (error) {
+          retryCount++;
+          console.error(`[AI Detection] ❌ Failed to load models (Attempt ${retryCount}/${maxRetries}):`, error);
+          
+          if (retryCount < maxRetries) {
+            // Wait before retrying (exponential backoff)
+            const waitTime = Math.min(1000 * Math.pow(2, retryCount), 5000);
+            console.log(`[AI Detection] Retrying in ${waitTime}ms...`);
+            await new Promise(resolve => setTimeout(resolve, waitTime));
+          } else {
+            console.error('[AI Detection] ❌❌ Failed to load models after all retries. AI detection disabled.');
+            isGlobalModelsLoaded = false;
+            return false;
+          }
         }
       }
+    })();
+
+    const result = await globalLoadPromise;
+    if (result) {
+      faceDetectorRef.current = globalFaceDetector;
+      objectDetectorRef.current = globalObjectDetector;
+      setIsModelLoaded(true);
+    } else {
+      globalLoadPromise = null;
+      setIsModelLoaded(false);
     }
+    return result;
   }, []);
 
   const canReportViolation = (violationType) => {
