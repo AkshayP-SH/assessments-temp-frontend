@@ -37,17 +37,18 @@ html, body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #4f46e5; /* shnoor-indigo */
+  background: #ffffff; /* white */
   border-radius: 4px;
+  border: 1px solid #e2e8f0; /* subtle border so it doesn't disappear on white backgrounds */
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #312e81; /* shnoor-navy */
+  background: #f1f5f9; /* very light grey on hover */
 }
 
 /* Custom Checkbox Accent */
 input[type="checkbox"], input[type="radio"] {
-  accent-color: #4f46e5; /* shnoor-indigo */
+  accent-color: #ffffff; /* white */
 }
 
 /* Landing page sections: offset for sticky navbar */
