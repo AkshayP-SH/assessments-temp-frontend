@@ -383,8 +383,10 @@ const AdminDashboard = () => {
           id: test.id,
           name: test.title,
           questions: test.question_count,
-          attempts: 0, // Will be calculated from results
-          avgScore: 0, // Will be calculated from results
+          attempts: parseInt(test.total_attempts) || 0,
+          avgScore: 0, // Will be updated from detailed results if available
+          passedCount: parseInt(test.pass_count) || 0,
+          passRate: parseInt(test.pass_percentage) || 0,
           status: test.status || 'draft',
           duration: test.duration || 60,
           maxAttempts: test.max_attempts || 1,
@@ -485,17 +487,19 @@ const AdminDashboard = () => {
 
         setStudentsData(groupedResults);
 
-        // Update tests with attempts, average scores, and pass rate
+        // Update tests with avg scores and detailed pass rate from results
+        // Only update attempts/passedCount if the export returned data for that test
         setTests(prevTests => prevTests.map(test => ({
           ...test,
-          attempts: testStats[test.id]?.count || 0,
+          // Only override attempts from export if it returned data; otherwise keep API value
+          attempts: testStats[test.id]?.count > 0 ? testStats[test.id].count : test.attempts,
           avgScore: testStats[test.id]?.count
             ? Math.round(testStats[test.id].totalScore / testStats[test.id].count)
             : 0,
-          passedCount: testStats[test.id]?.passed || 0,
-          passRate: testStats[test.id]?.count
+          passedCount: testStats[test.id]?.count > 0 ? testStats[test.id].passed : test.passedCount,
+          passRate: testStats[test.id]?.count > 0
             ? Math.round((testStats[test.id].passed / testStats[test.id].count) * 100)
-            : 0
+            : test.passRate
         })));
       }
     } catch (error) {
