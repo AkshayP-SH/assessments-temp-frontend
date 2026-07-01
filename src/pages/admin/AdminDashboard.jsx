@@ -2251,13 +2251,10 @@ const AdminDashboard = () => {
         </div>
       )}
 
-      {/* Client Admin — Plan Quota Bar */}
+      {/* Client Admin — Usage Stats Bar */}
       {!isSuperAdmin && quota && (
         <div className="bg-white border-b border-shnoor-mist">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-wrap items-center gap-4">
-            <span className="text-xs font-semibold text-shnoor-indigoMedium uppercase tracking-wide flex-shrink-0">
-              Plan: <span className="text-shnoor-navy capitalize">{quota.tier}</span>
-            </span>
             {[
               { label: 'Tests',      used: quota.limits?.tests?.used,      max: quota.limits?.tests?.max },
               { label: 'Institutes', used: quota.limits?.institutes?.used, max: quota.limits?.institutes?.max },
