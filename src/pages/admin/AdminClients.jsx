@@ -211,6 +211,42 @@ const EditClientModal = ({ client, onClose, onUpdated }) => {
   );
 };
 
+/* ─── Input Field Component ───────────────────────────────────────────── */
+const InputField = ({ label, name, type = 'text', placeholder, required = false, options = null, value, onChange, disabled, error }) => (
+  <div>
+    <label className="block text-xs font-semibold text-shnoor-navy uppercase tracking-wide mb-1.5">
+      {label} {required && <span className="text-red-500">*</span>}
+    </label>
+    {options ? (
+      <select
+        value={value}
+        onChange={onChange}
+        disabled={disabled}
+        className={`w-full h-[46px] px-4 rounded-lg border ${error ? 'border-red-500' : 'border-shnoor-mist'} bg-white text-sm text-shnoor-navy focus:outline-none focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo transition-colors`}
+      >
+        <option value="">Select {label}</option>
+        {options.map(opt => (
+          <option key={opt.value} value={opt.value}>{opt.label}</option>
+        ))}
+      </select>
+    ) : (
+      <input
+        type={type}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        disabled={disabled}
+        className={`w-full h-[46px] px-4 rounded-lg border ${error ? 'border-red-500' : 'border-shnoor-mist'} bg-white text-sm text-shnoor-navy placeholder-shnoor-soft focus:outline-none focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo transition-colors`}
+      />
+    )}
+    {error && (
+      <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
+        <span>⚠</span> {error}
+      </p>
+    )}
+  </div>
+);
+
 /* ─── Create Client Modal ─────────────────────────────────────────────── */
 const CreateClientModal = ({ onClose, onCreated }) => {
   const [form, setForm] = useState({
@@ -329,41 +365,6 @@ const CreateClientModal = ({ onClose, onCreated }) => {
     }
   };
 
-  const InputField = ({ label, name, type = 'text', placeholder, required = false, options = null }) => (
-    <div>
-      <label className="block text-xs font-semibold text-shnoor-navy uppercase tracking-wide mb-1.5">
-        {label} {required && <span className="text-red-500">*</span>}
-      </label>
-      {options ? (
-        <select
-          value={form[name]}
-          onChange={e => setForm(p => ({ ...p, [name]: e.target.value }))}
-          disabled={loading}
-          className={`w-full h-[46px] px-4 rounded-lg border ${errors[name] ? 'border-red-500' : 'border-shnoor-mist'} bg-white text-sm text-shnoor-navy focus:outline-none focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo transition-colors`}
-        >
-          <option value="">Select {label}</option>
-          {options.map(opt => (
-            <option key={opt.value} value={opt.value}>{opt.label}</option>
-          ))}
-        </select>
-      ) : (
-        <input
-          type={type}
-          value={form[name]}
-          onChange={e => setForm(p => ({ ...p, [name]: e.target.value }))}
-          placeholder={placeholder}
-          disabled={loading}
-          className={`w-full h-[46px] px-4 rounded-lg border ${errors[name] ? 'border-red-500' : 'border-shnoor-mist'} bg-white text-sm text-shnoor-navy placeholder-shnoor-soft focus:outline-none focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo transition-colors`}
-        />
-      )}
-      {errors[name] && (
-        <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
-          <span>⚠</span> {errors[name]}
-        </p>
-      )}
-    </div>
-  );
-
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -380,13 +381,49 @@ const CreateClientModal = ({ onClose, onCreated }) => {
           )}
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <InputField label="Organization Name" name="name" placeholder="e.g., Acme Corp" required />
-            <InputField label="Company / Display Name" name="company_name" placeholder="e.g., Acme Corporation Pvt Ltd" required />
+            <InputField 
+              label="Organization Name" 
+              name="name" 
+              placeholder="e.g., Acme Corp" 
+              required 
+              value={form.name}
+              onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
+              disabled={loading}
+              error={errors.name}
+            />
+            <InputField 
+              label="Company / Display Name" 
+              name="company_name" 
+              placeholder="e.g., Acme Corporation Pvt Ltd" 
+              required 
+              value={form.company_name}
+              onChange={e => setForm(p => ({ ...p, company_name: e.target.value }))}
+              disabled={loading}
+              error={errors.company_name}
+            />
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <InputField label="Admin Email" name="email" type="email" placeholder="admin@acme.com" required />
-            <InputField label="Phone Number" name="phone" placeholder="+91 98765 43210" />
+            <InputField 
+              label="Admin Email" 
+              name="email" 
+              type="email" 
+              placeholder="admin@acme.com" 
+              required 
+              value={form.email}
+              onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
+              disabled={loading}
+              error={errors.email}
+            />
+            <InputField 
+              label="Phone Number" 
+              name="phone" 
+              placeholder="+91 98765 43210" 
+              value={form.phone}
+              onChange={e => setForm(p => ({ ...p, phone: e.target.value }))}
+              disabled={loading}
+              error={errors.phone}
+            />
           </div>
           
           <div>
@@ -418,12 +455,24 @@ const CreateClientModal = ({ onClose, onCreated }) => {
             )}
           </div>
           
-          <InputField label="Company Website" name="company_website" placeholder="https://www.acme.com" />
+          <InputField 
+            label="Company Website" 
+            name="company_website" 
+            placeholder="https://www.acme.com" 
+            value={form.company_website}
+            onChange={e => setForm(p => ({ ...p, company_website: e.target.value }))}
+            disabled={loading}
+            error={errors.company_website}
+          />
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <InputField
               label="Company Size"
               name="company_size"
+              value={form.company_size}
+              onChange={e => setForm(p => ({ ...p, company_size: e.target.value }))}
+              disabled={loading}
+              error={errors.company_size}
               options={[
                 { value: '1-50', label: '1-50 employees' },
                 { value: '51-200', label: '51-200 employees' },
@@ -434,6 +483,10 @@ const CreateClientModal = ({ onClose, onCreated }) => {
             <InputField
               label="Industry"
               name="industry"
+              value={form.industry}
+              onChange={e => setForm(p => ({ ...p, industry: e.target.value }))}
+              disabled={loading}
+              error={errors.industry}
               options={[
                 { value: 'IT/Software', label: 'IT/Software' },
                 { value: 'Education', label: 'Education' },
@@ -444,12 +497,24 @@ const CreateClientModal = ({ onClose, onCreated }) => {
                 { value: 'Other', label: 'Other' }
               ]}
             />
-            <InputField label="Country" name="country" placeholder="e.g., India" />
+            <InputField 
+              label="Country" 
+              name="country" 
+              placeholder="e.g., India" 
+              value={form.country}
+              onChange={e => setForm(p => ({ ...p, country: e.target.value }))}
+              disabled={loading}
+              error={errors.country}
+            />
           </div>
           
           <InputField
             label="Primary Use Case"
             name="use_case"
+            value={form.use_case}
+            onChange={e => setForm(p => ({ ...p, use_case: e.target.value }))}
+            disabled={loading}
+            error={errors.use_case}
             options={[
               { value: 'Campus Hiring', label: 'Campus Hiring' },
               { value: 'Lateral Hiring', label: 'Lateral Hiring' },
