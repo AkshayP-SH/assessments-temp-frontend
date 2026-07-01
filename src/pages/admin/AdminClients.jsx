@@ -213,78 +213,272 @@ const EditClientModal = ({ client, onClose, onUpdated }) => {
 
 /* ─── Create Client Modal ─────────────────────────────────────────────── */
 const CreateClientModal = ({ onClose, onCreated }) => {
-  const [form, setForm] = useState({ name: '', email: '', password: '', company_name: '' });
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    password: '',
+    company_name: '',
+    phone: '',
+    company_website: '',
+    company_size: '',
+    industry: '',
+    country: '',
+    use_case: ''
+  });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState({});
   const [showPw, setShowPw] = useState(false);
+
+  const validateForm = () => {
+    const newErrors = {};
+    
+    // Organization Name
+    if (!form.name.trim()) {
+      newErrors.name = 'Organization name is required';
+    } else if (form.name.trim().length < 2) {
+      newErrors.name = 'Organization name must be at least 2 characters';
+    }
+    
+    // Company Name
+    if (!form.company_name.trim()) {
+      newErrors.company_name = 'Company/Display name is required';
+    } else if (form.company_name.trim().length < 2) {
+      newErrors.company_name = 'Company name must be at least 2 characters';
+    }
+    
+    // Email
+    if (!form.email.trim()) {
+      newErrors.email = 'Admin email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+    
+    // Password
+    if (!form.password) {
+      newErrors.password = 'Password is required';
+    } else if (form.password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
+    } else if (!/[A-Z]/.test(form.password)) {
+      newErrors.password = 'Password must contain at least one uppercase letter';
+    } else if (!/[0-9]/.test(form.password)) {
+      newErrors.password = 'Password must contain at least one number';
+    }
+    
+    // Phone (optional but validate format if provided)
+    if (form.phone && !/^[\d\s\+\-\(\)]{10,}$/.test(form.phone)) {
+      newErrors.phone = 'Please enter a valid phone number';
+    }
+    
+    // Website (optional but validate format if provided)
+    if (form.company_website && !/^https?:\/\/.+\..+/.test(form.company_website)) {
+      newErrors.company_website = 'Please enter a valid website URL (e.g., https://example.com)';
+    }
+    
+    return newErrors;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    if (!form.name.trim() || !form.email.trim() || !form.password || !form.company_name.trim()) {
-      setError('All fields are required.');
+    const newErrors = validateForm();
+    setErrors(newErrors);
+    
+    if (Object.keys(newErrors).length > 0) {
       return;
     }
-    if (form.password.length < 6) { setError('Password must be at least 6 characters.'); return; }
+    
     setLoading(true);
     try {
+      const payload = {
+        name: form.name.trim(),
+        company_name: form.company_name.trim(),
+        email: form.email.trim().toLowerCase(),
+        password: form.password,
+        phone: form.phone.trim() || null,
+        company_website: form.company_website.trim() || null,
+        company_size: form.company_size || null,
+        industry: form.industry || null,
+        country: form.country.trim() || null,
+        use_case: form.use_case || null
+      };
+      
       const res = await fetch(`${API_URL}/api/clients`, {
-        method: 'POST', headers: adminHeaders(),
-        body: JSON.stringify({ name: form.name.trim(), email: form.email.trim().toLowerCase(), password: form.password, company_name: form.company_name.trim() }),
+        method: 'POST',
+        headers: adminHeaders(),
+        body: JSON.stringify(payload),
       });
+      
       const data = await res.json();
-      if (!res.ok || !data.success) throw new Error(data.error || 'Failed to create client');
+      
+      if (!res.ok || !data.success) {
+        // Handle specific error messages from backend
+        if (data.error?.includes('Email already exists')) {
+          setErrors({ email: 'This email is already registered' });
+        } else if (data.error?.includes('duplicate key')) {
+          setErrors({ email: 'This email is already registered' });
+        } else {
+          setErrors({ submit: data.error || 'Failed to create client' });
+        }
+        return;
+      }
+      
       onCreated(data.client);
-    } catch (err) { setError(err.message); }
-    finally { setLoading(false); }
+    } catch (err) {
+      setErrors({ submit: 'Network error. Please try again.' });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const fields = [
-    { label: 'Organization Name', key: 'name', placeholder: 'e.g. Acme Corp' },
-    { label: 'Company / Display Name', key: 'company_name', placeholder: 'e.g. Acme Corporation Pvt Ltd' },
-    { label: 'Admin Email', key: 'email', placeholder: 'admin@acme.com', type: 'email' },
-  ];
+  const InputField = ({ label, name, type = 'text', placeholder, required = false, options = null }) => (
+    <div>
+      <label className="block text-xs font-semibold text-shnoor-navy uppercase tracking-wide mb-1.5">
+        {label} {required && <span className="text-red-500">*</span>}
+      </label>
+      {options ? (
+        <select
+          value={form[name]}
+          onChange={e => setForm(p => ({ ...p, [name]: e.target.value }))}
+          disabled={loading}
+          className={`w-full h-[46px] px-4 rounded-lg border ${errors[name] ? 'border-red-500' : 'border-shnoor-mist'} bg-white text-sm text-shnoor-navy focus:outline-none focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo transition-colors`}
+        >
+          <option value="">Select {label}</option>
+          {options.map(opt => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
+        </select>
+      ) : (
+        <input
+          type={type}
+          value={form[name]}
+          onChange={e => setForm(p => ({ ...p, [name]: e.target.value }))}
+          placeholder={placeholder}
+          disabled={loading}
+          className={`w-full h-[46px] px-4 rounded-lg border ${errors[name] ? 'border-red-500' : 'border-shnoor-mist'} bg-white text-sm text-shnoor-navy placeholder-shnoor-soft focus:outline-none focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo transition-colors`}
+        />
+      )}
+      {errors[name] && (
+        <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
+          <span>⚠</span> {errors[name]}
+        </p>
+      )}
+    </div>
+  );
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
-        <div className="px-6 py-5 border-b border-shnoor-mist flex items-center justify-between">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="px-6 py-5 border-b border-shnoor-mist flex items-center justify-between sticky top-0 bg-white z-10">
           <h2 className="text-base font-bold text-shnoor-navy">Create New Client</h2>
           <button onClick={onClose} className="text-shnoor-soft hover:text-shnoor-navy">✕</button>
         </div>
         <form onSubmit={handleSubmit} className="px-6 py-5 flex flex-col gap-4">
-          {error && <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">{error}</div>}
-          {fields.map(({ label, key, placeholder, type = 'text' }) => (
-            <div key={key}>
-              <label className="block text-xs font-semibold text-shnoor-navy uppercase tracking-wide mb-1.5">{label}</label>
-              <input type={type} value={form[key]} onChange={e => setForm(p => ({ ...p, [key]: e.target.value }))}
-                placeholder={placeholder} disabled={loading}
-                className="w-full h-[46px] px-4 rounded-lg border border-shnoor-mist bg-white text-sm text-shnoor-navy placeholder-shnoor-soft focus:outline-none focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo transition-colors" />
+          {errors.submit && (
+            <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm flex items-start gap-2">
+              <span className="text-lg">⚠️</span>
+              <span>{errors.submit}</span>
             </div>
-          ))}
+          )}
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <InputField label="Organization Name" name="name" placeholder="e.g., Acme Corp" required />
+            <InputField label="Company / Display Name" name="company_name" placeholder="e.g., Acme Corporation Pvt Ltd" required />
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <InputField label="Admin Email" name="email" type="email" placeholder="admin@acme.com" required />
+            <InputField label="Phone Number" name="phone" placeholder="+91 98765 43210" />
+          </div>
+          
           <div>
-            <label className="block text-xs font-semibold text-shnoor-navy uppercase tracking-wide mb-1.5">Password</label>
+            <label className="block text-xs font-semibold text-shnoor-navy uppercase tracking-wide mb-1.5">
+              Password <span className="text-red-500">*</span>
+            </label>
             <div className="relative">
-              <input type={showPw ? 'text' : 'password'} value={form.password}
+              <input
+                type={showPw ? 'text' : 'password'}
+                value={form.password}
                 onChange={e => setForm(p => ({ ...p, password: e.target.value }))}
-                placeholder="Min 6 characters" disabled={loading}
-                className="w-full h-[46px] px-4 pr-12 rounded-lg border border-shnoor-mist bg-white text-sm text-shnoor-navy placeholder-shnoor-soft focus:outline-none focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo transition-colors" />
-              <button type="button" onClick={() => setShowPw(v => !v)} tabIndex={-1}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-shnoor-soft hover:text-shnoor-navy p-1">
+                placeholder="Min 6 characters, 1 uppercase, 1 number"
+                disabled={loading}
+                className={`w-full h-[46px] px-4 pr-12 rounded-lg border ${errors.password ? 'border-red-500' : 'border-shnoor-mist'} bg-white text-sm text-shnoor-navy placeholder-shnoor-soft focus:outline-none focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo transition-colors`}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPw(v => !v)}
+                tabIndex={-1}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-shnoor-soft hover:text-shnoor-navy p-1"
+              >
                 {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
+            {errors.password && (
+              <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
+                <span>⚠</span> {errors.password}
+              </p>
+            )}
           </div>
-          <div className="flex gap-3 pt-1">
-            <button type="button" onClick={onClose} disabled={loading}
-              className="flex-1 h-[46px] border border-shnoor-mist text-shnoor-navy rounded-lg text-sm font-semibold hover:bg-shnoor-lavender transition-colors">
+          
+          <InputField label="Company Website" name="company_website" placeholder="https://www.acme.com" />
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <InputField
+              label="Company Size"
+              name="company_size"
+              options={[
+                { value: '1-50', label: '1-50 employees' },
+                { value: '51-200', label: '51-200 employees' },
+                { value: '201-500', label: '201-500 employees' },
+                { value: '500+', label: '500+ employees' }
+              ]}
+            />
+            <InputField
+              label="Industry"
+              name="industry"
+              options={[
+                { value: 'IT/Software', label: 'IT/Software' },
+                { value: 'Education', label: 'Education' },
+                { value: 'Finance', label: 'Finance' },
+                { value: 'Healthcare', label: 'Healthcare' },
+                { value: 'Manufacturing', label: 'Manufacturing' },
+                { value: 'Retail', label: 'Retail' },
+                { value: 'Other', label: 'Other' }
+              ]}
+            />
+            <InputField label="Country" name="country" placeholder="e.g., India" />
+          </div>
+          
+          <InputField
+            label="Primary Use Case"
+            name="use_case"
+            options={[
+              { value: 'Campus Hiring', label: 'Campus Hiring' },
+              { value: 'Lateral Hiring', label: 'Lateral Hiring' },
+              { value: 'Internal Assessment', label: 'Internal Assessment' },
+              { value: 'Education', label: 'Education' },
+              { value: 'Certification', label: 'Certification' },
+              { value: 'Other', label: 'Other' }
+            ]}
+          />
+          
+          <div className="flex gap-3 pt-2 border-t border-shnoor-mist mt-2">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={loading}
+              className="flex-1 h-[46px] border border-shnoor-mist text-shnoor-navy rounded-lg text-sm font-semibold hover:bg-shnoor-lavender transition-colors disabled:opacity-50"
+            >
               Cancel
             </button>
-            <button type="submit" disabled={loading}
-              className="flex-1 h-[46px] bg-shnoor-indigo text-white rounded-lg text-sm font-semibold hover:bg-shnoor-navy transition-colors relative">
-              {loading
-                ? <div className="absolute top-1/2 left-1/2 -ml-2.5 -mt-2.5 w-5 h-5 border-[3px] border-white border-t-transparent rounded-full animate-spin" />
-                : 'Create Client'}
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 h-[46px] bg-shnoor-indigo text-white rounded-lg text-sm font-semibold hover:bg-shnoor-navy transition-colors relative disabled:opacity-50"
+            >
+              {loading ? (
+                <div className="absolute top-1/2 left-1/2 -ml-2.5 -mt-2.5 w-5 h-5 border-[3px] border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                'Create Client'
+              )}
             </button>
           </div>
         </form>
