@@ -1,39 +1,23 @@
 import { useState } from 'react';
-import { Calendar, Lock, Unlock, Pause, X, Save, AlertCircle } from 'lucide-react';
+import { Lock, Unlock, Pause, X, Save, AlertCircle } from 'lucide-react';
 import { apiFetch } from '../../config/api';
+import CustomDateTimePicker from './CustomDateTimePicker';
 
 const InstituteRegistrationControl = ({ institute, onClose, onUpdate }) => {
   const [formData, setFormData] = useState({
     registration_status: institute.registration_status || 'open',
     registration_start_time: institute.registration_start_time 
-      ? formatDateTimeForInput(institute.registration_start_time) 
-      : '',
+      ? new Date(institute.registration_start_time) 
+      : null,
     registration_deadline: institute.registration_deadline 
-      ? formatDateTimeForInput(institute.registration_deadline) 
-      : ''
+      ? new Date(institute.registration_deadline) 
+      : null
   });
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
 
-  function formatDateTimeForInput(dateTimeString) {
-    if (!dateTimeString) return '';
-    const date = new Date(dateTimeString);
-    const istDate = new Date(date.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
-    const year = istDate.getFullYear();
-    const month = String(istDate.getMonth() + 1).padStart(2, '0');
-    const day = String(istDate.getDate()).padStart(2, '0');
-    const hours = String(istDate.getHours()).padStart(2, '0');
-    const minutes = String(istDate.getMinutes()).padStart(2, '0');
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
-  }
-
-  function convertISTToUTC(dateTimeString) {
-    if (!dateTimeString) return null;
-    const [datePart, timePart] = dateTimeString.split('T');
-    const [year, month, day] = datePart.split('-');
-    const [hours, minutes] = timePart.split(':');
-    const istDateString = `${year}-${month}-${day}T${hours}:${minutes}:00+05:30`;
-    const date = new Date(istDateString);
+  function convertISTToUTC(date) {
+    if (!date) return null;
     return date.toISOString();
   }
 
@@ -258,18 +242,14 @@ const InstituteRegistrationControl = ({ institute, onClose, onUpdate }) => {
             <label className="block text-sm font-semibold text-shnoor-navy mb-2">
               Registration Start Time (Optional)
             </label>
-            <div className="relative">
-              <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-shnoor-soft w-5 h-5" />
-              <input
-                type="datetime-local"
-                value={formData.registration_start_time}
-                onChange={(e) => setFormData({ ...formData, registration_start_time: e.target.value })}
-                className="w-full pl-10 pr-4 py-3 border-2 border-shnoor-light rounded-lg focus:ring-2 focus:ring-shnoor-lavender focus:border-shnoor-indigo transition-all text-sm"
-                disabled={isSaving}
-              />
-            </div>
+            <CustomDateTimePicker
+              value={formData.registration_start_time}
+              onChange={(date) => setFormData({ ...formData, registration_start_time: date })}
+              placeholder="YYYY-MM-DD HH:MM or click to select"
+              disabled={isSaving}
+            />
             <p className="text-xs text-shnoor-indigoMedium mt-2">
-              Leave empty for immediate registration. Time is in IST (Asia/Kolkata timezone).
+              Type date/time or click calendar icon. Format: YYYY-MM-DD HH:MM (24-hour). Time is in IST (Asia/Kolkata timezone).
             </p>
           </div>
 
@@ -278,18 +258,14 @@ const InstituteRegistrationControl = ({ institute, onClose, onUpdate }) => {
             <label className="block text-sm font-semibold text-shnoor-navy mb-2">
               Registration Deadline (Optional)
             </label>
-            <div className="relative">
-              <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-shnoor-soft w-5 h-5" />
-              <input
-                type="datetime-local"
-                value={formData.registration_deadline}
-                onChange={(e) => setFormData({ ...formData, registration_deadline: e.target.value })}
-                className="w-full pl-10 pr-4 py-3 border-2 border-shnoor-light rounded-lg focus:ring-2 focus:ring-shnoor-lavender focus:border-shnoor-indigo transition-all text-sm"
-                disabled={isSaving}
-              />
-            </div>
+            <CustomDateTimePicker
+              value={formData.registration_deadline}
+              onChange={(date) => setFormData({ ...formData, registration_deadline: date })}
+              placeholder="YYYY-MM-DD HH:MM or click to select"
+              disabled={isSaving}
+            />
             <p className="text-xs text-shnoor-indigoMedium mt-2">
-              Leave empty for no deadline. Time is in IST (Asia/Kolkata timezone).
+              Type date/time or click calendar icon. Format: YYYY-MM-DD HH:MM (24-hour). Time is in IST (Asia/Kolkata timezone).
             </p>
           </div>
 
