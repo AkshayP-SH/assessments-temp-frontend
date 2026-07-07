@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Plus, FileSpreadsheet, LogOut, Download, ArrowLeft,
-  Trash2, Eye, Users, CheckCircle, XCircle, UserCheck, ChevronDown, ChevronRight, Video, Loader2, X, Building2, MoreVertical, Copy, AlertCircle, Pencil, MessageSquare, Star, TrendingUp, BarChart3, Calendar, Filter, CheckSquare, Briefcase, Search
+  Trash2, Eye, Users, CheckCircle, XCircle, UserCheck, ChevronDown, ChevronRight, ChevronLeft, Video, Loader2, X, Building2, MoreVertical, Copy, AlertCircle, Pencil, MessageSquare, Star, TrendingUp, BarChart3, Calendar, Filter, CheckSquare, Briefcase, Search
 } from 'lucide-react';
 
 import axios from 'axios';
@@ -71,6 +71,7 @@ const AdminDashboard = () => {
 
   // Institute Management States
   const [allInstitutes, setAllInstitutes] = useState([]);
+  const [instituteSearchTerm, setInstituteSearchTerm] = useState('');
   const [isLoadingAllInstitutes, setIsLoadingAllInstitutes] = useState(false);
   const [newInstituteName, setNewInstituteName] = useState('');
   const [isAddingInstitute, setIsAddingInstitute] = useState(false);
@@ -129,6 +130,15 @@ const AdminDashboard = () => {
     dateRange: 'all'
   });
   const [sortBy, setSortBy] = useState('latest');
+
+  const [examCurrentPage, setExamCurrentPage] = useState(1);
+  const examItemsPerPage = 15;
+
+  const [instituteCurrentPage, setInstituteCurrentPage] = useState(1);
+  const instituteItemsPerPage = 15;
+
+  const [resultsCurrentPage, setResultsCurrentPage] = useState(1);
+  const [resultsRowsPerPage, setResultsRowsPerPage] = useState(40);
 
   // 3-Dot Menu States
   const [openMenuId, setOpenMenuId] = useState(null);
@@ -191,7 +201,7 @@ const AdminDashboard = () => {
     apiFetch('api/clients', { headers: { 'Authorization': `Bearer ${token}` } })
       .then(r => r.json())
       .then(d => { if (d.success) setClientsList(d.clients || []); })
-      .catch(() => {});
+      .catch(() => { });
   }, [isSuperAdmin]);
 
   // Fetch quota for client admins (so they can see plan usage)
@@ -202,7 +212,7 @@ const AdminDashboard = () => {
     apiFetch('api/client/auth/me/quota', { headers: { 'Authorization': `Bearer ${token}` } })
       .then(r => r.ok ? r.json() : null)
       .then(d => { if (d?.success) setQuota(d.quota); })
-      .catch(() => {});
+      .catch(() => { });
   }, [isSuperAdmin]);
 
   // Helper: build Authorization header + optional clientId query param for super admin
@@ -311,6 +321,33 @@ const AdminDashboard = () => {
 
     return filtered;
   }, [tests, searchTerm, filters, sortBy]);
+
+  const paginatedTests = useMemo(() => {
+    const startIndex = (examCurrentPage - 1) * examItemsPerPage;
+    return filteredTests.slice(startIndex, startIndex + examItemsPerPage);
+  }, [filteredTests, examCurrentPage]);
+  const examTotalPages = Math.ceil(filteredTests.length / examItemsPerPage);
+
+  const filteredInstitutes = useMemo(() => {
+    if (!instituteSearchTerm) return allInstitutes;
+    return allInstitutes.filter(inst =>
+      inst.name.toLowerCase().includes(instituteSearchTerm.toLowerCase())
+    );
+  }, [allInstitutes, instituteSearchTerm]);
+
+  const paginatedInstitutes = useMemo(() => {
+    const startIndex = (instituteCurrentPage - 1) * instituteItemsPerPage;
+    return filteredInstitutes.slice(startIndex, startIndex + instituteItemsPerPage);
+  }, [filteredInstitutes, instituteCurrentPage]);
+  const instituteTotalPages = Math.ceil(filteredInstitutes.length / instituteItemsPerPage);
+
+  useEffect(() => {
+    setExamCurrentPage(1);
+  }, [filteredTests]);
+
+  useEffect(() => {
+    setInstituteCurrentPage(1);
+  }, [filteredInstitutes]);
 
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
@@ -1905,14 +1942,14 @@ const AdminDashboard = () => {
   const handleSelectRange = () => {
     const startIdx = parseInt(selectionRange.start) - 1;
     const endIdx = parseInt(selectionRange.end) - 1;
-    
+
     if (isNaN(startIdx) || isNaN(endIdx) || startIdx < 0 || endIdx >= instituteStudentsForManagement.length || startIdx > endIdx) {
       alert('Please enter a valid range (e.g., 1 to ' + instituteStudentsForManagement.length + ')');
       return;
     }
 
     const studentsToSelect = instituteStudentsForManagement.slice(startIdx, endIdx + 1).map(s => s.id);
-    
+
     setSelectedStudentsForDelete(prev => {
       const newSelection = new Set([...prev, ...studentsToSelect]);
       return Array.from(newSelection);
@@ -2004,7 +2041,7 @@ const AdminDashboard = () => {
   // Toggle Student Tests Dropdown
   const toggleStudentTests = async (student) => {
     const studentId = student.id;
-    
+
     // If already expanded, collapse it
     if (expandedStudentTests[studentId]) {
       setExpandedStudentTests(prev => ({ ...prev, [studentId]: null }));
@@ -2025,9 +2062,9 @@ const AdminDashboard = () => {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        setExpandedStudentTests(prev => ({ 
-          ...prev, 
-          [studentId]: { loading: false, tests: data.tests || [], student: student } 
+        setExpandedStudentTests(prev => ({
+          ...prev,
+          [studentId]: { loading: false, tests: data.tests || [], student: student }
         }));
       } else {
         alert(data.message || 'Failed to fetch assigned tests');
@@ -2059,7 +2096,7 @@ const AdminDashboard = () => {
 
       if (response.ok && data.success) {
         alert(data.message || 'Test unassigned successfully');
-        
+
         // Refresh the expanded tests for this student
         const studentData = expandedStudentTests[studentId]?.student;
         if (studentData) {
@@ -2067,7 +2104,7 @@ const AdminDashboard = () => {
           // Re-expand after a brief delay
           setTimeout(() => toggleStudentTests(studentData), 100);
         }
-        
+
         // Refresh the student list to update counts
         handleManageStudents(selectedInstituteForStudents);
       } else {
@@ -2206,1243 +2243,2490 @@ const AdminDashboard = () => {
   return (
     <Suspense fallback={<div className="flex h-screen items-center justify-center bg-shnoor-lavender"><Loader2 className="animate-spin h-12 w-12 text-shnoor-indigo" /></div>}>
       <div className="admin-dashboard-root min-h-screen bg-shnoor-lavender">
-      {/* Header */}
-      <AdminHeader />
+        {/* Header */}
+        <AdminHeader />
 
-      {/* Super Admin — Client Scope Selector */}
-      {isSuperAdmin && (
-        <div className="bg-white border-b border-shnoor-mist shadow-sm">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center gap-3">
-            <div className="flex items-center gap-2 text-xs font-semibold text-shnoor-indigoMedium uppercase tracking-wide flex-shrink-0">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-              Viewing as:
-            </div>
-            <select
-              value={viewAsClientId}
-              onChange={e => {
-                setViewAsClientId(e.target.value);
-                setTests([]);
-                setAllInstitutes([]);
-              }}
-              className="h-8 pl-3 pr-8 rounded-lg border border-shnoor-mist bg-white text-sm text-shnoor-navy focus:outline-none focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo transition-colors"
-            >
-              <option value="">All Clients (Platform View)</option>
-              {clientsList.map(c => (
-                <option key={c.id} value={c.id}>
-                  {c.company_name || c.name} {c.status !== 'active' ? '(suspended)' : ''}
-                </option>
-              ))}
-            </select>
-            {viewAsClientId && (
-              <button
-                onClick={() => { setViewAsClientId(''); setTests([]); setAllInstitutes([]); }}
-                className="text-xs text-shnoor-danger hover:underline flex items-center gap-1"
+        {/* Super Admin — Client Scope Selector */}
+        {isSuperAdmin && (
+          <div className="bg-white border-b border-shnoor-mist shadow-sm">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center gap-3">
+              <div className="flex items-center gap-2 text-xs font-semibold text-shnoor-indigoMedium uppercase tracking-wide flex-shrink-0">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
+                Viewing as:
+              </div>
+              <select
+                value={viewAsClientId}
+                onChange={e => {
+                  setViewAsClientId(e.target.value);
+                  setTests([]);
+                  setAllInstitutes([]);
+                }}
+                className="h-8 pl-3 pr-8 rounded-lg border border-shnoor-mist bg-white text-sm text-shnoor-navy focus:outline-none focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo transition-colors"
               >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                Clear filter
-              </button>
-            )}
-            {viewAsClientId && (
-              <span className="ml-auto text-xs bg-shnoor-indigo text-white px-2.5 py-1 rounded-full font-medium">
-                Scoped to: {clientsList.find(c => String(c.id) === String(viewAsClientId))?.company_name || clientsList.find(c => String(c.id) === String(viewAsClientId))?.name || 'Client'}
-              </span>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Client Admin — Usage Stats Bar */}
-      {!isSuperAdmin && quota && (
-        <div className="bg-white border-b border-shnoor-mist">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-wrap items-center gap-4">
-            {[
-              { label: 'Tests',      used: quota.limits?.tests?.used,      max: quota.limits?.tests?.max },
-              { label: 'Institutes', used: quota.limits?.institutes?.used, max: quota.limits?.institutes?.max },
-              { label: 'Students',   used: quota.limits?.students?.used,   max: quota.limits?.students?.max },
-            ].map(({ label, used, max }) => {
-              if (max == null || max <= 0) return null;
-              const pct = Math.min(100, Math.round((used / max) * 100));
-              const warn = pct >= 90;
-              return (
-                <div key={label} className="flex items-center gap-2 min-w-[140px]">
-                  <span className="text-xs text-shnoor-soft w-16 flex-shrink-0">{label}</span>
-                  <div className="flex-1 h-1.5 bg-shnoor-lavender rounded-full overflow-hidden">
-                    <div className={`h-full rounded-full transition-all ${warn ? 'bg-shnoor-danger' : 'bg-shnoor-indigo'}`} style={{ width: `${pct}%` }} />
-                  </div>
-                  <span className={`text-xs font-medium flex-shrink-0 ${warn ? 'text-shnoor-danger' : 'text-shnoor-indigoMedium'}`}>
-                    {used}/{max}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
-        {/* Tab Navigation */}
-        {!showCreateTest && !selectedExamId && (
-          <div className="mb-4 sm:mb-8 overflow-x-auto pb-4 sm:pb-0 hide-scrollbar">
-            <div className="admin-tab-shell bg-white rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-mist p-2 flex sm:inline-flex space-x-2 min-w-max">
-              {[
-                { id: 'exams', label: 'Manage Exams', icon: FileSpreadsheet },
-                { id: 'institutes', label: 'Manage Institutes', icon: Building2 },
-                { id: 'reports', label: 'Reports', icon: FileSpreadsheet },
-                { id: 'bulk-upload', label: 'Bulk Upload', icon: Users },
-                { id: 'violations', label: 'Violations', icon: AlertCircle },
-                { id: 'interviews', label: 'Interviews', icon: Video },
-                { id: 'job-openings', label: 'Job Openings', icon: Briefcase },
-                ...(isSuperAdmin ? [{ id: 'subscription-plans', label: 'Subscription Plans', icon: FileSpreadsheet }] : [])
-              ].map((tab) => (
+                <option value="">All Clients (Platform View)</option>
+                {clientsList.map(c => (
+                  <option key={c.id} value={c.id}>
+                    {c.company_name || c.name} {c.status !== 'active' ? '(suspended)' : ''}
+                  </option>
+                ))}
+              </select>
+              {viewAsClientId && (
                 <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`admin-tab-button flex items-center space-x-2 px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-medium transition-all shrink-0 text-sm sm:text-base ${activeTab === tab.id ? 'is-active' : ''}`}
+                  onClick={() => { setViewAsClientId(''); setTests([]); setAllInstitutes([]); }}
+                  className="text-xs text-shnoor-danger hover:underline flex items-center gap-1"
                 >
-                  <tab.icon size={20} />
-                  <span>{tab.label}</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                  Clear filter
                 </button>
-              ))}
+              )}
+              {viewAsClientId && (
+                <span className="ml-auto text-xs bg-shnoor-indigo text-white px-2.5 py-1 rounded-full font-medium">
+                  Scoped to: {clientsList.find(c => String(c.id) === String(viewAsClientId))?.company_name || clientsList.find(c => String(c.id) === String(viewAsClientId))?.name || 'Client'}
+                </span>
+              )}
             </div>
           </div>
         )}
 
-        {/* Create Test Modal/Section */}
-        {showCreateTest ? (
-          <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-light p-8 mb-6">
-            <div className="flex items-center justify-between mb-8">
-              <button
-                onClick={() => {
-                  setShowCreateTest(false);
-                  setEditingTest(null);
-                }}
-                className="flex items-center text-shnoor-indigoMedium hover:text-shnoor-indigo transition-colors group"
-                title={editingTest ? 'Cancel Editing' : 'Back to Exams'}
-              >
-                <ArrowLeft size={22} className="group-hover:-translate-x-1 transition-transform" />
-              </button>
-            </div>
-            <CreateTestSection onComplete={handleCreateTestComplete} editingTest={editingTest} clientId={viewAsClientId || null} />
-          </div>
-        ) : selectedExamId ? (
-          /* Detail View: Student Results for a specific exam */
-          <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-light overflow-hidden">
-            <div className="p-8">
-              <button
-                onClick={() => {
-                  setSelectedExamId(null);
-                  setDetailViewTab('results');
-                }}
-                className="flex items-center text-shnoor-indigoMedium hover:text-shnoor-indigo mb-8 transition-colors group"
-              >
-                <ArrowLeft size={22} className="mr-2 group-hover:-translate-x-1 transition-transform" />
-                <span className="font-medium">Back to Exams List</span>
-              </button>
-
-              <div className="flex flex-col md:flex-row justify-between md:items-center mb-6 sm:mb-8 space-y-4 md:space-y-0">
-                <div>
-                  <h2 className="text-2xl sm:text-3xl font-bold text-shnoor-navy mb-2">{selectedExamDetails?.name}</h2>
-                  <div className="flex flex-wrap items-center gap-2 sm:space-x-4 text-xs sm:text-sm text-shnoor-indigoMedium">
-                    <span className="flex items-center">
-                      <FileSpreadsheet size={16} className="mr-1" />
-                      {selectedExamDetails?.questions} Questions
+        {/* Client Admin — Usage Stats Bar */}
+        {!isSuperAdmin && quota && (
+          <div className="bg-white border-b border-shnoor-mist">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-wrap items-center gap-4">
+              {[
+                { label: 'Tests', used: quota.limits?.tests?.used, max: quota.limits?.tests?.max },
+                { label: 'Institutes', used: quota.limits?.institutes?.used, max: quota.limits?.institutes?.max },
+                { label: 'Students', used: quota.limits?.students?.used, max: quota.limits?.students?.max },
+              ].map(({ label, used, max }) => {
+                if (max == null || max <= 0) return null;
+                const pct = Math.min(100, Math.round((used / max) * 100));
+                const warn = pct >= 90;
+                return (
+                  <div key={label} className="flex items-center gap-2 min-w-[140px]">
+                    <span className="text-xs text-shnoor-soft w-16 flex-shrink-0">{label}</span>
+                    <div className="flex-1 h-1.5 bg-shnoor-lavender rounded-full overflow-hidden">
+                      <div className={`h-full rounded-full transition-all ${warn ? 'bg-shnoor-danger' : 'bg-shnoor-indigo'}`} style={{ width: `${pct}%` }} />
+                    </div>
+                    <span className={`text-xs font-medium flex-shrink-0 ${warn ? 'text-shnoor-danger' : 'text-shnoor-indigoMedium'}`}>
+                      {used}/{max}
                     </span>
-                    <span className="hidden sm:inline">•</span>
-                    <span>Created on {selectedExamDetails?.date}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Main Content */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+          {/* Tab Navigation */}
+          {!showCreateTest && !selectedExamId && (
+            <div className="mb-4 sm:mb-8 overflow-x-auto pb-4 sm:pb-0 hide-scrollbar">
+              <div className="admin-tab-shell bg-white rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-mist p-2 flex sm:inline-flex space-x-2 min-w-max">
+                {[
+                  { id: 'exams', label: 'Manage Exams', icon: FileSpreadsheet },
+                  { id: 'institutes', label: 'Manage Institutes', icon: Building2 },
+                  { id: 'reports', label: 'Reports', icon: FileSpreadsheet },
+                  { id: 'bulk-upload', label: 'Bulk Upload', icon: Users },
+                  { id: 'violations', label: 'Violations', icon: AlertCircle },
+                  { id: 'interviews', label: 'Interviews', icon: Video },
+                  { id: 'job-openings', label: 'Job Openings', icon: Briefcase },
+                  ...(isSuperAdmin ? [{ id: 'subscription-plans', label: 'Subscription Plans', icon: FileSpreadsheet }] : [])
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`admin-tab-button flex items-center space-x-2 px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-medium transition-all shrink-0 text-sm sm:text-base ${activeTab === tab.id ? 'is-active' : ''}`}
+                  >
+                    <tab.icon size={20} />
+                    <span>{tab.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Create Test Modal/Section */}
+          {showCreateTest ? (
+            <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-light p-8 mb-6">
+              <div className="flex items-center justify-between mb-8">
+                <button
+                  onClick={() => {
+                    setShowCreateTest(false);
+                    setEditingTest(null);
+                  }}
+                  className="flex items-center text-shnoor-indigoMedium hover:text-shnoor-indigo transition-colors group"
+                  title={editingTest ? 'Cancel Editing' : 'Back to Exams'}
+                >
+                  <ArrowLeft size={22} className="group-hover:-translate-x-1 transition-transform" />
+                </button>
+              </div>
+              <CreateTestSection onComplete={handleCreateTestComplete} editingTest={editingTest} clientId={viewAsClientId || null} />
+            </div>
+          ) : selectedExamId ? (
+            /* Detail View: Student Results for a specific exam */
+            <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-light overflow-hidden">
+              <div className="p-8">
+                <button
+                  onClick={() => {
+                    setSelectedExamId(null);
+                    setDetailViewTab('results');
+                  }}
+                  className="flex items-center text-shnoor-indigoMedium hover:text-shnoor-indigo mb-8 transition-colors group"
+                >
+                  <ArrowLeft size={22} className="mr-2 group-hover:-translate-x-1 transition-transform" />
+                  <span className="font-medium">Back to Exams List</span>
+                </button>
+
+                <div className="flex flex-col md:flex-row justify-between md:items-center mb-6 sm:mb-8 space-y-4 md:space-y-0">
+                  <div>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-shnoor-navy mb-2">{selectedExamDetails?.name}</h2>
+                    <div className="flex flex-wrap items-center gap-2 sm:space-x-4 text-xs sm:text-sm text-shnoor-indigoMedium">
+                      <span className="flex items-center">
+                        <FileSpreadsheet size={16} className="mr-1" />
+                        {selectedExamDetails?.questions} Questions
+                      </span>
+                      <span className="hidden sm:inline">•</span>
+                      <span>Created on {selectedExamDetails?.date}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 w-full md:w-auto mt-4 md:mt-0">
+                    {/* Quick Select Dropdown */}
+                    {selectedExamStudents.length > 0 && (
+                      <div className="relative w-full sm:w-auto">
+                        <button
+                          onClick={() => {
+                            console.log('Quick Select button clicked, current state:', showQuickSelectMenu);
+                            setShowQuickSelectMenu(!showQuickSelectMenu);
+                          }}
+                          className="w-full flex items-center justify-center space-x-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl text-sm sm:text-base font-medium transition-all bg-shnoor-lavender text-shnoor-indigo hover:bg-shnoor-light shadow-[0_8px_30px_rgba(14,14,39,0.06)] transform hover:-translate-y-0.5"
+                        >
+                          <CheckSquare size={20} />
+                          <span>Quick Select</span>
+                          <ChevronDown size={16} className={`transition-transform ${showQuickSelectMenu ? 'rotate-180' : ''}`} />
+                        </button>
+                        {showQuickSelectMenu && (
+                          <>
+                            <div
+                              className="fixed inset-0 z-[9999]"
+                              onClick={() => setShowQuickSelectMenu(false)}
+                            />
+                            <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-[0_20px_60px_rgba(14,14,39,0.15)] border border-shnoor-light z-[10000] overflow-hidden">
+                              <div className="py-2">
+                                <button
+                                  onClick={() => {
+                                    console.log('Select All Visible clicked');
+                                    const filteredStudents = selectedExamStudents.filter(s => {
+                                      if (statusFilter === 'all') return true;
+                                      const percentage = (Number(s.score) / Number(s.total) * 100);
+                                      const passingPercentage = s.passingPercentage || selectedExamDetails?.passingPercentage || 50;
+                                      const isPassed = percentage >= passingPercentage;
+                                      if (statusFilter === 'pass') return isPassed;
+                                      if (statusFilter === 'fail') return !isPassed;
+                                      return true;
+                                    });
+                                    console.log('Filtered students count:', filteredStudents.length);
+                                    const ids = filteredStudents.map(s => s.student_id || s.id);
+                                    console.log('Setting selected candidates:', ids);
+                                    setSelectedCandidates(ids);
+                                    setShowQuickSelectMenu(false);
+                                  }}
+                                  className="w-full px-4 py-3 text-left hover:bg-shnoor-lavender transition-colors flex items-center space-x-3 text-sm"
+                                >
+                                  <CheckCircle size={16} className="text-shnoor-indigo" />
+                                  <span className="font-medium text-shnoor-navy">Select All Visible</span>
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    console.log('Select Shortlisted Students clicked');
+                                    const shortlistedStudents = selectedExamStudents.filter(s => {
+                                      const percentage = (Number(s.score) / Number(s.total) * 100);
+                                      const passingPercentage = s.passingPercentage || selectedExamDetails?.passingPercentage || 50;
+                                      return percentage >= passingPercentage && !s.flagged;
+                                    }).map(s => s.student_id || s.id);
+                                    console.log('Shortlisted students:', shortlistedStudents);
+                                    setSelectedCandidates(shortlistedStudents);
+                                    setShowQuickSelectMenu(false);
+                                  }}
+                                  className="w-full px-4 py-3 text-left hover:bg-shnoor-successLight transition-colors flex items-center space-x-3 text-sm"
+                                >
+                                  <CheckCircle size={16} className="text-shnoor-success" />
+                                  <span className="font-medium text-shnoor-navy">Select Shortlisted Students</span>
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    console.log('Select All Failed clicked');
+                                    const failedStudents = selectedExamStudents.filter(s => {
+                                      const percentage = (Number(s.score) / Number(s.total) * 100);
+                                      const passingPercentage = s.passingPercentage || selectedExamDetails?.passingPercentage || 50;
+                                      return percentage < passingPercentage;
+                                    }).map(s => s.student_id || s.id);
+                                    console.log('Failed students:', failedStudents);
+                                    setSelectedCandidates(failedStudents);
+                                    setShowQuickSelectMenu(false);
+                                  }}
+                                  className="w-full px-4 py-3 text-left hover:bg-shnoor-dangerLight transition-colors flex items-center space-x-3 text-sm"
+                                >
+                                  <XCircle size={16} className="text-shnoor-danger" />
+                                  <span className="font-medium text-shnoor-navy">Select All Failed</span>
+                                </button>
+                                <div className="border-t border-shnoor-light my-1"></div>
+                                <button
+                                  onClick={() => {
+                                    console.log('Clear All clicked');
+                                    setSelectedCandidates([]);
+                                    setShowQuickSelectMenu(false);
+                                  }}
+                                  className="w-full px-4 py-3 text-left hover:bg-shnoor-lavender transition-colors flex items-center space-x-3 text-sm"
+                                >
+                                  <X size={16} className="text-shnoor-indigoMedium" />
+                                  <span className="font-medium text-shnoor-navy">Clear All</span>
+                                </button>
+                              </div>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    )}
+
+                    <button
+                      onClick={exportToExcel}
+                      disabled={selectedExamStudents.length === 0}
+                      className={`w-full sm:w-auto flex items-center justify-center space-x-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl text-sm sm:text-base font-medium transition-all shadow-[0_8px_30px_rgba(14,14,39,0.06)] ${selectedExamStudents.length === 0
+                        ? 'bg-shnoor-light text-shnoor-soft cursor-not-allowed'
+                        : 'bg-shnoor-indigo hover:bg-shnoor-navy text-white hover:shadow-[0_8px_30px_rgba(14,14,39,0.06)] transform hover:-translate-y-0.5'
+                        }`}
+                      title={selectedExamStudents.length === 0 ? 'No results to export' : selectedCandidates.length > 0 ? `Export Excel (${selectedCandidates.length} selected)` : 'Export All to Excel'}
+                    >
+                      <FileSpreadsheet size={18} className="sm:size-5" />
+                      <span>Export Excel {selectedCandidates.length > 0 && `(${selectedCandidates.length})`}</span>
+                    </button>
+                    <button
+                      onClick={handleDownloadShortlistedPDF}
+                      disabled={selectedCandidates.length === 0}
+                      className={`w-full sm:w-auto flex items-center justify-center space-x-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl text-sm sm:text-base font-medium transition-all shadow-[0_8px_30px_rgba(14,14,39,0.06)] ${selectedCandidates.length === 0
+                        ? 'bg-shnoor-light text-shnoor-soft cursor-not-allowed opacity-50'
+                        : 'bg-shnoor-indigo hover:bg-shnoor-navy text-white hover:shadow-[0_8px_30px_rgba(14,14,39,0.06)] transform hover:-translate-y-0.5'
+                        }`}
+                      title={selectedCandidates.length === 0 ? 'Select candidates to download PDF' : `Download PDF (${selectedCandidates.length} selected)`}
+                    >
+                      <Download size={20} />
+                      <span>Export PDF {selectedCandidates.length > 0 && `(${selectedCandidates.length})`}</span>
+                    </button>
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 w-full md:w-auto mt-4 md:mt-0">
-                  {/* Quick Select Dropdown */}
-                  {selectedExamStudents.length > 0 && (
-                    <div className="relative w-full sm:w-auto">
-                      <button
-                        onClick={() => {
-                          console.log('Quick Select button clicked, current state:', showQuickSelectMenu);
-                          setShowQuickSelectMenu(!showQuickSelectMenu);
-                        }}
-                        className="w-full flex items-center justify-center space-x-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl text-sm sm:text-base font-medium transition-all bg-shnoor-lavender text-shnoor-indigo hover:bg-shnoor-light shadow-[0_8px_30px_rgba(14,14,39,0.06)] transform hover:-translate-y-0.5"
-                      >
-                        <CheckSquare size={20} />
-                        <span>Quick Select</span>
-                        <ChevronDown size={16} className={`transition-transform ${showQuickSelectMenu ? 'rotate-180' : ''}`} />
-                      </button>
-                      {showQuickSelectMenu && (
-                        <>
-                          <div
-                            className="fixed inset-0 z-[9999]"
-                            onClick={() => setShowQuickSelectMenu(false)}
-                          />
-                          <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-[0_20px_60px_rgba(14,14,39,0.15)] border border-shnoor-light z-[10000] overflow-hidden">
-                            <div className="py-2">
+                {/* Results / Feedback Tabs */}
+                <div className="flex space-x-2 mb-6">
+                  <button
+                    onClick={() => setDetailViewTab('results')}
+                    className={`px-6 py-3 rounded-lg font-medium transition-all ${detailViewTab === 'results'
+                      ? 'bg-shnoor-indigo text-white shadow-[0_8px_30px_rgba(14,14,39,0.06)]'
+                      : 'bg-shnoor-lavender opacity-80 text-shnoor-indigo hover:bg-shnoor-light'
+                      }`}
+                  >
+                    <Users size={18} className="inline mr-2" />
+                    Results
+                  </button>
+                  <button
+                    onClick={() => setDetailViewTab('feedback')}
+                    className={`px-6 py-3 rounded-lg font-medium transition-all ${detailViewTab === 'feedback'
+                      ? 'bg-shnoor-indigo text-white shadow-[0_8px_30px_rgba(14,14,39,0.06)]'
+                      : 'bg-shnoor-lavender opacity-80 text-shnoor-indigo hover:bg-shnoor-light'
+                      }`}
+                  >
+                    <MessageSquare size={18} className="inline mr-2" />
+                    Feedback
+                  </button>
+                </div>
+
+                {/* Compact Statistics Bar */}
+                {selectedExamStudents.length > 0 && (() => {
+                  const scores = selectedExamStudents.map(s => Number(s.score) || 0);
+                  const totals = selectedExamStudents.map(s => Number(s.total) || 0);
+                  const avgScore = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
+                  const highestScore = scores.length > 0 ? Math.max(...scores) : 0;
+                  const lowestScore = scores.length > 0 ? Math.min(...scores) : 0;
+                  const maxTotal = totals.length > 0 ? Math.max(...totals) : 0;
+                  const passedCount = selectedExamStudents.filter(s =>
+                    (Number(s.score) / Number(s.total) * 100) >= (s.passingPercentage || selectedExamDetails?.passingPercentage || 50)
+                  ).length;
+                  const failedCount = selectedExamStudents.length - passedCount;
+                  const passRate = selectedExamStudents.length > 0 ? (passedCount / selectedExamStudents.length) * 100 : 0;
+                  const flaggedCount = selectedExamStudents.filter(s => s.flagged === true).length;
+
+
+                  // Filter students based on statusFilter
+                  const filteredStudents = selectedExamStudents.filter(s => {
+                    if (statusFilter === 'all') return true;
+                    const percentage = (Number(s.score) / Number(s.total) * 100);
+                    const passingPercentage = s.passingPercentage || selectedExamDetails?.passingPercentage || 50;
+                    const isPassed = percentage >= passingPercentage;
+                    if (statusFilter === 'pass') return isPassed;
+                    if (statusFilter === 'fail') return !isPassed;
+                    return true;
+                  });
+
+
+                  return (
+                    <div className="bg-white border border-shnoor-light rounded-lg p-4 mb-6 shadow-[0_8px_30px_rgba(14,14,39,0.06)]">
+                      <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+                        {/* Total Attempts */}
+                        <div className="text-center">
+                          <p className="text-xs text-shnoor-indigoMedium font-medium mb-1">Total Attempts</p>
+                          <p className="text-2xl font-bold text-shnoor-navy">{selectedExamStudents.length}</p>
+                        </div>
+
+                        {/* Average Score */}
+                        <div className="text-center border-l border-shnoor-light">
+                          <p className="text-xs text-shnoor-indigoMedium font-medium mb-1">Average Score</p>
+                          <p className="text-2xl font-bold text-shnoor-indigo">{avgScore.toFixed(1)}/{maxTotal}</p>
+                        </div>
+
+                        {/* Highest Score */}
+                        <div className="text-center border-l border-shnoor-light">
+                          <p className="text-xs text-shnoor-indigoMedium font-medium mb-1">Highest Score</p>
+                          <p className="text-2xl font-bold text-shnoor-success">{highestScore}/{maxTotal}</p>
+                        </div>
+
+                        {/* Lowest Score */}
+                        <div className="text-center border-l border-shnoor-light">
+                          <p className="text-xs text-shnoor-indigoMedium font-medium mb-1">Lowest Score</p>
+                          <p className="text-2xl font-bold text-shnoor-warning">{lowestScore}/{maxTotal}</p>
+                        </div>
+
+                        {/* Pass Rate */}
+                        <div className="text-center border-l border-shnoor-light">
+                          <p className="text-xs text-shnoor-indigoMedium font-medium mb-1">Pass Rate</p>
+                          <p className="text-2xl font-bold text-shnoor-success">{passRate.toFixed(0)}%</p>
+                          <p className="text-xs text-shnoor-soft mt-0.5">({passedCount}/{selectedExamStudents.length})</p>
+                        </div>
+
+                        {/* Flagged Students */}
+                        <div className="text-center border-l border-shnoor-light">
+                          <p className="text-xs text-shnoor-indigoMedium font-medium mb-1">Flagged</p>
+                          <p className="text-2xl font-bold text-shnoor-danger">{flaggedCount}</p>
+                          <p className="text-xs text-shnoor-soft mt-0.5">(3+ high violations)</p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Results Tab Content */}
+                {detailViewTab === 'results' && (
+                  <>
+                    {/* Status Filter Tabs - Matching Results/Feedback Style */}
+                    {selectedExamStudents.length > 0 && (() => {
+                      const passedCount = selectedExamStudents.filter(s =>
+                        (Number(s.score) / Number(s.total) * 100) >= (s.passingPercentage || selectedExamDetails?.passingPercentage || 50)
+                      ).length;
+                      const failedCount = selectedExamStudents.length - passedCount;
+                      const filteredCount = selectedExamStudents.filter(s => {
+                        if (statusFilter === 'all') return true;
+                        const percentage = (Number(s.score) / Number(s.total) * 100);
+                        const passingPercentage = s.passingPercentage || selectedExamDetails?.passingPercentage || 50;
+                        const isPassed = percentage >= passingPercentage;
+                        return statusFilter === 'pass' ? isPassed : !isPassed;
+                      }).length;
+
+                      return (
+                        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-6">
+                          {/* Filter Tabs matching existing tab style */}
+                          <div className="flex overflow-x-auto hide-scrollbar space-x-2 pb-2 xl:pb-0 min-w-max w-full">
+                            <button
+                              onClick={() => setStatusFilter('all')}
+                              className={`px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base whitespace-nowrap font-medium transition-all flex items-center space-x-2 shrink-0 ${statusFilter === 'all'
+                                ? 'bg-shnoor-indigo text-white shadow-[0_8px_30px_rgba(14,14,39,0.06)]'
+                                : 'bg-shnoor-lavender opacity-80 text-shnoor-indigo hover:bg-shnoor-light'
+                                }`}
+                            >
+                              <Filter size={18} className="sm:size-5" />
+                              <span>All</span>
+                              <span className={`ml-1 px-2 py-0.5 rounded-full text-xs font-semibold ${statusFilter === 'all'
+                                ? 'bg-white bg-opacity-20'
+                                : 'bg-shnoor-indigo bg-opacity-20'
+                                }`}>
+                                {selectedExamStudents.length}
+                              </span>
+                            </button>
+                            <button
+                              onClick={() => setStatusFilter('pass')}
+                              className={`px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base whitespace-nowrap font-medium transition-all flex items-center space-x-2 shrink-0 ${statusFilter === 'pass'
+                                ? 'bg-shnoor-success text-white shadow-[0_8px_30px_rgba(14,14,39,0.06)]'
+                                : 'bg-shnoor-successLight opacity-80 text-shnoor-success hover:bg-green-100'
+                                }`}
+                            >
+                              <CheckCircle size={18} className="sm:size-5" />
+                              <span>Passed</span>
+                              <span className={`ml-1 px-2 py-0.5 rounded-full text-xs font-semibold ${statusFilter === 'pass'
+                                ? 'bg-white bg-opacity-20'
+                                : 'bg-shnoor-success bg-opacity-20'
+                                }`}>
+                                {passedCount}
+                              </span>
+                            </button>
+                            <button
+                              onClick={() => setStatusFilter('fail')}
+                              className={`px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base whitespace-nowrap font-medium transition-all flex items-center space-x-2 shrink-0 ${statusFilter === 'fail'
+                                ? 'bg-shnoor-danger text-white shadow-[0_8px_30px_rgba(14,14,39,0.06)]'
+                                : 'bg-shnoor-dangerLight opacity-80 text-shnoor-danger hover:bg-red-100'
+                                }`}
+                            >
+                              <XCircle size={18} className="sm:size-5" />
+                              <span>Failed</span>
+                              <span className={`ml-1 px-2 py-0.5 rounded-full text-xs font-semibold ${statusFilter === 'fail'
+                                ? 'bg-white bg-opacity-20'
+                                : 'bg-shnoor-danger bg-opacity-20'
+                                }`}>
+                                {failedCount}
+                              </span>
+                            </button>
+                          </div>
+
+                          {/* Selection Indicator - Subtle and consistent */}
+                          {selectedCandidates.length > 0 && (
+                            <div className="flex items-center space-x-2">
+                              <div className="bg-shnoor-lavender text-shnoor-indigo px-4 py-2 rounded-lg font-medium flex items-center space-x-2">
+                                <CheckSquare size={16} />
+                                <span className="text-sm">
+                                  <span className="font-bold">{selectedCandidates.length}</span>
+                                  <span className="text-shnoor-indigoMedium"> of {filteredCount} selected</span>
+                                </span>
+                              </div>
                               <button
-                                onClick={() => {
-                                  console.log('Select All Visible clicked');
+                                onClick={() => setSelectedCandidates([])}
+                                className="p-2 rounded-lg text-shnoor-indigoMedium hover:bg-shnoor-dangerLight hover:text-shnoor-danger transition-all"
+                                title="Clear selection"
+                              >
+                                <X size={18} />
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
+
+                    <div className="overflow-x-auto rounded-xl border border-shnoor-light shadow-[0_8px_30px_rgba(14,14,39,0.06)]">
+                      <table className="w-full">
+                        <thead className="bg-shnoor-indigo text-white">
+                          <tr>
+                            <th className="px-4 py-4 text-center text-xs font-bold uppercase tracking-wider">
+                              <input
+                                type="checkbox"
+                                checked={(() => {
                                   const filteredStudents = selectedExamStudents.filter(s => {
                                     if (statusFilter === 'all') return true;
                                     const percentage = (Number(s.score) / Number(s.total) * 100);
-                                    const passingPercentage = s.passingPercentage || selectedExamDetails?.passingPercentage || 50;
+                                    const passingPercentage = getPassingPercentage(s);
                                     const isPassed = percentage >= passingPercentage;
                                     if (statusFilter === 'pass') return isPassed;
                                     if (statusFilter === 'fail') return !isPassed;
                                     return true;
                                   });
-                                  console.log('Filtered students count:', filteredStudents.length);
-                                  const ids = filteredStudents.map(s => s.student_id || s.id);
-                                  console.log('Setting selected candidates:', ids);
-                                  setSelectedCandidates(ids);
-                                  setShowQuickSelectMenu(false);
-                                }}
-                                className="w-full px-4 py-3 text-left hover:bg-shnoor-lavender transition-colors flex items-center space-x-3 text-sm"
-                              >
-                                <CheckCircle size={16} className="text-shnoor-indigo" />
-                                <span className="font-medium text-shnoor-navy">Select All Visible</span>
-                              </button>
-                              <button
-                                onClick={() => {
-                                  console.log('Select Shortlisted Students clicked');
-                                  const shortlistedStudents = selectedExamStudents.filter(s => {
+                                  return filteredStudents.length > 0 && filteredStudents.every(s => selectedCandidates.includes(s.student_id || s.id));
+                                })()}
+                                onChange={(e) => {
+                                  const filteredStudents = selectedExamStudents.filter(s => {
+                                    if (statusFilter === 'all') return true;
                                     const percentage = (Number(s.score) / Number(s.total) * 100);
-                                    const passingPercentage = s.passingPercentage || selectedExamDetails?.passingPercentage || 50;
-                                    return percentage >= passingPercentage && !s.flagged;
-                                  }).map(s => s.student_id || s.id);
-                                  console.log('Shortlisted students:', shortlistedStudents);
-                                  setSelectedCandidates(shortlistedStudents);
-                                  setShowQuickSelectMenu(false);
+                                    const passingPercentage = getPassingPercentage(s);
+                                    const isPassed = percentage >= passingPercentage;
+                                    if (statusFilter === 'pass') return isPassed;
+                                    if (statusFilter === 'fail') return !isPassed;
+                                    return true;
+                                  });
+                                  if (e.target.checked) {
+                                    const filteredIds = filteredStudents.map(s => s.student_id || s.id);
+                                    setSelectedCandidates(prev => [...new Set([...prev, ...filteredIds])]);
+                                  } else {
+                                    const filteredIds = filteredStudents.map(s => s.student_id || s.id);
+                                    setSelectedCandidates(prev => prev.filter(id => !filteredIds.includes(id)));
+                                  }
                                 }}
-                                className="w-full px-4 py-3 text-left hover:bg-shnoor-successLight transition-colors flex items-center space-x-3 text-sm"
-                              >
-                                <CheckCircle size={16} className="text-shnoor-success" />
-                                <span className="font-medium text-shnoor-navy">Select Shortlisted Students</span>
-                              </button>
-                              <button
-                                onClick={() => {
-                                  console.log('Select All Failed clicked');
-                                  const failedStudents = selectedExamStudents.filter(s => {
-                                    const percentage = (Number(s.score) / Number(s.total) * 100);
-                                    const passingPercentage = s.passingPercentage || selectedExamDetails?.passingPercentage || 50;
-                                    return percentage < passingPercentage;
-                                  }).map(s => s.student_id || s.id);
-                                  console.log('Failed students:', failedStudents);
-                                  setSelectedCandidates(failedStudents);
-                                  setShowQuickSelectMenu(false);
-                                }}
-                                className="w-full px-4 py-3 text-left hover:bg-shnoor-dangerLight transition-colors flex items-center space-x-3 text-sm"
-                              >
-                                <XCircle size={16} className="text-shnoor-danger" />
-                                <span className="font-medium text-shnoor-navy">Select All Failed</span>
-                              </button>
-                              <div className="border-t border-shnoor-light my-1"></div>
-                              <button
-                                onClick={() => {
-                                  console.log('Clear All clicked');
-                                  setSelectedCandidates([]);
-                                  setShowQuickSelectMenu(false);
-                                }}
-                                className="w-full px-4 py-3 text-left hover:bg-shnoor-lavender transition-colors flex items-center space-x-3 text-sm"
-                              >
-                                <X size={16} className="text-shnoor-indigoMedium" />
-                                <span className="font-medium text-shnoor-navy">Clear All</span>
-                              </button>
-                            </div>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  )}
+                                className="w-4 h-4 cursor-pointer"
+                                title="Select All Visible"
+                              />
+                            </th>
 
-                  <button
-                    onClick={exportToExcel}
-                    disabled={selectedExamStudents.length === 0}
-                    className={`w-full sm:w-auto flex items-center justify-center space-x-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl text-sm sm:text-base font-medium transition-all shadow-[0_8px_30px_rgba(14,14,39,0.06)] ${selectedExamStudents.length === 0
-                      ? 'bg-shnoor-light text-shnoor-soft cursor-not-allowed'
-                      : 'bg-shnoor-indigo hover:bg-shnoor-navy text-white hover:shadow-[0_8px_30px_rgba(14,14,39,0.06)] transform hover:-translate-y-0.5'
-                      }`}
-                    title={selectedExamStudents.length === 0 ? 'No results to export' : selectedCandidates.length > 0 ? `Export Excel (${selectedCandidates.length} selected)` : 'Export All to Excel'}
-                  >
-                    <FileSpreadsheet size={18} className="sm:size-5" />
-                    <span>Export Excel {selectedCandidates.length > 0 && `(${selectedCandidates.length})`}</span>
-                  </button>
-                  <button
-                    onClick={handleDownloadShortlistedPDF}
-                    disabled={selectedCandidates.length === 0}
-                    className={`w-full sm:w-auto flex items-center justify-center space-x-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl text-sm sm:text-base font-medium transition-all shadow-[0_8px_30px_rgba(14,14,39,0.06)] ${selectedCandidates.length === 0
-                      ? 'bg-shnoor-light text-shnoor-soft cursor-not-allowed opacity-50'
-                      : 'bg-shnoor-indigo hover:bg-shnoor-navy text-white hover:shadow-[0_8px_30px_rgba(14,14,39,0.06)] transform hover:-translate-y-0.5'
-                      }`}
-                    title={selectedCandidates.length === 0 ? 'Select candidates to download PDF' : `Download PDF (${selectedCandidates.length} selected)`}
-                  >
-                    <Download size={20} />
-                    <span>Export PDF {selectedCandidates.length > 0 && `(${selectedCandidates.length})`}</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Results / Feedback Tabs */}
-              <div className="flex space-x-2 mb-6">
-                <button
-                  onClick={() => setDetailViewTab('results')}
-                  className={`px-6 py-3 rounded-lg font-medium transition-all ${detailViewTab === 'results'
-                    ? 'bg-shnoor-indigo text-white shadow-[0_8px_30px_rgba(14,14,39,0.06)]'
-                    : 'bg-shnoor-lavender opacity-80 text-shnoor-indigo hover:bg-shnoor-light'
-                    }`}
-                >
-                  <Users size={18} className="inline mr-2" />
-                  Results
-                </button>
-                <button
-                  onClick={() => setDetailViewTab('feedback')}
-                  className={`px-6 py-3 rounded-lg font-medium transition-all ${detailViewTab === 'feedback'
-                    ? 'bg-shnoor-indigo text-white shadow-[0_8px_30px_rgba(14,14,39,0.06)]'
-                    : 'bg-shnoor-lavender opacity-80 text-shnoor-indigo hover:bg-shnoor-light'
-                    }`}
-                >
-                  <MessageSquare size={18} className="inline mr-2" />
-                  Feedback
-                </button>
-              </div>
-
-              {/* Compact Statistics Bar */}
-              {selectedExamStudents.length > 0 && (() => {
-                const scores = selectedExamStudents.map(s => Number(s.score) || 0);
-                const totals = selectedExamStudents.map(s => Number(s.total) || 0);
-                const avgScore = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
-                const highestScore = scores.length > 0 ? Math.max(...scores) : 0;
-                const lowestScore = scores.length > 0 ? Math.min(...scores) : 0;
-                const maxTotal = totals.length > 0 ? Math.max(...totals) : 0;
-                const passedCount = selectedExamStudents.filter(s =>
-                  (Number(s.score) / Number(s.total) * 100) >= (s.passingPercentage || selectedExamDetails?.passingPercentage || 50)
-                ).length;
-                const failedCount = selectedExamStudents.length - passedCount;
-                const passRate = selectedExamStudents.length > 0 ? (passedCount / selectedExamStudents.length) * 100 : 0;
-                const flaggedCount = selectedExamStudents.filter(s => s.flagged === true).length;
-
-
-                // Filter students based on statusFilter
-                const filteredStudents = selectedExamStudents.filter(s => {
-                  if (statusFilter === 'all') return true;
-                  const percentage = (Number(s.score) / Number(s.total) * 100);
-                  const passingPercentage = s.passingPercentage || selectedExamDetails?.passingPercentage || 50;
-                  const isPassed = percentage >= passingPercentage;
-                  if (statusFilter === 'pass') return isPassed;
-                  if (statusFilter === 'fail') return !isPassed;
-                  return true;
-                });
-
-
-                return (
-                  <div className="bg-white border border-shnoor-light rounded-lg p-4 mb-6 shadow-[0_8px_30px_rgba(14,14,39,0.06)]">
-                    <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
-                      {/* Total Attempts */}
-                      <div className="text-center">
-                        <p className="text-xs text-shnoor-indigoMedium font-medium mb-1">Total Attempts</p>
-                        <p className="text-2xl font-bold text-shnoor-navy">{selectedExamStudents.length}</p>
-                      </div>
-
-                      {/* Average Score */}
-                      <div className="text-center border-l border-shnoor-light">
-                        <p className="text-xs text-shnoor-indigoMedium font-medium mb-1">Average Score</p>
-                        <p className="text-2xl font-bold text-shnoor-indigo">{avgScore.toFixed(1)}/{maxTotal}</p>
-                      </div>
-
-                      {/* Highest Score */}
-                      <div className="text-center border-l border-shnoor-light">
-                        <p className="text-xs text-shnoor-indigoMedium font-medium mb-1">Highest Score</p>
-                        <p className="text-2xl font-bold text-shnoor-success">{highestScore}/{maxTotal}</p>
-                      </div>
-
-                      {/* Lowest Score */}
-                      <div className="text-center border-l border-shnoor-light">
-                        <p className="text-xs text-shnoor-indigoMedium font-medium mb-1">Lowest Score</p>
-                        <p className="text-2xl font-bold text-shnoor-warning">{lowestScore}/{maxTotal}</p>
-                      </div>
-
-                      {/* Pass Rate */}
-                      <div className="text-center border-l border-shnoor-light">
-                        <p className="text-xs text-shnoor-indigoMedium font-medium mb-1">Pass Rate</p>
-                        <p className="text-2xl font-bold text-shnoor-success">{passRate.toFixed(0)}%</p>
-                        <p className="text-xs text-shnoor-soft mt-0.5">({passedCount}/{selectedExamStudents.length})</p>
-                      </div>
-
-                      {/* Flagged Students */}
-                      <div className="text-center border-l border-shnoor-light">
-                        <p className="text-xs text-shnoor-indigoMedium font-medium mb-1">Flagged</p>
-                        <p className="text-2xl font-bold text-shnoor-danger">{flaggedCount}</p>
-                        <p className="text-xs text-shnoor-soft mt-0.5">(3+ high violations)</p>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })()}
-
-              {/* Results Tab Content */}
-              {detailViewTab === 'results' && (
-                <>
-                  {/* Status Filter Tabs - Matching Results/Feedback Style */}
-                  {selectedExamStudents.length > 0 && (() => {
-                    const passedCount = selectedExamStudents.filter(s =>
-                      (Number(s.score) / Number(s.total) * 100) >= (s.passingPercentage || selectedExamDetails?.passingPercentage || 50)
-                    ).length;
-                    const failedCount = selectedExamStudents.length - passedCount;
-                    const filteredCount = selectedExamStudents.filter(s => {
-                      if (statusFilter === 'all') return true;
-                      const percentage = (Number(s.score) / Number(s.total) * 100);
-                      const passingPercentage = s.passingPercentage || selectedExamDetails?.passingPercentage || 50;
-                      const isPassed = percentage >= passingPercentage;
-                      return statusFilter === 'pass' ? isPassed : !isPassed;
-                    }).length;
-
-                    return (
-                      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-6">
-                        {/* Filter Tabs matching existing tab style */}
-                        <div className="flex overflow-x-auto hide-scrollbar space-x-2 pb-2 xl:pb-0 min-w-max w-full">
-                          <button
-                            onClick={() => setStatusFilter('all')}
-                            className={`px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base whitespace-nowrap font-medium transition-all flex items-center space-x-2 shrink-0 ${statusFilter === 'all'
-                              ? 'bg-shnoor-indigo text-white shadow-[0_8px_30px_rgba(14,14,39,0.06)]'
-                              : 'bg-shnoor-lavender opacity-80 text-shnoor-indigo hover:bg-shnoor-light'
-                              }`}
-                          >
-                            <Filter size={18} className="sm:size-5" />
-                            <span>All</span>
-                            <span className={`ml-1 px-2 py-0.5 rounded-full text-xs font-semibold ${statusFilter === 'all'
-                              ? 'bg-white bg-opacity-20'
-                              : 'bg-shnoor-indigo bg-opacity-20'
-                              }`}>
-                              {selectedExamStudents.length}
-                            </span>
-                          </button>
-                          <button
-                            onClick={() => setStatusFilter('pass')}
-                            className={`px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base whitespace-nowrap font-medium transition-all flex items-center space-x-2 shrink-0 ${statusFilter === 'pass'
-                              ? 'bg-shnoor-success text-white shadow-[0_8px_30px_rgba(14,14,39,0.06)]'
-                              : 'bg-shnoor-successLight opacity-80 text-shnoor-success hover:bg-green-100'
-                              }`}
-                          >
-                            <CheckCircle size={18} className="sm:size-5" />
-                            <span>Passed</span>
-                            <span className={`ml-1 px-2 py-0.5 rounded-full text-xs font-semibold ${statusFilter === 'pass'
-                              ? 'bg-white bg-opacity-20'
-                              : 'bg-shnoor-success bg-opacity-20'
-                              }`}>
-                              {passedCount}
-                            </span>
-                          </button>
-                          <button
-                            onClick={() => setStatusFilter('fail')}
-                            className={`px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base whitespace-nowrap font-medium transition-all flex items-center space-x-2 shrink-0 ${statusFilter === 'fail'
-                              ? 'bg-shnoor-danger text-white shadow-[0_8px_30px_rgba(14,14,39,0.06)]'
-                              : 'bg-shnoor-dangerLight opacity-80 text-shnoor-danger hover:bg-red-100'
-                              }`}
-                          >
-                            <XCircle size={18} className="sm:size-5" />
-                            <span>Failed</span>
-                            <span className={`ml-1 px-2 py-0.5 rounded-full text-xs font-semibold ${statusFilter === 'fail'
-                              ? 'bg-white bg-opacity-20'
-                              : 'bg-shnoor-danger bg-opacity-20'
-                              }`}>
-                              {failedCount}
-                            </span>
-                          </button>
-                        </div>
-
-                        {/* Selection Indicator - Subtle and consistent */}
-                        {selectedCandidates.length > 0 && (
-                          <div className="flex items-center space-x-2">
-                            <div className="bg-shnoor-lavender text-shnoor-indigo px-4 py-2 rounded-lg font-medium flex items-center space-x-2">
-                              <CheckSquare size={16} />
-                              <span className="text-sm">
-                                <span className="font-bold">{selectedCandidates.length}</span>
-                                <span className="text-shnoor-indigoMedium"> of {filteredCount} selected</span>
-                              </span>
-                            </div>
-                            <button
-                              onClick={() => setSelectedCandidates([])}
-                              className="p-2 rounded-lg text-shnoor-indigoMedium hover:bg-shnoor-dangerLight hover:text-shnoor-danger transition-all"
-                              title="Clear selection"
-                            >
-                              <X size={18} />
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })()}
-
-                  <div className="overflow-x-auto rounded-xl border border-shnoor-light shadow-[0_8px_30px_rgba(14,14,39,0.06)]">
-                    <table className="w-full">
-                      <thead className="bg-shnoor-indigo text-white">
-                        <tr>
-                          <th className="px-4 py-4 text-center text-xs font-bold uppercase tracking-wider">
-                            <input
-                              type="checkbox"
-                              checked={(() => {
-                                const filteredStudents = selectedExamStudents.filter(s => {
-                                  if (statusFilter === 'all') return true;
-                                  const percentage = (Number(s.score) / Number(s.total) * 100);
-                                  const passingPercentage = getPassingPercentage(s);
-                                  const isPassed = percentage >= passingPercentage;
-                                  if (statusFilter === 'pass') return isPassed;
-                                  if (statusFilter === 'fail') return !isPassed;
-                                  return true;
-                                });
-                                return filteredStudents.length > 0 && filteredStudents.every(s => selectedCandidates.includes(s.student_id || s.id));
-                              })()}
-                              onChange={(e) => {
-                                const filteredStudents = selectedExamStudents.filter(s => {
-                                  if (statusFilter === 'all') return true;
-                                  const percentage = (Number(s.score) / Number(s.total) * 100);
-                                  const passingPercentage = getPassingPercentage(s);
-                                  const isPassed = percentage >= passingPercentage;
-                                  if (statusFilter === 'pass') return isPassed;
-                                  if (statusFilter === 'fail') return !isPassed;
-                                  return true;
-                                });
-                                if (e.target.checked) {
-                                  const filteredIds = filteredStudents.map(s => s.student_id || s.id);
-                                  setSelectedCandidates(prev => [...new Set([...prev, ...filteredIds])]);
-                                } else {
-                                  const filteredIds = filteredStudents.map(s => s.student_id || s.id);
-                                  setSelectedCandidates(prev => prev.filter(id => !filteredIds.includes(id)));
-                                }
-                              }}
-                              className="w-4 h-4 cursor-pointer"
-                              title="Select All Visible"
-                            />
-                          </th>
-
-                          <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Student ID</th>
-                          <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Student Name</th>
-                          <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Email</th>
-                          <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Date Attempted</th>
-                          <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Score</th>
-                          <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Status</th>
-                          <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Shortlisted</th>
-                          <th className="px-4 py-4 text-center text-xs font-bold uppercase tracking-wider">No Face</th>
-                          <th className="px-4 py-4 text-center text-xs font-bold uppercase tracking-wider">Multi Faces</th>
-                          <th className="px-4 py-4 text-center text-xs font-bold uppercase tracking-wider">Phone</th>
-                          <th className="px-4 py-4 text-center text-xs font-bold uppercase tracking-wider">Noise</th>
-                          <th className="px-4 py-4 text-center text-xs font-bold uppercase tracking-wider">Voice</th>
-                          <th className="px-4 py-4 text-center text-xs font-bold uppercase tracking-wider">Total</th>
-                          <th className="px-4 py-4 text-center text-xs font-bold uppercase tracking-wider">Flagged</th>
-                          <th className="px-4 py-4 text-center text-xs font-bold uppercase tracking-wider">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-[#E5E7EB]">
-                        {/* {selectedExamStudents.length > 0 ? (
+                            <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Student ID</th>
+                            <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Student Name</th>
+                            <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Email</th>
+                            <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Date Attempted</th>
+                            <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Score</th>
+                            <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Status</th>
+                            <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Shortlisted</th>
+                            <th className="px-4 py-4 text-center text-xs font-bold uppercase tracking-wider">No Face</th>
+                            <th className="px-4 py-4 text-center text-xs font-bold uppercase tracking-wider">Multi Faces</th>
+                            <th className="px-4 py-4 text-center text-xs font-bold uppercase tracking-wider">Phone</th>
+                            <th className="px-4 py-4 text-center text-xs font-bold uppercase tracking-wider">Noise</th>
+                            <th className="px-4 py-4 text-center text-xs font-bold uppercase tracking-wider">Voice</th>
+                            <th className="px-4 py-4 text-center text-xs font-bold uppercase tracking-wider">Total</th>
+                            <th className="px-4 py-4 text-center text-xs font-bold uppercase tracking-wider">Flagged</th>
+                            <th className="px-4 py-4 text-center text-xs font-bold uppercase tracking-wider">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-[#E5E7EB]">
+                          {/* {selectedExamStudents.length > 0 ? (
                         selectedExamStudents.map((student, idx) => {
                           const percentage = (student.score / student.total * 100);
                           const passingPercentage = student.passingPercentage || 50; */}
-                        {/* const isPassed = percentage >= passingPercentage; */}
-                        {(() => {
-                          // Filter students based on statusFilter
-                          const filteredStudents = selectedExamStudents.filter(s => {
-                            if (statusFilter === 'all') return true;
-                            const percentage = (Number(s.score) / Number(s.total) * 100);
-                            const passingPercentage = getPassingPercentage(s);
-                            const isPassed = percentage >= passingPercentage;
-                            if (statusFilter === 'pass') return isPassed;
-                            if (statusFilter === 'fail') return !isPassed;
-                            return true;
-                          });
-
-                          return filteredStudents.length > 0 ? (
-                            filteredStudents.map((student, idx) => {
-                              const percentage = (student.score / student.total * 100);
-                              const passingPercentage = getPassingPercentage(student);
+                          {/* const isPassed = percentage >= passingPercentage; */}
+                          {(() => {
+                            // Filter students based on statusFilter
+                            const filteredStudents = selectedExamStudents.filter(s => {
+                              if (statusFilter === 'all') return true;
+                              const percentage = (Number(s.score) / Number(s.total) * 100);
+                              const passingPercentage = getPassingPercentage(s);
                               const isPassed = percentage >= passingPercentage;
-                              const studentIdentifier = student.student_id || student.id;
-                              return (
-                                <tr key={idx} className="hover:bg-shnoor-lavender">
-                                  <td className="px-4 py-4 text-center">
-                                    <input
-                                      type="checkbox"
-                                      checked={selectedCandidates.includes(studentIdentifier)}
-                                      onChange={(e) => {
-                                        console.log('Checkbox clicked:', {
-                                          checked: e.target.checked,
-                                          studentIdentifier,
-                                          studentName: student.name,
-                                          currentSelections: selectedCandidates
-                                        });
-                                        if (e.target.checked) {
-                                          setSelectedCandidates(prev => [...prev, studentIdentifier]);
-                                        } else {
-                                          setSelectedCandidates(prev => prev.filter(id => id !== studentIdentifier));
-                                        }
-                                      }}
-                                      className="w-4 h-4 cursor-pointer"
-                                    />
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-shnoor-navy">{student.id}</td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-shnoor-navy">{student.name}</td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-shnoor-indigoMedium">{student.email || 'N/A'}</td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-shnoor-indigoMedium">{student.date}</td>
-                                  <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="flex items-center">
-                                      <span className={`font-bold ${isPassed ? 'text-shnoor-success' : 'text-shnoor-danger'}`}>
-                                        {student.score}
+                              if (statusFilter === 'pass') return isPassed;
+                              if (statusFilter === 'fail') return !isPassed;
+                              return true;
+                            });
+
+                            const startIndex = (resultsCurrentPage - 1) * resultsRowsPerPage;
+                            const paginatedStudents = filteredStudents.slice(startIndex, startIndex + resultsRowsPerPage);
+
+                            return paginatedStudents.length > 0 ? (
+                              paginatedStudents.map((student, idx) => {
+                                const percentage = (student.score / student.total * 100);
+                                const passingPercentage = getPassingPercentage(student);
+                                const isPassed = percentage >= passingPercentage;
+                                const studentIdentifier = student.student_id || student.id;
+                                return (
+                                  <tr key={idx} className="hover:bg-shnoor-lavender">
+                                    <td className="px-4 py-4 text-center">
+                                      <input
+                                        type="checkbox"
+                                        checked={selectedCandidates.includes(studentIdentifier)}
+                                        onChange={(e) => {
+                                          console.log('Checkbox clicked:', {
+                                            checked: e.target.checked,
+                                            studentIdentifier,
+                                            studentName: student.name,
+                                            currentSelections: selectedCandidates
+                                          });
+                                          if (e.target.checked) {
+                                            setSelectedCandidates(prev => [...prev, studentIdentifier]);
+                                          } else {
+                                            setSelectedCandidates(prev => prev.filter(id => id !== studentIdentifier));
+                                          }
+                                        }}
+                                        className="w-4 h-4 cursor-pointer"
+                                      />
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-shnoor-navy">{student.id}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-shnoor-navy">{student.name}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-shnoor-indigoMedium">{student.email || 'N/A'}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-shnoor-indigoMedium">{student.date}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                      <div className="flex items-center">
+                                        <span className={`font-bold ${isPassed ? 'text-shnoor-success' : 'text-shnoor-danger'}`}>
+                                          {student.score}
+                                        </span>
+                                        <span className="text-shnoor-indigoMedium text-xs ml-1">/ {student.total}</span>
+                                        <span className="text-shnoor-indigoMedium text-xs ml-2">({percentage.toFixed(1)}%)</span>
+                                      </div>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${isPassed
+                                        ? 'bg-shnoor-successLight text-shnoor-success'
+                                        : 'bg-shnoor-dangerLight text-shnoor-danger'
+                                        }`}>
+                                        {isPassed ? 'Pass' : 'Fail'}
                                       </span>
-                                      <span className="text-shnoor-indigoMedium text-xs ml-1">/ {student.total}</span>
-                                      <span className="text-shnoor-indigoMedium text-xs ml-2">({percentage.toFixed(1)}%)</span>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${isPassed && !student.flagged
+                                        ? 'bg-green-100 text-green-700'
+                                        : 'bg-gray-100 text-gray-600'
+                                        }`}>
+                                        {isPassed && !student.flagged ? 'Shortlisted' : 'Not Shortlisted'}
+                                      </span>
+                                    </td>
+                                    <td className="px-4 py-4 text-center text-sm text-shnoor-indigo">{student.noFace || 0}</td>
+                                    <td className="px-4 py-4 text-center text-sm text-shnoor-indigo">{student.multipleFaces || 0}</td>
+                                    <td className="px-4 py-4 text-center text-sm text-shnoor-indigo">{student.phoneDetected || 0}</td>
+                                    <td className="px-4 py-4 text-center text-sm text-shnoor-indigo">{student.loudNoise || 0}</td>
+                                    <td className="px-4 py-4 text-center text-sm text-shnoor-indigo">{student.voiceDetected || 0}</td>
+                                    <td className="px-4 py-4 text-center text-sm font-semibold text-shnoor-navy">{student.totalViolations || 0}</td>
+                                    <td className="px-4 py-4 text-center">
+                                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${student.flagged
+                                        ? 'bg-shnoor-dangerLight text-shnoor-danger'
+                                        : 'bg-shnoor-lavender opacity-80 text-shnoor-indigoMedium'
+                                        }`}>
+                                        {student.flagged ? 'Yes' : 'No'}
+                                      </span>
+                                    </td>
+                                    <td className="px-4 py-4 text-center">
+                                      <button
+                                        onClick={() => {
+                                          console.log('=== INTERVIEW BUTTON CLICKED ===');
+                                          console.log('Student object:', student);
+                                          console.log('student.student_id:', student.student_id);
+                                          console.log('student.id:', student.id);
+
+                                          // Prefer the actual database ID; fall back to displayed id if needed
+                                          const resolvedStudentId = student.student_id || student.id || null;
+
+                                          setSelectedStudentForInterview({
+                                            id: resolvedStudentId,
+                                            name: student.name,
+                                            email: student.email
+                                          });
+                                          setShowInterviewScheduleModal(true);
+                                        }}
+                                        className="inline-flex items-center px-3 py-1.5 bg-shnoor-indigo hover:bg-shnoor-navy text-white text-xs font-medium rounded-lg transition-colors"
+                                        title="Schedule Interview"
+                                      >
+                                        <Video size={14} className="mr-1" />
+                                        Interview
+                                      </button>
+                                    </td>
+                                  </tr>
+                                );
+                              })
+                            ) : (
+                              <tr>
+                                <td colSpan="16" className="px-6 py-12 text-center text-shnoor-indigoMedium">
+                                  {statusFilter !== 'all'
+                                    ? `No ${statusFilter === 'pass' ? 'passed' : 'failed'} students found.`
+                                    : 'No students have attempted this exam yet.'
+                                  }
+                                </td>
+                              </tr>
+                            );
+                          })()}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Pagination */}
+                    {(() => {
+                      const filteredStudents = selectedExamStudents.filter(s => {
+                        if (statusFilter === 'all') return true;
+                        const percentage = (Number(s.score) / Number(s.total) * 100);
+                        const passingPercentage = getPassingPercentage(s);
+                        const isPassed = percentage >= passingPercentage;
+                        if (statusFilter === 'pass') return isPassed;
+                        if (statusFilter === 'fail') return !isPassed;
+                        return true;
+                      });
+                      if (filteredStudents.length === 0) return null;
+                      
+                      const totalPages = Math.ceil(filteredStudents.length / resultsRowsPerPage);
+                      const startIndex = (resultsCurrentPage - 1) * resultsRowsPerPage;
+                      const endIndex = Math.min(startIndex + resultsRowsPerPage, filteredStudents.length);
+                      
+                      return (
+                        <div className="flex items-center justify-end px-4 py-3 bg-white border border-shnoor-light mt-4 rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)]">
+                          <div className="flex items-center space-x-6 text-sm text-shnoor-indigoMedium">
+                            <div className="flex items-center space-x-2">
+                              <span>Rows per page:</span>
+                              <select
+                                value={resultsRowsPerPage}
+                                onChange={(e) => {
+                                  setResultsRowsPerPage(Number(e.target.value));
+                                  setResultsCurrentPage(1);
+                                }}
+                                className="bg-transparent border-none text-shnoor-navy font-medium focus:ring-0 cursor-pointer p-0 pr-4"
+                              >
+                                {[10, 20, 40, 50, 100].map(size => (
+                                  <option key={size} value={size}>{size}</option>
+                                ))}
+                              </select>
+                            </div>
+                            
+                            <span>
+                              {startIndex + 1} - {endIndex} of {filteredStudents.length}
+                            </span>
+                            
+                            <div className="flex items-center space-x-2">
+                              <button
+                                onClick={() => setResultsCurrentPage(prev => Math.max(prev - 1, 1))}
+                                disabled={resultsCurrentPage === 1}
+                                className={`p-1 rounded transition-colors ${resultsCurrentPage === 1 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-shnoor-lavender text-shnoor-navy'}`}
+                              >
+                                <ChevronLeft size={20} />
+                              </button>
+                              <button
+                                onClick={() => setResultsCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                disabled={resultsCurrentPage === totalPages}
+                                className={`p-1 rounded transition-colors ${resultsCurrentPage === totalPages ? 'opacity-30 cursor-not-allowed' : 'hover:bg-shnoor-lavender text-shnoor-navy'}`}
+                              >
+                                <ChevronRight size={20} />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </>
+                )}
+
+                {/* Feedback Tab Content */}
+                {detailViewTab === 'feedback' && (
+                  <div>
+                    {loadingFeedback ? (
+                      <div className="flex items-center justify-center py-12">
+                        <Loader2 className="animate-spin text-shnoor-indigo" size={48} />
+                      </div>
+                    ) : feedbackData.length === 0 ? (
+                      <div className="text-center py-12 bg-white rounded-xl border border-shnoor-light">
+                        <MessageSquare size={48} className="mx-auto text-shnoor-mist mb-3" />
+                        <p className="text-shnoor-indigoMedium text-lg">No feedback submitted yet</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-6">
+                        {/* Feedback Statistics */}
+                        {feedbackStats && (
+                          <div className="grid grid-cols-3 gap-4 mb-6">
+                            <div className="bg-gradient-to-br from-shnoor-mist to-shnoor-mist border border-shnoor-light rounded-lg p-4">
+                              <div className="flex items-center justify-between mb-2">
+                                <TrendingUp size={20} className="text-shnoor-indigo" />
+                                <span className="text-2xl font-bold text-shnoor-indigo">
+                                  {feedbackStats.averageRating}
+                                </span>
+                              </div>
+                              <p className="text-sm text-shnoor-indigo font-medium">Average Rating</p>
+                              <p className="text-xs text-shnoor-indigoMedium">{feedbackStats.totalFeedbacks} responses</p>
+                            </div>
+
+                            <div className="bg-gradient-to-br from-shnoor-successLight to-shnoor-successLight border border-shnoor-successLight rounded-lg p-4">
+                              <BarChart3 size={20} className="text-shnoor-success mb-2" />
+                              <p className="text-sm text-shnoor-indigo font-medium mb-2">Difficulty</p>
+                              <div className="space-y-1">
+                                <div className="flex justify-between text-xs">
+                                  <span className="text-shnoor-indigoMedium">Easy:</span>
+                                  <span className="font-medium text-shnoor-success">{feedbackStats.difficultyBreakdown.Easy}</span>
+                                </div>
+                                <div className="flex justify-between text-xs">
+                                  <span className="text-shnoor-indigoMedium">Medium:</span>
+                                  <span className="font-medium text-shnoor-warning">{feedbackStats.difficultyBreakdown.Medium}</span>
+                                </div>
+                                <div className="flex justify-between text-xs">
+                                  <span className="text-shnoor-indigoMedium">Hard:</span>
+                                  <span className="font-medium text-shnoor-danger">{feedbackStats.difficultyBreakdown.Hard}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="bg-gradient-to-br from-shnoor-warningLight to-shnoor-warningLight border border-shnoor-warningLight rounded-lg p-4">
+                              <Star size={20} className="text-shnoor-warning mb-2" />
+                              <p className="text-sm text-shnoor-indigo font-medium mb-2">Rating Distribution</p>
+                              <div className="space-y-1">
+                                {[5, 4, 3, 2, 1].map(rating => (
+                                  <div key={rating} className="flex items-center text-xs">
+                                    <span className="text-shnoor-indigoMedium w-8">{rating}★</span>
+                                    <div className="flex-1 bg-shnoor-light rounded-full h-2 mx-2">
+                                      <div
+                                        className="bg-shnoor-warning h-2 rounded-full"
+                                        style={{
+                                          width: `${feedbackStats.totalFeedbacks > 0
+                                            ? (feedbackStats.ratingBreakdown[rating] / feedbackStats.totalFeedbacks) * 100
+                                            : 0}%`
+                                        }}
+                                      ></div>
                                     </div>
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${isPassed
-                                      ? 'bg-shnoor-successLight text-shnoor-success'
-                                      : 'bg-shnoor-dangerLight text-shnoor-danger'
-                                      }`}>
-                                      {isPassed ? 'Pass' : 'Fail'}
-                                    </span>
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${isPassed && !student.flagged
-                                      ? 'bg-green-100 text-green-700'
-                                      : 'bg-gray-100 text-gray-600'
-                                      }`}>
-                                      {isPassed && !student.flagged ? 'Shortlisted' : 'Not Shortlisted'}
-                                    </span>
-                                  </td>
-                                  <td className="px-4 py-4 text-center text-sm text-shnoor-indigo">{student.noFace || 0}</td>
-                                  <td className="px-4 py-4 text-center text-sm text-shnoor-indigo">{student.multipleFaces || 0}</td>
-                                  <td className="px-4 py-4 text-center text-sm text-shnoor-indigo">{student.phoneDetected || 0}</td>
-                                  <td className="px-4 py-4 text-center text-sm text-shnoor-indigo">{student.loudNoise || 0}</td>
-                                  <td className="px-4 py-4 text-center text-sm text-shnoor-indigo">{student.voiceDetected || 0}</td>
-                                  <td className="px-4 py-4 text-center text-sm font-semibold text-shnoor-navy">{student.totalViolations || 0}</td>
-                                  <td className="px-4 py-4 text-center">
-                                    <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${student.flagged
-                                      ? 'bg-shnoor-dangerLight text-shnoor-danger'
-                                      : 'bg-shnoor-lavender opacity-80 text-shnoor-indigoMedium'
-                                      }`}>
-                                      {student.flagged ? 'Yes' : 'No'}
-                                    </span>
-                                  </td>
-                                  <td className="px-4 py-4 text-center">
-                                    <button
-                                      onClick={() => {
-                                        console.log('=== INTERVIEW BUTTON CLICKED ===');
-                                        console.log('Student object:', student);
-                                        console.log('student.student_id:', student.student_id);
-                                        console.log('student.id:', student.id);
+                                    <span className="font-medium text-shnoor-indigo w-6">{feedbackStats.ratingBreakdown[rating]}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        )}
 
-                                        // Prefer the actual database ID; fall back to displayed id if needed
-                                        const resolvedStudentId = student.student_id || student.id || null;
+                        {/* Individual Feedback Cards */}
+                        <div className="space-y-4">
+                          <h3 className="text-lg font-bold text-shnoor-navy mb-4">Student Feedback</h3>
+                          {feedbackData.map((feedback, idx) => (
+                            <div key={idx} className="border border-shnoor-light rounded-lg p-4 hover:shadow-md transition-shadow bg-white">
+                              <div className="flex justify-between items-start mb-3">
+                                <div>
+                                  <p className="font-semibold text-shnoor-navy">{feedback.student_name || 'Anonymous'}</p>
+                                  <p className="text-sm text-shnoor-indigoMedium">{feedback.student_email}</p>
+                                </div>
+                                <div className="text-right">
+                                  {feedback.rating && (
+                                    <div className="flex space-x-1">
+                                      {[1, 2, 3, 4, 5].map((star) => (
+                                        <Star
+                                          key={star}
+                                          size={16}
+                                          className={star <= feedback.rating ? 'fill-shnoor-warning text-shnoor-warning' : 'text-shnoor-mist'}
+                                        />
+                                      ))}
+                                    </div>
+                                  )}
+                                  <p className="text-xs text-shnoor-indigoMedium mt-1">
+                                    {new Date(feedback.created_at).toLocaleDateString()}
+                                  </p>
+                                </div>
+                              </div>
 
-                                        setSelectedStudentForInterview({
-                                          id: resolvedStudentId,
-                                          name: student.name,
-                                          email: student.email
-                                        });
-                                        setShowInterviewScheduleModal(true);
-                                      }}
-                                      className="inline-flex items-center px-3 py-1.5 bg-shnoor-indigo hover:bg-shnoor-navy text-white text-xs font-medium rounded-lg transition-colors"
-                                      title="Schedule Interview"
-                                    >
-                                      <Video size={14} className="mr-1" />
-                                      Interview
-                                    </button>
-                                  </td>
-                                </tr>
-                              );
-                            })
-                          ) : (
-                            <tr>
-                              <td colSpan="16" className="px-6 py-12 text-center text-shnoor-indigoMedium">
-                                {statusFilter !== 'all'
-                                  ? `No ${statusFilter === 'pass' ? 'passed' : 'failed'} students found.`
-                                  : 'No students have attempted this exam yet.'
-                                }
-                              </td>
-                            </tr>
-                          );
-                        })()}
-                      </tbody>
-                    </table>
+                              {feedback.difficulty && (
+                                <div className="mb-3">
+                                  <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${feedback.difficulty === 'Easy' ? 'bg-shnoor-successLight text-shnoor-success' :
+                                    feedback.difficulty === 'Medium' ? 'bg-shnoor-warningLight text-shnoor-warning' :
+                                      'bg-shnoor-dangerLight text-shnoor-danger'
+                                    }`}>
+                                    Difficulty: {feedback.difficulty}
+                                  </span>
+                                </div>
+                              )}
+
+                              {feedback.feedback_text && (
+                                <div className="bg-white rounded-lg p-3">
+                                  <p className="text-sm text-shnoor-indigo whitespace-pre-wrap">{feedback.feedback_text}</p>
+                                </div>
+                              )}
+
+                              {!feedback.rating && !feedback.difficulty && !feedback.feedback_text && (
+                                <p className="text-sm text-shnoor-soft italic">No detailed feedback provided</p>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </>
+                )}
+              </div>
+            </div>
+          ) : (
+            /* List View: All Exams */
+            <>
+              {activeTab === 'exams' && (
+                <div className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-light overflow-hidden">
+                  <div className="p-4 sm:p-6">
+                    <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 space-y-4 sm:space-y-0">
+                      <div className="flex items-start sm:items-center space-x-3">
+                        <div>
+                          <h2 className="text-2xl font-bold text-shnoor-navy flex items-center">
+                            <FileSpreadsheet className="mr-2 text-shnoor-indigo sm:size-7" size={24} />
+                            Exams
+                          </h2>
+                          <p className="text-xs sm:text-sm text-shnoor-indigoMedium mt-1">Manage all your exams and view results</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setShowCreateTest(true)}
+                        className="w-full sm:w-auto flex items-center justify-center space-x-2 px-4 py-2 bg-shnoor-indigo hover:bg-shnoor-navy text-white rounded-lg transition-colors shadow-[0_8px_30px_rgba(14,14,39,0.06)] font-semibold"
+                      >
+                        <Plus size={20} />
+                        <span>Create Test</span>
+                      </button>
+                    </div>
+
+                    {loading ? (
+                      <div className="flex justify-center items-center py-12">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-shnoor-indigo"></div>
+                        <span className="ml-3 text-shnoor-indigoMedium">Loading...</span>
+                      </div>
+                    ) : tests.length === 0 ? (
+                      <div className="text-center py-12 text-shnoor-indigoMedium">
+                        <FileSpreadsheet className="mx-auto mb-3 text-shnoor-mist" size={48} />
+                        <p className="font-medium">No exams found</p>
+                        <p className="text-sm mt-1">Click "Create Test" to add your first exam</p>
+                      </div>
+                    ) : (
+                      <>
+                        <ExamSearchFilter
+                          initialSearchTerm={searchTerm}
+                          initialFilters={filters}
+                          initialSortBy={sortBy}
+                          onSearchChange={setSearchTerm}
+                          onFilterChange={setFilters}
+                          onSortChange={setSortBy}
+                          showPublishedFilter={true}
+                          showAttemptedFilter={true}
+                          resultCount={filteredTests.length}
+                          sortOptions={[
+                            { value: 'latest', label: 'Latest Created' },
+                            { value: 'oldest', label: 'Oldest Created' },
+                            { value: 'most-attempted', label: 'Most Attempted' },
+                            { value: 'duration-asc', label: 'Shortest Duration' },
+                            { value: 'duration-desc', label: 'Longest Duration' }
+                          ]}
+                        />
+
+                        {filteredTests.length === 0 ? (
+                          <div className="text-center py-12 text-shnoor-indigoMedium">
+                            <FileSpreadsheet className="mx-auto mb-3 text-shnoor-mist" size={48} />
+                            <p className="font-medium">No exams match your filters</p>
+                            <p className="text-sm mt-1">Try adjusting your search or filters</p>
+                          </div>
+                        ) : (
+                          <>
+                            {/* Bulk Actions Bar */}
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 p-4 bg-white rounded-xl border border-shnoor-light space-y-3 sm:space-y-0">
+                              <label className="flex items-center space-x-3 cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedTests.length === filteredTests.length && filteredTests.length > 0}
+                                  onChange={toggleAllTests}
+                                  className="w-5 h-5 text-shnoor-indigo border-shnoor-mist rounded focus:ring-2 focus:ring-shnoor-indigo"
+                                />
+                                <span className="text-sm font-bold text-shnoor-indigo">
+                                  {selectedTests.length > 0 ? `${selectedTests.length} selected` : 'Select All'}
+                                </span>
+                              </label>
+                              {selectedTests.length > 0 && (
+                                <button
+                                  onClick={handleBulkDeleteTests}
+                                  className="w-full sm:w-auto px-4 py-2 bg-shnoor-danger hover:bg-shnoor-danger text-white rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
+                                >
+                                  <Trash2 size={16} />
+                                  <span>Delete {selectedTests.length} Test{selectedTests.length !== 1 ? 's' : ''}</span>
+                                </button>
+                              )}
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                              {paginatedTests.map((test) => (
+                                <div
+                                  key={test.id}
+                                  className="bg-white border border-shnoor-light rounded-xl p-6 hover:shadow-[0_8px_30px_rgba(14,14,39,0.06)] hover:border-shnoor-indigo transition-all group relative min-h-[400px] flex flex-col"
+                                >
+                                  {/* Checkbox for selection */}
+                                  <div className="absolute top-4 left-4 z-10">
+                                    <label onClick={(e) => e.stopPropagation()}>
+                                      <input
+                                        type="checkbox"
+                                        checked={selectedTests.includes(test.id)}
+                                        onChange={() => toggleTestSelection(test.id)}
+                                        className="w-5 h-5 text-shnoor-indigo border-shnoor-mist rounded focus:ring-2 focus:ring-shnoor-indigo cursor-pointer"
+                                      />
+                                    </label>
+                                  </div>
+
+                                  {/* Status Badge and 3-Dot Menu */}
+                                  <div className="absolute top-4 right-4 flex items-center space-x-2 z-10">
+                                    {test.status === 'published' ? (
+                                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-shnoor-successLight text-shnoor-success">
+                                        <CheckCircle size={12} className="mr-1" />
+                                        Published
+                                      </span>
+                                    ) : test.status === 'archived' ? (
+                                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-shnoor-dangerLight text-shnoor-danger">
+                                        <XCircle size={12} className="mr-1" />
+                                        Archived
+                                      </span>
+                                    ) : (
+                                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-shnoor-lavender opacity-80 text-shnoor-navy">
+                                        Draft
+                                      </span>
+                                    )}
+
+                                    {/* 3-Dot Menu */}
+                                    <div className="relative">
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setOpenMenuId(openMenuId === test.id ? null : test.id);
+                                        }}
+                                        className="p-1.5 bg-shnoor-lavender opacity-80 hover:bg-shnoor-light text-shnoor-indigoMedium hover:text-shnoor-navy rounded-lg transition-colors"
+                                        title="More options"
+                                      >
+                                        <MoreVertical size={14} />
+                                      </button>
+
+                                      {/* Dropdown Menu */}
+                                      {openMenuId === test.id && (
+                                        <div className="absolute right-0 mt-2 w-48 bg-white border border-shnoor-light rounded-lg shadow-[0_8px_30px_rgba(14,14,39,0.06)] z-50">
+                                          {/* For draft tests, only show Clone option */}
+                                          {test.status === 'draft' ? (
+                                            <>
+                                              <button
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  handlePreviewQuestions(test);
+                                                }}
+                                                className="w-full px-4 py-2.5 text-left text-sm text-shnoor-indigo hover:bg-shnoor-lavender flex items-center space-x-2 transition-colors"
+                                              >
+                                                <Eye size={14} />
+                                                <span>Preview Questions</span>
+                                              </button>
+                                              <button
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  handleViewTestHistory(test);
+                                                }}
+                                                className="w-full px-4 py-2.5 text-left text-sm text-shnoor-indigo hover:bg-shnoor-lavender flex items-center space-x-2 transition-colors border-t border-shnoor-light"
+                                              >
+                                                <AlertCircle size={14} />
+                                                <span>Test History</span>
+                                              </button>
+                                              <button
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  handleOpenCloneModal(test);
+                                                }}
+                                                className="w-full px-4 py-2.5 text-left text-sm text-shnoor-indigo hover:bg-shnoor-lavender flex items-center space-x-2 transition-colors border-t border-shnoor-light"
+                                              >
+                                                <Copy size={14} />
+                                                <span>Clone Test</span>
+                                              </button>
+                                            </>
+                                          ) : (
+                                            <>
+                                              {/* View Details - Available for published tests */}
+                                              <button
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  handleViewTestDetails(test);
+                                                }}
+                                                className="w-full px-4 py-2.5 text-left text-sm text-shnoor-indigo hover:bg-shnoor-lavender flex items-center space-x-2 transition-colors"
+                                              >
+                                                <Eye size={14} />
+                                                <span>View Details</span>
+                                              </button>
+
+                                              {/* Preview Questions */}
+                                              <button
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  handlePreviewQuestions(test);
+                                                }}
+                                                className="w-full px-4 py-2.5 text-left text-sm text-shnoor-indigo hover:bg-shnoor-lavender flex items-center space-x-2 transition-colors border-t border-shnoor-light"
+                                              >
+                                                <FileSpreadsheet size={14} />
+                                                <span>Preview Questions</span>
+                                              </button>
+
+                                              {/* Test History */}
+                                              <button
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  handleViewTestHistory(test);
+                                                }}
+                                                className="w-full px-4 py-2.5 text-left text-sm text-shnoor-indigo hover:bg-shnoor-lavender flex items-center space-x-2 transition-colors border-t border-shnoor-light"
+                                              >
+                                                <AlertCircle size={14} />
+                                                <span>Test History</span>
+                                              </button>
+
+                                              {/* Clone Test */}
+                                              <button
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  handleOpenCloneModal(test);
+                                                }}
+                                                className="w-full px-4 py-2.5 text-left text-sm text-shnoor-indigo hover:bg-shnoor-lavender flex items-center space-x-2 transition-colors border-t border-shnoor-light"
+                                              >
+                                                <Copy size={14} />
+                                                <span>Clone Test</span>
+                                              </button>
+                                            </>
+                                          )}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  {/* Header with Icon */}
+                                  <div className="mt-10 mb-4">
+                                    <div className="h-12 w-12 bg-shnoor-lavender rounded-lg flex items-center justify-center text-shnoor-indigo font-bold text-xl group-hover:bg-shnoor-indigo group-hover:text-white transition-colors">
+                                      {test.name.charAt(0)}
+                                    </div>
+                                  </div>
+
+                                  {/* Exam Title */}
+                                  <h3 className="font-bold text-shnoor-navy text-base md:text-lg mb-3 line-clamp-2 group-hover:text-shnoor-indigo transition-colors pr-2">
+                                    {test.name}
+                                  </h3>
+
+                                  {/* Exam Details */}
+                                  <div className="space-y-2 mb-4">
+                                    <div className="flex items-center text-sm text-shnoor-indigoMedium flex-wrap">
+                                      <FileSpreadsheet size={16} className="mr-2 flex-shrink-0" />
+                                      <span className="break-words">{test.questions} Questions • {test.duration} mins</span>
+                                    </div>
+                                    <div className="flex items-center text-xs text-shnoor-indigoMedium">
+                                      <span>Created: {test.date}</span>
+                                    </div>
+                                  </div>
+
+                                  {/* Stats */}
+                                  <div className="grid grid-cols-2 gap-3 pt-4 border-t border-shnoor-light mb-4">
+                                    <div className="text-center p-2">
+                                      <div className="flex items-center justify-center mb-1">
+                                        <Users size={16} className="text-shnoor-indigoMedium mr-1 flex-shrink-0" />
+                                        <span className="text-lg font-bold text-shnoor-navy">{test.attempts}</span>
+                                      </div>
+                                      <p className="text-xs text-shnoor-indigoMedium">Attempted</p>
+                                    </div>
+                                    <div className="text-center p-2">
+                                      <div className="flex items-center justify-center mb-1">
+                                        <CheckCircle size={16} className="text-shnoor-success mr-1 flex-shrink-0" />
+                                        <span className="text-lg font-bold text-shnoor-success">{test.passedCount || 0}</span>
+                                      </div>
+                                      <p className="text-xs text-shnoor-indigoMedium">Passed ({test.passRate || 0}%)</p>
+                                    </div>
+                                  </div>
+
+                                  {/* Action Buttons */}
+                                  <div className="flex items-center space-x-2 pt-4 border-t border-shnoor-light mt-auto">
+                                    {test.status === 'draft' ? (
+                                      <>
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setEditingTest(test);
+                                            setShowCreateTest(true);
+                                          }}
+                                          className="flex-1 py-2.5 px-3 bg-shnoor-lavender text-shnoor-indigo hover:bg-shnoor-navy hover:text-white rounded-lg text-sm font-medium transition-colors min-h-[44px] flex items-center justify-center"
+                                          title="View Test"
+                                        >
+                                          <Eye size={18} className="mr-1 flex-shrink-0" />
+                                          <span className="truncate">View</span>
+                                        </button>
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleTogglePublish(test.id, test.status);
+                                          }}
+                                          className="flex-1 py-2.5 px-3 bg-shnoor-successLight text-shnoor-success hover:bg-shnoor-success hover:text-white rounded-lg text-sm font-medium transition-colors min-h-[44px] flex items-center justify-center"
+                                          title="Publish Test"
+                                        >
+                                          <CheckCircle size={18} className="mr-1 flex-shrink-0" />
+                                          <span className="truncate">Publish</span>
+                                        </button>
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDeleteTest(test.id);
+                                          }}
+                                          className="p-2.5 text-shnoor-danger hover:bg-shnoor-dangerLight rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+                                          title="Delete Test"
+                                        >
+                                          <Trash2 size={18} />
+                                        </button>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setSelectedExamId(test.id);
+                                          }}
+                                          className="flex-1 py-2.5 px-3 bg-shnoor-lavender text-shnoor-indigo hover:bg-shnoor-indigo hover:text-white rounded-lg text-sm font-medium transition-colors min-h-[44px] flex items-center justify-center"
+                                          title="View Results"
+                                        >
+                                          <Eye size={18} className="mr-1 flex-shrink-0" />
+                                          <span className="truncate">View</span>
+                                        </button>
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDeleteTest(test.id);
+                                          }}
+                                          className="p-2.5 text-shnoor-danger hover:bg-shnoor-dangerLight rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+                                          title="Delete Test"
+                                        >
+                                          <Trash2 size={18} />
+                                        </button>
+                                      </>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+
+                            {examTotalPages > 1 && (
+                              <div className="flex justify-center items-center space-x-4 mt-8">
+                                <button
+                                  onClick={() => setExamCurrentPage(p => Math.max(1, p - 1))}
+                                  disabled={examCurrentPage === 1}
+                                  className="p-2 bg-white border border-shnoor-light rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-shnoor-lavender transition-colors"
+                                >
+                                  <ChevronLeft size={20} className="text-shnoor-indigo" />
+                                </button>
+                                <span className="text-sm text-shnoor-navy font-medium">
+                                  Page {examCurrentPage} of {examTotalPages}
+                                </span>
+                                <button
+                                  onClick={() => setExamCurrentPage(p => Math.min(examTotalPages, p + 1))}
+                                  disabled={examCurrentPage === examTotalPages}
+                                  className="p-2 bg-white border border-shnoor-light rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-shnoor-lavender transition-colors"
+                                >
+                                  <ChevronRight size={20} className="text-shnoor-indigo" />
+                                </button>
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </div>
               )}
 
-              {/* Feedback Tab Content */}
-              {detailViewTab === 'feedback' && (
-                <div>
-                  {loadingFeedback ? (
-                    <div className="flex items-center justify-center py-12">
-                      <Loader2 className="animate-spin text-shnoor-indigo" size={48} />
+              {activeTab === 'institutes' && (
+                <div className="space-y-6">
+                  <div className="admin-surface-card bg-white rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-light p-4 sm:p-8">
+                    <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-start justify-between">
+                      <div>
+                        <h2 className="text-2xl sm:text-3xl font-bold text-shnoor-navy mb-2 flex items-center">
+                          <Building2 className="mr-2 sm:mr-3 text-shnoor-indigo h-6 w-6 sm:h-8 sm:w-8" />
+                          Manage Institutes
+                        </h2>
+                        <p className="text-sm sm:text-base text-shnoor-indigoMedium ml-8 sm:ml-11">Add, view, and manage institutes and their students</p>
+                      </div>
+
+                      {/* Search Institutes */}
+                      <div className="mt-4 sm:mt-0 relative w-full sm:w-64">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-shnoor-indigoMedium" size={18} />
+                        <input
+                          type="text"
+                          placeholder="Search institutes..."
+                          value={instituteSearchTerm}
+                          onChange={(e) => setInstituteSearchTerm(e.target.value)}
+                          className="w-full pl-10 pr-4 py-2 border border-shnoor-light rounded-xl focus:ring-2 focus:ring-shnoor-lavender focus:border-shnoor-indigo bg-white text-shnoor-navy transition-all shadow-[0_4px_15px_rgba(14,14,39,0.04)]"
+                        />
+                      </div>
                     </div>
-                  ) : feedbackData.length === 0 ? (
-                    <div className="text-center py-12 bg-white rounded-xl border border-shnoor-light">
-                      <MessageSquare size={48} className="mx-auto text-shnoor-mist mb-3" />
-                      <p className="text-shnoor-indigoMedium text-lg">No feedback submitted yet</p>
+
+                    {/* Add Institute Form */}
+                    <div className="admin-subsurface-card mb-6 sm:mb-8 p-4 sm:p-6 bg-white rounded-2xl border border-shnoor-light shadow-[0_8px_30px_rgba(14,14,39,0.06)]">
+                      <label className="text-sm font-bold text-shnoor-navy mb-3 flex items-center">
+                        <Plus size={18} className="mr-2 text-shnoor-indigo" />
+                        Add New Institute
+                      </label>
+                      <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
+                        <input
+                          type="text"
+                          value={newInstituteName}
+                          onChange={(e) => setNewInstituteName(e.target.value)}
+                          placeholder="Enter institute name"
+                          className="flex-1 px-5 py-4 border border-shnoor-light rounded-xl focus:ring-4 focus:ring-shnoor-mist focus:border-shnoor-indigo bg-white text-shnoor-navy font-medium shadow-[0_8px_30px_rgba(14,14,39,0.06)]"
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                              handleAddInstitute();
+                            }
+                          }}
+                        />
+                        <button
+                          onClick={handleAddInstitute}
+                          disabled={isAddingInstitute || !newInstituteName.trim()}
+                          className={`w-full sm:w-auto px-6 py-4 rounded-xl font-bold transition-all flex items-center justify-center space-x-2 shadow-[0_8px_30px_rgba(14,14,39,0.06)] ${!isAddingInstitute && newInstituteName.trim()
+                            ? 'bg-shnoor-indigo hover:bg-shnoor-navy text-white hover:shadow-[0_8px_30px_rgba(14,14,39,0.06)] transform hover:-translate-y-0.5'
+                            : 'bg-shnoor-light text-shnoor-soft cursor-not-allowed'
+                            }`}
+                        >
+                          {isAddingInstitute && (
+                            <Loader2 className="animate-spin" size={20} />
+                          )}
+                          <Plus size={20} />
+                          <span>{isAddingInstitute ? 'Adding...' : 'Add'}</span>
+                        </button>
+                      </div>
                     </div>
-                  ) : (
-                    <div className="space-y-6">
-                      {/* Feedback Statistics */}
-                      {feedbackStats && (
-                        <div className="grid grid-cols-3 gap-4 mb-6">
-                          <div className="bg-gradient-to-br from-shnoor-mist to-shnoor-mist border border-shnoor-light rounded-lg p-4">
-                            <div className="flex items-center justify-between mb-2">
-                              <TrendingUp size={20} className="text-shnoor-indigo" />
-                              <span className="text-2xl font-bold text-shnoor-indigo">
-                                {feedbackStats.averageRating}
+
+                    {/* Institutes List */}
+                    <div className="space-y-4">
+                      {/* Bulk Test Assignment Section - shown when institutes are selected */}
+                      {selectedInstitutes.length > 0 && (
+                        <div className="admin-highlight-panel mb-6 p-4 sm:p-6 bg-shnoor-lavender rounded-2xl border-2 border-shnoor-indigo">
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 space-y-2 sm:space-y-0">
+                            <h3 className="text-base sm:text-lg font-bold text-shnoor-navy flex items-center">
+                              <FileSpreadsheet className="mr-2 text-shnoor-indigo shrink-0" size={22} />
+                              <span>Assign Test to Selected Institutes</span>
+                            </h3>
+                            <button
+                              onClick={() => setSelectedInstitutes([])}
+                              className="text-sm text-shnoor-indigoMedium hover:text-shnoor-navy font-medium self-end sm:self-auto"
+                            >
+                              Clear Selection
+                            </button>
+                          </div>
+
+                          <div className="space-y-4">
+                            <div>
+                              <p className="text-sm text-shnoor-navy mb-2">
+                                <span className="font-bold">{selectedInstitutes.length}</span> institute{selectedInstitutes.length !== 1 ? 's' : ''} selected
+                              </p>
+                              <div className="flex flex-wrap gap-2">
+                                {selectedInstitutes.map(instId => {
+                                  const inst = allInstitutes.find(i => i.id === instId);
+                                  return inst ? (
+                                    <span key={instId} className="px-3 py-1 bg-white rounded-lg text-xs font-medium text-shnoor-navy border border-shnoor-light">
+                                      {inst.display_name}
+                                    </span>
+                                  ) : null;
+                                })}
+                              </div>
+                            </div>
+
+                            <div className="relative">
+                              <label className="block text-sm font-bold text-shnoor-navy mb-2">
+                                Select Test to Assign
+                              </label>
+
+                              {/* Custom Dropdown Button */}
+                              <button
+                                type="button"
+                                onClick={() => setIsTestDropdownOpen(!isTestDropdownOpen)}
+                                className="w-full px-4 py-3 border border-shnoor-light rounded-xl bg-white text-shnoor-navy font-medium transition-all flex items-center justify-between hover:border-shnoor-indigo focus:ring-4 focus:ring-shnoor-lavender focus:border-shnoor-indigo"
+                              >
+                                <span className={selectedTestsForMultipleInstitutes.length === 0 ? 'text-shnoor-indigoMedium' : 'text-shnoor-navy'}>
+                                  {selectedTestsForMultipleInstitutes.length === 0
+                                    ? '-- Select a test --'
+                                    : `${selectedTestsForMultipleInstitutes.length} test${selectedTestsForMultipleInstitutes.length !== 1 ? 's' : ''} selected`
+                                  }
+                                </span>
+                                <ChevronDown size={20} className={`transition-transform ${isTestDropdownOpen ? 'rotate-180' : ''}`} />
+                              </button>
+
+                              {/* Dropdown Menu with Checkboxes */}
+                              {isTestDropdownOpen && (
+                                <div className="admin-dropdown-menu absolute z-50 w-full mt-2 bg-white border border-shnoor-light rounded-xl shadow-lg max-h-64 overflow-y-auto">
+                                  {tests.filter(test => test.status === 'published').length === 0 ? (
+                                    <div className="p-4 text-center text-shnoor-indigoMedium text-sm">
+                                      No published tests available
+                                    </div>
+                                  ) : (
+                                    <div className="py-2">
+                                      {tests.filter(test => test.status === 'published').map((test) => (
+                                        <label
+                                          key={test.id}
+                                          className="flex items-center space-x-3 px-4 py-3 hover:bg-shnoor-lavender cursor-pointer transition-colors"
+                                          onClick={(e) => e.stopPropagation()}
+                                        >
+                                          <input
+                                            type="checkbox"
+                                            checked={selectedTestsForMultipleInstitutes.includes(test.id)}
+                                            onChange={(e) => {
+                                              if (e.target.checked) {
+                                                setSelectedTestsForMultipleInstitutes([...selectedTestsForMultipleInstitutes, test.id]);
+                                              } else {
+                                                setSelectedTestsForMultipleInstitutes(selectedTestsForMultipleInstitutes.filter(id => id !== test.id));
+                                              }
+                                            }}
+                                            className="w-4 h-4 text-shnoor-indigo border-shnoor-mist rounded focus:ring-2 focus:ring-shnoor-indigo"
+                                          />
+                                          <span className="text-sm font-medium text-shnoor-navy flex-1">
+                                            {test.name}
+                                          </span>
+                                        </label>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+
+                              {/* Selected tests count */}
+                              {selectedTestsForMultipleInstitutes.length > 0 && (
+                                <p className="text-xs text-shnoor-indigo mt-2 font-medium">
+                                  {selectedTestsForMultipleInstitutes.length} test{selectedTestsForMultipleInstitutes.length !== 1 ? 's' : ''} selected
+                                </p>
+                              )}
+                            </div>
+
+                            <button
+                              onClick={handleAssignTestToMultipleInstitutes}
+                              disabled={selectedTestsForMultipleInstitutes.length === 0 || isAssigningTestToMultipleInstitutes}
+                              className={`w-full px-6 py-4 rounded-xl font-bold transition-all flex items-center justify-center space-x-2 ${selectedTestsForMultipleInstitutes.length > 0 && !isAssigningTestToMultipleInstitutes
+                                ? 'bg-shnoor-indigo hover:bg-shnoor-navy text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
+                                : 'bg-shnoor-light text-shnoor-soft cursor-not-allowed'
+                                }`}
+                            >
+                              {isAssigningTestToMultipleInstitutes && (
+                                <Loader2 className="animate-spin mr-2" size={20} />
+                              )}
+                              <UserCheck size={22} />
+                              <span>
+                                {isAssigningTestToMultipleInstitutes
+                                  ? 'Assigning...'
+                                  : `Assign ${selectedTestsForMultipleInstitutes.length} Test${selectedTestsForMultipleInstitutes.length !== 1 ? 's' : ''} to ${selectedInstitutes.length} Institute${selectedInstitutes.length !== 1 ? 's' : ''}`
+                                }
                               </span>
-                            </div>
-                            <p className="text-sm text-shnoor-indigo font-medium">Average Rating</p>
-                            <p className="text-xs text-shnoor-indigoMedium">{feedbackStats.totalFeedbacks} responses</p>
+                            </button>
                           </div>
+                        </div>
+                      )}
 
-                          <div className="bg-gradient-to-br from-shnoor-successLight to-shnoor-successLight border border-shnoor-successLight rounded-lg p-4">
-                            <BarChart3 size={20} className="text-shnoor-success mb-2" />
-                            <p className="text-sm text-shnoor-indigo font-medium mb-2">Difficulty</p>
-                            <div className="space-y-1">
-                              <div className="flex justify-between text-xs">
-                                <span className="text-shnoor-indigoMedium">Easy:</span>
-                                <span className="font-medium text-shnoor-success">{feedbackStats.difficultyBreakdown.Easy}</span>
-                              </div>
-                              <div className="flex justify-between text-xs">
-                                <span className="text-shnoor-indigoMedium">Medium:</span>
-                                <span className="font-medium text-shnoor-warning">{feedbackStats.difficultyBreakdown.Medium}</span>
-                              </div>
-                              <div className="flex justify-between text-xs">
-                                <span className="text-shnoor-indigoMedium">Hard:</span>
-                                <span className="font-medium text-shnoor-danger">{feedbackStats.difficultyBreakdown.Hard}</span>
-                              </div>
-                            </div>
-                          </div>
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 space-y-3 sm:space-y-0">
+                        <div className="flex items-center space-x-4">
+                          <h3 className="text-xl font-bold text-shnoor-navy flex items-center">
+                            <Building2 size={22} className="mr-2 text-shnoor-indigo" />
+                            All Institutes
+                          </h3>
+                          {allInstitutes.length > 0 && (
+                            <label className="flex items-center space-x-2 cursor-pointer px-3 py-1.5 bg-shnoor-lavender hover:bg-shnoor-light rounded-lg transition-colors border border-shnoor-light">
+                              <input
+                                type="checkbox"
+                                checked={selectedInstitutes.length === allInstitutes.length && allInstitutes.length > 0}
+                                ref={(el) => { if (el) el.indeterminate = selectedInstitutes.length > 0 && selectedInstitutes.length < allInstitutes.length; }}
+                                onChange={toggleAllInstitutes}
+                                className="w-4 h-4 text-shnoor-indigo border-shnoor-mist rounded focus:ring-2 focus:ring-shnoor-indigo"
+                              />
+                              <span className="text-sm font-bold text-shnoor-navy whitespace-nowrap">Select All</span>
+                            </label>
+                          )}
+                        </div>
+                        {allInstitutes.length > 0 && (
+                          <span className="text-sm text-shnoor-indigoMedium bg-shnoor-lavender px-3 py-1 rounded-full border border-shnoor-light">
+                            {allInstitutes.length} institute{allInstitutes.length !== 1 ? 's' : ''}
+                          </span>
+                        )}
+                      </div>
 
-                          <div className="bg-gradient-to-br from-shnoor-warningLight to-shnoor-warningLight border border-shnoor-warningLight rounded-lg p-4">
-                            <Star size={20} className="text-shnoor-warning mb-2" />
-                            <p className="text-sm text-shnoor-indigo font-medium mb-2">Rating Distribution</p>
-                            <div className="space-y-1">
-                              {[5, 4, 3, 2, 1].map(rating => (
-                                <div key={rating} className="flex items-center text-xs">
-                                  <span className="text-shnoor-indigoMedium w-8">{rating}★</span>
-                                  <div className="flex-1 bg-shnoor-light rounded-full h-2 mx-2">
-                                    <div
-                                      className="bg-shnoor-warning h-2 rounded-full"
-                                      style={{
-                                        width: `${feedbackStats.totalFeedbacks > 0
-                                          ? (feedbackStats.ratingBreakdown[rating] / feedbackStats.totalFeedbacks) * 100
-                                          : 0}%`
-                                      }}
-                                    ></div>
+                      {isLoadingAllInstitutes ? (
+                        <div className="flex items-center justify-center py-12 bg-white rounded-2xl border border-shnoor-light">
+                          <Loader2 className="animate-spin text-shnoor-indigo" size={32} />
+                          <span className="ml-3 text-shnoor-indigoMedium font-medium">Loading institutes...</span>
+                        </div>
+                      ) : allInstitutes.length === 0 ? (
+                        <div className="text-center py-16 bg-white rounded-2xl border border-shnoor-light">
+                          <Building2 className="mx-auto mb-4 text-shnoor-mist" size={64} />
+                          <p className="text-shnoor-navy font-medium text-lg">No institutes found</p>
+                          <p className="text-shnoor-indigoMedium text-sm mt-2">Add your first institute using the form above</p>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {paginatedInstitutes.map((institute) => {
+                            // Calculate effective status based on start time and deadline
+                            const now = new Date();
+                            const startTime = institute.registration_start_time ? new Date(institute.registration_start_time) : null;
+                            const deadline = institute.registration_deadline ? new Date(institute.registration_deadline) : null;
+                            const notYetOpen = startTime && now < startTime;
+                            const deadlinePassed = deadline && now > deadline;
+
+                            let effectiveStatus = institute.registration_status || 'open';
+                            let statusBadgeText = effectiveStatus;
+                            let statusBadgeColor = effectiveStatus === 'open'
+                              ? 'admin-status-pill is-open'
+                              : effectiveStatus === 'paused'
+                                ? 'admin-status-pill is-paused'
+                                : 'admin-status-pill is-closed';
+
+                            // Override if not yet open
+                            if (notYetOpen) {
+                              statusBadgeText = 'not yet open';
+                              statusBadgeColor = 'admin-status-pill is-not-yet-open';
+                            }
+                            // Override if deadline passed
+                            else if (deadlinePassed && effectiveStatus === 'open') {
+                              statusBadgeText = 'closed';
+                              statusBadgeColor = 'admin-status-pill is-closed';
+                            }
+
+                            const isInstituteSelected = selectedInstitutes.includes(institute.id);
+
+                            return (
+                              <div
+                                key={institute.id}
+                                className={`border rounded-2xl p-6 bg-white hover:shadow-[0_8px_30px_rgba(14,14,39,0.06)] transition-all ${isInstituteSelected ? 'border-shnoor-indigo border-2 bg-shnoor-indigo/5' : 'border-shnoor-light'
+                                  }`}
+                              >
+                                <div className="flex items-start space-x-3 mb-4">
+                                  {/* Checkbox for multi-select */}
+                                  <label className="flex items-center cursor-pointer mt-1">
+                                    <input
+                                      type="checkbox"
+                                      checked={isInstituteSelected}
+                                      onChange={() => toggleInstituteSelection(institute.id)}
+                                      className="w-5 h-5 text-shnoor-indigo border-shnoor-mist rounded focus:ring-2 focus:ring-shnoor-indigo"
+                                    />
+                                  </label>
+
+                                  <div className="flex-1">
+                                    <div className="flex items-center justify-between mb-2">
+                                      <h4 className="font-bold text-lg text-shnoor-navy">
+                                        {institute.display_name}
+                                      </h4>
+                                      {/* Registration Status Badge */}
+                                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${statusBadgeColor}`}>
+                                        {statusBadgeText}
+                                      </span>
+                                    </div>
+                                    <div className="space-y-1 text-sm text-shnoor-indigoMedium">
+                                      <p className="flex items-center">
+                                        <Users size={14} className="mr-2" />
+                                        {institute.student_count} student{institute.student_count !== 1 ? 's' : ''}
+                                      </p>
+                                      <p className="flex items-center">
+                                        <FileSpreadsheet size={14} className="mr-2" />
+                                        {institute.assigned_tests_count} test{institute.assigned_tests_count !== 1 ? 's' : ''} assigned
+                                      </p>
+                                      {institute.registration_start_time && (
+                                        <p className="flex items-center text-xs text-shnoor-indigoMedium">
+                                          <Calendar size={12} className="mr-2" />
+                                          Start: {new Date(institute.registration_start_time).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })}
+                                        </p>
+                                      )}
+                                      {institute.registration_deadline && (
+                                        <p className="flex items-center text-xs text-shnoor-indigoMedium">
+                                          <Calendar size={12} className="mr-2" />
+                                          Deadline: {new Date(institute.registration_deadline).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })}
+                                        </p>
+                                      )}
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-2 mt-4">
+                                      <button
+                                        onClick={() => handleViewAssignedTests(institute)}
+                                        className="py-2 px-3 bg-shnoor-lavender text-shnoor-indigo hover:bg-shnoor-indigo hover:text-white rounded-lg text-sm font-medium transition-colors"
+                                      >
+                                        <FileSpreadsheet size={16} className="inline mr-1" />
+                                        Tests
+                                      </button>
+                                      <button
+                                        onClick={() => handleManageStudents(institute)}
+                                        className="py-2 px-3 bg-shnoor-successLight text-shnoor-success hover:bg-shnoor-success hover:text-white rounded-lg text-sm font-medium transition-colors"
+                                      >
+                                        <Users size={16} className="inline mr-1" />
+                                        Students
+                                      </button>
+                                      <button
+                                        onClick={() => {
+                                          setSelectedInstituteForRegistration(institute);
+                                          setShowRegistrationControlModal(true);
+                                        }}
+                                        className="py-2 px-3 bg-shnoor-lavender text-shnoor-indigo hover:bg-shnoor-indigo hover:text-white rounded-lg text-sm font-medium transition-colors"
+                                      >
+                                        <Calendar size={16} className="inline mr-1" />
+                                        Registration
+                                      </button>
+                                      <button
+                                        onClick={() => handleDeleteInstitute(institute.id, institute.display_name)}
+                                        className="py-2 px-3 text-shnoor-danger hover:bg-shnoor-dangerLight rounded-lg transition-colors text-sm font-medium"
+                                        title="Delete Institute"
+                                      >
+                                        <Trash2 size={16} className="inline mr-1" />
+                                        Delete
+                                      </button>
+                                    </div>
                                   </div>
-                                  <span className="font-medium text-shnoor-indigo w-6">{feedbackStats.ratingBreakdown[rating]}</span>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      {instituteTotalPages > 1 && allInstitutes.length > 0 && (
+                        <div className="flex justify-center items-center space-x-4 mt-8">
+                          <button
+                            onClick={() => setInstituteCurrentPage(p => Math.max(1, p - 1))}
+                            disabled={instituteCurrentPage === 1}
+                            className="p-2 bg-white border border-shnoor-light rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-shnoor-lavender transition-colors"
+                          >
+                            <ChevronLeft size={20} className="text-shnoor-indigo" />
+                          </button>
+                          <span className="text-sm text-shnoor-navy font-medium">
+                            Page {instituteCurrentPage} of {instituteTotalPages}
+                          </span>
+                          <button
+                            onClick={() => setInstituteCurrentPage(p => Math.min(instituteTotalPages, p + 1))}
+                            disabled={instituteCurrentPage === instituteTotalPages}
+                            className="p-2 bg-white border border-shnoor-light rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-shnoor-lavender transition-colors"
+                          >
+                            <ChevronRight size={20} className="text-shnoor-indigo" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Reports Tab */}
+              {activeTab === 'reports' && (
+                <div className="space-y-6">
+                  <AdminReports />
+                </div>
+              )}
+
+              {/* Bulk Upload Students Tab */}
+              {activeTab === 'bulk-upload' && (
+                <div className="space-y-6">
+                  <BulkStudentUpload clientId={viewAsClientId || null} />
+                </div>
+              )}
+
+              {/* Violations Tab */}
+              {activeTab === 'violations' && (
+                <div className="space-y-6">
+                  {/* Header */}
+                  <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-light p-4 sm:p-8 flex flex-col">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 space-y-4 sm:space-y-0">
+                      <div>
+                        <h2 className="text-2xl sm:text-3xl font-bold text-shnoor-navy flex items-center">
+                          <AlertCircle className="mr-2 sm:mr-3 text-shnoor-indigo h-6 w-6 sm:h-8 sm:w-8" />
+                          Violations
+                        </h2>
+                        <p className="text-sm sm:text-base text-shnoor-indigoMedium mt-1">Monitor detected suspicious activities during exams</p>
+                      </div>
+                      {selectedTestForViolations && violationsByStudent.length > 0 && (
+                        <button
+                          onClick={exportViolationsToExcel}
+                          className="w-full sm:w-auto flex items-center justify-center space-x-2 px-5 py-3 bg-shnoor-indigo hover:bg-shnoor-navy text-white rounded-xl transition-all shadow-[0_8px_30px_rgba(14,14,39,0.06)] hover:shadow-[0_8px_30px_rgba(14,14,39,0.12)] transform hover:-translate-y-0.5 font-semibold"
+                          title="Export Violations Report"
+                        >
+                          <Download size={20} />
+                          <span>Export Report</span>
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Test Selector */}
+                    <div className="mb-6">
+                      <label className="block text-sm font-bold text-shnoor-navy mb-2">
+                        Select Test to View Violations
+                      </label>
+                      <select
+                        value={selectedTestForViolations}
+                        onChange={(e) => setSelectedTestForViolations(e.target.value)}
+                        className="w-full px-4 py-3 border border-shnoor-light rounded-xl focus:ring-4 focus:ring-shnoor-lavender focus:border-shnoor-indigo bg-white text-shnoor-navy font-medium transition-all"
+                      >
+                        <option value="">-- Select a test --</option>
+                        {tests.map((test) => (
+                          <option key={test.id} value={test.id}>
+                            {test.name} ({test.attempts} attempts)
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {selectedTestForViolations && (
+                      <>
+                        {/* Flagged Students */}
+                        {flaggedStudents.length > 0 && (
+                          <div className="mb-6">
+                            <h3 className="text-lg font-bold text-shnoor-navy mb-4 flex items-center">
+                              <AlertCircle className="mr-2 text-shnoor-indigo" size={20} />
+                              Flagged Students (3+ High Severity Violations)
+                            </h3>
+                            <div className="space-y-3">
+                              {flaggedStudents.map((student) => (
+                                <div
+                                  key={student.student_id}
+                                  className="p-4 bg-shnoor-lavender border border-shnoor-light rounded-xl"
+                                >
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex-1">
+                                      <h4 className="font-bold text-shnoor-navy">{student.student_name}</h4>
+                                      <p className="text-sm text-shnoor-indigoMedium">{student.student_email}</p>
+                                    </div>
+                                    <div className="text-right">
+                                      <p className="text-2xl font-bold text-shnoor-indigo">{student.total_violations}</p>
+                                      <p className="text-xs text-shnoor-indigoMedium">Total Violations</p>
+                                    </div>
+                                  </div>
+                                  <div className="mt-3 flex space-x-4 text-sm">
+                                    <span className="px-3 py-1 bg-shnoor-indigo text-white rounded-full font-medium">
+                                      High: {student.high_severity_count}
+                                    </span>
+                                    <span className="px-3 py-1 bg-shnoor-indigoMedium text-white rounded-full font-medium">
+                                      Medium: {student.medium_severity_count}
+                                    </span>
+                                    <span className="text-shnoor-indigoMedium">
+                                      Last: {new Date(student.last_violation).toLocaleString()}
+                                    </span>
+                                  </div>
                                 </div>
                               ))}
                             </div>
                           </div>
-                        </div>
-                      )}
+                        )}
 
-                      {/* Individual Feedback Cards */}
+                        {/* Student Violations Table */}
+                        {isLoadingViolations ? (
+                          <div className="flex items-center justify-center py-12">
+                            <Loader2 className="animate-spin text-shnoor-indigo" size={32} />
+                            <span className="ml-3 text-shnoor-indigoMedium">Loading violations...</span>
+                          </div>
+                        ) : violationsByStudent.length === 0 ? (
+                          <div className="text-center py-12 bg-shnoor-lavender rounded-xl border border-shnoor-light">
+                            <CheckCircle className="mx-auto mb-2 text-shnoor-indigo" size={48} />
+                            <p className="text-shnoor-navy font-medium">No violations detected</p>
+                            <p className="text-sm text-shnoor-indigoMedium mt-1">All students followed exam guidelines</p>
+                          </div>
+                        ) : (
+                          <div className="overflow-x-auto">
+                            <h3 className="text-lg font-bold text-shnoor-navy mb-4">
+                              Student Violations Summary
+                            </h3>
+                            <table className="w-full border-collapse">
+                              <thead>
+                                <tr className="bg-shnoor-lavender border-b-2 border-shnoor-light">
+                                  <th className="px-4 py-3 text-left text-sm font-bold text-shnoor-navy">Student ID</th>
+                                  <th className="px-4 py-3 text-left text-sm font-bold text-shnoor-navy">Name</th>
+                                  <th className="px-4 py-3 text-left text-sm font-bold text-shnoor-navy">Email</th>
+                                  <th className="px-4 py-3 text-left text-sm font-bold text-shnoor-navy">Phone</th>
+                                  <th className="px-4 py-3 text-center text-sm font-bold text-shnoor-navy">No Face</th>
+                                  <th className="px-4 py-3 text-center text-sm font-bold text-shnoor-navy">Multiple Faces</th>
+                                  <th className="px-4 py-3 text-center text-sm font-bold text-shnoor-navy">Phone Detected</th>
+                                  <th className="px-4 py-3 text-center text-sm font-bold text-shnoor-navy">Loud Noise</th>
+                                  <th className="px-4 py-3 text-center text-sm font-bold text-shnoor-navy">Voice Detected</th>
+                                  <th className="px-4 py-3 text-center text-sm font-bold text-shnoor-navy">Total</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {violationsByStudent.map((student, idx) => (
+                                  <tr
+                                    key={student.student_id}
+                                    className={`border-b border-shnoor-light hover:bg-shnoor-lavender transition-colors ${student.total_violations >= 5 ? 'bg-shnoor-lavender/50' : ''
+                                      }`}
+                                  >
+                                    <td className="px-4 py-3 text-sm text-shnoor-indigoMedium">{student.student_id}</td>
+                                    <td className="px-4 py-3 text-sm font-medium text-shnoor-navy">{student.student_name}</td>
+                                    <td className="px-4 py-3 text-sm text-shnoor-indigoMedium">{student.student_email}</td>
+                                    <td className="px-4 py-3 text-sm text-shnoor-indigoMedium">{student.student_phone || 'N/A'}</td>
+                                    <td className="px-4 py-3 text-center">
+                                      <span className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${student.no_face_count > 0 ? 'bg-shnoor-indigo/10 text-shnoor-indigo' : 'bg-shnoor-lavender text-shnoor-soft'
+                                        }`}>
+                                        {student.no_face_count}
+                                      </span>
+                                    </td>
+                                    <td className="px-4 py-3 text-center">
+                                      <span className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${student.multiple_faces_count > 0 ? 'bg-shnoor-indigo/10 text-shnoor-indigo' : 'bg-shnoor-lavender text-shnoor-soft'
+                                        }`}>
+                                        {student.multiple_faces_count}
+                                      </span>
+                                    </td>
+                                    <td className="px-4 py-3 text-center">
+                                      <span className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${student.phone_detected_count > 0 ? 'bg-shnoor-indigoMedium/10 text-shnoor-indigoMedium' : 'bg-shnoor-lavender text-shnoor-soft'
+                                        }`}>
+                                        {student.phone_detected_count}
+                                      </span>
+                                    </td>
+                                    <td className="px-4 py-3 text-center">
+                                      <span className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${student.loud_noise_count > 0 ? 'bg-shnoor-indigoMedium/10 text-shnoor-indigoMedium' : 'bg-shnoor-lavender text-shnoor-soft'
+                                        }`}>
+                                        {student.loud_noise_count || 0}
+                                      </span>
+                                    </td>
+                                    <td className="px-4 py-3 text-center">
+                                      <span className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${student.voice_detected_count > 0 ? 'bg-shnoor-indigoMedium/10 text-shnoor-indigoMedium' : 'bg-shnoor-lavender text-shnoor-soft'
+                                        }`}>
+                                        {student.voice_detected_count || 0}
+                                      </span>
+                                    </td>
+                                    <td className="px-4 py-3 text-center">
+                                      <span className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${student.total_violations >= 5
+                                        ? 'bg-shnoor-indigo text-white'
+                                        : student.total_violations >= 3
+                                          ? 'bg-shnoor-indigoMedium text-white'
+                                          : 'bg-shnoor-lavender text-shnoor-indigo'
+                                        }`}>
+                                        {student.total_violations}
+                                      </span>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Interviews Tab */}
+              {activeTab === 'interviews' && (
+                <div className="space-y-6">
+                  <InterviewsList />
+                </div>
+              )}
+
+              {/* Job Openings Tab */}
+              {activeTab === 'job-openings' && (
+                <div className="space-y-6">
+                  <AdminJobOpenings />
+                </div>
+              )}
+
+              {/* Subscription Plans Tab */}
+              {activeTab === 'subscription-plans' && isSuperAdmin && (
+                <div className="space-y-6">
+                  <SubscriptionPlansSettings />
+                </div>
+              )}
+            </>
+          )}
+
+
+          {/* Clone Test Modal */}
+          {showCloneModal && testToClone && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] max-w-md w-full">
+                <div className="bg-gradient-to-r from-shnoor-indigo to-shnoor-navy px-6 py-4 flex justify-between items-center">
+                  <div>
+                    <h3 className="text-xl font-bold text-white">Clone Test</h3>
+                    <p className="text-shnoor-lavender text-sm mt-1">Create a copy of "{testToClone.name}"</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setShowCloneModal(false);
+                      setTestToClone(null);
+                      setCloneTestName('');
+                      setCloneError('');
+                    }}
+                    className="text-white hover:bg-white/20 rounded-full p-2 transition-colors"
+                    disabled={isCloning}
+                  >
+                    <X size={24} />
+                  </button>
+                </div>
+
+                <div className="p-6 space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-shnoor-indigo mb-2">
+                      New Test Name <span className="text-shnoor-danger">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={cloneTestName}
+                      onChange={(e) => {
+                        setCloneTestName(e.target.value);
+                        setCloneError('');
+                      }}
+                      className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-shnoor-indigo ${cloneError ? 'border-shnoor-danger' : 'border-shnoor-mist'
+                        }`}
+                      placeholder="Enter new test name"
+                      disabled={isCloning}
+                      autoFocus
+                    />
+                    {cloneError && (
+                      <p className="mt-2 text-sm text-shnoor-danger flex items-center">
+                        <XCircle size={14} className="mr-1" />
+                        {cloneError}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="bg-shnoor-lavender border border-shnoor-light rounded-lg p-4">
+                    <p className="text-sm text-shnoor-navy">
+                      <strong>Note:</strong> This will create a new test with:
+                    </p>
+                    <ul className="mt-2 text-sm text-shnoor-indigo space-y-1 ml-4 list-disc">
+                      <li>All questions from the original test</li>
+                      <li>Same duration and settings</li>
+                      <li>Draft status (not published)</li>
+                      <li>No results or student assignments</li>
+                    </ul>
+                  </div>
+
+                  <div className="flex space-x-3 pt-4">
+                    <button
+                      onClick={() => {
+                        setShowCloneModal(false);
+                        setTestToClone(null);
+                        setCloneTestName('');
+                        setCloneError('');
+                      }}
+                      className="flex-1 px-6 py-3 bg-shnoor-light hover:bg-shnoor-lavender text-shnoor-navy rounded-xl font-medium transition-colors"
+                      disabled={isCloning}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleCloneTest}
+                      className="flex-1 px-6 py-3 bg-shnoor-indigo hover:bg-shnoor-navy text-white rounded-xl font-medium transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={isCloning}
+                    >
+                      {isCloning ? (
+                        <>
+                          <Loader2 className="animate-spin" size={18} />
+                          <span>Cloning...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy size={18} />
+                          <span>Clone Test</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* View Test Details Modal */}
+          {showViewDetailsModal && selectedTestForDetails && (
+            <ViewTestDetailsModal
+              test={selectedTestForDetails}
+              onClose={() => {
+                setShowViewDetailsModal(false);
+                setSelectedTestForDetails(null);
+              }}
+              onEdit={handleEditTestDetails}
+            />
+          )}
+
+          {/* Edit Test Details Modal */}
+          {showEditDetailsModal && selectedTestForDetails && (
+            <EditTestDetailsModal
+              test={selectedTestForDetails}
+              onClose={() => {
+                setShowEditDetailsModal(false);
+                setSelectedTestForDetails(null);
+              }}
+              onSave={handleSaveTestDetails}
+            />
+          )}
+
+          {/* Job Role/Description Modal */}
+          {showJobModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] max-w-3xl w-full max-h-[90vh] overflow-hidden">
+                <div className="bg-gradient-to-r from-shnoor-indigo to-shnoor-navy px-6 py-4 flex justify-between items-center">
+                  <div>
+                    <h3 className="text-xl font-bold text-white">{selectedJobTest?.name}</h3>
+                    <p className="text-shnoor-lavender text-sm mt-1">Job Role & Description</p>
+                  </div>
+                  <button
+                    onClick={() => setShowJobModal(false)}
+                    className="text-white hover:bg-white/20 rounded-full p-2 transition-colors"
+                  >
+                    <X size={24} />
+                  </button>
+                </div>
+
+                <div className="p-6 space-y-6">{isLoadingJobRoles ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="animate-spin text-shnoor-indigo" size={32} />
+                    <span className="ml-3 text-shnoor-indigoMedium">Loading job roles...</span>
+                  </div>
+                ) : (
+                  <>
+                    {!isEditingJob && jobRoles.length > 1 && (
+                      <div>
+                        <label className="block text-sm font-bold text-shnoor-navy mb-2">
+                          Select Job Role
+                        </label>
+                        <select
+                          value={selectedJobRoleIndex}
+                          onChange={(e) => setSelectedJobRoleIndex(parseInt(e.target.value))}
+                          className="w-full px-4 py-3 border border-shnoor-light rounded-xl focus:ring-4 focus:ring-shnoor-mist focus:border-shnoor-indigo bg-white text-shnoor-navy font-medium"
+                        >
+                          {jobRoles.map((role, index) => (
+                            <option key={index} value={index}>
+                              {role.jobRole}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+
+                    {isEditingJob ? (
                       <div className="space-y-4">
-                        <h3 className="text-lg font-bold text-shnoor-navy mb-4">Student Feedback</h3>
-                        {feedbackData.map((feedback, idx) => (
-                          <div key={idx} className="border border-shnoor-light rounded-lg p-4 hover:shadow-md transition-shadow bg-white">
-                            <div className="flex justify-between items-start mb-3">
-                              <div>
-                                <p className="font-semibold text-shnoor-navy">{feedback.student_name || 'Anonymous'}</p>
-                                <p className="text-sm text-shnoor-indigoMedium">{feedback.student_email}</p>
-                              </div>
-                              <div className="text-right">
-                                {feedback.rating && (
-                                  <div className="flex space-x-1">
-                                    {[1, 2, 3, 4, 5].map((star) => (
-                                      <Star
-                                        key={star}
-                                        size={16}
-                                        className={star <= feedback.rating ? 'fill-shnoor-warning text-shnoor-warning' : 'text-shnoor-mist'}
-                                      />
-                                    ))}
-                                  </div>
-                                )}
-                                <p className="text-xs text-shnoor-indigoMedium mt-1">
-                                  {new Date(feedback.created_at).toLocaleDateString()}
-                                </p>
-                              </div>
+                        <div className="flex items-center justify-between">
+                          <label className="block text-sm font-bold text-shnoor-navy">
+                            Job Roles & Descriptions
+                          </label>
+                          <button
+                            type="button"
+                            onClick={handleAddJobRole}
+                            className="flex items-center space-x-1 px-3 py-1.5 bg-shnoor-lavender text-shnoor-indigo rounded-lg hover:bg-shnoor-lavender transition-colors text-sm font-medium"
+                          >
+                            <Plus size={16} />
+                            <span>Add Role</span>
+                          </button>
+                        </div>
+
+                        {jobRoles.map((role, index) => (
+                          <div key={index} className="p-4 border border-shnoor-light rounded-lg space-y-3 bg-white">
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm font-semibold text-shnoor-indigo">
+                                Role {index + 1} {index === 0 && <span className="text-shnoor-indigo">(Default)</span>}
+                              </span>
+                              {jobRoles.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveJobRole(index)}
+                                  className="text-shnoor-danger hover:text-shnoor-danger p-1"
+                                  title="Remove this role"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              )}
                             </div>
 
-                            {feedback.difficulty && (
-                              <div className="mb-3">
-                                <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${feedback.difficulty === 'Easy' ? 'bg-shnoor-successLight text-shnoor-success' :
-                                  feedback.difficulty === 'Medium' ? 'bg-shnoor-warningLight text-shnoor-warning' :
-                                    'bg-shnoor-dangerLight text-shnoor-danger'
-                                  }`}>
-                                  Difficulty: {feedback.difficulty}
-                                </span>
-                              </div>
-                            )}
+                            <div>
+                              <input
+                                type="text"
+                                value={role.jobRole}
+                                onChange={(e) => handleJobRoleChange(index, 'jobRole', e.target.value)}
+                                className="w-full px-4 py-3 border border-shnoor-light rounded-xl focus:ring-4 focus:ring-shnoor-mist focus:border-shnoor-indigo bg-white text-shnoor-navy font-medium"
+                                placeholder="e.g., Senior Software Engineer"
+                              />
+                            </div>
 
-                            {feedback.feedback_text && (
-                              <div className="bg-white rounded-lg p-3">
-                                <p className="text-sm text-shnoor-indigo whitespace-pre-wrap">{feedback.feedback_text}</p>
-                              </div>
-                            )}
-
-                            {!feedback.rating && !feedback.difficulty && !feedback.feedback_text && (
-                              <p className="text-sm text-shnoor-soft italic">No detailed feedback provided</p>
-                            )}
+                            <div>
+                              <textarea
+                                value={role.jobDescription}
+                                onChange={(e) => handleJobRoleChange(index, 'jobDescription', e.target.value)}
+                                rows={4}
+                                className="w-full px-4 py-3 border border-shnoor-light rounded-xl focus:ring-4 focus:ring-shnoor-mist focus:border-shnoor-indigo bg-white text-shnoor-navy resize-none"
+                                placeholder="Enter job description, requirements, responsibilities..."
+                              />
+                            </div>
                           </div>
                         ))}
                       </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        ) : (
-          /* List View: All Exams */
-          <>
-            {activeTab === 'exams' && (
-              <div className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-light overflow-hidden">
-                <div className="p-4 sm:p-6">
-                  <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 space-y-4 sm:space-y-0">
-                    <div>
-                      <h2 className="text-2xl font-bold text-shnoor-navy flex items-center">
-                        <FileSpreadsheet className="mr-2 text-shnoor-indigo sm:size-7" size={24} />
-                        Exams
-                      </h2>
-                      <p className="text-xs sm:text-sm text-shnoor-indigoMedium mt-1">Manage all your exams and view results</p>
-                    </div>
-                    <button
-                      onClick={() => setShowCreateTest(true)}
-                      className="w-full sm:w-auto flex items-center justify-center space-x-2 px-4 py-2 bg-shnoor-indigo hover:bg-shnoor-navy text-white rounded-lg transition-colors shadow-[0_8px_30px_rgba(14,14,39,0.06)] font-semibold"
-                    >
-                      <Plus size={20} />
-                      <span>Create Test</span>
-                    </button>
-                  </div>
+                    ) : (
+                      <>
+                        <div>
+                          <label className="block text-sm font-bold text-shnoor-navy mb-2">
+                            Job Role
+                          </label>
+                          <div className="px-4 py-3 bg-shnoor-lavender rounded-xl border border-shnoor-light">
+                            <p className="text-shnoor-navy font-semibold">
+                              {jobRoles[selectedJobRoleIndex]?.jobRole || 'Not specified'}
+                            </p>
+                          </div>
+                        </div>
 
-                  {loading ? (
-                    <div className="flex justify-center items-center py-12">
-                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-shnoor-indigo"></div>
-                      <span className="ml-3 text-shnoor-indigoMedium">Loading...</span>
-                    </div>
-                  ) : tests.length === 0 ? (
-                    <div className="text-center py-12 text-shnoor-indigoMedium">
-                      <FileSpreadsheet className="mx-auto mb-3 text-shnoor-mist" size={48} />
-                      <p className="font-medium">No exams found</p>
-                      <p className="text-sm mt-1">Click "Create Test" to add your first exam</p>
-                    </div>
+                        <div>
+                          <label className="block text-sm font-bold text-shnoor-navy mb-2">
+                            Job Description
+                          </label>
+                          <div className="px-4 py-3 bg-shnoor-lavender rounded-xl border border-shnoor-light max-h-96 overflow-y-auto">
+                            <p className="text-shnoor-indigoMedium whitespace-pre-wrap">
+                              {jobRoles[selectedJobRoleIndex]?.jobDescription || 'No description provided'}
+                            </p>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </>
+                )}
+                </div>
+
+                {/* Modal Footer */}
+                <div className="p-6 border-t border-shnoor-light flex justify-end space-x-3">
+                  {isEditingJob ? (
+                    <>
+                      <button
+                        onClick={() => {
+                          setIsEditingJob(false);
+                          handleViewJob(selectedJobTest); // Reload original data
+                        }}
+                        className="px-6 py-3 bg-shnoor-light hover:bg-shnoor-lavender text-shnoor-navy rounded-xl font-medium transition-colors"
+                        disabled={isSavingJob}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleSaveJob}
+                        disabled={isSavingJob}
+                        className="px-6 py-3 bg-shnoor-indigo hover:bg-shnoor-navy text-white rounded-xl font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                      >
+                        {isSavingJob && (
+                          <Loader2 className="animate-spin" size={16} />
+                        )}
+                        <span>{isSavingJob ? 'Saving...' : 'Save Changes'}</span>
+                      </button>
+                    </>
                   ) : (
                     <>
-                      <ExamSearchFilter
-                        onSearchChange={setSearchTerm}
-                        onFilterChange={setFilters}
-                        onSortChange={setSortBy}
-                        showPublishedFilter={true}
-                        showAttemptedFilter={true}
-                        resultCount={filteredTests.length}
-                        sortOptions={[
-                          { value: 'latest', label: 'Latest Created' },
-                          { value: 'oldest', label: 'Oldest Created' },
-                          { value: 'most-attempted', label: 'Most Attempted' },
-                          { value: 'duration-asc', label: 'Shortest Duration' },
-                          { value: 'duration-desc', label: 'Longest Duration' }
-                        ]}
-                      />
-
-                      {filteredTests.length === 0 ? (
-                        <div className="text-center py-12 text-shnoor-indigoMedium">
-                          <FileSpreadsheet className="mx-auto mb-3 text-shnoor-mist" size={48} />
-                          <p className="font-medium">No exams match your filters</p>
-                          <p className="text-sm mt-1">Try adjusting your search or filters</p>
-                        </div>
-                      ) : (
-                        <>
-                          {/* Bulk Actions Bar */}
-                          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 p-4 bg-white rounded-xl border border-shnoor-light space-y-3 sm:space-y-0">
-                            <label className="flex items-center space-x-3 cursor-pointer">
-                              <input
-                                type="checkbox"
-                                checked={selectedTests.length === filteredTests.length && filteredTests.length > 0}
-                                onChange={toggleAllTests}
-                                className="w-5 h-5 text-shnoor-indigo border-shnoor-mist rounded focus:ring-2 focus:ring-shnoor-indigo"
-                              />
-                              <span className="text-sm font-bold text-shnoor-indigo">
-                                {selectedTests.length > 0 ? `${selectedTests.length} selected` : 'Select All'}
-                              </span>
-                            </label>
-                            {selectedTests.length > 0 && (
-                              <button
-                                onClick={handleBulkDeleteTests}
-                                className="w-full sm:w-auto px-4 py-2 bg-shnoor-danger hover:bg-shnoor-danger text-white rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
-                              >
-                                <Trash2 size={16} />
-                                <span>Delete {selectedTests.length} Test{selectedTests.length !== 1 ? 's' : ''}</span>
-                              </button>
-                            )}
-                          </div>
-
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {filteredTests.map((test) => (
-                              <div
-                                key={test.id}
-                                className="bg-white border border-shnoor-light rounded-xl p-6 hover:shadow-[0_8px_30px_rgba(14,14,39,0.06)] hover:border-shnoor-indigo transition-all group relative min-h-[400px] flex flex-col"
-                              >
-                                {/* Checkbox for selection */}
-                                <div className="absolute top-4 left-4 z-10">
-                                  <label onClick={(e) => e.stopPropagation()}>
-                                    <input
-                                      type="checkbox"
-                                      checked={selectedTests.includes(test.id)}
-                                      onChange={() => toggleTestSelection(test.id)}
-                                      className="w-5 h-5 text-shnoor-indigo border-shnoor-mist rounded focus:ring-2 focus:ring-shnoor-indigo cursor-pointer"
-                                    />
-                                  </label>
-                                </div>
-
-                                {/* Status Badge and 3-Dot Menu */}
-                                <div className="absolute top-4 right-4 flex items-center space-x-2 z-10">
-                                  {test.status === 'published' ? (
-                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-shnoor-successLight text-shnoor-success">
-                                      <CheckCircle size={12} className="mr-1" />
-                                      Published
-                                    </span>
-                                  ) : test.status === 'archived' ? (
-                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-shnoor-dangerLight text-shnoor-danger">
-                                      <XCircle size={12} className="mr-1" />
-                                      Archived
-                                    </span>
-                                  ) : (
-                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-shnoor-lavender opacity-80 text-shnoor-navy">
-                                      Draft
-                                    </span>
-                                  )}
-
-                                  {/* 3-Dot Menu */}
-                                  <div className="relative">
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setOpenMenuId(openMenuId === test.id ? null : test.id);
-                                      }}
-                                      className="p-1.5 bg-shnoor-lavender opacity-80 hover:bg-shnoor-light text-shnoor-indigoMedium hover:text-shnoor-navy rounded-lg transition-colors"
-                                      title="More options"
-                                    >
-                                      <MoreVertical size={14} />
-                                    </button>
-
-                                    {/* Dropdown Menu */}
-                                    {openMenuId === test.id && (
-                                      <div className="absolute right-0 mt-2 w-48 bg-white border border-shnoor-light rounded-lg shadow-[0_8px_30px_rgba(14,14,39,0.06)] z-50">
-                                        {/* For draft tests, only show Clone option */}
-                                        {test.status === 'draft' ? (
-                                          <>
-                                            <button
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                handlePreviewQuestions(test);
-                                              }}
-                                              className="w-full px-4 py-2.5 text-left text-sm text-shnoor-indigo hover:bg-shnoor-lavender flex items-center space-x-2 transition-colors"
-                                            >
-                                              <Eye size={14} />
-                                              <span>Preview Questions</span>
-                                            </button>
-                                            <button
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleViewTestHistory(test);
-                                              }}
-                                              className="w-full px-4 py-2.5 text-left text-sm text-shnoor-indigo hover:bg-shnoor-lavender flex items-center space-x-2 transition-colors border-t border-shnoor-light"
-                                            >
-                                              <AlertCircle size={14} />
-                                              <span>Test History</span>
-                                            </button>
-                                            <button
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleOpenCloneModal(test);
-                                              }}
-                                              className="w-full px-4 py-2.5 text-left text-sm text-shnoor-indigo hover:bg-shnoor-lavender flex items-center space-x-2 transition-colors border-t border-shnoor-light"
-                                            >
-                                              <Copy size={14} />
-                                              <span>Clone Test</span>
-                                            </button>
-                                          </>
-                                        ) : (
-                                          <>
-                                            {/* View Details - Available for published tests */}
-                                            <button
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleViewTestDetails(test);
-                                              }}
-                                              className="w-full px-4 py-2.5 text-left text-sm text-shnoor-indigo hover:bg-shnoor-lavender flex items-center space-x-2 transition-colors"
-                                            >
-                                              <Eye size={14} />
-                                              <span>View Details</span>
-                                            </button>
-
-                                            {/* Preview Questions */}
-                                            <button
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                handlePreviewQuestions(test);
-                                              }}
-                                              className="w-full px-4 py-2.5 text-left text-sm text-shnoor-indigo hover:bg-shnoor-lavender flex items-center space-x-2 transition-colors border-t border-shnoor-light"
-                                            >
-                                              <FileSpreadsheet size={14} />
-                                              <span>Preview Questions</span>
-                                            </button>
-
-                                            {/* Test History */}
-                                            <button
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleViewTestHistory(test);
-                                              }}
-                                              className="w-full px-4 py-2.5 text-left text-sm text-shnoor-indigo hover:bg-shnoor-lavender flex items-center space-x-2 transition-colors border-t border-shnoor-light"
-                                            >
-                                              <AlertCircle size={14} />
-                                              <span>Test History</span>
-                                            </button>
-
-                                            {/* Clone Test */}
-                                            <button
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleOpenCloneModal(test);
-                                              }}
-                                              className="w-full px-4 py-2.5 text-left text-sm text-shnoor-indigo hover:bg-shnoor-lavender flex items-center space-x-2 transition-colors border-t border-shnoor-light"
-                                            >
-                                              <Copy size={14} />
-                                              <span>Clone Test</span>
-                                            </button>
-                                          </>
-                                        )}
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-
-                                {/* Header with Icon */}
-                                <div className="mt-10 mb-4">
-                                  <div className="h-12 w-12 bg-shnoor-lavender rounded-lg flex items-center justify-center text-shnoor-indigo font-bold text-xl group-hover:bg-shnoor-indigo group-hover:text-white transition-colors">
-                                    {test.name.charAt(0)}
-                                  </div>
-                                </div>
-
-                                {/* Exam Title */}
-                                <h3 className="font-bold text-shnoor-navy text-base md:text-lg mb-3 line-clamp-2 group-hover:text-shnoor-indigo transition-colors pr-2">
-                                  {test.name}
-                                </h3>
-
-                                {/* Exam Details */}
-                                <div className="space-y-2 mb-4">
-                                  <div className="flex items-center text-sm text-shnoor-indigoMedium flex-wrap">
-                                    <FileSpreadsheet size={16} className="mr-2 flex-shrink-0" />
-                                    <span className="break-words">{test.questions} Questions • {test.duration} mins</span>
-                                  </div>
-                                  <div className="flex items-center text-xs text-shnoor-indigoMedium">
-                                    <span>Created: {test.date}</span>
-                                  </div>
-                                </div>
-
-                                {/* Stats */}
-                                <div className="grid grid-cols-2 gap-3 pt-4 border-t border-shnoor-light mb-4">
-                                  <div className="text-center p-2">
-                                    <div className="flex items-center justify-center mb-1">
-                                      <Users size={16} className="text-shnoor-indigoMedium mr-1 flex-shrink-0" />
-                                      <span className="text-lg font-bold text-shnoor-navy">{test.attempts}</span>
-                                    </div>
-                                    <p className="text-xs text-shnoor-indigoMedium">Attempted</p>
-                                  </div>
-                                  <div className="text-center p-2">
-                                    <div className="flex items-center justify-center mb-1">
-                                      <CheckCircle size={16} className="text-shnoor-success mr-1 flex-shrink-0" />
-                                      <span className="text-lg font-bold text-shnoor-success">{test.passedCount || 0}</span>
-                                    </div>
-                                    <p className="text-xs text-shnoor-indigoMedium">Passed ({test.passRate || 0}%)</p>
-                                  </div>
-                                </div>
-
-                                {/* Action Buttons */}
-                                <div className="flex items-center space-x-2 pt-4 border-t border-shnoor-light mt-auto">
-                                  {test.status === 'draft' ? (
-                                    <>
-                                      <button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          setEditingTest(test);
-                                          setShowCreateTest(true);
-                                        }}
-                                        className="flex-1 py-2.5 px-3 bg-shnoor-lavender text-shnoor-indigo hover:bg-shnoor-navy hover:text-white rounded-lg text-sm font-medium transition-colors min-h-[44px] flex items-center justify-center"
-                                        title="View Test"
-                                      >
-                                        <Eye size={18} className="mr-1 flex-shrink-0" />
-                                        <span className="truncate">View</span>
-                                      </button>
-                                      <button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleTogglePublish(test.id, test.status);
-                                        }}
-                                        className="flex-1 py-2.5 px-3 bg-shnoor-successLight text-shnoor-success hover:bg-shnoor-success hover:text-white rounded-lg text-sm font-medium transition-colors min-h-[44px] flex items-center justify-center"
-                                        title="Publish Test"
-                                      >
-                                        <CheckCircle size={18} className="mr-1 flex-shrink-0" />
-                                        <span className="truncate">Publish</span>
-                                      </button>
-                                      <button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleDeleteTest(test.id);
-                                        }}
-                                        className="p-2.5 text-shnoor-danger hover:bg-shnoor-dangerLight rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
-                                        title="Delete Test"
-                                      >
-                                        <Trash2 size={18} />
-                                      </button>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          setSelectedExamId(test.id);
-                                        }}
-                                        className="flex-1 py-2.5 px-3 bg-shnoor-lavender text-shnoor-indigo hover:bg-shnoor-indigo hover:text-white rounded-lg text-sm font-medium transition-colors min-h-[44px] flex items-center justify-center"
-                                        title="View Results"
-                                      >
-                                        <Eye size={18} className="mr-1 flex-shrink-0" />
-                                        <span className="truncate">View</span>
-                                      </button>
-                                      <button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleDeleteTest(test.id);
-                                        }}
-                                        className="p-2.5 text-shnoor-danger hover:bg-shnoor-dangerLight rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
-                                        title="Delete Test"
-                                      >
-                                        <Trash2 size={18} />
-                                      </button>
-                                    </>
-                                  )}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </>
-                      )}
+                      <button
+                        onClick={() => setShowJobModal(false)}
+                        className="px-6 py-3 bg-shnoor-light hover:bg-shnoor-lavender text-shnoor-navy rounded-xl font-medium transition-colors"
+                      >
+                        Close
+                      </button>
+                      <button
+                        onClick={() => setIsEditingJob(true)}
+                        className="px-6 py-3 bg-shnoor-indigo hover:bg-shnoor-navy text-white rounded-xl font-medium transition-colors flex items-center space-x-2"
+                        title="Edit Roles"
+                      >
+                        <Pencil size={18} />
+                        <span>Edit</span>
+                      </button>
                     </>
                   )}
                 </div>
               </div>
-            )}
+            </div>
+          )}
 
-            {activeTab === 'institutes' && (
-              <div className="space-y-6">
-                <div className="admin-surface-card bg-white rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-light p-4 sm:p-8">
-                  <div className="mb-6 sm:mb-8">
-                    <h2 className="text-2xl sm:text-3xl font-bold text-shnoor-navy mb-2 flex items-center">
-                      <Building2 className="mr-2 sm:mr-3 text-shnoor-indigo h-6 w-6 sm:h-8 sm:w-8" />
-                      Manage Institutes
-                    </h2>
-                    <p className="text-sm sm:text-base text-shnoor-indigoMedium ml-8 sm:ml-11">Add, view, and manage institutes and their students</p>
+          {/* Assigned Tests Modal */}
+          {showAssignedTestsModal && selectedInstituteForTests && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+                <div className="bg-gradient-to-r from-shnoor-indigo to-shnoor-navy px-6 py-4 flex justify-between items-center flex-shrink-0">
+                  <div>
+                    <h3 className="text-xl font-bold text-white">{selectedInstituteForTests.display_name}</h3>
+                    <p className="text-shnoor-lavender text-sm mt-1">Assigned Tests</p>
                   </div>
+                  <button
+                    onClick={() => {
+                      setShowAssignedTestsModal(false);
+                      setSelectedTestsForUnassign([]);
+                    }}
+                    className="text-white hover:bg-white/20 rounded-full p-2 transition-colors"
+                  >
+                    <X size={24} />
+                  </button>
+                </div>
 
-                  {/* Add Institute Form */}
-                  <div className="admin-subsurface-card mb-6 sm:mb-8 p-4 sm:p-6 bg-white rounded-2xl border border-shnoor-light shadow-[0_8px_30px_rgba(14,14,39,0.06)]">
-                    <label className="text-sm font-bold text-shnoor-navy mb-3 flex items-center">
-                      <Plus size={18} className="mr-2 text-shnoor-indigo" />
-                      Add New Institute
+                <div className="p-6 space-y-6 overflow-y-auto flex-1">
+                  {/* Assign New Test */}
+                  <div className="p-4 bg-shnoor-lavender rounded-xl border border-shnoor-light">
+                    <label className="block text-sm font-bold text-shnoor-navy mb-3">
+                      Assign New Test to Institute
                     </label>
-                    <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
-                      <input
-                        type="text"
-                        value={newInstituteName}
-                        onChange={(e) => setNewInstituteName(e.target.value)}
-                        placeholder="Enter institute name"
-                        className="flex-1 px-5 py-4 border border-shnoor-light rounded-xl focus:ring-4 focus:ring-shnoor-mist focus:border-shnoor-indigo bg-white text-shnoor-navy font-medium shadow-[0_8px_30px_rgba(14,14,39,0.06)]"
-                        onKeyPress={(e) => {
-                          if (e.key === 'Enter') {
-                            handleAddInstitute();
-                          }
-                        }}
-                      />
+                    <div className="relative space-y-3">
+                      {/* Custom Dropdown Button */}
                       <button
-                        onClick={handleAddInstitute}
-                        disabled={isAddingInstitute || !newInstituteName.trim()}
-                        className={`w-full sm:w-auto px-6 py-4 rounded-xl font-bold transition-all flex items-center justify-center space-x-2 shadow-[0_8px_30px_rgba(14,14,39,0.06)] ${!isAddingInstitute && newInstituteName.trim()
-                          ? 'bg-shnoor-indigo hover:bg-shnoor-navy text-white hover:shadow-[0_8px_30px_rgba(14,14,39,0.06)] transform hover:-translate-y-0.5'
+                        type="button"
+                        onClick={() => setIsInstituteTestDropdownOpen(!isInstituteTestDropdownOpen)}
+                        className="w-full px-4 py-3 border border-shnoor-light rounded-xl bg-white text-shnoor-navy font-medium transition-all flex items-center justify-between hover:border-shnoor-indigo focus:ring-4 focus:ring-shnoor-lavender focus:border-shnoor-indigo"
+                      >
+                        <span className={selectedTestsForInstitute.length === 0 ? 'text-shnoor-indigoMedium' : 'text-shnoor-navy'}>
+                          {selectedTestsForInstitute.length === 0
+                            ? '-- Select a test --'
+                            : `${selectedTestsForInstitute.length} test${selectedTestsForInstitute.length !== 1 ? 's' : ''} selected`
+                          }
+                        </span>
+                        <ChevronDown size={20} className={`transition-transform ${isInstituteTestDropdownOpen ? 'rotate-180' : ''}`} />
+                      </button>
+
+                      {/* Dropdown Menu with Checkboxes */}
+                      {isInstituteTestDropdownOpen && (
+                        <div className="absolute z-50 w-full mt-2 bg-white border border-shnoor-light rounded-xl shadow-lg max-h-64 overflow-y-auto">
+                          {tests.filter(test => test.status === 'published').length === 0 ? (
+                            <div className="p-4 text-center text-shnoor-indigoMedium text-sm flex items-center justify-center">
+                              <AlertCircle size={16} className="mr-1" />
+                              No published tests available. Please publish a test first.
+                            </div>
+                          ) : (
+                            <div className="py-2">
+                              {tests.filter(test => test.status === 'published').map((test) => (
+                                <label
+                                  key={test.id}
+                                  className="flex items-center space-x-3 px-4 py-3 hover:bg-shnoor-lavender cursor-pointer transition-colors"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={selectedTestsForInstitute.includes(test.id)}
+                                    onChange={(e) => {
+                                      if (e.target.checked) {
+                                        setSelectedTestsForInstitute([...selectedTestsForInstitute, test.id]);
+                                      } else {
+                                        setSelectedTestsForInstitute(selectedTestsForInstitute.filter(id => id !== test.id));
+                                      }
+                                    }}
+                                    className="w-4 h-4 text-shnoor-indigo border-shnoor-mist rounded focus:ring-2 focus:ring-shnoor-indigo"
+                                  />
+                                  <span className="text-sm font-medium text-shnoor-navy flex-1">
+                                    {test.name} <span className="text-shnoor-indigoMedium">({test.questions} questions)</span>
+                                  </span>
+                                </label>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Selected tests count */}
+                      {selectedTestsForInstitute.length > 0 && (
+                        <p className="text-xs text-shnoor-indigo mt-2 font-medium">
+                          {selectedTestsForInstitute.length} test{selectedTestsForInstitute.length !== 1 ? 's' : ''} selected
+                        </p>
+                      )}
+
+                      <button
+                        onClick={() => {
+                          handleAssignTestToInstitute();
+                          setIsInstituteTestDropdownOpen(false);
+                        }}
+                        disabled={selectedTestsForInstitute.length === 0 || isAssigningTestToInstitute}
+                        className={`w-full px-6 py-3 rounded-xl font-bold transition-all flex items-center justify-center space-x-2 ${selectedTestsForInstitute.length > 0 && !isAssigningTestToInstitute
+                          ? 'bg-shnoor-indigo hover:bg-shnoor-navy text-white shadow-lg hover:-translate-y-0.5'
                           : 'bg-shnoor-light text-shnoor-soft cursor-not-allowed'
                           }`}
                       >
-                        {isAddingInstitute && (
-                          <Loader2 className="animate-spin" size={20} />
+                        {isAssigningTestToInstitute && (
+                          <Loader2 className="animate-spin" size={16} />
                         )}
-                        <Plus size={20} />
-                        <span>{isAddingInstitute ? 'Adding...' : 'Add'}</span>
+                        <span>
+                          {isAssigningTestToInstitute
+                            ? 'Assigning...'
+                            : selectedTestsForInstitute.length > 0
+                              ? `Assign ${selectedTestsForInstitute.length} Test${selectedTestsForInstitute.length !== 1 ? 's' : ''}`
+                              : 'Select Tests to Assign'
+                          }
+                        </span>
                       </button>
                     </div>
                   </div>
 
-                  {/* Institutes List */}
-                  <div className="space-y-4">
-                    {/* Bulk Test Assignment Section - shown when institutes are selected */}
-                    {selectedInstitutes.length > 0 && (
-                      <div className="admin-highlight-panel mb-6 p-4 sm:p-6 bg-shnoor-lavender rounded-2xl border-2 border-shnoor-indigo">
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 space-y-2 sm:space-y-0">
-                          <h3 className="text-base sm:text-lg font-bold text-shnoor-navy flex items-center">
-                            <FileSpreadsheet className="mr-2 text-shnoor-indigo shrink-0" size={22} />
-                            <span>Assign Test to Selected Institutes</span>
-                          </h3>
-                          <button
-                            onClick={() => setSelectedInstitutes([])}
-                            className="text-sm text-shnoor-indigoMedium hover:text-shnoor-navy font-medium self-end sm:self-auto"
-                          >
-                            Clear Selection
-                          </button>
+                  {/* Assigned Tests List */}
+                  <div>
+                    <div className="flex justify-between items-center mb-3">
+                      <h4 className="text-sm font-bold text-shnoor-navy">Currently Assigned Tests</h4>
+                      {selectedTestsForUnassign.length > 0 && (
+                        <button
+                          onClick={handleBulkUnassignTests}
+                          disabled={isUnassigningTests}
+                          className="px-4 py-2 bg-shnoor-indigo hover:bg-shnoor-navy text-white rounded-lg font-medium transition-all shadow-lg hover:-translate-y-0.5 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {isUnassigningTests ? (
+                            <>
+                              <Loader2 className="animate-spin" size={16} />
+                              <span>Unassigning...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Trash2 size={16} />
+                              <span>Unassign {selectedTestsForUnassign.length} Selected</span>
+                            </>
+                          )}
+                        </button>
+                      )}
+                    </div>
+                    {isLoadingAssignedTests ? (
+                      <div className="flex items-center justify-center py-8">
+                        <Loader2 className="animate-spin text-shnoor-indigo" size={32} />
+                        <span className="ml-3 text-shnoor-indigoMedium">Loading...</span>
+                      </div>
+                    ) : assignedTests.length === 0 ? (
+                      <div className="text-center py-8 bg-shnoor-lavender rounded-xl border border-shnoor-light">
+                        <FileSpreadsheet className="mx-auto mb-2 text-shnoor-mist" size={48} />
+                        <p className="text-shnoor-indigoMedium">No tests assigned yet</p>
+                      </div>
+                    ) : (
+                      <>
+                        {/* Select All Checkbox */}
+                        <div className="flex items-center space-x-3 mb-3 p-3 bg-white rounded-lg">
+                          <input
+                            type="checkbox"
+                            checked={selectedTestsForUnassign.length === assignedTests.length && assignedTests.length > 0}
+                            onChange={toggleAllTestsForUnassign}
+                            className="w-5 h-5 text-shnoor-indigo border-shnoor-mist rounded focus:ring-2 focus:ring-shnoor-lavender"
+                          />
+                          <span className="text-sm font-bold text-shnoor-indigo">
+                            {selectedTestsForUnassign.length > 0 ? `${selectedTestsForUnassign.length} selected` : 'Select All'}
+                          </span>
                         </div>
 
-                        <div className="space-y-4">
-                          <div>
-                            <p className="text-sm text-shnoor-navy mb-2">
-                              <span className="font-bold">{selectedInstitutes.length}</span> institute{selectedInstitutes.length !== 1 ? 's' : ''} selected
-                            </p>
-                            <div className="flex flex-wrap gap-2">
-                              {selectedInstitutes.map(instId => {
-                                const inst = allInstitutes.find(i => i.id === instId);
-                                return inst ? (
-                                  <span key={instId} className="px-3 py-1 bg-white rounded-lg text-xs font-medium text-shnoor-navy border border-shnoor-light">
-                                    {inst.display_name}
-                                  </span>
-                                ) : null;
-                              })}
+                        <div className="space-y-2 max-h-96 overflow-y-auto">
+                          {assignedTests.map((test) => (
+                            <div
+                              key={test.id}
+                              className={`flex items-center justify-between p-4 border rounded-xl hover:shadow-md transition-all ${selectedTestsForUnassign.includes(test.id)
+                                ? 'bg-shnoor-lavender border-shnoor-indigo'
+                                : 'bg-white border-shnoor-light'
+                                }`}
+                            >
+                              <div className="flex items-center space-x-3 flex-1">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedTestsForUnassign.includes(test.id)}
+                                  onChange={() => toggleTestForUnassign(test.id)}
+                                  className="w-5 h-5 text-shnoor-indigo border-shnoor-mist rounded focus:ring-2 focus:ring-shnoor-lavender"
+                                />
+                                <div className="flex-1">
+                                  <h5 className="font-bold text-shnoor-navy">{test.title}</h5>
+                                  <p className="text-sm text-shnoor-indigoMedium">
+                                    {test.question_count} questions • {test.duration_minutes} mins
+                                    {test.is_institute_level && (
+                                      <span className="ml-2 px-2 py-0.5 bg-shnoor-lavender text-shnoor-indigo rounded text-xs font-medium">
+                                        Institute Level
+                                      </span>
+                                    )}
+                                  </p>
+                                </div>
+                              </div>
+                              <button
+                                onClick={() => handleUnassignTestFromInstitute(test.id, test.title)}
+                                className="p-2 text-shnoor-indigo hover:bg-shnoor-lavender rounded-lg transition-colors"
+                                title="Unassign Test"
+                              >
+                                <Trash2 size={18} />
+                              </button>
                             </div>
-                          </div>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
 
+                <div className="p-6 border-t border-shnoor-light flex justify-end">
+                  <button
+                    onClick={() => {
+                      setShowAssignedTestsModal(false);
+                      setSelectedTestsForUnassign([]);
+                    }}
+                    className="px-6 py-3 bg-shnoor-light hover:bg-shnoor-mist text-shnoor-navy rounded-xl font-medium transition-colors"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Student Management Modal */}
+          {showStudentManagementModal && selectedInstituteForStudents && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+                <div className="bg-gradient-to-r from-shnoor-indigo to-shnoor-navy px-6 py-4 flex justify-between items-center flex-shrink-0">
+                  <div>
+                    <h3 className="text-xl font-bold text-white">{selectedInstituteForStudents.display_name}</h3>
+                    <p className="text-shnoor-lavender text-sm mt-1">Manage Students</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setShowStudentManagementModal(false);
+                      setSelectedStudentsForDelete([]);
+                      setSelectedTestsForStudentModal([]);
+                      setStudentSearchTerm('');
+                    }}
+                    className="text-white hover:bg-white/20 rounded-full p-2 transition-colors"
+                  >
+                    <X size={24} />
+                  </button>
+                </div>
+
+                <div className="p-6 space-y-6 overflow-y-auto flex-1">
+                  {/* Add Student Form */}
+                  {showAddStudentForm ? (
+                    <div className="p-4 bg-shnoor-lavender rounded-xl border border-shnoor-light">
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="text-sm font-bold text-shnoor-navy">Add New Student</h4>
+                        <button
+                          onClick={() => setShowAddStudentForm(false)}
+                          className="text-shnoor-indigoMedium hover:text-shnoor-indigo transition-colors"
+                        >
+                          <X size={20} />
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                        <input
+                          type="text"
+                          placeholder="Full Name *"
+                          value={newStudentData.full_name}
+                          onChange={(e) => setNewStudentData({ ...newStudentData, full_name: e.target.value })}
+                          className="px-4 py-3 border border-shnoor-light rounded-xl focus:ring-4 focus:ring-shnoor-lavender focus:border-shnoor-indigo bg-white text-shnoor-navy transition-all"
+                        />
+                        <input
+                          type="email"
+                          placeholder="Email *"
+                          value={newStudentData.email}
+                          onChange={(e) => setNewStudentData({ ...newStudentData, email: e.target.value })}
+                          className="px-4 py-3 border border-shnoor-light rounded-xl focus:ring-4 focus:ring-shnoor-lavender focus:border-shnoor-indigo bg-white text-shnoor-navy transition-all"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Roll Number (Optional)"
+                          value={newStudentData.roll_number}
+                          onChange={(e) => setNewStudentData({ ...newStudentData, roll_number: e.target.value })}
+                          className="px-4 py-3 border border-shnoor-light rounded-xl focus:ring-4 focus:ring-shnoor-lavender focus:border-shnoor-indigo bg-white text-shnoor-navy transition-all"
+                        />
+                        <input
+                          type="text"
+                          value={newStudentData.institute}
+                          disabled
+                          className="px-4 py-3 border border-shnoor-light rounded-xl bg-shnoor-lavender text-shnoor-indigoMedium"
+                        />
+                      </div>
+                      <div className="flex justify-end space-x-2">
+                        <button
+                          onClick={() => setShowAddStudentForm(false)}
+                          className="px-4 py-2 bg-shnoor-light hover:bg-shnoor-mist text-shnoor-navy rounded-lg font-medium transition-colors"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={handleAddStudent}
+                          disabled={isAddingStudent}
+                          className={`px-4 py-2 rounded-lg font-medium transition-all flex items-center space-x-2 ${!isAddingStudent
+                            ? 'bg-shnoor-indigo hover:bg-shnoor-navy text-white shadow-lg hover:-translate-y-0.5'
+                            : 'bg-shnoor-light text-shnoor-soft cursor-not-allowed'
+                            }`}
+                        >
+                          {isAddingStudent && (
+                            <Loader2 className="animate-spin" size={16} />
+                          )}
+                          <span>{isAddingStudent ? 'Adding...' : 'Add Student'}</span>
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center mb-4">
+                        <h4 className="text-sm font-bold text-shnoor-navy">Students List</h4>
+                        <div className="flex space-x-2 items-center">
                           <div className="relative">
-                            <label className="block text-sm font-bold text-shnoor-navy mb-2">
-                              Select Test to Assign
-                            </label>
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-shnoor-indigoMedium" size={16} />
+                            <input
+                              type="text"
+                              placeholder="Search students..."
+                              value={studentSearchTerm}
+                              onChange={(e) => setStudentSearchTerm(e.target.value)}
+                              className="w-48 pl-9 pr-3 py-2 text-sm border border-shnoor-light rounded-lg focus:ring-2 focus:ring-shnoor-lavender focus:border-shnoor-indigo bg-white text-shnoor-navy transition-all"
+                            />
+                          </div>
+                          <button
+                            onClick={() => setShowAddStudentForm(true)}
+                            className="px-4 py-2 bg-shnoor-indigo hover:bg-shnoor-navy text-white rounded-lg font-medium transition-all shadow-lg hover:-translate-y-0.5 flex items-center space-x-2"
+                          >
+                            <Plus size={16} />
+                            <span>Add Student</span>
+                          </button>
+                          {selectedStudentsForDelete.length > 0 && (
+                            <button
+                              onClick={handleBulkDeleteStudents}
+                              className="px-4 py-2 bg-shnoor-indigo hover:bg-shnoor-navy text-white rounded-lg font-medium transition-all shadow-lg hover:-translate-y-0.5 flex items-center space-x-2"
+                            >
+                              <Trash2 size={16} />
+                              <span>Delete {selectedStudentsForDelete.length} Selected</span>
+                            </button>
+                          )}
+                          {instituteStudentsForManagement.length > 0 && (
+                            <button
+                              onClick={handleDeleteAllStudents}
+                              className="px-4 py-2 bg-shnoor-indigo hover:bg-shnoor-navy text-white rounded-lg font-medium transition-all shadow-lg hover:-translate-y-0.5 flex items-center space-x-2"
+                            >
+                              <Trash2 size={16} />
+                              <span>Delete All</span>
+                            </button>
+                          )}
+                        </div>
+                      </div>
 
+                      {/* Test Assignment Section */}
+                      {selectedStudentsForDelete.length > 0 && (
+                        <div className="p-4 bg-shnoor-lavender rounded-xl border border-shnoor-light">
+                          <h5 className="text-sm font-bold text-shnoor-navy mb-3">
+                            Assign Test to {selectedStudentsForDelete.length} Selected Student{selectedStudentsForDelete.length !== 1 ? 's' : ''}
+                          </h5>
+                          <div className="relative space-y-3">
                             {/* Custom Dropdown Button */}
                             <button
                               type="button"
-                              onClick={() => setIsTestDropdownOpen(!isTestDropdownOpen)}
+                              onClick={() => setIsStudentTestDropdownOpen(!isStudentTestDropdownOpen)}
                               className="w-full px-4 py-3 border border-shnoor-light rounded-xl bg-white text-shnoor-navy font-medium transition-all flex items-center justify-between hover:border-shnoor-indigo focus:ring-4 focus:ring-shnoor-lavender focus:border-shnoor-indigo"
                             >
-                              <span className={selectedTestsForMultipleInstitutes.length === 0 ? 'text-shnoor-indigoMedium' : 'text-shnoor-navy'}>
-                                {selectedTestsForMultipleInstitutes.length === 0
+                              <span className={selectedTestsForStudentModal.length === 0 ? 'text-shnoor-indigoMedium' : 'text-shnoor-navy'}>
+                                {selectedTestsForStudentModal.length === 0
                                   ? '-- Select a test --'
-                                  : `${selectedTestsForMultipleInstitutes.length} test${selectedTestsForMultipleInstitutes.length !== 1 ? 's' : ''} selected`
+                                  : `${selectedTestsForStudentModal.length} test${selectedTestsForStudentModal.length !== 1 ? 's' : ''} selected`
                                 }
                               </span>
-                              <ChevronDown size={20} className={`transition-transform ${isTestDropdownOpen ? 'rotate-180' : ''}`} />
+                              <ChevronDown size={20} className={`transition-transform ${isStudentTestDropdownOpen ? 'rotate-180' : ''}`} />
                             </button>
 
                             {/* Dropdown Menu with Checkboxes */}
-                            {isTestDropdownOpen && (
-                              <div className="admin-dropdown-menu absolute z-50 w-full mt-2 bg-white border border-shnoor-light rounded-xl shadow-lg max-h-64 overflow-y-auto">
+                            {isStudentTestDropdownOpen && (
+                              <div className="absolute z-50 w-full mt-2 bg-white border border-shnoor-light rounded-xl shadow-lg max-h-64 overflow-y-auto">
                                 {tests.filter(test => test.status === 'published').length === 0 ? (
-                                  <div className="p-4 text-center text-shnoor-indigoMedium text-sm">
-                                    No published tests available
+                                  <div className="p-4 text-center text-shnoor-indigoMedium text-sm flex items-center justify-center">
+                                    <AlertCircle size={16} className="mr-1" />
+                                    No published tests available. Please publish a test first.
                                   </div>
                                 ) : (
                                   <div className="py-2">
@@ -3454,18 +4738,18 @@ const AdminDashboard = () => {
                                       >
                                         <input
                                           type="checkbox"
-                                          checked={selectedTestsForMultipleInstitutes.includes(test.id)}
+                                          checked={selectedTestsForStudentModal.includes(test.id)}
                                           onChange={(e) => {
                                             if (e.target.checked) {
-                                              setSelectedTestsForMultipleInstitutes([...selectedTestsForMultipleInstitutes, test.id]);
+                                              setSelectedTestsForStudentModal([...selectedTestsForStudentModal, test.id]);
                                             } else {
-                                              setSelectedTestsForMultipleInstitutes(selectedTestsForMultipleInstitutes.filter(id => id !== test.id));
+                                              setSelectedTestsForStudentModal(selectedTestsForStudentModal.filter(id => id !== test.id));
                                             }
                                           }}
                                           className="w-4 h-4 text-shnoor-indigo border-shnoor-mist rounded focus:ring-2 focus:ring-shnoor-indigo"
                                         />
                                         <span className="text-sm font-medium text-shnoor-navy flex-1">
-                                          {test.name}
+                                          {test.name} <span className="text-shnoor-indigoMedium">({test.questions} questions • {test.duration} mins)</span>
                                         </span>
                                       </label>
                                     ))}
@@ -3475,1598 +4759,475 @@ const AdminDashboard = () => {
                             )}
 
                             {/* Selected tests count */}
-                            {selectedTestsForMultipleInstitutes.length > 0 && (
+                            {selectedTestsForStudentModal.length > 0 && (
                               <p className="text-xs text-shnoor-indigo mt-2 font-medium">
-                                {selectedTestsForMultipleInstitutes.length} test{selectedTestsForMultipleInstitutes.length !== 1 ? 's' : ''} selected
+                                {selectedTestsForStudentModal.length} test{selectedTestsForStudentModal.length !== 1 ? 's' : ''} selected
                               </p>
                             )}
-                          </div>
 
-                          <button
-                            onClick={handleAssignTestToMultipleInstitutes}
-                            disabled={selectedTestsForMultipleInstitutes.length === 0 || isAssigningTestToMultipleInstitutes}
-                            className={`w-full px-6 py-4 rounded-xl font-bold transition-all flex items-center justify-center space-x-2 ${selectedTestsForMultipleInstitutes.length > 0 && !isAssigningTestToMultipleInstitutes
-                              ? 'bg-shnoor-indigo hover:bg-shnoor-navy text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
-                              : 'bg-shnoor-light text-shnoor-soft cursor-not-allowed'
-                              }`}
-                          >
-                            {isAssigningTestToMultipleInstitutes && (
-                              <Loader2 className="animate-spin mr-2" size={20} />
-                            )}
-                            <UserCheck size={22} />
-                            <span>
-                              {isAssigningTestToMultipleInstitutes
-                                ? 'Assigning...'
-                                : `Assign ${selectedTestsForMultipleInstitutes.length} Test${selectedTestsForMultipleInstitutes.length !== 1 ? 's' : ''} to ${selectedInstitutes.length} Institute${selectedInstitutes.length !== 1 ? 's' : ''}`
-                              }
-                            </span>
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 space-y-3 sm:space-y-0">
-                      <div className="flex items-center space-x-4">
-                        <h3 className="text-xl font-bold text-shnoor-navy flex items-center">
-                          <Building2 size={22} className="mr-2 text-shnoor-indigo" />
-                          All Institutes
-                        </h3>
-                        {allInstitutes.length > 0 && (
-                          <label className="flex items-center space-x-2 cursor-pointer px-3 py-1.5 bg-shnoor-lavender hover:bg-shnoor-light rounded-lg transition-colors border border-shnoor-light">
-                            <input
-                              type="checkbox"
-                              checked={selectedInstitutes.length === allInstitutes.length && allInstitutes.length > 0}
-                              ref={(el) => { if (el) el.indeterminate = selectedInstitutes.length > 0 && selectedInstitutes.length < allInstitutes.length; }}
-                              onChange={toggleAllInstitutes}
-                              className="w-4 h-4 text-shnoor-indigo border-shnoor-mist rounded focus:ring-2 focus:ring-shnoor-indigo"
-                            />
-                            <span className="text-sm font-bold text-shnoor-navy whitespace-nowrap">Select All</span>
-                          </label>
-                        )}
-                      </div>
-                      {allInstitutes.length > 0 && (
-                        <span className="text-sm text-shnoor-indigoMedium bg-shnoor-lavender px-3 py-1 rounded-full border border-shnoor-light">
-                          {allInstitutes.length} institute{allInstitutes.length !== 1 ? 's' : ''}
-                        </span>
-                      )}
-                    </div>
-
-                    {isLoadingAllInstitutes ? (
-                      <div className="flex items-center justify-center py-12 bg-white rounded-2xl border border-shnoor-light">
-                        <Loader2 className="animate-spin text-shnoor-indigo" size={32} />
-                        <span className="ml-3 text-shnoor-indigoMedium font-medium">Loading institutes...</span>
-                      </div>
-                    ) : allInstitutes.length === 0 ? (
-                      <div className="text-center py-16 bg-white rounded-2xl border border-shnoor-light">
-                        <Building2 className="mx-auto mb-4 text-shnoor-mist" size={64} />
-                        <p className="text-shnoor-navy font-medium text-lg">No institutes found</p>
-                        <p className="text-shnoor-indigoMedium text-sm mt-2">Add your first institute using the form above</p>
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {allInstitutes.map((institute) => {
-                          // Calculate effective status based on start time and deadline
-                          const now = new Date();
-                          const startTime = institute.registration_start_time ? new Date(institute.registration_start_time) : null;
-                          const deadline = institute.registration_deadline ? new Date(institute.registration_deadline) : null;
-                          const notYetOpen = startTime && now < startTime;
-                          const deadlinePassed = deadline && now > deadline;
-
-                          let effectiveStatus = institute.registration_status || 'open';
-                          let statusBadgeText = effectiveStatus;
-                          let statusBadgeColor = effectiveStatus === 'open'
-                            ? 'admin-status-pill is-open'
-                            : effectiveStatus === 'paused'
-                              ? 'admin-status-pill is-paused'
-                              : 'admin-status-pill is-closed';
-
-                          // Override if not yet open
-                          if (notYetOpen) {
-                            statusBadgeText = 'not yet open';
-                            statusBadgeColor = 'admin-status-pill is-not-yet-open';
-                          }
-                          // Override if deadline passed
-                          else if (deadlinePassed && effectiveStatus === 'open') {
-                            statusBadgeText = 'closed';
-                            statusBadgeColor = 'admin-status-pill is-closed';
-                          }
-
-                          const isInstituteSelected = selectedInstitutes.includes(institute.id);
-
-                          return (
-                            <div
-                              key={institute.id}
-                              className={`border rounded-2xl p-6 bg-white hover:shadow-[0_8px_30px_rgba(14,14,39,0.06)] transition-all ${isInstituteSelected ? 'border-shnoor-indigo border-2 bg-shnoor-indigo/5' : 'border-shnoor-light'
+                            <button
+                              onClick={() => {
+                                handleAssignTestInModal();
+                                setIsStudentTestDropdownOpen(false);
+                              }}
+                              disabled={selectedTestsForStudentModal.length === 0 || isAssigningTestInModal}
+                              className={`w-full px-6 py-3 rounded-xl font-bold transition-all flex items-center justify-center space-x-2 ${selectedTestsForStudentModal.length > 0 && !isAssigningTestInModal
+                                ? 'bg-shnoor-indigo hover:bg-shnoor-navy text-white shadow-lg hover:-translate-y-0.5'
+                                : 'bg-shnoor-light text-shnoor-soft cursor-not-allowed'
                                 }`}
                             >
-                              <div className="flex items-start space-x-3 mb-4">
-                                {/* Checkbox for multi-select */}
-                                <label className="flex items-center cursor-pointer mt-1">
-                                  <input
-                                    type="checkbox"
-                                    checked={isInstituteSelected}
-                                    onChange={() => toggleInstituteSelection(institute.id)}
-                                    className="w-5 h-5 text-shnoor-indigo border-shnoor-mist rounded focus:ring-2 focus:ring-shnoor-indigo"
-                                  />
-                                </label>
-
-                                <div className="flex-1">
-                                  <div className="flex items-center justify-between mb-2">
-                                    <h4 className="font-bold text-lg text-shnoor-navy">
-                                      {institute.display_name}
-                                    </h4>
-                                    {/* Registration Status Badge */}
-                                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${statusBadgeColor}`}>
-                                      {statusBadgeText}
-                                    </span>
-                                  </div>
-                                  <div className="space-y-1 text-sm text-shnoor-indigoMedium">
-                                    <p className="flex items-center">
-                                      <Users size={14} className="mr-2" />
-                                      {institute.student_count} student{institute.student_count !== 1 ? 's' : ''}
-                                    </p>
-                                    <p className="flex items-center">
-                                      <FileSpreadsheet size={14} className="mr-2" />
-                                      {institute.assigned_tests_count} test{institute.assigned_tests_count !== 1 ? 's' : ''} assigned
-                                    </p>
-                                    {institute.registration_start_time && (
-                                      <p className="flex items-center text-xs text-shnoor-indigoMedium">
-                                        <Calendar size={12} className="mr-2" />
-                                        Start: {new Date(institute.registration_start_time).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })}
-                                      </p>
-                                    )}
-                                    {institute.registration_deadline && (
-                                      <p className="flex items-center text-xs text-shnoor-indigoMedium">
-                                        <Calendar size={12} className="mr-2" />
-                                        Deadline: {new Date(institute.registration_deadline).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })}
-                                      </p>
-                                    )}
-                                  </div>
-
-                                  <div className="grid grid-cols-2 gap-2 mt-4">
-                                    <button
-                                      onClick={() => handleViewAssignedTests(institute)}
-                                      className="py-2 px-3 bg-shnoor-lavender text-shnoor-indigo hover:bg-shnoor-indigo hover:text-white rounded-lg text-sm font-medium transition-colors"
-                                    >
-                                      <FileSpreadsheet size={16} className="inline mr-1" />
-                                      Tests
-                                    </button>
-                                    <button
-                                      onClick={() => handleManageStudents(institute)}
-                                      className="py-2 px-3 bg-shnoor-successLight text-shnoor-success hover:bg-shnoor-success hover:text-white rounded-lg text-sm font-medium transition-colors"
-                                    >
-                                      <Users size={16} className="inline mr-1" />
-                                      Students
-                                    </button>
-                                    <button
-                                      onClick={() => {
-                                        setSelectedInstituteForRegistration(institute);
-                                        setShowRegistrationControlModal(true);
-                                      }}
-                                      className="py-2 px-3 bg-shnoor-lavender text-shnoor-indigo hover:bg-shnoor-indigo hover:text-white rounded-lg text-sm font-medium transition-colors"
-                                    >
-                                      <Calendar size={16} className="inline mr-1" />
-                                      Registration
-                                    </button>
-                                    <button
-                                      onClick={() => handleDeleteInstitute(institute.id, institute.display_name)}
-                                      className="py-2 px-3 text-shnoor-danger hover:bg-shnoor-dangerLight rounded-lg transition-colors text-sm font-medium"
-                                      title="Delete Institute"
-                                    >
-                                      <Trash2 size={16} className="inline mr-1" />
-                                      Delete
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Reports Tab */}
-            {activeTab === 'reports' && (
-              <div className="space-y-6">
-                <AdminReports />
-              </div>
-            )}
-
-            {/* Bulk Upload Students Tab */}
-            {activeTab === 'bulk-upload' && (
-              <div className="space-y-6">
-                <BulkStudentUpload clientId={viewAsClientId || null} />
-              </div>
-            )}
-
-            {/* Violations Tab */}
-            {activeTab === 'violations' && (
-              <div className="space-y-6">
-                {/* Header */}
-                <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-light p-4 sm:p-8 flex flex-col">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 space-y-4 sm:space-y-0">
-                    <div>
-                      <h2 className="text-2xl sm:text-3xl font-bold text-shnoor-navy flex items-center">
-                        <AlertCircle className="mr-2 sm:mr-3 text-shnoor-indigo h-6 w-6 sm:h-8 sm:w-8" />
-                        Violations
-                      </h2>
-                      <p className="text-sm sm:text-base text-shnoor-indigoMedium mt-1">Monitor detected suspicious activities during exams</p>
-                    </div>
-                    {selectedTestForViolations && violationsByStudent.length > 0 && (
-                      <button
-                        onClick={exportViolationsToExcel}
-                        className="w-full sm:w-auto flex items-center justify-center space-x-2 px-5 py-3 bg-shnoor-indigo hover:bg-shnoor-navy text-white rounded-xl transition-all shadow-[0_8px_30px_rgba(14,14,39,0.06)] hover:shadow-[0_8px_30px_rgba(14,14,39,0.12)] transform hover:-translate-y-0.5 font-semibold"
-                        title="Export Violations Report"
-                      >
-                        <Download size={20} />
-                        <span>Export Report</span>
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Test Selector */}
-                  <div className="mb-6">
-                    <label className="block text-sm font-bold text-shnoor-navy mb-2">
-                      Select Test to View Violations
-                    </label>
-                    <select
-                      value={selectedTestForViolations}
-                      onChange={(e) => setSelectedTestForViolations(e.target.value)}
-                      className="w-full px-4 py-3 border border-shnoor-light rounded-xl focus:ring-4 focus:ring-shnoor-lavender focus:border-shnoor-indigo bg-white text-shnoor-navy font-medium transition-all"
-                    >
-                      <option value="">-- Select a test --</option>
-                      {tests.map((test) => (
-                        <option key={test.id} value={test.id}>
-                          {test.name} ({test.attempts} attempts)
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {selectedTestForViolations && (
-                    <>
-                      {/* Flagged Students */}
-                      {flaggedStudents.length > 0 && (
-                        <div className="mb-6">
-                          <h3 className="text-lg font-bold text-shnoor-navy mb-4 flex items-center">
-                            <AlertCircle className="mr-2 text-shnoor-indigo" size={20} />
-                            Flagged Students (3+ High Severity Violations)
-                          </h3>
-                          <div className="space-y-3">
-                            {flaggedStudents.map((student) => (
-                              <div
-                                key={student.student_id}
-                                className="p-4 bg-shnoor-lavender border border-shnoor-light rounded-xl"
-                              >
-                                <div className="flex items-center justify-between">
-                                  <div className="flex-1">
-                                    <h4 className="font-bold text-shnoor-navy">{student.student_name}</h4>
-                                    <p className="text-sm text-shnoor-indigoMedium">{student.student_email}</p>
-                                  </div>
-                                  <div className="text-right">
-                                    <p className="text-2xl font-bold text-shnoor-indigo">{student.total_violations}</p>
-                                    <p className="text-xs text-shnoor-indigoMedium">Total Violations</p>
-                                  </div>
-                                </div>
-                                <div className="mt-3 flex space-x-4 text-sm">
-                                  <span className="px-3 py-1 bg-shnoor-indigo text-white rounded-full font-medium">
-                                    High: {student.high_severity_count}
-                                  </span>
-                                  <span className="px-3 py-1 bg-shnoor-indigoMedium text-white rounded-full font-medium">
-                                    Medium: {student.medium_severity_count}
-                                  </span>
-                                  <span className="text-shnoor-indigoMedium">
-                                    Last: {new Date(student.last_violation).toLocaleString()}
-                                  </span>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Student Violations Table */}
-                      {isLoadingViolations ? (
-                        <div className="flex items-center justify-center py-12">
-                          <Loader2 className="animate-spin text-shnoor-indigo" size={32} />
-                          <span className="ml-3 text-shnoor-indigoMedium">Loading violations...</span>
-                        </div>
-                      ) : violationsByStudent.length === 0 ? (
-                        <div className="text-center py-12 bg-shnoor-lavender rounded-xl border border-shnoor-light">
-                          <CheckCircle className="mx-auto mb-2 text-shnoor-indigo" size={48} />
-                          <p className="text-shnoor-navy font-medium">No violations detected</p>
-                          <p className="text-sm text-shnoor-indigoMedium mt-1">All students followed exam guidelines</p>
-                        </div>
-                      ) : (
-                        <div className="overflow-x-auto">
-                          <h3 className="text-lg font-bold text-shnoor-navy mb-4">
-                            Student Violations Summary
-                          </h3>
-                          <table className="w-full border-collapse">
-                            <thead>
-                              <tr className="bg-shnoor-lavender border-b-2 border-shnoor-light">
-                                <th className="px-4 py-3 text-left text-sm font-bold text-shnoor-navy">Student ID</th>
-                                <th className="px-4 py-3 text-left text-sm font-bold text-shnoor-navy">Name</th>
-                                <th className="px-4 py-3 text-left text-sm font-bold text-shnoor-navy">Email</th>
-                                <th className="px-4 py-3 text-left text-sm font-bold text-shnoor-navy">Phone</th>
-                                <th className="px-4 py-3 text-center text-sm font-bold text-shnoor-navy">No Face</th>
-                                <th className="px-4 py-3 text-center text-sm font-bold text-shnoor-navy">Multiple Faces</th>
-                                <th className="px-4 py-3 text-center text-sm font-bold text-shnoor-navy">Phone Detected</th>
-                                <th className="px-4 py-3 text-center text-sm font-bold text-shnoor-navy">Loud Noise</th>
-                                <th className="px-4 py-3 text-center text-sm font-bold text-shnoor-navy">Voice Detected</th>
-                                <th className="px-4 py-3 text-center text-sm font-bold text-shnoor-navy">Total</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {violationsByStudent.map((student, idx) => (
-                                <tr
-                                  key={student.student_id}
-                                  className={`border-b border-shnoor-light hover:bg-shnoor-lavender transition-colors ${student.total_violations >= 5 ? 'bg-shnoor-lavender/50' : ''
-                                    }`}
-                                >
-                                  <td className="px-4 py-3 text-sm text-shnoor-indigoMedium">{student.student_id}</td>
-                                  <td className="px-4 py-3 text-sm font-medium text-shnoor-navy">{student.student_name}</td>
-                                  <td className="px-4 py-3 text-sm text-shnoor-indigoMedium">{student.student_email}</td>
-                                  <td className="px-4 py-3 text-sm text-shnoor-indigoMedium">{student.student_phone || 'N/A'}</td>
-                                  <td className="px-4 py-3 text-center">
-                                    <span className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${student.no_face_count > 0 ? 'bg-shnoor-indigo/10 text-shnoor-indigo' : 'bg-shnoor-lavender text-shnoor-soft'
-                                      }`}>
-                                      {student.no_face_count}
-                                    </span>
-                                  </td>
-                                  <td className="px-4 py-3 text-center">
-                                    <span className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${student.multiple_faces_count > 0 ? 'bg-shnoor-indigo/10 text-shnoor-indigo' : 'bg-shnoor-lavender text-shnoor-soft'
-                                      }`}>
-                                      {student.multiple_faces_count}
-                                    </span>
-                                  </td>
-                                  <td className="px-4 py-3 text-center">
-                                    <span className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${student.phone_detected_count > 0 ? 'bg-shnoor-indigoMedium/10 text-shnoor-indigoMedium' : 'bg-shnoor-lavender text-shnoor-soft'
-                                      }`}>
-                                      {student.phone_detected_count}
-                                    </span>
-                                  </td>
-                                  <td className="px-4 py-3 text-center">
-                                    <span className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${student.loud_noise_count > 0 ? 'bg-shnoor-indigoMedium/10 text-shnoor-indigoMedium' : 'bg-shnoor-lavender text-shnoor-soft'
-                                      }`}>
-                                      {student.loud_noise_count || 0}
-                                    </span>
-                                  </td>
-                                  <td className="px-4 py-3 text-center">
-                                    <span className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${student.voice_detected_count > 0 ? 'bg-shnoor-indigoMedium/10 text-shnoor-indigoMedium' : 'bg-shnoor-lavender text-shnoor-soft'
-                                      }`}>
-                                      {student.voice_detected_count || 0}
-                                    </span>
-                                  </td>
-                                  <td className="px-4 py-3 text-center">
-                                    <span className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${student.total_violations >= 5
-                                      ? 'bg-shnoor-indigo text-white'
-                                      : student.total_violations >= 3
-                                        ? 'bg-shnoor-indigoMedium text-white'
-                                        : 'bg-shnoor-lavender text-shnoor-indigo'
-                                      }`}>
-                                      {student.total_violations}
-                                    </span>
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Interviews Tab */}
-            {activeTab === 'interviews' && (
-              <div className="space-y-6">
-                <InterviewsList />
-              </div>
-            )}
-            
-            {/* Job Openings Tab */}
-            {activeTab === 'job-openings' && (
-              <div className="space-y-6">
-                <AdminJobOpenings />
-              </div>
-            )}
-
-            {/* Subscription Plans Tab */}
-            {activeTab === 'subscription-plans' && isSuperAdmin && (
-              <div className="space-y-6">
-                <SubscriptionPlansSettings />
-              </div>
-            )}
-          </>
-        )}
-
-
-        {/* Clone Test Modal */}
-        {showCloneModal && testToClone && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] max-w-md w-full">
-              <div className="bg-gradient-to-r from-shnoor-indigo to-shnoor-navy px-6 py-4 flex justify-between items-center">
-                <div>
-                  <h3 className="text-xl font-bold text-white">Clone Test</h3>
-                  <p className="text-shnoor-lavender text-sm mt-1">Create a copy of "{testToClone.name}"</p>
-                </div>
-                <button
-                  onClick={() => {
-                    setShowCloneModal(false);
-                    setTestToClone(null);
-                    setCloneTestName('');
-                    setCloneError('');
-                  }}
-                  className="text-white hover:bg-white/20 rounded-full p-2 transition-colors"
-                  disabled={isCloning}
-                >
-                  <X size={24} />
-                </button>
-              </div>
-
-              <div className="p-6 space-y-4">
-                <div>
-                  <label className="block text-sm font-semibold text-shnoor-indigo mb-2">
-                    New Test Name <span className="text-shnoor-danger">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={cloneTestName}
-                    onChange={(e) => {
-                      setCloneTestName(e.target.value);
-                      setCloneError('');
-                    }}
-                    className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-shnoor-indigo ${cloneError ? 'border-shnoor-danger' : 'border-shnoor-mist'
-                      }`}
-                    placeholder="Enter new test name"
-                    disabled={isCloning}
-                    autoFocus
-                  />
-                  {cloneError && (
-                    <p className="mt-2 text-sm text-shnoor-danger flex items-center">
-                      <XCircle size={14} className="mr-1" />
-                      {cloneError}
-                    </p>
-                  )}
-                </div>
-
-                <div className="bg-shnoor-lavender border border-shnoor-light rounded-lg p-4">
-                  <p className="text-sm text-shnoor-navy">
-                    <strong>Note:</strong> This will create a new test with:
-                  </p>
-                  <ul className="mt-2 text-sm text-shnoor-indigo space-y-1 ml-4 list-disc">
-                    <li>All questions from the original test</li>
-                    <li>Same duration and settings</li>
-                    <li>Draft status (not published)</li>
-                    <li>No results or student assignments</li>
-                  </ul>
-                </div>
-
-                <div className="flex space-x-3 pt-4">
-                  <button
-                    onClick={() => {
-                      setShowCloneModal(false);
-                      setTestToClone(null);
-                      setCloneTestName('');
-                      setCloneError('');
-                    }}
-                    className="flex-1 px-6 py-3 bg-shnoor-light hover:bg-shnoor-lavender text-shnoor-navy rounded-xl font-medium transition-colors"
-                    disabled={isCloning}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleCloneTest}
-                    className="flex-1 px-6 py-3 bg-shnoor-indigo hover:bg-shnoor-navy text-white rounded-xl font-medium transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled={isCloning}
-                  >
-                    {isCloning ? (
-                      <>
-                        <Loader2 className="animate-spin" size={18} />
-                        <span>Cloning...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy size={18} />
-                        <span>Clone Test</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* View Test Details Modal */}
-        {showViewDetailsModal && selectedTestForDetails && (
-          <ViewTestDetailsModal
-            test={selectedTestForDetails}
-            onClose={() => {
-              setShowViewDetailsModal(false);
-              setSelectedTestForDetails(null);
-            }}
-            onEdit={handleEditTestDetails}
-          />
-        )}
-
-        {/* Edit Test Details Modal */}
-        {showEditDetailsModal && selectedTestForDetails && (
-          <EditTestDetailsModal
-            test={selectedTestForDetails}
-            onClose={() => {
-              setShowEditDetailsModal(false);
-              setSelectedTestForDetails(null);
-            }}
-            onSave={handleSaveTestDetails}
-          />
-        )}
-
-        {/* Job Role/Description Modal */}
-        {showJobModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] max-w-3xl w-full max-h-[90vh] overflow-hidden">
-              <div className="bg-gradient-to-r from-shnoor-indigo to-shnoor-navy px-6 py-4 flex justify-between items-center">
-                <div>
-                  <h3 className="text-xl font-bold text-white">{selectedJobTest?.name}</h3>
-                  <p className="text-shnoor-lavender text-sm mt-1">Job Role & Description</p>
-                </div>
-                <button
-                  onClick={() => setShowJobModal(false)}
-                  className="text-white hover:bg-white/20 rounded-full p-2 transition-colors"
-                >
-                  <X size={24} />
-                </button>
-              </div>
-
-              <div className="p-6 space-y-6">{isLoadingJobRoles ? (
-                <div className="flex items-center justify-center py-12">
-                  <Loader2 className="animate-spin text-shnoor-indigo" size={32} />
-                  <span className="ml-3 text-shnoor-indigoMedium">Loading job roles...</span>
-                </div>
-              ) : (
-                <>
-                  {!isEditingJob && jobRoles.length > 1 && (
-                    <div>
-                      <label className="block text-sm font-bold text-shnoor-navy mb-2">
-                        Select Job Role
-                      </label>
-                      <select
-                        value={selectedJobRoleIndex}
-                        onChange={(e) => setSelectedJobRoleIndex(parseInt(e.target.value))}
-                        className="w-full px-4 py-3 border border-shnoor-light rounded-xl focus:ring-4 focus:ring-shnoor-mist focus:border-shnoor-indigo bg-white text-shnoor-navy font-medium"
-                      >
-                        {jobRoles.map((role, index) => (
-                          <option key={index} value={index}>
-                            {role.jobRole}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
-
-                  {isEditingJob ? (
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <label className="block text-sm font-bold text-shnoor-navy">
-                          Job Roles & Descriptions
-                        </label>
-                        <button
-                          type="button"
-                          onClick={handleAddJobRole}
-                          className="flex items-center space-x-1 px-3 py-1.5 bg-shnoor-lavender text-shnoor-indigo rounded-lg hover:bg-shnoor-lavender transition-colors text-sm font-medium"
-                        >
-                          <Plus size={16} />
-                          <span>Add Role</span>
-                        </button>
-                      </div>
-
-                      {jobRoles.map((role, index) => (
-                        <div key={index} className="p-4 border border-shnoor-light rounded-lg space-y-3 bg-white">
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm font-semibold text-shnoor-indigo">
-                              Role {index + 1} {index === 0 && <span className="text-shnoor-indigo">(Default)</span>}
-                            </span>
-                            {jobRoles.length > 1 && (
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveJobRole(index)}
-                                className="text-shnoor-danger hover:text-shnoor-danger p-1"
-                                title="Remove this role"
-                              >
-                                <Trash2 size={16} />
-                              </button>
-                            )}
-                          </div>
-
-                          <div>
-                            <input
-                              type="text"
-                              value={role.jobRole}
-                              onChange={(e) => handleJobRoleChange(index, 'jobRole', e.target.value)}
-                              className="w-full px-4 py-3 border border-shnoor-light rounded-xl focus:ring-4 focus:ring-shnoor-mist focus:border-shnoor-indigo bg-white text-shnoor-navy font-medium"
-                              placeholder="e.g., Senior Software Engineer"
-                            />
-                          </div>
-
-                          <div>
-                            <textarea
-                              value={role.jobDescription}
-                              onChange={(e) => handleJobRoleChange(index, 'jobDescription', e.target.value)}
-                              rows={4}
-                              className="w-full px-4 py-3 border border-shnoor-light rounded-xl focus:ring-4 focus:ring-shnoor-mist focus:border-shnoor-indigo bg-white text-shnoor-navy resize-none"
-                              placeholder="Enter job description, requirements, responsibilities..."
-                            />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <>
-                      <div>
-                        <label className="block text-sm font-bold text-shnoor-navy mb-2">
-                          Job Role
-                        </label>
-                        <div className="px-4 py-3 bg-shnoor-lavender rounded-xl border border-shnoor-light">
-                          <p className="text-shnoor-navy font-semibold">
-                            {jobRoles[selectedJobRoleIndex]?.jobRole || 'Not specified'}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-bold text-shnoor-navy mb-2">
-                          Job Description
-                        </label>
-                        <div className="px-4 py-3 bg-shnoor-lavender rounded-xl border border-shnoor-light max-h-96 overflow-y-auto">
-                          <p className="text-shnoor-indigoMedium whitespace-pre-wrap">
-                            {jobRoles[selectedJobRoleIndex]?.jobDescription || 'No description provided'}
-                          </p>
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </>
-              )}
-              </div>
-
-              {/* Modal Footer */}
-              <div className="p-6 border-t border-shnoor-light flex justify-end space-x-3">
-                {isEditingJob ? (
-                  <>
-                    <button
-                      onClick={() => {
-                        setIsEditingJob(false);
-                        handleViewJob(selectedJobTest); // Reload original data
-                      }}
-                      className="px-6 py-3 bg-shnoor-light hover:bg-shnoor-lavender text-shnoor-navy rounded-xl font-medium transition-colors"
-                      disabled={isSavingJob}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleSaveJob}
-                      disabled={isSavingJob}
-                      className="px-6 py-3 bg-shnoor-indigo hover:bg-shnoor-navy text-white rounded-xl font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
-                    >
-                      {isSavingJob && (
-                        <Loader2 className="animate-spin" size={16} />
-                      )}
-                      <span>{isSavingJob ? 'Saving...' : 'Save Changes'}</span>
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      onClick={() => setShowJobModal(false)}
-                      className="px-6 py-3 bg-shnoor-light hover:bg-shnoor-lavender text-shnoor-navy rounded-xl font-medium transition-colors"
-                    >
-                      Close
-                    </button>
-                    <button
-                      onClick={() => setIsEditingJob(true)}
-                      className="px-6 py-3 bg-shnoor-indigo hover:bg-shnoor-navy text-white rounded-xl font-medium transition-colors flex items-center space-x-2"
-                      title="Edit Roles"
-                    >
-                      <Pencil size={18} />
-                      <span>Edit</span>
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Assigned Tests Modal */}
-        {showAssignedTestsModal && selectedInstituteForTests && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] max-w-4xl w-full max-h-[90vh] overflow-hidden">
-              <div className="bg-gradient-to-r from-shnoor-indigo to-shnoor-navy px-6 py-4 flex justify-between items-center">
-                <div>
-                  <h3 className="text-xl font-bold text-white">{selectedInstituteForTests.display_name}</h3>
-                  <p className="text-shnoor-lavender text-sm mt-1">Assigned Tests</p>
-                </div>
-                <button
-                  onClick={() => {
-                    setShowAssignedTestsModal(false);
-                    setSelectedTestsForUnassign([]);
-                  }}
-                  className="text-white hover:bg-white/20 rounded-full p-2 transition-colors"
-                >
-                  <X size={24} />
-                </button>
-              </div>
-
-              <div className="p-6 space-y-6">
-                {/* Assign New Test */}
-                <div className="p-4 bg-shnoor-lavender rounded-xl border border-shnoor-light">
-                  <label className="block text-sm font-bold text-shnoor-navy mb-3">
-                    Assign New Test to Institute
-                  </label>
-                  <div className="relative space-y-3">
-                    {/* Custom Dropdown Button */}
-                    <button
-                      type="button"
-                      onClick={() => setIsInstituteTestDropdownOpen(!isInstituteTestDropdownOpen)}
-                      className="w-full px-4 py-3 border border-shnoor-light rounded-xl bg-white text-shnoor-navy font-medium transition-all flex items-center justify-between hover:border-shnoor-indigo focus:ring-4 focus:ring-shnoor-lavender focus:border-shnoor-indigo"
-                    >
-                      <span className={selectedTestsForInstitute.length === 0 ? 'text-shnoor-indigoMedium' : 'text-shnoor-navy'}>
-                        {selectedTestsForInstitute.length === 0
-                          ? '-- Select a test --'
-                          : `${selectedTestsForInstitute.length} test${selectedTestsForInstitute.length !== 1 ? 's' : ''} selected`
-                        }
-                      </span>
-                      <ChevronDown size={20} className={`transition-transform ${isInstituteTestDropdownOpen ? 'rotate-180' : ''}`} />
-                    </button>
-
-                    {/* Dropdown Menu with Checkboxes */}
-                    {isInstituteTestDropdownOpen && (
-                      <div className="absolute z-50 w-full mt-2 bg-white border border-shnoor-light rounded-xl shadow-lg max-h-64 overflow-y-auto">
-                        {tests.filter(test => test.status === 'published').length === 0 ? (
-                          <div className="p-4 text-center text-shnoor-indigoMedium text-sm flex items-center justify-center">
-                            <AlertCircle size={16} className="mr-1" />
-                            No published tests available. Please publish a test first.
-                          </div>
-                        ) : (
-                          <div className="py-2">
-                            {tests.filter(test => test.status === 'published').map((test) => (
-                              <label
-                                key={test.id}
-                                className="flex items-center space-x-3 px-4 py-3 hover:bg-shnoor-lavender cursor-pointer transition-colors"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={selectedTestsForInstitute.includes(test.id)}
-                                  onChange={(e) => {
-                                    if (e.target.checked) {
-                                      setSelectedTestsForInstitute([...selectedTestsForInstitute, test.id]);
-                                    } else {
-                                      setSelectedTestsForInstitute(selectedTestsForInstitute.filter(id => id !== test.id));
-                                    }
-                                  }}
-                                  className="w-4 h-4 text-shnoor-indigo border-shnoor-mist rounded focus:ring-2 focus:ring-shnoor-indigo"
-                                />
-                                <span className="text-sm font-medium text-shnoor-navy flex-1">
-                                  {test.name} <span className="text-shnoor-indigoMedium">({test.questions} questions)</span>
-                                </span>
-                              </label>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Selected tests count */}
-                    {selectedTestsForInstitute.length > 0 && (
-                      <p className="text-xs text-shnoor-indigo mt-2 font-medium">
-                        {selectedTestsForInstitute.length} test{selectedTestsForInstitute.length !== 1 ? 's' : ''} selected
-                      </p>
-                    )}
-
-                    <button
-                      onClick={() => {
-                        handleAssignTestToInstitute();
-                        setIsInstituteTestDropdownOpen(false);
-                      }}
-                      disabled={selectedTestsForInstitute.length === 0 || isAssigningTestToInstitute}
-                      className={`w-full px-6 py-3 rounded-xl font-bold transition-all flex items-center justify-center space-x-2 ${selectedTestsForInstitute.length > 0 && !isAssigningTestToInstitute
-                        ? 'bg-shnoor-indigo hover:bg-shnoor-navy text-white shadow-lg hover:-translate-y-0.5'
-                        : 'bg-shnoor-light text-shnoor-soft cursor-not-allowed'
-                        }`}
-                    >
-                      {isAssigningTestToInstitute && (
-                        <Loader2 className="animate-spin" size={16} />
-                      )}
-                      <span>
-                        {isAssigningTestToInstitute
-                          ? 'Assigning...'
-                          : selectedTestsForInstitute.length > 0
-                            ? `Assign ${selectedTestsForInstitute.length} Test${selectedTestsForInstitute.length !== 1 ? 's' : ''}`
-                            : 'Select Tests to Assign'
-                        }
-                      </span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Assigned Tests List */}
-                <div>
-                  <div className="flex justify-between items-center mb-3">
-                    <h4 className="text-sm font-bold text-shnoor-navy">Currently Assigned Tests</h4>
-                    {selectedTestsForUnassign.length > 0 && (
-                      <button
-                        onClick={handleBulkUnassignTests}
-                        disabled={isUnassigningTests}
-                        className="px-4 py-2 bg-shnoor-indigo hover:bg-shnoor-navy text-white rounded-lg font-medium transition-all shadow-lg hover:-translate-y-0.5 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {isUnassigningTests ? (
-                          <>
-                            <Loader2 className="animate-spin" size={16} />
-                            <span>Unassigning...</span>
-                          </>
-                        ) : (
-                          <>
-                            <Trash2 size={16} />
-                            <span>Unassign {selectedTestsForUnassign.length} Selected</span>
-                          </>
-                        )}
-                      </button>
-                    )}
-                  </div>
-                  {isLoadingAssignedTests ? (
-                    <div className="flex items-center justify-center py-8">
-                      <Loader2 className="animate-spin text-shnoor-indigo" size={32} />
-                      <span className="ml-3 text-shnoor-indigoMedium">Loading...</span>
-                    </div>
-                  ) : assignedTests.length === 0 ? (
-                    <div className="text-center py-8 bg-shnoor-lavender rounded-xl border border-shnoor-light">
-                      <FileSpreadsheet className="mx-auto mb-2 text-shnoor-mist" size={48} />
-                      <p className="text-shnoor-indigoMedium">No tests assigned yet</p>
-                    </div>
-                  ) : (
-                    <>
-                      {/* Select All Checkbox */}
-                      <div className="flex items-center space-x-3 mb-3 p-3 bg-white rounded-lg">
-                        <input
-                          type="checkbox"
-                          checked={selectedTestsForUnassign.length === assignedTests.length && assignedTests.length > 0}
-                          onChange={toggleAllTestsForUnassign}
-                          className="w-5 h-5 text-shnoor-indigo border-shnoor-mist rounded focus:ring-2 focus:ring-shnoor-lavender"
-                        />
-                        <span className="text-sm font-bold text-shnoor-indigo">
-                          {selectedTestsForUnassign.length > 0 ? `${selectedTestsForUnassign.length} selected` : 'Select All'}
-                        </span>
-                      </div>
-
-                      <div className="space-y-2 max-h-96 overflow-y-auto">
-                        {assignedTests.map((test) => (
-                          <div
-                            key={test.id}
-                            className={`flex items-center justify-between p-4 border rounded-xl hover:shadow-md transition-all ${selectedTestsForUnassign.includes(test.id)
-                              ? 'bg-shnoor-lavender border-shnoor-indigo'
-                              : 'bg-white border-shnoor-light'
-                            }`}
-                          >
-                            <div className="flex items-center space-x-3 flex-1">
-                              <input
-                                type="checkbox"
-                                checked={selectedTestsForUnassign.includes(test.id)}
-                                onChange={() => toggleTestForUnassign(test.id)}
-                                className="w-5 h-5 text-shnoor-indigo border-shnoor-mist rounded focus:ring-2 focus:ring-shnoor-lavender"
-                              />
-                              <div className="flex-1">
-                                <h5 className="font-bold text-shnoor-navy">{test.title}</h5>
-                                <p className="text-sm text-shnoor-indigoMedium">
-                                  {test.question_count} questions • {test.duration_minutes} mins
-                                  {test.is_institute_level && (
-                                    <span className="ml-2 px-2 py-0.5 bg-shnoor-lavender text-shnoor-indigo rounded text-xs font-medium">
-                                      Institute Level
-                                    </span>
-                                  )}
-                                </p>
-                              </div>
-                            </div>
-                            <button
-                              onClick={() => handleUnassignTestFromInstitute(test.id, test.title)}
-                              className="p-2 text-shnoor-indigo hover:bg-shnoor-lavender rounded-lg transition-colors"
-                              title="Unassign Test"
-                            >
-                              <Trash2 size={18} />
+                              {isAssigningTestInModal && (
+                                <Loader2 className="animate-spin" size={16} />
+                              )}
+                              <UserCheck size={18} />
+                              <span>
+                                {isAssigningTestInModal
+                                  ? 'Assigning...'
+                                  : selectedTestsForStudentModal.length > 0
+                                    ? `Assign ${selectedTestsForStudentModal.length} Test${selectedTestsForStudentModal.length !== 1 ? 's' : ''}`
+                                    : 'Select Tests to Assign'
+                                }
+                              </span>
                             </button>
                           </div>
-                        ))}
-                      </div>
-                    </>
+                        </div>
+                      )}
+                    </div>
                   )}
-                </div>
-              </div>
 
-              <div className="p-6 border-t border-shnoor-light flex justify-end">
-                <button
-                  onClick={() => {
-                    setShowAssignedTestsModal(false);
-                    setSelectedTestsForUnassign([]);
-                  }}
-                  className="px-6 py-3 bg-shnoor-light hover:bg-shnoor-mist text-shnoor-navy rounded-xl font-medium transition-colors"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Student Management Modal */}
-        {showStudentManagementModal && selectedInstituteForStudents && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] max-w-5xl w-full max-h-[90vh] overflow-hidden">
-              <div className="bg-gradient-to-r from-shnoor-indigo to-shnoor-navy px-6 py-4 flex justify-between items-center">
-                <div>
-                  <h3 className="text-xl font-bold text-white">{selectedInstituteForStudents.display_name}</h3>
-                  <p className="text-shnoor-lavender text-sm mt-1">Manage Students</p>
-                </div>
-                <button
-                  onClick={() => {
-                    setShowStudentManagementModal(false);
-                    setSelectedStudentsForDelete([]);
-                    setSelectedTestsForStudentModal([]);
-                    setStudentSearchTerm('');
-                  }}
-                  className="text-white hover:bg-white/20 rounded-full p-2 transition-colors"
-                >
-                  <X size={24} />
-                </button>
-              </div>
-
-              <div className="p-6 space-y-6">
-                {/* Add Student Form */}
-                {showAddStudentForm ? (
-                  <div className="p-4 bg-shnoor-lavender rounded-xl border border-shnoor-light">
-                    <div className="flex items-center justify-between mb-4">
-                      <h4 className="text-sm font-bold text-shnoor-navy">Add New Student</h4>
-                      <button
-                        onClick={() => setShowAddStudentForm(false)}
-                        className="text-shnoor-indigoMedium hover:text-shnoor-indigo transition-colors"
-                      >
-                        <X size={20} />
-                      </button>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                      <input
-                        type="text"
-                        placeholder="Full Name *"
-                        value={newStudentData.full_name}
-                        onChange={(e) => setNewStudentData({ ...newStudentData, full_name: e.target.value })}
-                        className="px-4 py-3 border border-shnoor-light rounded-xl focus:ring-4 focus:ring-shnoor-lavender focus:border-shnoor-indigo bg-white text-shnoor-navy transition-all"
-                      />
-                      <input
-                        type="email"
-                        placeholder="Email *"
-                        value={newStudentData.email}
-                        onChange={(e) => setNewStudentData({ ...newStudentData, email: e.target.value })}
-                        className="px-4 py-3 border border-shnoor-light rounded-xl focus:ring-4 focus:ring-shnoor-lavender focus:border-shnoor-indigo bg-white text-shnoor-navy transition-all"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Roll Number (Optional)"
-                        value={newStudentData.roll_number}
-                        onChange={(e) => setNewStudentData({ ...newStudentData, roll_number: e.target.value })}
-                        className="px-4 py-3 border border-shnoor-light rounded-xl focus:ring-4 focus:ring-shnoor-lavender focus:border-shnoor-indigo bg-white text-shnoor-navy transition-all"
-                      />
-                      <input
-                        type="text"
-                        value={newStudentData.institute}
-                        disabled
-                        className="px-4 py-3 border border-shnoor-light rounded-xl bg-shnoor-lavender text-shnoor-indigoMedium"
-                      />
-                    </div>
-                    <div className="flex justify-end space-x-2">
-                      <button
-                        onClick={() => setShowAddStudentForm(false)}
-                        className="px-4 py-2 bg-shnoor-light hover:bg-shnoor-mist text-shnoor-navy rounded-lg font-medium transition-colors"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        onClick={handleAddStudent}
-                        disabled={isAddingStudent}
-                        className={`px-4 py-2 rounded-lg font-medium transition-all flex items-center space-x-2 ${!isAddingStudent
-                          ? 'bg-shnoor-indigo hover:bg-shnoor-navy text-white shadow-lg hover:-translate-y-0.5'
-                          : 'bg-shnoor-light text-shnoor-soft cursor-not-allowed'
-                          }`}
-                      >
-                        {isAddingStudent && (
-                          <Loader2 className="animate-spin" size={16} />
-                        )}
-                        <span>{isAddingStudent ? 'Adding...' : 'Add Student'}</span>
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <h4 className="text-sm font-bold text-shnoor-navy">Students List</h4>
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => setShowAddStudentForm(true)}
-                          className="px-4 py-2 bg-shnoor-indigo hover:bg-shnoor-navy text-white rounded-lg font-medium transition-all shadow-lg hover:-translate-y-0.5 flex items-center space-x-2"
-                        >
-                          <Plus size={16} />
-                          <span>Add Student</span>
-                        </button>
-                        {selectedStudentsForDelete.length > 0 && (
-                          <button
-                            onClick={handleBulkDeleteStudents}
-                            className="px-4 py-2 bg-shnoor-indigo hover:bg-shnoor-navy text-white rounded-lg font-medium transition-all shadow-lg hover:-translate-y-0.5 flex items-center space-x-2"
-                          >
-                            <Trash2 size={16} />
-                            <span>Delete {selectedStudentsForDelete.length} Selected</span>
-                          </button>
-                        )}
-                        {instituteStudentsForManagement.length > 0 && (
-                          <button
-                            onClick={handleDeleteAllStudents}
-                            className="px-4 py-2 bg-shnoor-indigo hover:bg-shnoor-navy text-white rounded-lg font-medium transition-all shadow-lg hover:-translate-y-0.5 flex items-center space-x-2"
-                          >
-                            <Trash2 size={16} />
-                            <span>Delete All</span>
-                          </button>
-                        )}
+                  {/* Students List */}
+                  <div>
+                    {isLoadingStudentsForManagement ? (
+                      <div className="flex items-center justify-center py-8">
+                        <Loader2 className="animate-spin text-shnoor-indigo" size={32} />
+                        <span className="ml-3 text-shnoor-indigoMedium">Loading students...</span>
                       </div>
-                    </div>
+                    ) : instituteStudentsForManagement.length === 0 ? (
+                      <div className="text-center py-8 bg-shnoor-lavender rounded-xl border border-shnoor-light">
+                        <Users className="mx-auto mb-2 text-shnoor-mist" size={48} />
+                        <p className="text-shnoor-indigoMedium">No students found</p>
+                      </div>
+                    ) : (() => {
+                      const filteredStudents = instituteStudentsForManagement.filter(student => {
+                        if (!studentSearchTerm) return true;
+                        const searchLower = studentSearchTerm.toLowerCase();
+                        return (
+                          student.full_name?.toLowerCase().includes(searchLower) ||
+                          student.email?.toLowerCase().includes(searchLower) ||
+                          student.roll_number?.toLowerCase().includes(searchLower)
+                        );
+                      });
 
-                    {/* Search Bar */}
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-shnoor-indigoMedium" size={18} />
-                      <input
-                        type="text"
-                        placeholder="Search students by name, email, or roll number..."
-                        value={studentSearchTerm}
-                        onChange={(e) => setStudentSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 border border-shnoor-light rounded-xl focus:ring-4 focus:ring-shnoor-lavender focus:border-shnoor-indigo bg-white text-shnoor-navy transition-all"
-                      />
-                    </div>
+                      if (filteredStudents.length === 0) {
+                        return (
+                          <div className="text-center py-8 bg-shnoor-lavender rounded-xl border border-shnoor-light">
+                            <Search className="mx-auto mb-2 text-shnoor-mist" size={48} />
+                            <p className="text-shnoor-indigoMedium">No students match your search</p>
+                          </div>
+                        );
+                      }
 
-                    {/* Test Assignment Section */}
-                    {selectedStudentsForDelete.length > 0 && (
-                      <div className="p-4 bg-shnoor-lavender rounded-xl border border-shnoor-light">
-                        <h5 className="text-sm font-bold text-shnoor-navy mb-3">
-                          Assign Test to {selectedStudentsForDelete.length} Selected Student{selectedStudentsForDelete.length !== 1 ? 's' : ''}
-                        </h5>
-                        <div className="relative space-y-3">
-                          {/* Custom Dropdown Button */}
-                          <button
-                            type="button"
-                            onClick={() => setIsStudentTestDropdownOpen(!isStudentTestDropdownOpen)}
-                            className="w-full px-4 py-3 border border-shnoor-light rounded-xl bg-white text-shnoor-navy font-medium transition-all flex items-center justify-between hover:border-shnoor-indigo focus:ring-4 focus:ring-shnoor-lavender focus:border-shnoor-indigo"
-                          >
-                            <span className={selectedTestsForStudentModal.length === 0 ? 'text-shnoor-indigoMedium' : 'text-shnoor-navy'}>
-                              {selectedTestsForStudentModal.length === 0
-                                ? '-- Select a test --'
-                                : `${selectedTestsForStudentModal.length} test${selectedTestsForStudentModal.length !== 1 ? 's' : ''} selected`
-                              }
-                            </span>
-                            <ChevronDown size={20} className={`transition-transform ${isStudentTestDropdownOpen ? 'rotate-180' : ''}`} />
-                          </button>
-
-                          {/* Dropdown Menu with Checkboxes */}
-                          {isStudentTestDropdownOpen && (
-                            <div className="absolute z-50 w-full mt-2 bg-white border border-shnoor-light rounded-xl shadow-lg max-h-64 overflow-y-auto">
-                              {tests.filter(test => test.status === 'published').length === 0 ? (
-                                <div className="p-4 text-center text-shnoor-indigoMedium text-sm flex items-center justify-center">
-                                  <AlertCircle size={16} className="mr-1" />
-                                  No published tests available. Please publish a test first.
-                                </div>
-                              ) : (
-                                <div className="py-2">
-                                  {tests.filter(test => test.status === 'published').map((test) => (
-                                    <label
-                                      key={test.id}
-                                      className="flex items-center space-x-3 px-4 py-3 hover:bg-shnoor-lavender cursor-pointer transition-colors"
-                                      onClick={(e) => e.stopPropagation()}
-                                    >
-                                      <input
-                                        type="checkbox"
-                                        checked={selectedTestsForStudentModal.includes(test.id)}
-                                        onChange={(e) => {
-                                          if (e.target.checked) {
-                                            setSelectedTestsForStudentModal([...selectedTestsForStudentModal, test.id]);
-                                          } else {
-                                            setSelectedTestsForStudentModal(selectedTestsForStudentModal.filter(id => id !== test.id));
-                                          }
-                                        }}
-                                        className="w-4 h-4 text-shnoor-indigo border-shnoor-mist rounded focus:ring-2 focus:ring-shnoor-indigo"
-                                      />
-                                      <span className="text-sm font-medium text-shnoor-navy flex-1">
-                                        {test.name} <span className="text-shnoor-indigoMedium">({test.questions} questions • {test.duration} mins)</span>
-                                      </span>
-                                    </label>
-                                  ))}
-                                </div>
-                              )}
+                      return (
+                        <>
+                          {/* Select All Checkbox */}
+                          {/* Selection Controls */}
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3 p-3 bg-white rounded-lg">
+                            <div className="flex items-center space-x-3">
+                              <input
+                                type="checkbox"
+                                checked={selectedStudentsForDelete.length === filteredStudents.length && filteredStudents.length > 0}
+                                onChange={() => toggleAllStudentsForDelete(filteredStudents)}
+                                className="w-5 h-5 text-shnoor-indigo border-shnoor-mist rounded focus:ring-2 focus:ring-shnoor-lavender"
+                              />
+                              <span className="text-sm font-bold text-shnoor-indigo">
+                                {selectedStudentsForDelete.length > 0 ? `${selectedStudentsForDelete.length} selected` : 'Select All'}
+                              </span>
                             </div>
-                          )}
 
-                          {/* Selected tests count */}
-                          {selectedTestsForStudentModal.length > 0 && (
-                            <p className="text-xs text-shnoor-indigo mt-2 font-medium">
-                              {selectedTestsForStudentModal.length} test{selectedTestsForStudentModal.length !== 1 ? 's' : ''} selected
-                            </p>
-                          )}
+                            <div className="flex items-center space-x-2">
+                              <span className="text-sm text-shnoor-indigoMedium">Select Range:</span>
+                              <input
+                                type="number"
+                                min="1"
+                                max={filteredStudents.length}
+                                className="w-16 px-2 py-1 text-sm border border-shnoor-light rounded focus:ring-2 focus:ring-shnoor-lavender"
+                                placeholder="1"
+                                value={selectionRange.start}
+                                onChange={(e) => setSelectionRange({ ...selectionRange, start: e.target.value })}
+                              />
+                              <span className="text-sm text-shnoor-indigoMedium">to</span>
+                              <input
+                                type="number"
+                                min="1"
+                                max={filteredStudents.length}
+                                className="w-16 px-2 py-1 text-sm border border-shnoor-light rounded focus:ring-2 focus:ring-shnoor-lavender"
+                                placeholder={filteredStudents.length.toString()}
+                                value={selectionRange.end}
+                                onChange={(e) => setSelectionRange({ ...selectionRange, end: e.target.value })}
+                              />
+                              <button
+                                onClick={handleSelectRange}
+                                className="px-3 py-1 bg-shnoor-indigo hover:bg-shnoor-navy text-white text-sm rounded transition-colors"
+                              >
+                                Select
+                              </button>
+                            </div>
+                          </div>
 
-                          <button
-                            onClick={() => {
-                              handleAssignTestInModal();
-                              setIsStudentTestDropdownOpen(false);
-                            }}
-                            disabled={selectedTestsForStudentModal.length === 0 || isAssigningTestInModal}
-                            className={`w-full px-6 py-3 rounded-xl font-bold transition-all flex items-center justify-center space-x-2 ${selectedTestsForStudentModal.length > 0 && !isAssigningTestInModal
-                              ? 'bg-shnoor-indigo hover:bg-shnoor-navy text-white shadow-lg hover:-translate-y-0.5'
-                              : 'bg-shnoor-light text-shnoor-soft cursor-not-allowed'
-                              }`}
-                          >
-                            {isAssigningTestInModal && (
-                              <Loader2 className="animate-spin" size={16} />
-                            )}
-                            <UserCheck size={18} />
-                            <span>
-                              {isAssigningTestInModal
-                                ? 'Assigning...'
-                                : selectedTestsForStudentModal.length > 0
-                                  ? `Assign ${selectedTestsForStudentModal.length} Test${selectedTestsForStudentModal.length !== 1 ? 's' : ''}`
-                                  : 'Select Tests to Assign'
-                              }
-                            </span>
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Students List */}
-                <div>
-                  {isLoadingStudentsForManagement ? (
-                    <div className="flex items-center justify-center py-8">
-                      <Loader2 className="animate-spin text-shnoor-indigo" size={32} />
-                      <span className="ml-3 text-shnoor-indigoMedium">Loading students...</span>
-                    </div>
-                  ) : instituteStudentsForManagement.length === 0 ? (
-                    <div className="text-center py-8 bg-shnoor-lavender rounded-xl border border-shnoor-light">
-                      <Users className="mx-auto mb-2 text-shnoor-mist" size={48} />
-                      <p className="text-shnoor-indigoMedium">No students found</p>
-                    </div>
-                  ) : (() => {
-                    const filteredStudents = instituteStudentsForManagement.filter(student => {
-                      if (!studentSearchTerm) return true;
-                      const searchLower = studentSearchTerm.toLowerCase();
-                      return (
-                        student.full_name?.toLowerCase().includes(searchLower) ||
-                        student.email?.toLowerCase().includes(searchLower) ||
-                        student.roll_number?.toLowerCase().includes(searchLower)
-                      );
-                    });
-
-                    if (filteredStudents.length === 0) {
-                      return (
-                        <div className="text-center py-8 bg-shnoor-lavender rounded-xl border border-shnoor-light">
-                          <Search className="mx-auto mb-2 text-shnoor-mist" size={48} />
-                          <p className="text-shnoor-indigoMedium">No students match your search</p>
-                        </div>
-                      );
-                    }
-
-                    return (
-                    <>
-                      {/* Select All Checkbox */}
-                      {/* Selection Controls */}
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3 p-3 bg-white rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          <input
-                            type="checkbox"
-                            checked={selectedStudentsForDelete.length === filteredStudents.length && filteredStudents.length > 0}
-                            onChange={() => toggleAllStudentsForDelete(filteredStudents)}
-                            className="w-5 h-5 text-shnoor-indigo border-shnoor-mist rounded focus:ring-2 focus:ring-shnoor-lavender"
-                          />
-                          <span className="text-sm font-bold text-shnoor-indigo">
-                            {selectedStudentsForDelete.length > 0 ? `${selectedStudentsForDelete.length} selected` : 'Select All'}
-                          </span>
-                        </div>
-                        
-                        <div className="flex items-center space-x-2">
-                          <span className="text-sm text-shnoor-indigoMedium">Select Range:</span>
-                          <input 
-                            type="number" 
-                            min="1"
-                            max={filteredStudents.length}
-                            className="w-16 px-2 py-1 text-sm border border-shnoor-light rounded focus:ring-2 focus:ring-shnoor-lavender"
-                            placeholder="1"
-                            value={selectionRange.start}
-                            onChange={(e) => setSelectionRange({...selectionRange, start: e.target.value})}
-                          />
-                          <span className="text-sm text-shnoor-indigoMedium">to</span>
-                          <input 
-                            type="number" 
-                            min="1"
-                            max={filteredStudents.length}
-                            className="w-16 px-2 py-1 text-sm border border-shnoor-light rounded focus:ring-2 focus:ring-shnoor-lavender"
-                            placeholder={filteredStudents.length.toString()}
-                            value={selectionRange.end}
-                            onChange={(e) => setSelectionRange({...selectionRange, end: e.target.value})}
-                          />
-                          <button
-                            onClick={handleSelectRange}
-                            className="px-3 py-1 bg-shnoor-indigo hover:bg-shnoor-navy text-white text-sm rounded transition-colors"
-                          >
-                            Select
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2 max-h-96 overflow-y-auto">
-                        {filteredStudents.map((student, index) => (
-                          <div key={student.id}>
-                            <div
-                              className={`flex items-center justify-between p-4 border rounded-xl hover:shadow-md transition-all ${selectedStudentsForDelete.includes(student.id)
-                                ? 'bg-shnoor-lavender border-shnoor-indigo'
-                                : 'bg-white border-shnoor-light'
-                                }`}
-                            >
-                              <div className="flex items-center space-x-3 flex-1">
-                                <span className="text-sm font-bold text-shnoor-indigo w-6">{index + 1}.</span>
-                                <input
-                                  type="checkbox"
-                                  checked={selectedStudentsForDelete.includes(student.id)}
-                                  onChange={() => toggleStudentForDelete(student.id)}
-                                  className="w-5 h-5 text-shnoor-indigo border-shnoor-mist rounded focus:ring-2 focus:ring-shnoor-lavender"
-                                />
-                                <div className="flex-1">
-                                  <h5 className="font-bold text-shnoor-navy">{student.full_name}</h5>
-                                  <p className="text-sm text-shnoor-indigoMedium">
-                                    {student.email} • {student.roll_number || 'No roll number'}
+                          <div className="space-y-2 max-h-96 overflow-y-auto">
+                            {filteredStudents.map((student, index) => (
+                              <div key={student.id}>
+                                <div
+                                  className={`flex items-center justify-between p-4 border rounded-xl hover:shadow-md transition-all ${selectedStudentsForDelete.includes(student.id)
+                                    ? 'bg-shnoor-lavender border-shnoor-indigo'
+                                    : 'bg-white border-shnoor-light'
+                                    }`}
+                                >
+                                  <div className="flex items-center space-x-3 flex-1">
+                                    <span className="text-sm font-bold text-shnoor-indigo w-6">{index + 1}.</span>
+                                    <input
+                                      type="checkbox"
+                                      checked={selectedStudentsForDelete.includes(student.id)}
+                                      onChange={() => toggleStudentForDelete(student.id)}
+                                      className="w-5 h-5 text-shnoor-indigo border-shnoor-mist rounded focus:ring-2 focus:ring-shnoor-lavender"
+                                    />
+                                    <div className="flex-1">
+                                      <h5 className="font-bold text-shnoor-navy">{student.full_name}</h5>
+                                      <p className="text-sm text-shnoor-indigoMedium">
+                                        {student.email} • {student.roll_number || 'No roll number'}
+                                        {student.assigned_tests_count > 0 && (
+                                          <button
+                                            onClick={() => toggleStudentTests(student)}
+                                            className="ml-2 text-xs text-shnoor-indigo hover:text-shnoor-navy font-medium underline"
+                                          >
+                                            ({student.assigned_tests_count} test{student.assigned_tests_count !== 1 ? 's' : ''} assigned)
+                                          </button>
+                                        )}
+                                        {student.assigned_tests_count === 0 && (
+                                          <span className="ml-2 text-xs text-shnoor-soft">
+                                            (0 tests assigned)
+                                          </span>
+                                        )}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center space-x-2">
                                     {student.assigned_tests_count > 0 && (
                                       <button
                                         onClick={() => toggleStudentTests(student)}
-                                        className="ml-2 text-xs text-shnoor-indigo hover:text-shnoor-navy font-medium underline"
+                                        className="p-2 text-shnoor-indigo hover:bg-shnoor-lavender rounded-lg transition-colors"
+                                        title="View Assigned Tests"
                                       >
-                                        ({student.assigned_tests_count} test{student.assigned_tests_count !== 1 ? 's' : ''} assigned)
+                                        <ChevronDown
+                                          size={18}
+                                          className={`transition-transform ${expandedStudentTests[student.id] ? 'rotate-180' : ''}`}
+                                        />
                                       </button>
                                     )}
-                                    {student.assigned_tests_count === 0 && (
-                                      <span className="ml-2 text-xs text-shnoor-soft">
-                                        (0 tests assigned)
-                                      </span>
-                                    )}
-                                  </p>
+                                    <button
+                                      onClick={() => handleDeleteStudent(student.id, student.full_name)}
+                                      className="p-2 text-shnoor-indigo hover:bg-shnoor-lavender rounded-lg transition-colors"
+                                      title="Delete Student"
+                                    >
+                                      <Trash2 size={18} />
+                                    </button>
+                                  </div>
                                 </div>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                {student.assigned_tests_count > 0 && (
-                                  <button
-                                    onClick={() => toggleStudentTests(student)}
-                                    className="p-2 text-shnoor-indigo hover:bg-shnoor-lavender rounded-lg transition-colors"
-                                    title="View Assigned Tests"
-                                  >
-                                    <ChevronDown 
-                                      size={18} 
-                                      className={`transition-transform ${expandedStudentTests[student.id] ? 'rotate-180' : ''}`}
-                                    />
-                                  </button>
-                                )}
-                                <button
-                                  onClick={() => handleDeleteStudent(student.id, student.full_name)}
-                                  className="p-2 text-shnoor-indigo hover:bg-shnoor-lavender rounded-lg transition-colors"
-                                  title="Delete Student"
-                                >
-                                  <Trash2 size={18} />
-                                </button>
-                              </div>
-                            </div>
 
-                            {/* Expanded Tests Dropdown */}
-                            {expandedStudentTests[student.id] && (
-                              <div className="ml-12 mr-4 mt-2 mb-2 p-4 bg-shnoor-lavender rounded-lg border border-shnoor-light">
-                                {expandedStudentTests[student.id].loading ? (
-                                  <div className="flex items-center justify-center py-4">
-                                    <Loader2 className="animate-spin text-shnoor-indigo" size={20} />
-                                    <span className="ml-2 text-sm text-shnoor-indigoMedium">Loading tests...</span>
-                                  </div>
-                                ) : expandedStudentTests[student.id].tests.length === 0 ? (
-                                  <div className="text-center py-4">
-                                    <FileSpreadsheet className="mx-auto mb-2 text-shnoor-mist" size={32} />
-                                    <p className="text-sm text-shnoor-indigoMedium">No tests assigned</p>
-                                  </div>
-                                ) : (
-                                  <div className="space-y-2">
-                                    <h6 className="text-xs font-bold text-shnoor-navy mb-2">Assigned Tests:</h6>
-                                    {expandedStudentTests[student.id].tests.map((test) => (
-                                      <div
-                                        key={test.id}
-                                        className="flex items-center justify-between p-3 bg-white rounded-lg border border-shnoor-light hover:shadow-sm transition-all"
-                                      >
-                                        <div className="flex-1">
-                                          <h6 className="text-sm font-semibold text-shnoor-navy">{test.title}</h6>
-                                          <p className="text-xs text-shnoor-indigoMedium">
-                                            {test.question_count} questions • {test.duration_minutes} mins
-                                            {test.status && (
-                                              <span className={`ml-2 px-2 py-0.5 rounded text-xs font-medium ${
-                                                test.status === 'completed' 
-                                                  ? 'bg-green-100 text-green-700' 
-                                                  : test.status === 'in_progress'
-                                                  ? 'bg-yellow-100 text-yellow-700'
-                                                  : 'bg-blue-100 text-blue-700'
-                                              }`}>
-                                                {test.status === 'completed' ? 'Completed' : test.status === 'in_progress' ? 'In Progress' : 'Not Started'}
-                                              </span>
-                                            )}
-                                          </p>
-                                        </div>
-                                        <button
-                                          onClick={() => handleUnassignTestFromStudent(student.id, test.id, test.title, student.full_name)}
-                                          className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                                          title="Unassign Test"
-                                        >
-                                          <Trash2 size={16} />
-                                        </button>
+                                {/* Expanded Tests Dropdown */}
+                                {expandedStudentTests[student.id] && (
+                                  <div className="ml-12 mr-4 mt-2 mb-2 p-4 bg-shnoor-lavender rounded-lg border border-shnoor-light">
+                                    {expandedStudentTests[student.id].loading ? (
+                                      <div className="flex items-center justify-center py-4">
+                                        <Loader2 className="animate-spin text-shnoor-indigo" size={20} />
+                                        <span className="ml-2 text-sm text-shnoor-indigoMedium">Loading tests...</span>
                                       </div>
-                                    ))}
+                                    ) : expandedStudentTests[student.id].tests.length === 0 ? (
+                                      <div className="text-center py-4">
+                                        <FileSpreadsheet className="mx-auto mb-2 text-shnoor-mist" size={32} />
+                                        <p className="text-sm text-shnoor-indigoMedium">No tests assigned</p>
+                                      </div>
+                                    ) : (
+                                      <div className="space-y-2">
+                                        <h6 className="text-xs font-bold text-shnoor-navy mb-2">Assigned Tests:</h6>
+                                        {expandedStudentTests[student.id].tests.map((test) => (
+                                          <div
+                                            key={test.id}
+                                            className="flex items-center justify-between p-3 bg-white rounded-lg border border-shnoor-light hover:shadow-sm transition-all"
+                                          >
+                                            <div className="flex-1">
+                                              <h6 className="text-sm font-semibold text-shnoor-navy">{test.title}</h6>
+                                              <p className="text-xs text-shnoor-indigoMedium">
+                                                {test.question_count} questions • {test.duration_minutes} mins
+                                                {test.status && (
+                                                  <span className={`ml-2 px-2 py-0.5 rounded text-xs font-medium ${test.status === 'completed'
+                                                    ? 'bg-green-100 text-green-700'
+                                                    : test.status === 'in_progress'
+                                                      ? 'bg-yellow-100 text-yellow-700'
+                                                      : 'bg-blue-100 text-blue-700'
+                                                    }`}>
+                                                    {test.status === 'completed' ? 'Completed' : test.status === 'in_progress' ? 'In Progress' : 'Not Started'}
+                                                  </span>
+                                                )}
+                                              </p>
+                                            </div>
+                                            <button
+                                              onClick={() => handleUnassignTestFromStudent(student.id, test.id, test.title, student.full_name)}
+                                              className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                              title="Unassign Test"
+                                            >
+                                              <Trash2 size={16} />
+                                            </button>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
                                   </div>
                                 )}
                               </div>
-                            )}
+                            ))}
                           </div>
-                        ))}
-                      </div>
-                    </>
-                    );
-                  })()}
+                        </>
+                      );
+                    })()}
+                  </div>
                 </div>
-              </div>
 
-              <div className="p-6 border-t border-shnoor-light flex justify-end">
-                <button
-                  onClick={() => {
-                    setShowStudentManagementModal(false);
-                    setSelectedStudentsForDelete([]);
-                    setSelectedTestsForStudentModal([]);
-                    setStudentSearchTerm('');
-                    setExpandedStudentTests({});
-                  }}
-                  className="px-6 py-3 bg-shnoor-light hover:bg-shnoor-mist text-shnoor-navy rounded-xl font-medium transition-colors"
-                >
-                  Close
-                </button>
+                <div className="p-6 border-t border-shnoor-light flex justify-end">
+                  <button
+                    onClick={() => {
+                      setShowStudentManagementModal(false);
+                      setSelectedStudentsForDelete([]);
+                      setSelectedTestsForStudentModal([]);
+                      setStudentSearchTerm('');
+                      setExpandedStudentTests({});
+                    }}
+                    className="px-6 py-3 bg-shnoor-light hover:bg-shnoor-mist text-shnoor-navy rounded-xl font-medium transition-colors"
+                  >
+                    Close
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Registration Control Modal */}
-        {showRegistrationControlModal && selectedInstituteForRegistration && (
-          <InstituteRegistrationControl
-            institute={selectedInstituteForRegistration}
-            onClose={() => {
-              setShowRegistrationControlModal(false);
-              setSelectedInstituteForRegistration(null);
-            }}
-            onUpdate={() => {
-              fetchAllInstitutes();
-            }}
-          />
-        )}
+          {/* Registration Control Modal */}
+          {showRegistrationControlModal && selectedInstituteForRegistration && (
+            <InstituteRegistrationControl
+              institute={selectedInstituteForRegistration}
+              onClose={() => {
+                setShowRegistrationControlModal(false);
+                setSelectedInstituteForRegistration(null);
+              }}
+              onUpdate={() => {
+                fetchAllInstitutes();
+              }}
+            />
+          )}
 
-        {/* Preview Questions Modal */}
-        {showPreviewQuestionsModal && previewTest && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] max-w-4xl w-full max-h-[90vh] overflow-hidden">
-              <div className="bg-gradient-to-r from-shnoor-indigo to-shnoor-navy px-6 py-4 flex justify-between items-center">
-                <div>
-                  <h3 className="text-xl font-bold text-white">{previewTest.name}</h3>
-                  <p className="text-shnoor-lavender text-sm mt-1">Preview Questions</p>
+          {/* Preview Questions Modal */}
+          {showPreviewQuestionsModal && previewTest && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] max-w-4xl w-full max-h-[90vh] overflow-hidden">
+                <div className="bg-gradient-to-r from-shnoor-indigo to-shnoor-navy px-6 py-4 flex justify-between items-center">
+                  <div>
+                    <h3 className="text-xl font-bold text-white">{previewTest.name}</h3>
+                    <p className="text-shnoor-lavender text-sm mt-1">Preview Questions</p>
+                  </div>
+                  <button
+                    onClick={() => setShowPreviewQuestionsModal(false)}
+                    className="text-white hover:bg-white/20 rounded-full p-2 transition-colors"
+                  >
+                    <X size={24} />
+                  </button>
                 </div>
-                <button
-                  onClick={() => setShowPreviewQuestionsModal(false)}
-                  className="text-white hover:bg-white/20 rounded-full p-2 transition-colors"
-                >
-                  <X size={24} />
-                </button>
-              </div>
 
-              <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-                {isLoadingPreview ? (
-                  <div className="flex items-center justify-center py-12">
-                    <Loader2 className="animate-spin text-shnoor-indigo" size={32} />
-                    <span className="ml-3 text-shnoor-indigoMedium">Loading questions...</span>
-                  </div>
-                ) : previewQuestions.length === 0 ? (
-                  <div className="text-center py-12">
-                    <FileSpreadsheet className="mx-auto mb-3 text-shnoor-mist" size={48} />
-                    <p className="text-shnoor-indigoMedium">No questions found</p>
-                  </div>
-                ) : (
-                  <div className="space-y-6">
-                    {previewQuestions.map((question, index) => (
-                      <div key={question.id} className="p-4 bg-white rounded-xl border border-shnoor-light">
-                        <div className="flex items-start space-x-3 mb-3">
-                          <span className="flex-shrink-0 w-8 h-8 bg-shnoor-lavender text-shnoor-indigo rounded-full flex items-center justify-center font-bold text-sm">
-                            {index + 1}
-                          </span>
-                          <p className="flex-1 text-shnoor-navy font-medium">{question.question_text}</p>
-                        </div>
-                        <div className="ml-11 space-y-2">
-                          {[
-                            { label: 'A', value: question.option_a },
-                            { label: 'B', value: question.option_b },
-                            { label: 'C', value: question.option_c },
-                            { label: 'D', value: question.option_d }
-                          ].filter(opt => opt.value).map((option) => (
-                            <div
-                              key={option.label}
-                              className={`p-3 rounded-lg border ${question.correct_option === option.label
-                                ? 'bg-shnoor-successLight border-shnoor-success text-shnoor-success'
-                                : 'bg-white border-shnoor-light text-shnoor-indigoMedium'
-                                }`}
-                            >
-                              <span className="font-bold mr-2">{option.label}.</span>
-                              {option.value}
-                              {question.correct_option === option.label && (
-                                <span className="ml-2 text-xs font-bold text-shnoor-success">(Correct Answer)</span>
-                              )}
+                <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+                  {isLoadingPreview ? (
+                    <div className="flex items-center justify-center py-12">
+                      <Loader2 className="animate-spin text-shnoor-indigo" size={32} />
+                      <span className="ml-3 text-shnoor-indigoMedium">Loading questions...</span>
+                    </div>
+                  ) : previewQuestions.length === 0 ? (
+                    <div className="text-center py-12">
+                      <FileSpreadsheet className="mx-auto mb-3 text-shnoor-mist" size={48} />
+                      <p className="text-shnoor-indigoMedium">No questions found</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-6">
+                      {previewQuestions.map((question, index) => (
+                        <div key={question.id} className="p-4 bg-white rounded-xl border border-shnoor-light">
+                          <div className="flex items-start space-x-3 mb-3">
+                            <span className="flex-shrink-0 w-8 h-8 bg-shnoor-lavender text-shnoor-indigo rounded-full flex items-center justify-center font-bold text-sm">
+                              {index + 1}
+                            </span>
+                            <p className="flex-1 text-shnoor-navy font-medium">{question.question_text}</p>
+                          </div>
+                          <div className="ml-11 space-y-2">
+                            {[
+                              { label: 'A', value: question.option_a },
+                              { label: 'B', value: question.option_b },
+                              { label: 'C', value: question.option_c },
+                              { label: 'D', value: question.option_d }
+                            ].filter(opt => opt.value).map((option) => (
+                              <div
+                                key={option.label}
+                                className={`p-3 rounded-lg border ${question.correct_option === option.label
+                                  ? 'bg-shnoor-successLight border-shnoor-success text-shnoor-success'
+                                  : 'bg-white border-shnoor-light text-shnoor-indigoMedium'
+                                  }`}
+                              >
+                                <span className="font-bold mr-2">{option.label}.</span>
+                                {option.value}
+                                {question.correct_option === option.label && (
+                                  <span className="ml-2 text-xs font-bold text-shnoor-success">(Correct Answer)</span>
+                                )}
+                              </div>
+                            ))}
+                            <div className="text-sm text-shnoor-indigoMedium mt-2">
+                              <span className="font-bold">Marks:</span> {question.marks || 1}
                             </div>
-                          ))}
-                          <div className="text-sm text-shnoor-indigoMedium mt-2">
-                            <span className="font-bold">Marks:</span> {question.marks || 1}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="p-6 border-t border-shnoor-light flex justify-end">
+                  <button
+                    onClick={() => setShowPreviewQuestionsModal(false)}
+                    className="px-6 py-3 bg-shnoor-light hover:bg-shnoor-lavender text-shnoor-navy rounded-xl font-medium transition-colors"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Test History Modal */}
+          {showTestHistoryModal && testHistory && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] max-w-2xl w-full">
+                <div className="bg-gradient-to-r from-shnoor-indigo to-shnoor-navy px-6 py-4 flex justify-between items-center">
+                  <div>
+                    <h3 className="text-xl font-bold text-white">Test History</h3>
+                    <p className="text-shnoor-lavender text-sm mt-1">{testHistory.testName}</p>
+                  </div>
+                  <button
+                    onClick={() => setShowTestHistoryModal(false)}
+                    className="text-white hover:bg-white/20 rounded-full p-2 transition-colors"
+                  >
+                    <X size={24} />
+                  </button>
+                </div>
+
+                <div className="p-6">
+                  {isLoadingHistory ? (
+                    <div className="flex items-center justify-center py-12">
+                      <Loader2 className="animate-spin text-shnoor-indigo" size={32} />
+                      <span className="ml-3 text-shnoor-indigoMedium">Loading history...</span>
+                    </div>
+                  ) : (
+                    <div className="space-y-6">
+                      {/* Created Info */}
+                      <div className="p-4 bg-shnoor-successLight rounded-xl border border-shnoor-successLight">
+                        <div className="flex items-center space-x-3 mb-3">
+                          <div className="w-10 h-10 bg-shnoor-successLight rounded-full flex items-center justify-center">
+                            <Plus className="text-shnoor-success" size={20} />
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-shnoor-navy">Created</h4>
+                            <p className="text-sm text-shnoor-indigoMedium">Test was created</p>
+                          </div>
+                        </div>
+                        <div className="ml-13 space-y-2">
+                          <div className="flex items-center space-x-2 text-sm">
+                            <Users size={16} className="text-shnoor-indigoMedium" />
+                            <span className="text-shnoor-indigoMedium">By:</span>
+                            <span className="font-bold text-shnoor-navy">{testHistory.createdBy}</span>
+                          </div>
+                          <div className="flex items-center space-x-2 text-sm">
+                            <Calendar size={16} className="text-shnoor-indigoMedium" />
+                            <span className="text-shnoor-indigoMedium">On:</span>
+                            <span className="font-bold text-shnoor-navy">
+                              {new Date(testHistory.createdAt).toLocaleString('en-US', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </span>
                           </div>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
 
-              <div className="p-6 border-t border-shnoor-light flex justify-end">
-                <button
-                  onClick={() => setShowPreviewQuestionsModal(false)}
-                  className="px-6 py-3 bg-shnoor-light hover:bg-shnoor-lavender text-shnoor-navy rounded-xl font-medium transition-colors"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Test History Modal */}
-        {showTestHistoryModal && testHistory && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] max-w-2xl w-full">
-              <div className="bg-gradient-to-r from-shnoor-indigo to-shnoor-navy px-6 py-4 flex justify-between items-center">
-                <div>
-                  <h3 className="text-xl font-bold text-white">Test History</h3>
-                  <p className="text-shnoor-lavender text-sm mt-1">{testHistory.testName}</p>
+                      {/* Updated Info */}
+                      <div className="p-4 bg-shnoor-lavender rounded-xl border border-shnoor-light">
+                        <div className="flex items-center space-x-3 mb-3">
+                          <div className="w-10 h-10 bg-shnoor-lavender rounded-full flex items-center justify-center">
+                            <Pencil className="text-shnoor-indigo" size={20} />
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-shnoor-navy">Last Updated</h4>
+                            <p className="text-sm text-shnoor-indigoMedium">Most recent modification</p>
+                          </div>
+                        </div>
+                        <div className="ml-13 space-y-2">
+                          <div className="flex items-center space-x-2 text-sm">
+                            <Users size={16} className="text-shnoor-indigoMedium" />
+                            <span className="text-shnoor-indigoMedium">By:</span>
+                            <span className="font-bold text-shnoor-navy">{testHistory.updatedBy}</span>
+                          </div>
+                          <div className="flex items-center space-x-2 text-sm">
+                            <Calendar size={16} className="text-shnoor-indigoMedium" />
+                            <span className="text-shnoor-indigoMedium">On:</span>
+                            <span className="font-bold text-shnoor-navy">
+                              {new Date(testHistory.updatedAt).toLocaleString('en-US', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <button
-                  onClick={() => setShowTestHistoryModal(false)}
-                  className="text-white hover:bg-white/20 rounded-full p-2 transition-colors"
-                >
-                  <X size={24} />
-                </button>
-              </div>
 
-              <div className="p-6">
-                {isLoadingHistory ? (
-                  <div className="flex items-center justify-center py-12">
-                    <Loader2 className="animate-spin text-shnoor-indigo" size={32} />
-                    <span className="ml-3 text-shnoor-indigoMedium">Loading history...</span>
-                  </div>
-                ) : (
-                  <div className="space-y-6">
-                    {/* Created Info */}
-                    <div className="p-4 bg-shnoor-successLight rounded-xl border border-shnoor-successLight">
-                      <div className="flex items-center space-x-3 mb-3">
-                        <div className="w-10 h-10 bg-shnoor-successLight rounded-full flex items-center justify-center">
-                          <Plus className="text-shnoor-success" size={20} />
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-shnoor-navy">Created</h4>
-                          <p className="text-sm text-shnoor-indigoMedium">Test was created</p>
-                        </div>
-                      </div>
-                      <div className="ml-13 space-y-2">
-                        <div className="flex items-center space-x-2 text-sm">
-                          <Users size={16} className="text-shnoor-indigoMedium" />
-                          <span className="text-shnoor-indigoMedium">By:</span>
-                          <span className="font-bold text-shnoor-navy">{testHistory.createdBy}</span>
-                        </div>
-                        <div className="flex items-center space-x-2 text-sm">
-                          <Calendar size={16} className="text-shnoor-indigoMedium" />
-                          <span className="text-shnoor-indigoMedium">On:</span>
-                          <span className="font-bold text-shnoor-navy">
-                            {new Date(testHistory.createdAt).toLocaleString('en-US', {
-                              year: 'numeric',
-                              month: 'short',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Updated Info */}
-                    <div className="p-4 bg-shnoor-lavender rounded-xl border border-shnoor-light">
-                      <div className="flex items-center space-x-3 mb-3">
-                        <div className="w-10 h-10 bg-shnoor-lavender rounded-full flex items-center justify-center">
-                          <Pencil className="text-shnoor-indigo" size={20} />
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-shnoor-navy">Last Updated</h4>
-                          <p className="text-sm text-shnoor-indigoMedium">Most recent modification</p>
-                        </div>
-                      </div>
-                      <div className="ml-13 space-y-2">
-                        <div className="flex items-center space-x-2 text-sm">
-                          <Users size={16} className="text-shnoor-indigoMedium" />
-                          <span className="text-shnoor-indigoMedium">By:</span>
-                          <span className="font-bold text-shnoor-navy">{testHistory.updatedBy}</span>
-                        </div>
-                        <div className="flex items-center space-x-2 text-sm">
-                          <Calendar size={16} className="text-shnoor-indigoMedium" />
-                          <span className="text-shnoor-indigoMedium">On:</span>
-                          <span className="font-bold text-shnoor-navy">
-                            {new Date(testHistory.updatedAt).toLocaleString('en-US', {
-                              year: 'numeric',
-                              month: 'short',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="p-6 border-t border-shnoor-light flex justify-end">
-                <button
-                  onClick={() => setShowTestHistoryModal(false)}
-                  className="px-6 py-3 bg-shnoor-light hover:bg-shnoor-lavender text-shnoor-navy rounded-xl font-medium transition-colors"
-                >
-                  Close
-                </button>
+                <div className="p-6 border-t border-shnoor-light flex justify-end">
+                  <button
+                    onClick={() => setShowTestHistoryModal(false)}
+                    className="px-6 py-3 bg-shnoor-light hover:bg-shnoor-lavender text-shnoor-navy rounded-xl font-medium transition-colors"
+                  >
+                    Close
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Interview Schedule Modal */}
-        {showInterviewScheduleModal && selectedStudentForInterview && (
-          <InterviewSchedule
-            student={selectedStudentForInterview}
-            testId={selectedExamId}
-            onClose={() => {
-              setShowInterviewScheduleModal(false);
-              setSelectedStudentForInterview(null);
-            }}
-            onScheduled={() => {
-              setShowInterviewScheduleModal(false);
-              setSelectedStudentForInterview(null);
-            }}
-          />
-        )}
-      </div>
+          {/* Interview Schedule Modal */}
+          {showInterviewScheduleModal && selectedStudentForInterview && (
+            <InterviewSchedule
+              student={selectedStudentForInterview}
+              testId={selectedExamId}
+              onClose={() => {
+                setShowInterviewScheduleModal(false);
+                setSelectedStudentForInterview(null);
+              }}
+              onScheduled={() => {
+                setShowInterviewScheduleModal(false);
+                setSelectedStudentForInterview(null);
+              }}
+            />
+          )}
+        </div>
       </div>
     </Suspense>
   );

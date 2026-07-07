@@ -10,16 +10,15 @@ const ExamSearchFilter = memo(({
   sortOptions = [],
   showPublishedFilter = false,
   showAttemptedFilter = false,
-  resultCount = 0
+  resultCount = 0,
+  initialSearchTerm = '',
+  initialFilters = { published: 'all', attempted: 'all', dateRange: 'all' },
+  initialSortBy = 'latest'
 }) => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
   const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState({
-    published: 'all',
-    attempted: 'all',
-    dateRange: 'all'
-  });
-  const [sortBy, setSortBy] = useState('latest');
+  const [filters, setFilters] = useState(initialFilters);
+  const [sortBy, setSortBy] = useState(initialSortBy);
 
   // Debounce search so onSearchChange fires 300ms after user stops typing
   const debouncedSearch = useDebounce(searchTerm, 300);
