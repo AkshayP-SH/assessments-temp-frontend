@@ -1,8 +1,9 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useClientAuth } from '../contexts/ClientAuthContext';
 
 const ClientProtectedRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useClientAuth();
+  const { isAuthenticated, loading, clientUser } = useClientAuth();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -12,7 +13,19 @@ const ClientProtectedRoute = ({ children }) => {
     );
   }
 
-  return isAuthenticated ? children : <Navigate to="/login?portal=org" replace />;
+  if (!isAuthenticated) {
+    return <Navigate to="/login?portal=org" replace />;
+  }
+
+  // Check if payment is required and user is not on subscription plans page
+  const requiresPayment = clientUser?.requiresPayment || clientUser?.clientStatus === 'awaiting_payment';
+  const isOnSubscriptionPage = location.pathname === '/client/subscription-plans';
+  
+  if (requiresPayment && !isOnSubscriptionPage) {
+    return <Navigate to="/client/subscription-plans" replace state={{ requiresPayment: true }} />;
+  }
+
+  return children;
 };
 
 export default ClientProtectedRoute;

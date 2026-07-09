@@ -173,7 +173,12 @@ const Login = () => {
       // Fall through to client login
       const result = await clientLogin(email.trim(), password);
       if (result.success) {
-        navigate('/client/dashboard', { replace: true });
+        // Check if payment is required (awaiting_payment status)
+        if (result.user?.requiresPayment || result.user?.clientStatus === 'awaiting_payment') {
+          navigate('/client/subscription-plans', { replace: true, state: { requiresPayment: true } });
+        } else {
+          navigate('/client/dashboard', { replace: true });
+        }
       } else {
         setApiError(result.message || 'Invalid credentials. Please try again.');
       }
