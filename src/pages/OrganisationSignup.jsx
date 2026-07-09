@@ -180,9 +180,9 @@ const OrganisationSignup = () => {
               </div>
               <h2 className="text-2xl font-extrabold text-shnoor-navy mb-2">Registration Complete!</h2>
               <p className="text-shnoor-soft text-sm mb-8">
-                Your organisation account has been successfully created. You can now log in to the admin portal.
+                Your organisation account has been created. Please log in and complete payment to activate your account and access all features.
               </p>
-              <Link to="/login">
+              <Link to="/client/login">
                 <Button className="w-full h-[52px]">Go to Login</Button>
               </Link>
             </div>

@@ -51,7 +51,7 @@ export const ClientAuthProvider = ({ children }) => {
       localStorage.setItem('adminUser', JSON.stringify(data.user));
       setClientUser(data.user);
       setIsAuthenticated(true);
-      return { success: true };
+      return { success: true, user: data.user };
     } catch (err) {
       return { success: false, message: 'Network error. Please try again.' };
     }
