@@ -25,7 +25,7 @@ const StatPill = ({ label, value }) => (
 );
 
 /* ─── Edit Client Modal ───────────────────────────────────────────────── */
-const EditClientModal = ({ client, onClose, onUpdated }) => {
+const EditClientModal = ({ client, onClose, onUpdated, subscriptionPlans = [] }) => {
   const [form, setForm] = useState({
     name: client.name || '',
     company_name: client.company_name || '',
@@ -40,6 +40,9 @@ const EditClientModal = ({ client, onClose, onUpdated }) => {
     max_institutes: String(client.max_institutes ?? 10),
     max_tests: String(client.max_tests ?? 50),
     max_students: String(client.max_students ?? 1000),
+    plan_id: client.plan_id || 'Basic',
+    subscription_duration: client.subscription_duration || '30_DAYS',
+    payment_status: client.payment_status || 'UNPAID',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -64,10 +67,13 @@ const EditClientModal = ({ client, onClose, onUpdated }) => {
       country: form.country.trim() || null,
       use_case: form.use_case.trim() || null,
       status: client.status,
-      subscription_tier: form.subscription_tier,
+      subscription_tier: form.plan_id?.toLowerCase() || 'basic',
       max_institutes: Math.max(1, parseInt(form.max_institutes, 10) || 1),
       max_tests: Math.max(1, parseInt(form.max_tests, 10) || 1),
       max_students: Math.max(1, parseInt(form.max_students, 10) || 1),
+      plan_id: form.plan_id,
+      subscription_duration: form.subscription_duration,
+      payment_status: form.payment_status,
     };
 
     setLoading(true);
@@ -89,8 +95,8 @@ const EditClientModal = ({ client, onClose, onUpdated }) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl">
-        <div className="px-6 py-5 border-b border-shnoor-mist flex items-center justify-between">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto flex flex-col">
+        <div className="px-6 py-5 border-b border-shnoor-mist flex items-center justify-between sticky top-0 bg-white z-10 flex-shrink-0">
           <h2 className="text-base font-bold text-shnoor-navy">Edit Client</h2>
           <button onClick={onClose} className="text-shnoor-soft hover:text-shnoor-navy">✕</button>
         </div>
@@ -167,15 +173,7 @@ const EditClientModal = ({ client, onClose, onUpdated }) => {
             </div>
           </div>
           
-          <div>
-            <label className="block text-xs font-semibold text-shnoor-navy uppercase tracking-wide mb-1.5">Subscription Tier</label>
-            <select value={form.subscription_tier} onChange={e => setForm(p => ({ ...p, subscription_tier: e.target.value }))} disabled={loading}
-              className="w-full h-[42px] px-3 rounded-lg border border-shnoor-mist text-sm focus:outline-none focus:border-shnoor-indigo bg-white">
-              <option value="basic">Basic</option>
-              <option value="premium">Premium</option>
-              <option value="enterprise">Enterprise</option>
-            </select>
-          </div>
+
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
@@ -192,6 +190,49 @@ const EditClientModal = ({ client, onClose, onUpdated }) => {
               <label className="block text-xs font-semibold text-shnoor-navy uppercase tracking-wide mb-1.5">Max Students</label>
               <input type="number" min="1" value={form.max_students} onChange={e => setForm(p => ({ ...p, max_students: e.target.value }))} disabled={loading}
                 className="w-full h-[42px] px-3 rounded-lg border border-shnoor-mist text-sm focus:outline-none focus:border-shnoor-indigo" />
+            </div>
+          </div>
+
+          <div className="mt-2 pt-4 border-t border-shnoor-mist">
+            <h3 className="text-sm font-bold text-shnoor-navy mb-3">Subscription Details</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-shnoor-navy uppercase tracking-wide mb-1.5">Plan</label>
+                <select 
+                  value={form.plan_id} 
+                  onChange={e => setForm(p => ({ ...p, plan_id: e.target.value }))}
+                  disabled={loading}
+                  className="w-full h-[42px] px-3 rounded-lg border border-shnoor-mist text-sm focus:outline-none focus:border-shnoor-indigo bg-white">
+                  {subscriptionPlans.length > 0 ? (
+                    subscriptionPlans.map(plan => (
+                      <option key={plan.id} value={plan.plan_id}>{plan.name}</option>
+                    ))
+                  ) : (
+                    <>
+                      <option value="Basic">Basic</option>
+                      <option value="Premium">Premium</option>
+                      <option value="Super Premium">Super Premium</option>
+                    </>
+                  )}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-shnoor-navy uppercase tracking-wide mb-1.5">Duration</label>
+                <select value={form.subscription_duration} onChange={e => setForm(p => ({ ...p, subscription_duration: e.target.value }))} disabled={loading}
+                  className="w-full h-[42px] px-3 rounded-lg border border-shnoor-mist text-sm focus:outline-none focus:border-shnoor-indigo bg-white">
+                  <option value="30_DAYS">30 Days</option>
+                  <option value="90_DAYS">90 Days</option>
+                  <option value="1_YEAR">1 Year</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-shnoor-navy uppercase tracking-wide mb-1.5">Payment</label>
+                <select value={form.payment_status} onChange={e => setForm(p => ({ ...p, payment_status: e.target.value }))} disabled={loading}
+                  className="w-full h-[42px] px-3 rounded-lg border border-shnoor-mist text-sm focus:outline-none focus:border-shnoor-indigo bg-white">
+                  <option value="UNPAID">Unpaid</option>
+                  <option value="PAID">Paid</option>
+                </select>
+              </div>
             </div>
           </div>
 
@@ -248,7 +289,7 @@ const InputField = ({ label, name, type = 'text', placeholder, required = false,
 );
 
 /* ─── Create Client Modal ─────────────────────────────────────────────── */
-const CreateClientModal = ({ onClose, onCreated }) => {
+const CreateClientModal = ({ onClose, onCreated, subscriptionPlans = [] }) => {
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -259,7 +300,10 @@ const CreateClientModal = ({ onClose, onCreated }) => {
     company_size: '',
     industry: '',
     country: '',
-    use_case: ''
+    use_case: '',
+    plan_id: 'Basic',
+    subscription_duration: '30_DAYS',
+    payment_status: 'UNPAID'
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
@@ -334,7 +378,10 @@ const CreateClientModal = ({ onClose, onCreated }) => {
         company_size: form.company_size || null,
         industry: form.industry || null,
         country: form.country.trim() || null,
-        use_case: form.use_case || null
+        use_case: form.use_case || null,
+        plan_id: form.plan_id,
+        subscription_duration: form.subscription_duration,
+        payment_status: form.payment_status
       };
       
       const res = await fetch(`${API_URL}/api/clients`, {
@@ -524,6 +571,57 @@ const CreateClientModal = ({ onClose, onCreated }) => {
               { value: 'Other', label: 'Other' }
             ]}
           />
+
+          {/* Subscription Details Section */}
+          <div className="mt-2 pt-4 border-t border-shnoor-mist">
+            <h3 className="text-sm font-bold text-shnoor-navy mb-3">Subscription Details</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <InputField
+                label="Plan"
+                name="plan_id"
+                value={form.plan_id}
+                onChange={e => setForm(p => ({ ...p, plan_id: e.target.value }))}
+                disabled={loading}
+                required
+                options={subscriptionPlans.length > 0 
+                  ? subscriptionPlans.map(plan => ({ value: plan.plan_id, label: plan.name }))
+                  : [
+                      { value: 'Basic', label: 'Basic' },
+                      { value: 'Premium', label: 'Premium' },
+                      { value: 'Super Premium', label: 'Super Premium' }
+                    ]
+                }
+              />
+              <InputField
+                label="Subscription Duration"
+                name="subscription_duration"
+                value={form.subscription_duration}
+                onChange={e => setForm(p => ({ ...p, subscription_duration: e.target.value }))}
+                disabled={loading}
+                required
+                options={[
+                  { value: '30_DAYS', label: '30 Days' },
+                  { value: '90_DAYS', label: '90 Days' },
+                  { value: '1_YEAR', label: '1 Year' }
+                ]}
+              />
+              <InputField
+                label="Payment Status"
+                name="payment_status"
+                value={form.payment_status}
+                onChange={e => setForm(p => ({ ...p, payment_status: e.target.value }))}
+                disabled={loading}
+                required
+                options={[
+                  { value: 'UNPAID', label: 'Unpaid' },
+                  { value: 'PAID', label: 'Paid' }
+                ]}
+              />
+            </div>
+            <p className="text-xs text-shnoor-soft mt-2">
+              Note: Duration starts from today.
+            </p>
+          </div>
           
           <div className="flex gap-3 pt-2 border-t border-shnoor-mist mt-2">
             <button
@@ -611,7 +709,7 @@ const CreatedModal = ({ client, onClose }) => {
 };
 
 /* ─── Client Detail Panel ─────────────────────────────────────────────── */
-const ClientDetailPanel = ({ client, onClose, onStatusChange, onDelete, onClientUpdated }) => {
+const ClientDetailPanel = ({ client, onClose, onStatusChange, onDelete, onClientUpdated, subscriptionPlans = [] }) => {
   const [stats, setStats] = useState(null);
   const [loadingStats, setLoadingStats] = useState(true);
   const [copiedUrl, setCopiedUrl] = useState(false);
@@ -694,11 +792,18 @@ const ClientDetailPanel = ({ client, onClose, onStatusChange, onDelete, onClient
             <label className="block text-xs font-bold text-shnoor-soft uppercase tracking-wide mb-1.5">Registration Token</label>
             <code className="block bg-shnoor-lavender rounded-lg px-3 py-2 text-xs font-mono text-shnoor-navy break-all">{client.registration_token}</code>
           </div>
-          <div className="grid grid-cols-2 gap-3 text-xs">
-            <div><span className="text-shnoor-soft">Created</span><p className="font-semibold text-shnoor-navy mt-0.5">{new Date(client.created_at).toLocaleDateString('en-IN')}</p></div>
-            <div><span className="text-shnoor-soft">Last Login</span><p className="font-semibold text-shnoor-navy mt-0.5">{client.last_login ? new Date(client.last_login).toLocaleDateString('en-IN') : 'Never'}</p></div>
-            <div><span className="text-shnoor-soft">Tier</span><p className="font-semibold text-shnoor-navy mt-0.5 capitalize">{client.subscription_tier || 'basic'}</p></div>
-            <div><span className="text-shnoor-soft">Max Students</span><p className="font-semibold text-shnoor-navy mt-0.5">{client.max_students}</p></div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs border-y border-shnoor-mist py-4">
+            <div><span className="text-shnoor-soft">Plan</span><p className="font-semibold text-shnoor-navy mt-0.5">{subscriptionPlans.find(p => p.plan_id === client.plan_id)?.name || client.plan_id || 'Basic'}</p></div>
+            <div><span className="text-shnoor-soft">Duration</span><p className="font-semibold text-shnoor-navy mt-0.5 capitalize">{client.subscription_duration?.toLowerCase().replace('_', ' ') || '30 days'}</p></div>
+            <div>
+              <span className="text-shnoor-soft">Payment</span>
+              <p className={`font-semibold mt-0.5 ${client.payment_status === 'PAID' ? 'text-emerald-600' : 'text-red-600'}`}>
+                {client.payment_status || 'UNPAID'}
+              </p>
+            </div>
+            <div><span className="text-shnoor-soft">Start Date</span><p className="font-semibold text-shnoor-navy mt-0.5">{client.subscription_start_date ? new Date(client.subscription_start_date).toLocaleDateString('en-IN') : '-'}</p></div>
+            <div><span className="text-shnoor-soft">Expiry Date</span><p className="font-semibold text-shnoor-navy mt-0.5">{client.subscription_end_date ? new Date(client.subscription_end_date).toLocaleDateString('en-IN') : '-'}</p></div>
+            <div><span className="text-shnoor-soft">Created On</span><p className="font-semibold text-shnoor-navy mt-0.5">{new Date(client.created_at).toLocaleDateString('en-IN')}</p></div>
           </div>
           <div className="flex gap-3 pt-1">
             <button onClick={() => setShowEdit(true)} disabled={actionLoading}
@@ -724,6 +829,7 @@ const ClientDetailPanel = ({ client, onClose, onStatusChange, onDelete, onClient
             onClientUpdated({ ...client, ...updatedClient });
             setShowEdit(false);
           }}
+          subscriptionPlans={subscriptionPlans}
         />
       )}
     </div>
@@ -740,6 +846,19 @@ const AdminClients = () => {
   const [showCreate, setShowCreate] = useState(false);
   const [createdClient, setCreatedClient] = useState(null);
   const [selectedClient, setSelectedClient] = useState(null);
+  const [subscriptionPlans, setSubscriptionPlans] = useState([]);
+
+  const fetchSubscriptionPlans = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/subscription-plans/all`, { headers: adminHeaders() });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setSubscriptionPlans(data.plans || []);
+      }
+    } catch (err) {
+      console.error('Failed to load subscription plans:', err);
+    }
+  }, []);
 
   const fetchClients = useCallback(async () => {
     setLoading(true);
@@ -756,7 +875,10 @@ const AdminClients = () => {
     }
   }, []);
 
-  useEffect(() => { fetchClients(); }, [fetchClients]);
+  useEffect(() => { 
+    fetchClients(); 
+    fetchSubscriptionPlans();
+  }, [fetchClients, fetchSubscriptionPlans]);
 
   const handleCreated = (newClient) => {
     setShowCreate(false);
@@ -874,34 +996,84 @@ const AdminClients = () => {
             )}
           </div>
         ) : (
-          <div className="flex flex-col gap-3">
-            {filtered.map(client => (
-              <div key={client.id} onClick={() => setSelectedClient(client)}
-                className="bg-white rounded-xl border border-shnoor-mist p-4 flex items-center gap-4 shadow-sm hover:border-shnoor-indigo hover:shadow-md transition-all cursor-pointer group">
-                <div className="w-11 h-11 rounded-xl bg-shnoor-indigo/10 flex items-center justify-center flex-shrink-0">
-                  <Building2 size={20} className="text-shnoor-indigo" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="font-bold text-shnoor-navy text-sm truncate">{client.company_name || client.name}</p>
-                    <StatusBadge active={client.status === 'active'} />
-                  </div>
-                  <p className="text-xs text-shnoor-soft truncate mt-0.5">{client.email}</p>
-                </div>
-                <div className="hidden sm:flex items-center gap-2 flex-shrink-0">
-                  <StatPill label="Students" value={client.students_count || 0} />
-                  <StatPill label="Tests" value={client.tests_count || 0} />
-                </div>
-                <svg className="text-shnoor-mist group-hover:text-shnoor-indigo transition-colors flex-shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="m9 18 6-6-6-6" />
-                </svg>
-              </div>
-            ))}
+          <div className="bg-white rounded-xl border border-shnoor-mist overflow-hidden shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm whitespace-nowrap">
+                <thead className="bg-shnoor-lavender text-shnoor-navy border-b border-shnoor-mist">
+                  <tr>
+                    <th className="px-4 py-3 font-semibold">Organization</th>
+                    <th className="px-4 py-3 font-semibold">Plan</th>
+                    <th className="px-4 py-3 font-semibold">Duration</th>
+                    <th className="px-4 py-3 font-semibold">Payment</th>
+                    <th className="px-4 py-3 font-semibold">Expiry Date</th>
+                    <th className="px-4 py-3 font-semibold">Days Left</th>
+                    <th className="px-4 py-3 font-semibold">Status</th>
+                    <th className="px-4 py-3 font-semibold text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-shnoor-mist">
+                  {filtered.map(client => {
+                    let daysLeft = '-';
+                    if (client.subscription_end_date) {
+                      const diff = new Date(client.subscription_end_date).getTime() - new Date().getTime();
+                      const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+                      daysLeft = days > 0 ? `${days} days` : 'Expired';
+                    }
+
+                    return (
+                      <tr key={client.id} className="hover:bg-shnoor-mist/20 transition-colors group">
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-lg bg-shnoor-indigo/10 flex items-center justify-center flex-shrink-0">
+                              <Building2 size={16} className="text-shnoor-indigo" />
+                            </div>
+                            <div>
+                              <p className="font-bold text-shnoor-navy">{client.company_name || client.name}</p>
+                              <p className="text-xs text-shnoor-soft">{client.email}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 font-medium text-shnoor-navy">
+                          {subscriptionPlans.find(p => p.plan_id === client.plan_id)?.name || client.plan_id || 'Basic'}
+                        </td>
+                        <td className="px-4 py-3 text-shnoor-soft capitalize">
+                          {client.subscription_duration?.toLowerCase().replace('_', ' ') || '30 days'}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${client.payment_status === 'PAID' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
+                            {client.payment_status || 'UNPAID'}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-shnoor-soft">
+                          {client.subscription_end_date ? new Date(client.subscription_end_date).toLocaleDateString('en-IN') : '-'}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className={`text-xs font-bold ${daysLeft === 'Expired' ? 'text-red-600' : (parseInt(daysLeft) <= 7 ? 'text-amber-500' : 'text-shnoor-navy')}`}>
+                            {daysLeft}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <StatusBadge active={client.status === 'active'} />
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <button
+                            onClick={() => setSelectedClient(client)}
+                            className="inline-flex items-center justify-center h-8 px-3 rounded-lg text-xs font-semibold text-shnoor-indigo bg-shnoor-lavender hover:bg-shnoor-indigo hover:text-white transition-colors"
+                          >
+                            Manage
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
 
         {/* Modals */}
-        {showCreate && <CreateClientModal onClose={() => setShowCreate(false)} onCreated={handleCreated} />}
+        {showCreate && <CreateClientModal onClose={() => setShowCreate(false)} onCreated={handleCreated} subscriptionPlans={subscriptionPlans} />}
         {createdClient && <CreatedModal client={createdClient} onClose={() => setCreatedClient(null)} />}
         {selectedClient && (
           <ClientDetailPanel
@@ -910,6 +1082,7 @@ const AdminClients = () => {
             onStatusChange={handleStatusChange}
             onDelete={handleDelete}
             onClientUpdated={handleClientUpdated}
+            subscriptionPlans={subscriptionPlans}
           />
         )}
 

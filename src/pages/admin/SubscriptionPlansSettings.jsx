@@ -96,13 +96,39 @@ const SubscriptionPlansSettings = () => {
             </div>
 
             <div className="mb-4">
-              <label className="block text-xs font-bold text-shnoor-soft uppercase mb-1">Price (Monthly INR)</label>
-              <input 
-                type="number" 
-                value={plan.price_monthly} 
-                onChange={(e) => handleChange(plan.id, 'price_monthly', e.target.value)}
-                className="w-full border border-shnoor-mist rounded p-2 text-sm text-shnoor-navy focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo outline-none"
-              />
+              <label className="block text-xs font-bold text-shnoor-soft uppercase mb-2">Pricing (INR)</label>
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <span className="block text-[10px] font-bold text-shnoor-soft mb-1 tracking-wide">30 DAYS</span>
+                  <input 
+                    type="number" 
+                    value={plan.price_monthly || ''} 
+                    onChange={(e) => handleChange(plan.id, 'price_monthly', e.target.value)}
+                    className="w-full border border-shnoor-mist rounded p-2 text-sm text-shnoor-navy focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo outline-none"
+                    placeholder="0.00"
+                  />
+                </div>
+                <div>
+                  <span className="block text-[10px] font-bold text-shnoor-soft mb-1 tracking-wide">90 DAYS</span>
+                  <input 
+                    type="number" 
+                    value={plan.price_quarterly || ''} 
+                    onChange={(e) => handleChange(plan.id, 'price_quarterly', e.target.value)}
+                    className="w-full border border-shnoor-mist rounded p-2 text-sm text-shnoor-navy focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo outline-none"
+                    placeholder="0.00"
+                  />
+                </div>
+                <div>
+                  <span className="block text-[10px] font-bold text-shnoor-soft mb-1 tracking-wide">1 YEAR</span>
+                  <input 
+                    type="number" 
+                    value={plan.price_yearly || ''} 
+                    onChange={(e) => handleChange(plan.id, 'price_yearly', e.target.value)}
+                    className="w-full border border-shnoor-mist rounded p-2 text-sm text-shnoor-navy focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo outline-none"
+                    placeholder="0.00"
+                  />
+                </div>
+              </div>
             </div>
 
             <div className="mb-4">
@@ -114,6 +140,8 @@ const SubscriptionPlansSettings = () => {
                 className="w-full border border-shnoor-mist rounded p-2 text-sm text-shnoor-navy focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo outline-none"
               />
             </div>
+
+
 
             <div className="mb-4">
               <label className="block text-xs font-bold text-shnoor-soft uppercase mb-1">Features (One per line)</label>
