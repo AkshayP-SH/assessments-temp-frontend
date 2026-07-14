@@ -13,6 +13,7 @@ const GlobalThemeSelector = () => {
     location.pathname === '/job-board' ||
     location.pathname === '/student/my-applications' ||
     location.pathname.startsWith('/admin') ||
+    location.pathname.startsWith('/client') ||
     location.pathname.startsWith('/dashboard') ||
     location.pathname.startsWith('/test')
   ) {

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { useClientAuth } from '../../contexts/ClientAuthContext';
-import { apiFetch } from '../../config/api';
+import { apiFetch, getApiUrl } from '../../config/api';
 import AdminHeader from '../../components/AdminHeader';
 import Button from '../../components/Button';
 import { useSEO } from '../../hooks/useSEO';
@@ -64,16 +64,26 @@ const ClientSubscriptionPlans = () => {
         // Simulate payment processing delay
         await new Promise(resolve => setTimeout(resolve, 1500));
         
+        // Get the token from localStorage
+        const token = localStorage.getItem('clientToken') || localStorage.getItem('adminToken');
+        
+        if (!token) {
+          throw new Error('Authentication token not found. Please login again.');
+        }
+        
         // Directly call verify payment with dummy data
-        const verifyResponse = await apiFetch('api/settings/verify-payment', {
+        const verifyResponse = await fetch(getApiUrl('api/settings/verify-payment'), {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
           body: JSON.stringify({
             razorpay_order_id: 'dummy_order_' + Date.now(),
             razorpay_payment_id: 'dummy_payment_' + Date.now(),
             razorpay_signature: 'dummy_signature',
             plan_id: planId,
-            isDummyPayment: true, // Flag to skip signature verification
+            isDummyPayment: true,
           }),
         });
 
@@ -204,14 +214,14 @@ const ClientSubscriptionPlans = () => {
   }
 
   return (
-    <div className="min-h-screen bg-shnoor-lavender">
+    <div className="min-h-screen bg-gradient-to-br from-shnoor-lavender via-white to-shnoor-lavender">
       <AdminHeader isClientPortal={true} onLogout={handleLogout} />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         
         {/* Back Button (Only show if not locked out) */}
         {!(requiresPayment || subscriptionExpired) && (
-          <div className="mb-6">
+          <div className="mb-6 animate-fade-in">
             <button
               onClick={() => navigate(-1)}
               className="flex items-center gap-2 text-shnoor-indigo font-semibold hover:text-shnoor-navy transition-colors bg-white px-4 py-2 rounded-lg shadow-sm border border-shnoor-light hover:shadow-md w-fit"
@@ -221,17 +231,18 @@ const ClientSubscriptionPlans = () => {
             </button>
           </div>
         )}
-
         {/* Test Mode Banner - Only show in dummy mode */}
         {DUMMY_PAYMENT_MODE && (
-          <div className="mb-6 bg-blue-50 border-2 border-blue-300 rounded-xl p-4">
-            <div className="flex items-start gap-3">
-              <svg className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <div>
-                <h3 className="text-sm font-bold text-blue-900 mb-1">Test Mode Active</h3>
-                <p className="text-xs text-blue-800">
+          <div className="mb-8 bg-gradient-to-r from-blue-50 to-blue-100 border-2 border-blue-400 rounded-2xl p-5 shadow-lg animate-fade-in">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-base font-extrabold text-blue-900 mb-1">Test Mode Active</h3>
+                <p className="text-sm text-blue-800 leading-relaxed">
                   This is a dummy payment system for testing. No actual payment will be processed. Click any "Select Plan" button to simulate successful payment and activate your account instantly.
                 </p>
               </div>
@@ -240,14 +251,16 @@ const ClientSubscriptionPlans = () => {
         )}
 
         {requiresPayment && !subscriptionExpired && (
-          <div className="mb-8 bg-yellow-50 border border-yellow-200 rounded-xl p-6">
+          <div className="mb-8 bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-400 rounded-2xl p-6 shadow-lg animate-fade-in">
             <div className="flex items-start gap-4">
-              <svg className="w-6 h-6 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-              <div>
-                <h3 className="text-lg font-bold text-yellow-900 mb-1">Payment Required</h3>
-                <p className="text-sm text-yellow-800">
+              <div className="flex-shrink-0 w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center">
+                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-xl font-extrabold text-yellow-900 mb-2">Payment Required</h3>
+                <p className="text-base text-yellow-800 leading-relaxed">
                   Your account is currently in awaiting payment status. Please select a subscription plan and complete payment to activate your account and access all features.
                 </p>
               </div>
@@ -271,47 +284,73 @@ const ClientSubscriptionPlans = () => {
           </div>
         )}
 
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-extrabold text-shnoor-navy mb-3">Choose Your Plan</h1>
-          <p className="text-lg text-shnoor-soft max-w-2xl mx-auto">
-            Select the perfect plan for your organization's assessment needs
+        <div className="text-center mb-16 animate-fade-in">
+          <h1 className="text-5xl font-extrabold text-shnoor-navy mb-4 tracking-tight">
+            Choose Your Plan
+          </h1>
+          <p className="text-xl text-shnoor-soft max-w-3xl mx-auto leading-relaxed">
+            Select the perfect plan for your organization's assessment needs and start managing exams like a pro
           </p>
         </div>
 
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
-            <svg className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <p className="text-sm text-red-800">{error}</p>
+          <div className="mb-8 bg-gradient-to-r from-red-50 to-red-100 border-2 border-red-300 rounded-2xl p-5 shadow-lg animate-shake">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-10 h-10 bg-red-500 rounded-full flex items-center justify-center">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-red-800">{error}</p>
+              </div>
+              <button
+                onClick={() => setError('')}
+                className="flex-shrink-0 text-red-600 hover:text-red-800 transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
           </div>
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {plans.map((plan) => (
+          {plans.map((plan, index) => (
             <div
               key={plan.id}
-              className="bg-white rounded-2xl shadow-lg border-2 border-shnoor-mist hover:border-shnoor-indigo transition-all duration-200 overflow-hidden flex flex-col"
+              className="group relative bg-white rounded-3xl shadow-xl border-2 border-shnoor-mist hover:border-shnoor-indigo transition-all duration-300 overflow-hidden animate-slide-up hover:shadow-2xl hover:scale-105"
+              style={{ animationDelay: `${index * 100}ms` }}
             >
               <div className="p-8 flex-1">
-                <h3 className="text-2xl font-extrabold text-shnoor-navy mb-2">{plan.name}</h3>
-                <p className="text-sm text-shnoor-soft mb-6">{plan.description}</p>
-                
                 <div className="mb-6">
+                  <h3 className="text-3xl font-extrabold text-shnoor-navy mb-2 group-hover:text-shnoor-indigo transition-colors">
+                    {plan.name}
+                  </h3>
+                  <p className="text-sm text-shnoor-soft leading-relaxed">{plan.description}</p>
+                </div>
+                
+                <div className="mb-8 pb-6 border-b-2 border-shnoor-lavender">
                   <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-extrabold text-shnoor-navy">₹{plan.price_monthly}</span>
-                    <span className="text-shnoor-soft">/month</span>
+                    <span className="text-5xl font-extrabold text-shnoor-navy group-hover:text-shnoor-indigo transition-colors">
+                      ₹{plan.price_monthly}
+                    </span>
+                    <span className="text-lg text-shnoor-soft font-medium">/month</span>
                   </div>
+                  <p className="text-xs text-shnoor-soft mt-2">Billed monthly • Cancel anytime</p>
                 </div>
 
-                <div className="space-y-3 mb-8">
+                <div className="space-y-4 mb-8">
                   {plan.features && Array.isArray(plan.features) 
                     ? plan.features.map((feature, idx) => (
-                      <div key={idx} className="flex items-start gap-2">
-                        <svg className="w-5 h-5 text-shnoor-success flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                        </svg>
-                        <span className="text-sm text-shnoor-navy">{feature}</span>
+                      <div key={idx} className="flex items-start gap-3 group/item">
+                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-green-100 flex items-center justify-center group-hover/item:bg-green-200 transition-colors">
+                          <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                        <span className="text-sm text-shnoor-navy font-medium leading-relaxed">{feature}</span>
                       </div>
                     ))
                     : null
@@ -323,11 +362,15 @@ const ClientSubscriptionPlans = () => {
                 <Button
                   onClick={() => handleSelectPlan(plan.plan_id)}
                   disabled={processingPlan !== null}
-                  className="w-full h-12 flex items-center justify-center gap-2"
+                  className={`w-full h-14 flex items-center justify-center gap-2 text-base font-bold shadow-lg transition-all duration-300 ${
+                    processingPlan === plan.plan_id
+                      ? 'opacity-50 cursor-not-allowed'
+                      : 'hover:shadow-xl hover:scale-105'
+                  }`}
                 >
                   {processingPlan === plan.plan_id ? (
                     <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <div className="w-5 h-5 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
                       Processing Payment...
                     </>
                   ) : (
@@ -345,16 +388,47 @@ const ClientSubscriptionPlans = () => {
         </div>
 
         {!(requiresPayment || subscriptionExpired) && (
-          <div className="text-center mt-12">
+          <div className="text-center mt-16 animate-fade-in">
             <button
               onClick={() => navigate('/client/dashboard')}
-              className="text-shnoor-indigo hover:text-shnoor-navy font-semibold text-sm underline"
+              className="text-shnoor-indigo hover:text-shnoor-navy font-semibold text-base underline underline-offset-4 transition-colors"
             >
-              Skip for now and go to dashboard
+              Skip for now and go to dashboard →
             </button>
           </div>
         )}
       </div>
+      
+      <style>{`
+        @keyframes fade-in {
+          from { opacity: 0; transform: translateY(-10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slide-up {
+          from { opacity: 0; transform: translateY(30px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          25% { transform: translateX(-5px); }
+          75% { transform: translateX(5px); }
+        }
+        
+        .animate-fade-in {
+          animation: fade-in 0.5s ease-out forwards;
+        }
+        
+        .animate-slide-up {
+          animation: slide-up 0.6s ease-out forwards;
+          opacity: 0;
+        }
+        
+        .animate-shake {
+          animation: shake 0.4s ease-in-out;
+        }
+      `}</style>
     </div>
   );
 };
