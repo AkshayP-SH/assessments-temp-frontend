@@ -75,6 +75,19 @@ export const apiFetch = async (endpoint, options = {}) => {
       }
     }
 
+    // Check for Quota Exceeded (403)
+    if (shouldHandleGlobalRedirect && response.status === 403) {
+      try {
+        const cloned = response.clone();
+        const data = await cloned.json();
+        if (data.quota) {
+          window.dispatchEvent(new CustomEvent('quota_exceeded', { detail: data.quota }));
+        }
+      } catch (e) {
+        // Ignore if parsing fails
+      }
+    }
+
     return response;
   } catch (error) {
     // Catch absolute network failures (server completely off) or aborts (timeouts)

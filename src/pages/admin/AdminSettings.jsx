@@ -1,14 +1,29 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Settings, User, BookOpen } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { ArrowLeft, Settings, User, BookOpen, CreditCard } from 'lucide-react';
 import AdminLayout from '../../components/AdminLayout';
 import SystemSettingsTab from '../../components/admin/SystemSettingsTab';
 import ProfileTab from '../../components/admin/ProfileTab';
 import QuestionBankTab from '../../components/admin/QuestionBankTab';
+import MySubscriptionTab from './MySubscriptionTab';
 
 const AdminSettings = () => {
     const navigate = useNavigate();
-    const [activeTab, setActiveTab] = useState('profile');
+    const location = useLocation();
+    const isSuperAdmin = localStorage.getItem('adminToken') !== null && localStorage.getItem('clientToken') === null;
+    
+    const [activeTab, setActiveTab] = useState(() => {
+        const params = new URLSearchParams(location.search);
+        return params.get('tab') || 'profile';
+    });
+
+    React.useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const tab = params.get('tab');
+        if (tab) {
+            setActiveTab(tab);
+        }
+    }, [location.search]);
 
     const tabs = [
         {
@@ -28,7 +43,13 @@ const AdminSettings = () => {
             label: 'Question Bank',
             icon: BookOpen,
             component: QuestionBankTab
-        }
+        },
+        ...(!isSuperAdmin ? [{
+            id: 'subscription',
+            label: 'My Subscription',
+            icon: CreditCard,
+            component: MySubscriptionTab
+        }] : [])
     ];
 
     const ActiveComponent = tabs.find(tab => tab.id === activeTab)?.component || ProfileTab;

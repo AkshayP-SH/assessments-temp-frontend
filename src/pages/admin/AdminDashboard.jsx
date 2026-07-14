@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Plus, FileSpreadsheet, LogOut, Download, ArrowLeft,
-  Trash2, Eye, Users, CheckCircle, XCircle, UserCheck, ChevronDown, ChevronRight, ChevronLeft, Video, Loader2, X, Building2, MoreVertical, Copy, AlertCircle, Pencil, MessageSquare, Star, TrendingUp, BarChart3, Calendar, Filter, CheckSquare, Briefcase, Search
+  Trash2, Eye, Users, CheckCircle, XCircle, UserCheck, ChevronDown, ChevronRight, ChevronLeft, Video, Loader2, X, Building2, MoreVertical, Copy, AlertCircle, Pencil, MessageSquare, Star, TrendingUp, BarChart3, Calendar, Filter, CheckSquare, Briefcase, Search, CreditCard
 } from 'lucide-react';
 
 import axios from 'axios';
@@ -29,6 +29,7 @@ const InterviewSchedule = lazy(() => import('./InterviewSchedule'));
 const AdminJobOpenings = lazy(() => import('../../components/admin/AdminJobOpenings'));
 const AdminReports = lazy(() => import('./AdminReports'));
 const SubscriptionPlansSettings = lazy(() => import('./SubscriptionPlansSettings'));
+const MySubscriptionTab = lazy(() => import('./MySubscriptionTab'));
 
 const AdminDashboard = () => {
   useSEO({
@@ -193,6 +194,19 @@ const AdminDashboard = () => {
       return u.role === 'super_admin' || u.role === 'admin';
     } catch { return false; }
   })();
+
+  const currentUser = useMemo(() => {
+    try {
+      return JSON.parse(localStorage.getItem('adminUser') || '{}');
+    } catch { return {}; }
+  }, []);
+
+  // Calculate days remaining for banner
+  const daysRemaining = useMemo(() => {
+    if (!currentUser?.subscriptionEndDate) return null;
+    const diff = new Date(currentUser.subscriptionEndDate) - new Date();
+    return Math.ceil(diff / (1000 * 60 * 60 * 24));
+  }, [currentUser]);
 
   // Fetch clients list for super admin selector
   useEffect(() => {
@@ -2319,6 +2333,38 @@ const AdminDashboard = () => {
         {/* Main Content */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
+          {/* Subscription Expiry Banner */}
+          {!isSuperAdmin && daysRemaining !== null && daysRemaining <= 7 && (
+            <div className={`mb-6 p-4 rounded-xl shadow-sm border flex items-center justify-between animate-fade-in ${
+              daysRemaining <= 1 
+                ? 'bg-red-50 border-red-200 text-red-800' 
+                : 'bg-yellow-50 border-yellow-200 text-yellow-800'
+            }`}>
+              <div className="flex items-center">
+                <AlertCircle size={20} className={`mr-3 ${daysRemaining <= 1 ? 'text-red-500' : 'text-yellow-600'}`} />
+                <div>
+                  <h4 className="font-bold">Subscription Alert</h4>
+                  <p className="text-sm mt-0.5">
+                    {daysRemaining <= 0 
+                      ? 'Your subscription has expired. Please renew to avoid losing access.'
+                      : `Your subscription will expire in ${daysRemaining} day${daysRemaining === 1 ? '' : 's'}. Renew now to avoid interruption.`
+                    }
+                  </p>
+                </div>
+              </div>
+              <button 
+                onClick={() => navigate('/client/subscription-plans')}
+                className={`px-4 py-2 rounded-lg text-sm font-bold shadow-sm transition-colors ${
+                  daysRemaining <= 1 
+                    ? 'bg-red-600 hover:bg-red-700 text-white' 
+                    : 'bg-yellow-500 hover:bg-yellow-600 text-white'
+                }`}
+              >
+                Renew Now
+              </button>
+            </div>
+          )}
+
           {/* Tab Navigation */}
           {!showCreateTest && !selectedExamId && (
             <div className="mb-4 sm:mb-8 overflow-x-auto pb-4 sm:pb-0 hide-scrollbar">
@@ -2768,11 +2814,6 @@ const AdminDashboard = () => {
                           </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-[#E5E7EB]">
-                          {/* {selectedExamStudents.length > 0 ? (
-                        selectedExamStudents.map((student, idx) => {
-                          const percentage = (student.score / student.total * 100);
-                          const passingPercentage = student.passingPercentage || 50; */}
-                          {/* const isPassed = percentage >= passingPercentage; */}
                           {(() => {
                             // Filter students based on statusFilter
                             const filteredStudents = selectedExamStudents.filter(s => {
@@ -2801,12 +2842,6 @@ const AdminDashboard = () => {
                                         type="checkbox"
                                         checked={selectedCandidates.includes(studentIdentifier)}
                                         onChange={(e) => {
-                                          console.log('Checkbox clicked:', {
-                                            checked: e.target.checked,
-                                            studentIdentifier,
-                                            studentName: student.name,
-                                            currentSelections: selectedCandidates
-                                          });
                                           if (e.target.checked) {
                                             setSelectedCandidates(prev => [...prev, studentIdentifier]);
                                           } else {
@@ -2862,14 +2897,7 @@ const AdminDashboard = () => {
                                     <td className="px-4 py-4 text-center">
                                       <button
                                         onClick={() => {
-                                          console.log('=== INTERVIEW BUTTON CLICKED ===');
-                                          console.log('Student object:', student);
-                                          console.log('student.student_id:', student.student_id);
-                                          console.log('student.id:', student.id);
-
-                                          // Prefer the actual database ID; fall back to displayed id if needed
                                           const resolvedStudentId = student.student_id || student.id || null;
-
                                           setSelectedStudentForInterview({
                                             id: resolvedStudentId,
                                             name: student.name,
@@ -4027,7 +4055,6 @@ const AdminDashboard = () => {
                   </div>
                 </div>
               )}
-
               {/* Interviews Tab */}
               {activeTab === 'interviews' && (
                 <div className="space-y-6">
@@ -4037,7 +4064,7 @@ const AdminDashboard = () => {
 
               {/* Job Openings Tab */}
               {activeTab === 'job-openings' && (
-                <div className="space-y-6">
+                <div className="animate-fade-in">
                   <AdminJobOpenings />
                 </div>
               )}

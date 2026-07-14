@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { useClientAuth } from '../../contexts/ClientAuthContext';
 import { apiFetch } from '../../config/api';
 import AdminHeader from '../../components/AdminHeader';
@@ -29,6 +30,7 @@ const ClientSubscriptionPlans = () => {
   const [processingPlan, setProcessingPlan] = useState(null);
   
   const requiresPayment = location.state?.requiresPayment || false;
+  const subscriptionExpired = location.state?.subscriptionExpired || false;
 
   useEffect(() => {
     fetchPlans();
@@ -206,6 +208,20 @@ const ClientSubscriptionPlans = () => {
       <AdminHeader isClientPortal={true} onLogout={handleLogout} />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        {/* Back Button (Only show if not locked out) */}
+        {!(requiresPayment || subscriptionExpired) && (
+          <div className="mb-6">
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center gap-2 text-shnoor-indigo font-semibold hover:text-shnoor-navy transition-colors bg-white px-4 py-2 rounded-lg shadow-sm border border-shnoor-light hover:shadow-md w-fit"
+            >
+              <ArrowLeft size={16} />
+              Back
+            </button>
+          </div>
+        )}
+
         {/* Test Mode Banner - Only show in dummy mode */}
         {DUMMY_PAYMENT_MODE && (
           <div className="mb-6 bg-blue-50 border-2 border-blue-300 rounded-xl p-4">
@@ -223,7 +239,7 @@ const ClientSubscriptionPlans = () => {
           </div>
         )}
 
-        {requiresPayment && (
+        {requiresPayment && !subscriptionExpired && (
           <div className="mb-8 bg-yellow-50 border border-yellow-200 rounded-xl p-6">
             <div className="flex items-start gap-4">
               <svg className="w-6 h-6 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -233,6 +249,22 @@ const ClientSubscriptionPlans = () => {
                 <h3 className="text-lg font-bold text-yellow-900 mb-1">Payment Required</h3>
                 <p className="text-sm text-yellow-800">
                   Your account is currently in awaiting payment status. Please select a subscription plan and complete payment to activate your account and access all features.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {subscriptionExpired && (
+          <div className="mb-8 bg-red-50 border border-red-200 rounded-xl p-6">
+            <div className="flex items-start gap-4">
+              <svg className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <div>
+                <h3 className="text-lg font-bold text-red-900 mb-1">Subscription Expired</h3>
+                <p className="text-sm text-red-800">
+                  Your subscription has expired. Please renew your plan to regain access to your dashboard and features.
                 </p>
               </div>
             </div>
@@ -312,7 +344,7 @@ const ClientSubscriptionPlans = () => {
           ))}
         </div>
 
-        {!requiresPayment && (
+        {!(requiresPayment || subscriptionExpired) && (
           <div className="text-center mt-12">
             <button
               onClick={() => navigate('/client/dashboard')}

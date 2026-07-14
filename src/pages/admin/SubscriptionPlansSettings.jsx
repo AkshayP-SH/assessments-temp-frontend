@@ -141,7 +141,37 @@ const SubscriptionPlansSettings = () => {
               />
             </div>
 
-
+            <div className="mb-4">
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <label className="block text-xs font-bold text-shnoor-soft uppercase mb-1">Max Institutes</label>
+                  <input 
+                    type="number" 
+                    value={plan.max_institutes || ''} 
+                    onChange={(e) => handleChange(plan.id, 'max_institutes', e.target.value)}
+                    className="w-full border border-shnoor-mist rounded p-2 text-sm text-shnoor-navy focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-shnoor-soft uppercase mb-1">Max Tests</label>
+                  <input 
+                    type="number" 
+                    value={plan.max_tests || ''} 
+                    onChange={(e) => handleChange(plan.id, 'max_tests', e.target.value)}
+                    className="w-full border border-shnoor-mist rounded p-2 text-sm text-shnoor-navy focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-shnoor-soft uppercase mb-1">Max Students</label>
+                  <input 
+                    type="number" 
+                    value={plan.max_students || ''} 
+                    onChange={(e) => handleChange(plan.id, 'max_students', e.target.value)}
+                    className="w-full border border-shnoor-mist rounded p-2 text-sm text-shnoor-navy focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo outline-none"
+                  />
+                </div>
+              </div>
+            </div>
 
             <div className="mb-4">
               <label className="block text-xs font-bold text-shnoor-soft uppercase mb-1">Features (One per line)</label>

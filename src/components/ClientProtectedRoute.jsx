@@ -22,7 +22,10 @@ const ClientProtectedRoute = ({ children }) => {
   const isOnSubscriptionPage = location.pathname === '/client/subscription-plans';
   
   if (requiresPayment && !isOnSubscriptionPage) {
-    return <Navigate to="/client/subscription-plans" replace state={{ requiresPayment: true }} />;
+    return <Navigate to="/client/subscription-plans" replace state={{ 
+      requiresPayment: true,
+      subscriptionExpired: clientUser?.subscriptionExpired
+    }} />;
   }
 
   return children;

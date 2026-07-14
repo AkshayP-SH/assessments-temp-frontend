@@ -200,7 +200,19 @@ const EditClientModal = ({ client, onClose, onUpdated, subscriptionPlans = [] })
                 <label className="block text-xs font-semibold text-shnoor-navy uppercase tracking-wide mb-1.5">Plan</label>
                 <select 
                   value={form.plan_id} 
-                  onChange={e => setForm(p => ({ ...p, plan_id: e.target.value }))}
+                  onChange={e => {
+                    const newPlanId = e.target.value;
+                    const selectedPlan = subscriptionPlans.find(p => p.plan_id === newPlanId);
+                    setForm(p => ({
+                      ...p,
+                      plan_id: newPlanId,
+                      ...(selectedPlan && {
+                        max_institutes: String(selectedPlan.max_institutes ?? p.max_institutes),
+                        max_tests: String(selectedPlan.max_tests ?? p.max_tests),
+                        max_students: String(selectedPlan.max_students ?? p.max_students),
+                      })
+                    }));
+                  }}
                   disabled={loading}
                   className="w-full h-[42px] px-3 rounded-lg border border-shnoor-mist text-sm focus:outline-none focus:border-shnoor-indigo bg-white">
                   {subscriptionPlans.length > 0 ? (
@@ -580,7 +592,19 @@ const CreateClientModal = ({ onClose, onCreated, subscriptionPlans = [] }) => {
                 label="Plan"
                 name="plan_id"
                 value={form.plan_id}
-                onChange={e => setForm(p => ({ ...p, plan_id: e.target.value }))}
+                onChange={e => {
+                  const newPlanId = e.target.value;
+                  const selectedPlan = subscriptionPlans.find(p => p.plan_id === newPlanId);
+                  setForm(p => ({
+                    ...p,
+                    plan_id: newPlanId,
+                    ...(selectedPlan && {
+                      max_institutes: String(selectedPlan.max_institutes ?? p.max_institutes),
+                      max_tests: String(selectedPlan.max_tests ?? p.max_tests),
+                      max_students: String(selectedPlan.max_students ?? p.max_students),
+                    })
+                  }));
+                }}
                 disabled={loading}
                 required
                 options={subscriptionPlans.length > 0 

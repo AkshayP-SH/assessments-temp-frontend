@@ -8,6 +8,7 @@ import AdminProtectedRoute from './components/AdminProtectedRoute';
 import ClientProtectedRoute from './components/ClientProtectedRoute';
 import GlobalThemeSelector from './components/GlobalThemeSelector';
 import { applyTheme, getSavedTheme } from './utils/theme';
+import UpgradeRequiredModal from './components/UpgradeRequiredModal';
 
 // Eagerly load Loading Spinner to show while chunks are fetched
 const LoadingFallback = () => (
@@ -61,13 +62,29 @@ const TestRoute = ({ children }) => {
 };
 
 const AppRoutes = () => {
+  const [showUpgradeModal, setShowUpgradeModal] = React.useState(false);
+  const [quotaInfo, setQuotaInfo] = React.useState(null);
+
   useEffect(() => {
     applyTheme(getSavedTheme());
+
+    const handleQuotaExceeded = (e) => {
+      setQuotaInfo(e.detail);
+      setShowUpgradeModal(true);
+    };
+
+    window.addEventListener('quota_exceeded', handleQuotaExceeded);
+    return () => window.removeEventListener('quota_exceeded', handleQuotaExceeded);
   }, []);
 
   return (
     <>
       <GlobalThemeSelector />
+      <UpgradeRequiredModal 
+        isOpen={showUpgradeModal} 
+        onClose={() => setShowUpgradeModal(false)} 
+        quotaInfo={quotaInfo} 
+      />
       <Routes>
         {/* Public Routes — each group has its own Suspense so a failure in one
             section doesn't block the rest of the app from rendering */}
