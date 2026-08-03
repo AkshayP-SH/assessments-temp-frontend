@@ -13,6 +13,7 @@ import remarkGfm from 'remark-gfm';
 import StudentMessageAlert from '../components/student/StudentMessageAlert';
 import StudentWarningsSidebar from '../components/student/StudentWarningsSidebar';
 import LazyMonacoEditor from '../components/LazyMonacoEditor';
+import ErrorBoundary from '../components/ErrorBoundary';
 import {
   Clock,
   AlertTriangle,
@@ -1142,6 +1143,7 @@ int main() {
             <div className="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
 
             {/* Column 1 - Question Palette - Collapsible */}
+            <ErrorBoundary>
             <aside className={`bg-white border-r border-shnoor-mist flex-col flex-shrink-0 overflow-y-auto pb-16 lg:pb-0 transition-all duration-300 ${activeCodingTab === 'questions' ? 'flex w-full' : 'hidden'} lg:flex ${warningsSidebarCollapsed ? 'lg:w-14' : 'lg:w-64'}`}>
               {/* Collapse Toggle Button - Desktop Only */}
               <button
@@ -1307,8 +1309,10 @@ int main() {
                 </div>
               )}
             </aside>
+            </ErrorBoundary>
 
             {/* Column 2 - Problem Description (resizable) */}
+            <ErrorBoundary>
             <div
               style={{ width: `${leftPanelWidth}%` }}
               className={`bg-white overflow-y-auto custom-scrollbar pb-16 lg:pb-0 border-r border-shnoor-mist flex-shrink-0 ${activeCodingTab === 'description' ? 'flex flex-col w-full' : 'hidden'} lg:flex lg:flex-col`}
@@ -1370,6 +1374,7 @@ int main() {
                 </div>
               </div>
             </div>
+            </ErrorBoundary>
 
             {/* Horizontal Resizer */}
             <div
@@ -1463,6 +1468,7 @@ int main() {
                             currentLang,
                             testCases.map(tc => ({
                               input: tc.input,
+                              output: tc.output || tc.expectedOutput,
                               expected_output: tc.output || tc.expectedOutput,
                               is_hidden: tc.isHidden || false
                             }))
@@ -1692,6 +1698,7 @@ int main() {
               </div>
               {/* Code Editor */}
               <div className="flex-1 overflow-hidden">
+                <ErrorBoundary>
                 <LazyMonacoEditor
                   height="100%"
                   language={(() => {
@@ -1752,6 +1759,7 @@ int main() {
                     }
                   }}
                 />
+                </ErrorBoundary>
               </div>
 
               {/* Vertical Resize Handle */}
