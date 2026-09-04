@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTimer } from '../hooks/useTimer';
 import { useFullscreen } from '../hooks/useFullscreen';
@@ -22,7 +22,8 @@ import {
   Flag,
   CheckCircle,
   StopCircle,
-  XCircle
+  XCircle,
+  WifiOff
 } from 'lucide-react';
 import { apiFetch } from '../config/api';
 import codeExecutionAPI from '../services/codeExecutionAPI';
@@ -38,7 +39,8 @@ const TestScreen = () => {
   const [answers, setAnswers] = useState({});
   const [codingConsoleOutput, setCodingConsoleOutput] = useState({}); // Store console output per question
   const [markedForReview, setMarkedForReview] = useState(new Set());
-
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  const lastSavedStateRef = useRef(null);
   // Termination modal state
   const [showTerminationModal, setShowTerminationModal] = useState(false);
   const [terminationData, setTerminationData] = useState(null);
@@ -377,8 +379,58 @@ int main() {
 
 
 
-  // Manual save function - only called when user clicks Save & Next or Skip
-  const saveProgressNow = useCallback(async () => {
+  // Offline Syncing function
+  const syncOfflineProgress = useCallback(async () => {
+    const testId = localStorage.getItem('selectedTestId');
+    if (!testId) return;
+    const offlineKey = `offline_test_sync_${testId}`;
+    const cachedData = localStorage.getItem(offlineKey);
+    
+    if (cachedData) {
+      try {
+        const payload = JSON.parse(cachedData);
+        const token = localStorage.getItem('studentAuthToken');
+        if (!token) return;
+
+        console.log('🔄 Syncing offline progress to server...');
+        const response = await apiFetch('api/student/save-progress', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+          console.log('✅ Offline progress synced successfully');
+          localStorage.removeItem(offlineKey);
+        }
+      } catch (error) {
+        console.error('Error syncing offline progress:', error);
+      }
+    }
+  }, []);
+
+  // Online / Offline Listeners
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOffline(false);
+      syncOfflineProgress();
+    };
+    const handleOffline = () => setIsOffline(true);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [syncOfflineProgress]);
+
+  // Manual save function - used for Save & Next, Skip, and Background Auto-Save
+  const saveProgressNow = useCallback(async (isBackground = false) => {
     // Get JWT session token from localStorage
     const token = localStorage.getItem('studentAuthToken');
     const testId = localStorage.getItem('selectedTestId');
@@ -396,7 +448,20 @@ int main() {
         warningCount: warningCount
       };
 
-      console.log('💾 Saving progress manually');
+      const currentStateString = JSON.stringify(payload);
+      if (isBackground && lastSavedStateRef.current === currentStateString) {
+        return true; // No changes to save
+      }
+      
+      lastSavedStateRef.current = currentStateString;
+
+      if (!navigator.onLine) {
+        console.log('📶 Offline: Saving progress locally');
+        localStorage.setItem(`offline_test_sync_${testId}`, currentStateString);
+        return true; 
+      }
+
+      if (!isBackground) console.log('💾 Saving progress manually');
 
       const response = await apiFetch('api/student/save-progress', {
         method: 'POST',
@@ -404,11 +469,11 @@ int main() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(payload)
+        body: currentStateString
       });
 
       if (response.ok) {
-        console.log('✅ Progress saved');
+        if (!isBackground) console.log('✅ Progress saved');
         return true;
       } else {
         const errorData = await response.json();
@@ -416,9 +481,21 @@ int main() {
         return false;
       }
     } catch (error) {
+      console.error('Error saving progress:', error);
       return false;
     }
   }, [answers, currentQuestion, markedForReview, visited, timeLeft, warningCount, questions.length]);
+
+  // Background Auto-Save Interval
+  useEffect(() => {
+    if (!hasStarted || totalQuestions === 0) return;
+
+    const intervalId = setInterval(() => {
+      saveProgressNow(true);
+    }, 60000);
+
+    return () => clearInterval(intervalId);
+  }, [hasStarted, totalQuestions, saveProgressNow]);
 
   // Progress only saves when user clicks Save & Next or Skip buttons
 
@@ -781,6 +858,14 @@ int main() {
       {/* Fullscreen Warning Modal */}
       {showWarning && (
         <FullscreenWarning onEnterFullscreen={enterFullscreen} />
+      )}
+
+      {/* Offline Banner */}
+      {isOffline && (
+        <div className="fixed top-0 left-0 w-full bg-shnoor-danger text-white px-4 py-2 text-center text-sm font-medium flex items-center justify-center space-x-2 z-50 shadow-md">
+          <WifiOff size={16} />
+          <span>You are currently offline. Your progress is being saved locally and will sync when you reconnect.</span>
+        </div>
       )}
 
       {/* Tab Switch Warning */}
