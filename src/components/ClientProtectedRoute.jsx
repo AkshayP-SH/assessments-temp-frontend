@@ -19,7 +19,7 @@ const ClientProtectedRoute = ({ children }) => {
 
   // Check if payment is required and user is not on subscription plans page
   const requiresPayment = clientUser?.requiresPayment || clientUser?.clientStatus === 'awaiting_payment';
-  const isOnSubscriptionPage = location.pathname === '/client/subscription-plans' || location.pathname === '/client/checkout';
+  const isOnSubscriptionPage = location.pathname === '/client/subscription-plans';
   
   if (requiresPayment && !isOnSubscriptionPage) {
     return <Navigate to="/client/subscription-plans" replace state={{ 

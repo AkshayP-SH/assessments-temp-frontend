@@ -301,29 +301,6 @@ int main() {
     }
   }, [timeLeft, submitTest, hasStarted]);
 
-  // Handle global deadline auto-submit
-  useEffect(() => {
-    if (hasStarted && testDetails?.endDateTime) {
-      const deadline = new Date(testDetails.endDateTime).getTime();
-      const now = new Date().getTime();
-      const timeUntilDeadline = deadline - now;
-      
-      if (timeUntilDeadline <= 0) {
-        // Deadline has already passed
-        alert('The exam time slot has ended.\n\nYour exam is being submitted automatically.');
-        submitTest('time_slot_expired');
-      } else {
-        // Set a timeout to submit exactly when the deadline arrives
-        const timeoutId = setTimeout(() => {
-          alert('The exam time slot has ended.\n\nYour exam is being submitted automatically.');
-          submitTest('time_slot_expired');
-        }, timeUntilDeadline);
-        
-        return () => clearTimeout(timeoutId);
-      }
-    }
-  }, [hasStarted, testDetails?.endDateTime, submitTest]);
-
   // Handle tab switch
   const handleTabSwitch = useCallback((count, max) => {
     // Don't count tab switches before exam starts
@@ -586,8 +563,7 @@ int main() {
           setTestDetails({
             title: data.test.title || 'Assessment',
             duration: data.test.duration || 60,
-            totalQuestions: data.test.questions.length + (data.test.codingQuestions?.length || 0),
-            endDateTime: data.test.endDateTime
+            totalQuestions: data.test.questions.length + (data.test.codingQuestions?.length || 0)
           });
 
           // Get test duration from backend

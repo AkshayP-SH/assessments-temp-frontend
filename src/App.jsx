@@ -46,7 +46,6 @@ const MyApplications = React.lazy(() => import('./pages/MyApplications'));
 const AdminClients = React.lazy(() => import('./pages/admin/AdminClients'));
 const OrganisationSignup = React.lazy(() => import('./pages/OrganisationSignup'));
 const ClientSubscriptionPlans = React.lazy(() => import('./pages/client/ClientSubscriptionPlans'));
-const DummyCheckout = React.lazy(() => import('./pages/client/DummyCheckout'));
 
 // Protected Route wrappers
 const StudentRoute = ({ children }) => {
@@ -130,7 +129,6 @@ const AppRoutes = () => {
         {/* Client Portal Routes (multi-tenant, admin UI parity) */}
         <Route path="/client/login" element={<Navigate to="/login?portal=org" replace />} />
         <Route path="/client/subscription-plans" element={<ClientProtectedRoute><Suspense fallback={<LoadingFallback />}><ClientSubscriptionPlans /></Suspense></ClientProtectedRoute>} />
-        <Route path="/client/checkout" element={<ClientProtectedRoute><Suspense fallback={<LoadingFallback />}><DummyCheckout /></Suspense></ClientProtectedRoute>} />
         <Route path="/client/dashboard" element={<ClientProtectedRoute><Suspense fallback={<LoadingFallback />}><AdminDashboard /></Suspense></ClientProtectedRoute>} />
         <Route path="/client/reports" element={<ClientProtectedRoute><Suspense fallback={<LoadingFallback />}><AdminReports /></Suspense></ClientProtectedRoute>} />
         <Route path="/client/live-proctoring" element={<ClientProtectedRoute><Suspense fallback={<LoadingFallback />}><LiveProctoring /></Suspense></ClientProtectedRoute>} />

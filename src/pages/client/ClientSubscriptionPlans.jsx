@@ -61,19 +61,52 @@ const ClientSubscriptionPlans = () => {
       const isDummyMode = DUMMY_PAYMENT_MODE;
       
       if (isDummyMode) {
-        const selected = plans.find(p => p.plan_id === planId);
+        // Simulate payment processing delay
+        await new Promise(resolve => setTimeout(resolve, 1500));
         
-        // Navigate to the checkout page, passing the plan details in the state
-        navigate('/client/checkout', {
-          state: {
-            planDetails: {
-              id: planId,
-              name: selected?.name,
-              price: selected?.price_monthly,
-              features: selected?.features
-            }
-          }
+        // Get the token from localStorage
+        const token = localStorage.getItem('clientToken') || localStorage.getItem('adminToken');
+        
+        if (!token) {
+          throw new Error('Authentication token not found. Please login again.');
+        }
+        
+        // Directly call verify payment with dummy data
+        const verifyResponse = await fetch(getApiUrl('api/settings/verify-payment'), {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            razorpay_order_id: 'dummy_order_' + Date.now(),
+            razorpay_payment_id: 'dummy_payment_' + Date.now(),
+            razorpay_signature: 'dummy_signature',
+            plan_id: planId,
+            isDummyPayment: true,
+          }),
         });
+
+        const verifyData = await verifyResponse.json();
+        
+        if (verifyData.success) {
+          // Update local storage to reflect active subscription
+          const storedUser = JSON.parse(localStorage.getItem('clientUser') || '{}');
+          storedUser.requiresPayment = false;
+          storedUser.clientStatus = 'active';
+          storedUser.subscriptionActive = true;
+          localStorage.setItem('clientUser', JSON.stringify(storedUser));
+          localStorage.setItem('adminUser', JSON.stringify(storedUser)); // Mirror for shared pages
+          
+          // Payment successful, navigate to dashboard
+          navigate('/client/dashboard', { 
+            replace: true, 
+            state: { message: 'Payment successful! Your subscription is now active.' } 
+          });
+        } else {
+          setError('Payment verification failed. Please contact support.');
+        }
+        setProcessingPlan(null);
         return;
       }
       
@@ -198,7 +231,24 @@ const ClientSubscriptionPlans = () => {
             </button>
           </div>
         )}
-
+        {/* Test Mode Banner - Only show in dummy mode */}
+        {DUMMY_PAYMENT_MODE && (
+          <div className="mb-8 bg-gradient-to-r from-blue-50 to-blue-100 border-2 border-blue-400 rounded-2xl p-5 shadow-lg animate-fade-in">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-base font-extrabold text-blue-900 mb-1">Test Mode Active</h3>
+                <p className="text-sm text-blue-800 leading-relaxed">
+                  This is a dummy payment system for testing. No actual payment will be processed. Click any "Select Plan" button to simulate successful payment and activate your account instantly.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {requiresPayment && !subscriptionExpired && (
           <div className="mb-8 bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-400 rounded-2xl p-6 shadow-lg animate-fade-in">
@@ -270,7 +320,7 @@ const ClientSubscriptionPlans = () => {
           {plans.map((plan, index) => (
             <div
               key={plan.id}
-              className="group relative bg-white rounded-3xl shadow-xl border-2 border-shnoor-mist hover:border-shnoor-indigo transition-all duration-300 overflow-hidden animate-slide-up hover:shadow-2xl hover:scale-105 flex flex-col"
+              className="group relative bg-white rounded-3xl shadow-xl border-2 border-shnoor-mist hover:border-shnoor-indigo transition-all duration-300 overflow-hidden animate-slide-up hover:shadow-2xl hover:scale-105"
               style={{ animationDelay: `${index * 100}ms` }}
             >
               <div className="p-8 flex-1">
@@ -308,7 +358,7 @@ const ClientSubscriptionPlans = () => {
                 </div>
               </div>
 
-              <div className="p-8 pt-0 mt-auto">
+              <div className="p-8 pt-0">
                 <Button
                   onClick={() => handleSelectPlan(plan.plan_id)}
                   disabled={processingPlan !== null}
@@ -328,7 +378,7 @@ const ClientSubscriptionPlans = () => {
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                       </svg>
-                      {processingPlan === plan.plan_id ? 'Processing...' : 'Select Plan'}
+                      {DUMMY_PAYMENT_MODE ? 'Select Plan (Test Mode)' : 'Select Plan'}
                     </>
                   )}
                 </Button>
@@ -348,7 +398,7 @@ const ClientSubscriptionPlans = () => {
           </div>
         )}
       </div>
-
+      
       <style>{`
         @keyframes fade-in {
           from { opacity: 0; transform: translateY(-10px); }

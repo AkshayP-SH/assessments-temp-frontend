@@ -109,9 +109,8 @@ const Dashboard = () => {
           // Check for saved progress for each test
           const progressChecks = await Promise.all(
             data.tests.map(async (test) => {
-              // Skip progress check if test is not available.
-              // Note: We DO NOT skip if test.alreadyTaken is true, because the "used" attempt might be the one currently in progress!
-              if (!test.isAvailable) {
+              // Skip progress check if test is not available, already taken, or no attempts left
+              if (!test.isAvailable || test.alreadyTaken || !test.hasAttemptsLeft) {
                 return { testId: test.id, hasProgress: false };
               }
 
@@ -530,24 +529,14 @@ const Dashboard = () => {
                       let cardBorderColor = 'border-shnoor-indigo';
                       let cardOpacity = 'opacity-100';
 
-                      // Client-side strict deadline check
-                      const isPastDeadline = test.endDateTime ? new Date(test.endDateTime) < new Date() : false;
-                      const currentTestStatus = isPastDeadline ? 'expired' : test.testStatus;
-                      const hasProgress = testsWithProgress.has(test.id);
-                      // If a test has progress, it's not "completed" yet, even if attempts are maxed out
-                      const isCompleted = test.alreadyTaken && !hasProgress;
-
-                      // 15-Minute Strict Entry Window Check
-                      const isEntryWindowClosed = test.startDateTime && !hasProgress && test.attemptsTaken === 0 && (new Date() > new Date(new Date(test.startDateTime).getTime() + 15 * 60000));
-
                       if (test.isMockTest) {
                         cardBgColor = 'bg-shnoor-successLight';
                         cardBorderColor = 'border-shnoor-success';
-                      } else if (currentTestStatus === 'expired' || isCompleted || isEntryWindowClosed) {
+                      } else if (test.testStatus === 'expired' || test.alreadyTaken) {
                         cardBgColor = 'bg-shnoor-lavender';
                         cardBorderColor = 'border-shnoor-mist';
                         cardOpacity = 'opacity-75';
-                      } else if (currentTestStatus === 'upcoming') {
+                      } else if (test.testStatus === 'upcoming') {
                         cardBgColor = 'bg-shnoor-warningLight';
                         cardBorderColor = 'border-shnoor-warningLight';
                       }
@@ -580,27 +569,22 @@ const Dashboard = () => {
                               {test.isMockTest && (
                                 <p className="text-xs text-shnoor-success mt-1">Practice test to get familiar with the platform</p>
                               )}
-                              {isCompleted && !isEntryWindowClosed && (
+                              {test.alreadyTaken && (
                                 <span className="inline-block mt-2 px-3 py-1 bg-shnoor-dangerLight text-shnoor-danger rounded-full text-xs font-semibold">
                                   All Attempts Used ({test.attemptsTaken}/{test.maxAttempts})
                                 </span>
                               )}
-                              {isEntryWindowClosed && (
-                                <span className="inline-block mt-2 px-3 py-1 bg-shnoor-dangerLight text-shnoor-danger rounded-full text-xs font-semibold">
-                                  🚫 Missed Entry Window
-                                </span>
-                              )}
-                              {currentTestStatus === 'upcoming' && !isCompleted && !isEntryWindowClosed && (
+                              {test.testStatus === 'upcoming' && !test.alreadyTaken && (
                                 <span className="inline-block mt-2 px-3 py-1 bg-shnoor-warningLight text-shnoor-warning rounded-full text-xs font-semibold">
                                   🕐 Upcoming
                                 </span>
                               )}
-                              {currentTestStatus === 'expired' && !isCompleted && (
+                              {test.testStatus === 'expired' && !test.alreadyTaken && (
                                 <span className="inline-block mt-2 px-3 py-1 bg-shnoor-lavender text-shnoor-navy rounded-full text-xs font-semibold">
                                   ⏰ Deadline Passed
                                 </span>
                               )}
-                              {test.isAvailable && !isCompleted && hasProgress && (
+                              {test.isAvailable && !test.alreadyTaken && testsWithProgress.has(test.id) && (
                                 <span className="inline-block mt-2 px-3 py-1 bg-shnoor-successLight text-shnoor-success rounded-full text-xs font-semibold">
                                   ⏸ In Progress
                                 </span>
@@ -646,30 +630,28 @@ const Dashboard = () => {
                             </button>
 
                             <button
-                              onClick={() => test.isAvailable && (!test.alreadyTaken || hasProgress) && !isPastDeadline && !isEntryWindowClosed && handleTakeTest(test.id)}
-                              disabled={!test.isAvailable || isCompleted || isPastDeadline || isEntryWindowClosed}
-                              className={`w-full py-3 px-4 font-semibold rounded-lg transition-colors shadow-sm min-h-[44px] touch-manipulation ${isCompleted || isEntryWindowClosed
+                              onClick={() => test.isAvailable && !test.alreadyTaken && handleTakeTest(test.id)}
+                              disabled={!test.isAvailable || test.alreadyTaken}
+                              className={`w-full py-3 px-4 font-semibold rounded-lg transition-colors shadow-sm min-h-[44px] touch-manipulation ${test.alreadyTaken
                                 ? 'bg-shnoor-mist/50 text-shnoor-navy cursor-not-allowed border border-shnoor-mist'
-                                : currentTestStatus === 'upcoming'
+                                : test.testStatus === 'upcoming'
                                   ? 'bg-shnoor-warning text-white cursor-not-allowed'
-                                  : isPastDeadline || currentTestStatus === 'expired'
+                                  : test.testStatus === 'expired'
                                     ? 'bg-shnoor-mist/50 text-shnoor-navy cursor-not-allowed border border-shnoor-mist'
-                                    : hasProgress
+                                    : testsWithProgress.has(test.id)
                                       ? 'bg-shnoor-success hover:bg-shnoor-success text-white'
                                       : 'bg-shnoor-indigo hover:bg-[#4d4d9c] text-white'
                                 }`}
                             >
-                              {isEntryWindowClosed
-                                ? 'Missed Entry Window'
-                                : isCompleted
-                                  ? `Completed (${test.attemptsTaken}/${test.maxAttempts} attempts used)`
-                                  : currentTestStatus === 'upcoming'
-                                    ? `🕐 Available from ${new Date(test.startDateTime).toLocaleString()}`
-                                    : isPastDeadline || currentTestStatus === 'expired'
-                                      ? `⏰ Expired on ${new Date(test.endDateTime).toLocaleString()}`
-                                      : hasProgress
-                                        ? '▶ Resume Test'
-                                        : `Take Test (${test.attemptsRemaining} attempts left)`}
+                              {test.alreadyTaken
+                                ? `Completed (${test.attemptsTaken}/${test.maxAttempts} attempts used)`
+                                : test.testStatus === 'upcoming'
+                                  ? `🕐 Available from ${new Date(test.startDateTime).toLocaleString()}`
+                                  : test.testStatus === 'expired'
+                                    ? `⏰ Expired on ${new Date(test.endDateTime).toLocaleString()}`
+                                    : testsWithProgress.has(test.id)
+                                      ? '▶ Resume Test'
+                                      : `Take Test (${test.attemptsRemaining} attempts left)`}
                             </button>
                           </div>
                         </div>
