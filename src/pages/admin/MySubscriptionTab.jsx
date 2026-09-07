@@ -32,7 +32,11 @@ const MySubscriptionTab = ({ quota: propQuota, user: propUser }) => {
   const isExpired = daysRemaining !== null && daysRemaining <= 0;
 
   const renderProgressBar = (label, used, max) => {
-    const percentage = max > 0 ? Math.min(Math.round((used / max) * 100), 100) : 0;
+    const parsedUsed = parseInt(used, 10) || 0;
+    const parsedMax = parseInt(max, 10) || 0;
+    
+    // Calculate percentage correctly, defaulting to 0 if max is 0 or -1
+    const percentage = parsedMax > 0 ? Math.min(Math.round((parsedUsed / parsedMax) * 100), 100) : 0;
     const isNearingLimit = percentage > 85;
 
     return (
@@ -40,12 +44,12 @@ const MySubscriptionTab = ({ quota: propQuota, user: propUser }) => {
         <div className="flex justify-between text-sm mb-2">
           <span className="font-medium text-shnoor-indigoMedium">{label}</span>
           <span className="font-semibold text-shnoor-indigo">
-            {used} / {max}
+            {parsedUsed} / {parsedMax > 0 ? parsedMax : 'Unlimited'}
           </span>
         </div>
         <div className="w-full bg-shnoor-mist rounded-full h-2.5 overflow-hidden">
           <div 
-            className={`h-2.5 rounded-full ${isNearingLimit ? 'bg-red-500' : 'bg-shnoor-primary'} transition-all duration-500`}
+            className={`h-2.5 rounded-full ${isNearingLimit ? 'bg-red-500' : 'bg-shnoor-indigo'} transition-all duration-500`}
             style={{ width: `${percentage}%` }}
           ></div>
         </div>
