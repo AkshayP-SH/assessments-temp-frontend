@@ -66,6 +66,12 @@ const ReviewRow = ({ label, value, hidden }) => (
   </div>
 );
 
+/* ─── Field Error Component ────────────────────────────────────────────────── */
+const FieldError = ({ msg }) => {
+  if (!msg) return null;
+  return <p className="text-xs text-shnoor-danger mt-1">{msg}</p>;
+};
+
 /* ─── Resume Link Row with text display ────────────────────────────────────── */
 const ResumeLinkRow = ({ label, value }) => (
   <div className="flex items-start justify-between py-2.5 border-b border-shnoor-mist/50 last:border-0 gap-4">
