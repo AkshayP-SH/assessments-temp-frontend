@@ -1390,7 +1390,7 @@ const AdminDashboard = () => {
   };
 
   const handleDeleteInstitute = async (instituteId, instituteName) => {
-    if (!confirm(`Are you sure you want to delete "${instituteName}"? This will not delete students, but will deactivate the institute.`)) {
+    if (!confirm(`Permanently delete "${instituteName}" and all students registered under it? This cannot be undone.`)) {
       return;
     }
 
@@ -1406,7 +1406,7 @@ const AdminDashboard = () => {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        alert('Institute deleted successfully');
+        alert(data.message || 'Institute and registered students deleted successfully');
         setAllInstitutes(prevInstitutes => prevInstitutes.filter(institute => institute.id !== instituteId));
       } else {
         alert(data.message || 'Failed to delete institute');
