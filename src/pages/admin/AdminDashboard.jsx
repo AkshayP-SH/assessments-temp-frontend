@@ -573,7 +573,7 @@ const AdminDashboard = () => {
 
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await apiFetch(`api/tests/${testId}`, {
+      const response = await apiFetch(`api/tests/${testId}${clientParam}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -582,7 +582,7 @@ const AdminDashboard = () => {
 
       if (response.ok) {
         alert('Test deleted successfully');
-        fetchTests(); // Refresh the test list
+        setTests(prevTests => prevTests.filter(test => test.id !== testId));
         // Refresh institute list if we're on the institutes tab to update test counts
         if (activeTab === 'institutes') {
           fetchAllInstitutes();
@@ -608,7 +608,7 @@ const AdminDashboard = () => {
 
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await apiFetch('api/tests/bulk', {
+      const response = await apiFetch(`api/tests/bulk${clientParam}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -622,7 +622,7 @@ const AdminDashboard = () => {
       if (response.ok && data.success) {
         alert(`Successfully deleted ${data.deleted_count} test(s)`);
         setSelectedTests([]);
-        fetchTests();
+        setTests(prevTests => prevTests.filter(test => !selectedTests.includes(test.id)));
         if (activeTab === 'institutes') {
           fetchAllInstitutes();
         }
@@ -684,9 +684,15 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleCreateTestComplete = () => {
+  const handleCreateTestComplete = (publishedTest) => {
     setShowCreateTest(false);
     setEditingTest(null);
+    if (publishedTest) {
+      setTests(prevTests => prevTests.map(test => test.id === publishedTest.id
+        ? { ...test, status: publishedTest.status }
+        : test
+      ));
+    }
     fetchTests(); // Refresh the list
   };
 
@@ -2428,7 +2434,12 @@ const AdminDashboard = () => {
                   <ArrowLeft size={22} className="group-hover:-translate-x-1 transition-transform" />
                 </button>
               </div>
-              <CreateTestSection onComplete={handleCreateTestComplete} editingTest={editingTest} clientId={viewAsClientId || null} />
+              <CreateTestSection
+                onComplete={handleCreateTestComplete}
+                onSaved={fetchTests}
+                editingTest={editingTest}
+                clientId={viewAsClientId || null}
+              />
             </div>
           ) : selectedExamId ? (
             /* Detail View: Student Results for a specific exam */

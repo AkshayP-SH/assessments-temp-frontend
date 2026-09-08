@@ -7,7 +7,7 @@ import MCQBankSelector from './MCQBankSelector';
 // DISABLED: Code execution feature
 const ENABLE_CODE_EXECUTION = true;
 
-const CreateTestSection = ({ onComplete, editingTest, clientId }) => {
+const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
     const FALLBACK_DEFAULT_JOB_ROLE = 'General Assessment Candidate';
     const FALLBACK_DEFAULT_JOB_DESCRIPTION = 'This assessment evaluates candidate readiness across core technical and problem-solving skills relevant to the role.';
     const [step, setStep] = useState('init'); // init, manual, bulk, success
@@ -665,6 +665,7 @@ const CreateTestSection = ({ onComplete, editingTest, clientId }) => {
 
                     setUploadedTestId(testId);
                     setUploadedTestName(testTitle);
+                    if (onSaved) onSaved();
                     setStep('success');
                 } else {
                     alert(data.message || 'Failed to create test');
@@ -881,7 +882,7 @@ const CreateTestSection = ({ onComplete, editingTest, clientId }) => {
             if (response.ok && data.success) {
                 alert(`Test "${uploadedTestName}" published successfully! Students can now see it.`);
                 resetForm();
-                if (onComplete) onComplete();
+                if (onComplete) onComplete(data.test);
             } else {
                 alert(data.message || 'Failed to publish test');
             }
