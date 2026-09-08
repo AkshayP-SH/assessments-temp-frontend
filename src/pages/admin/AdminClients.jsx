@@ -84,7 +84,10 @@ const EditClientModal = ({ client, onClose, onUpdated, subscriptionPlans = [] })
         body: JSON.stringify(payload),
       });
       const data = await res.json();
-      if (!res.ok || !data.success) throw new Error(data.error || 'Failed to update client');
+      if (!res.ok || !data.success) {
+        const detail = data.detail ? `: ${data.detail}` : '';
+        throw new Error(`${data.error || 'Failed to update client'}${detail}`);
+      }
       onUpdated(data.client);
     } catch (err) {
       setError(err.message);
