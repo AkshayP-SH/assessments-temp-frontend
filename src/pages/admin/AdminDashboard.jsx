@@ -1347,14 +1347,15 @@ const AdminDashboard = () => {
     try {
       setIsAddingInstitute(true);
       const token = localStorage.getItem('adminToken');
-      const response = await apiFetch('api/institutes', {
+      const response = await apiFetch(`api/institutes${clientParam}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          instituteName: newInstituteName.trim()
+          instituteName: newInstituteName.trim(),
+          client_id: viewAsClientId || undefined
         })
       });
 
@@ -1363,7 +1364,14 @@ const AdminDashboard = () => {
       if (response.ok && data.success) {
         alert(data.message || 'Institute added successfully');
         setNewInstituteName('');
-        fetchAllInstitutes();
+        setAllInstitutes(prevInstitutes => [
+          {
+            ...data.institute,
+            student_count: data.institute.student_count ?? 0,
+            assigned_tests_count: data.institute.assigned_tests_count ?? 0
+          },
+          ...prevInstitutes.filter(institute => institute.id !== data.institute.id)
+        ]);
       } else {
         alert(data.message || 'Failed to add institute');
       }
@@ -1382,7 +1390,7 @@ const AdminDashboard = () => {
 
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await apiFetch(`api/institutes/${instituteId}`, {
+      const response = await apiFetch(`api/institutes/${instituteId}${clientParam}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -1393,7 +1401,7 @@ const AdminDashboard = () => {
 
       if (response.ok && data.success) {
         alert('Institute deleted successfully');
-        fetchAllInstitutes();
+        setAllInstitutes(prevInstitutes => prevInstitutes.filter(institute => institute.id !== instituteId));
       } else {
         alert(data.message || 'Failed to delete institute');
       }
@@ -1447,6 +1455,7 @@ const AdminDashboard = () => {
       let successCount = 0;
       let failCount = 0;
       let alreadyAssignedCount = 0;
+      const successfulAssignmentsByInstitute = {};
       const errors = [];
 
       // Loop through each institute
@@ -1454,7 +1463,7 @@ const AdminDashboard = () => {
         // Loop through each selected test
         for (const testId of selectedTestsForMultipleInstitutes) {
           try {
-            const response = await apiFetch(`api/institutes/${instituteId}/assign-test`, {
+            const response = await apiFetch(`api/institutes/${instituteId}/assign-test${clientParam}`, {
               method: 'POST',
               headers: {
                 'Authorization': `Bearer ${token}`,
@@ -1472,6 +1481,7 @@ const AdminDashboard = () => {
                 alreadyAssignedCount++;
               } else {
                 successCount++;
+                successfulAssignmentsByInstitute[instituteId] = (successfulAssignmentsByInstitute[instituteId] || 0) + 1;
               }
             } else if (data.message && data.message.includes('already assigned')) {
               alreadyAssignedCount++;
@@ -1517,7 +1527,10 @@ const AdminDashboard = () => {
       setSelectedInstitutes([]);
       setSelectedTestsForMultipleInstitutes([]);
       setIsTestDropdownOpen(false); // Close dropdown after assignment
-      fetchAllInstitutes();
+      setAllInstitutes(prevInstitutes => prevInstitutes.map(institute => ({
+        ...institute,
+        assigned_tests_count: Number(institute.assigned_tests_count || 0) + (successfulAssignmentsByInstitute[institute.id] || 0)
+      })));
 
     } catch (error) {
       console.error('Error assigning test to institutes:', error);
@@ -1535,7 +1548,7 @@ const AdminDashboard = () => {
 
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await apiFetch(`api/institutes/${institute.id}/assigned-tests`, {
+      const response = await apiFetch(`api/institutes/${institute.id}/assigned-tests${clientParam}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -1575,7 +1588,7 @@ const AdminDashboard = () => {
       // Loop through each selected test
       for (const testId of selectedTestsForInstitute) {
         try {
-          const response = await apiFetch(`api/institutes/${selectedInstituteForTests.id}/assign-test`, {
+          const response = await apiFetch(`api/institutes/${selectedInstituteForTests.id}/assign-test${clientParam}`, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${token}`,
@@ -1632,7 +1645,12 @@ const AdminDashboard = () => {
       alert(summaryMessage || 'Tests assigned successfully');
       setSelectedTestsForInstitute([]);
       handleViewAssignedTests(selectedInstituteForTests);
-      fetchAllInstitutes(); // Refresh institute list to update test counts
+      if (successCount > 0) {
+        setAllInstitutes(prevInstitutes => prevInstitutes.map(institute => institute.id === selectedInstituteForTests.id
+          ? { ...institute, assigned_tests_count: Number(institute.assigned_tests_count || 0) + successCount }
+          : institute
+        ));
+      }
     } catch (error) {
       console.error('Error assigning test:', error);
       alert('Failed to assign tests');
@@ -1648,7 +1666,7 @@ const AdminDashboard = () => {
 
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await apiFetch(`api/institutes/${selectedInstituteForTests.id}/unassign-test/${testId}`, {
+      const response = await apiFetch(`api/institutes/${selectedInstituteForTests.id}/unassign-test/${testId}${clientParam}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -1660,7 +1678,10 @@ const AdminDashboard = () => {
       if (response.ok && data.success) {
         alert(data.message || 'Test unassigned successfully');
         handleViewAssignedTests(selectedInstituteForTests);
-        fetchAllInstitutes(); // Refresh institute list to update test counts
+        setAllInstitutes(prevInstitutes => prevInstitutes.map(institute => institute.id === selectedInstituteForTests.id
+          ? { ...institute, assigned_tests_count: Math.max(0, Number(institute.assigned_tests_count || 0) - 1) }
+          : institute
+        ));
       } else {
         alert(data.message || 'Failed to unassign test');
       }
@@ -1759,7 +1780,7 @@ const AdminDashboard = () => {
 
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await apiFetch(`api/institutes/${encodeURIComponent(institute.name)}/students`, {
+      const response = await apiFetch(`api/institutes/${encodeURIComponent(institute.name)}/students${clientParam}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -1797,7 +1818,7 @@ const AdminDashboard = () => {
     try {
       setIsAddingStudent(true);
       const token = localStorage.getItem('adminToken');
-      const response = await apiFetch('api/student/create', {
+      const response = await apiFetch(`api/student/create${clientParam}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -1843,7 +1864,7 @@ const AdminDashboard = () => {
 
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await apiFetch(`api/student/${studentId}`, {
+      const response = await apiFetch(`api/student/${studentId}${clientParam}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
