@@ -1203,7 +1203,15 @@ const AdminDashboard = () => {
 
       const data = await response.json();
       if (response.ok && data.success) {
-        setPreviewQuestions(data.test.questions || []);
+        const mcqQuestions = (data.test.questions || []).map(question => ({
+          ...question,
+          type: 'mcq'
+        }));
+        const codingQuestions = (data.test.codingQuestions || []).map(question => ({
+          ...question,
+          type: 'coding'
+        }));
+        setPreviewQuestions([...mcqQuestions, ...codingQuestions]);
       } else {
         alert('Failed to load questions');
         setShowPreviewQuestionsModal(false);
@@ -5120,33 +5128,65 @@ const AdminDashboard = () => {
                             <span className="flex-shrink-0 w-8 h-8 bg-shnoor-lavender text-shnoor-indigo rounded-full flex items-center justify-center font-bold text-sm">
                               {index + 1}
                             </span>
-                            <p className="flex-1 text-shnoor-navy font-medium">{question.question_text}</p>
-                          </div>
-                          <div className="ml-11 space-y-2">
-                            {[
-                              { label: 'A', value: question.option_a },
-                              { label: 'B', value: question.option_b },
-                              { label: 'C', value: question.option_c },
-                              { label: 'D', value: question.option_d }
-                            ].filter(opt => opt.value).map((option) => (
-                              <div
-                                key={option.label}
-                                className={`p-3 rounded-lg border ${question.correct_option === option.label
-                                  ? 'bg-shnoor-successLight border-shnoor-success text-shnoor-success'
-                                  : 'bg-white border-shnoor-light text-shnoor-indigoMedium'
-                                  }`}
-                              >
-                                <span className="font-bold mr-2">{option.label}.</span>
-                                {option.value}
-                                {question.correct_option === option.label && (
-                                  <span className="ml-2 text-xs font-bold text-shnoor-success">(Correct Answer)</span>
-                                )}
-                              </div>
-                            ))}
-                            <div className="text-sm text-shnoor-indigoMedium mt-2">
-                              <span className="font-bold">Marks:</span> {question.marks || 1}
+                            <div className="flex-1">
+                              <span className="inline-block mb-2 px-2 py-1 rounded text-xs font-bold bg-shnoor-lavender text-shnoor-indigo">
+                                {question.type === 'coding' ? 'Coding' : 'MCQ'}
+                              </span>
+                              <p className="text-shnoor-navy font-medium">
+                                {question.type === 'coding' ? question.title : question.question_text}
+                              </p>
                             </div>
                           </div>
+                          {question.type === 'coding' ? (
+                            <div className="ml-11 space-y-3">
+                              <p className="text-sm text-shnoor-indigoMedium whitespace-pre-wrap">
+                                {question.description || 'No description provided'}
+                              </p>
+                              <div className="flex flex-wrap gap-3 text-sm text-shnoor-indigoMedium">
+                                <span><strong>Time limit:</strong> {question.timeLimit ?? 'N/A'}s</span>
+                                <span><strong>Memory:</strong> {question.memoryLimit ?? 'N/A'} MB</span>
+                                <span><strong>Marks:</strong> {question.marks || 10}</span>
+                              </div>
+                              {question.publicTestCases?.length > 0 && (
+                                <div className="space-y-2">
+                                  <p className="text-sm font-bold text-shnoor-navy">Public test cases</p>
+                                  {question.publicTestCases.map((testCase, testCaseIndex) => (
+                                    <div key={`${question.id}-test-${testCaseIndex}`} className="p-3 rounded-lg bg-shnoor-lavender border border-shnoor-light text-sm">
+                                      <p className="text-shnoor-indigoMedium"><strong>Input:</strong> {testCase.input || '(empty)'}</p>
+                                      <p className="text-shnoor-indigoMedium"><strong>Output:</strong> {testCase.output || '(empty)'}</p>
+                                      {testCase.explanation && <p className="mt-1 text-shnoor-soft"><strong>Explanation:</strong> {testCase.explanation}</p>}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="ml-11 space-y-2">
+                              {[
+                                { label: 'A', value: question.option_a },
+                                { label: 'B', value: question.option_b },
+                                { label: 'C', value: question.option_c },
+                                { label: 'D', value: question.option_d }
+                              ].filter(opt => opt.value).map((option) => (
+                                <div
+                                  key={option.label}
+                                  className={`p-3 rounded-lg border ${question.correct_option === option.label
+                                    ? 'bg-shnoor-successLight border-shnoor-success text-shnoor-success'
+                                    : 'bg-white border-shnoor-light text-shnoor-indigoMedium'
+                                    }`}
+                                >
+                                  <span className="font-bold mr-2">{option.label}.</span>
+                                  {option.value}
+                                  {question.correct_option === option.label && (
+                                    <span className="ml-2 text-xs font-bold text-shnoor-success">(Correct Answer)</span>
+                                  )}
+                                </div>
+                              ))}
+                              <div className="text-sm text-shnoor-indigoMedium mt-2">
+                                <span className="font-bold">Marks:</span> {question.marks || 1}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
