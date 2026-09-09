@@ -11,15 +11,50 @@ const MySubscriptionTab = ({ quota: propQuota, user: propUser }) => {
   const user = propUser || JSON.parse(localStorage.getItem('clientUser') || '{}');
   const [quota, setQuota] = React.useState(propQuota || null);
 
+  const normalizeQuota = (rawQuota) => {
+    if (!rawQuota) return null;
+
+    const toNumber = (value) => {
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : 0;
+    };
+
+    return {
+      institutes: {
+        used: toNumber(rawQuota.institutes?.used),
+        max: toNumber(rawQuota.institutes?.max),
+      },
+      tests: {
+        used: toNumber(rawQuota.tests?.used),
+        max: toNumber(rawQuota.tests?.max),
+      },
+      students: {
+        used: toNumber(rawQuota.students?.used),
+        max: toNumber(rawQuota.students?.max),
+      },
+    };
+  };
+
   React.useEffect(() => {
-    if (propQuota || isSuperAdmin) return;
+    if (propQuota) {
+      setQuota(normalizeQuota(propQuota));
+      return;
+    }
+
+    if (isSuperAdmin) return;
+
     const token = localStorage.getItem('adminToken');
     if (!token) return;
+
     apiFetch('api/client/auth/me/quota', { headers: { 'Authorization': `Bearer ${token}` } })
       .then(r => r.ok ? r.json() : null)
-      .then(d => { if (d?.success) setQuota(d.quota); })
+      .then(d => {
+        if (d?.success) {
+          setQuota(normalizeQuota(d.quota));
+        }
+      })
       .catch(() => { });
-  }, [propQuota, isSuperAdmin]);
+  }, [propQuota, isSuperAdmin, user?.id, user?.subscriptionTier]);
 
   const getDaysRemaining = (endDate) => {
     if (!endDate) return null;
@@ -32,7 +67,11 @@ const MySubscriptionTab = ({ quota: propQuota, user: propUser }) => {
   const isExpired = daysRemaining !== null && daysRemaining <= 0;
 
   const renderProgressBar = (label, used, max) => {
-    const percentage = max > 0 ? Math.min(Math.round((used / max) * 100), 100) : 0;
+    const safeUsed = Number.isFinite(Number(used)) ? Number(used) : 0;
+    const safeMax = Number.isFinite(Number(max)) ? Number(max) : 0;
+    const percentage = safeMax > 0
+      ? Math.max(0, Math.min((safeUsed / safeMax) * 100, 100))
+      : 0;
     const isNearingLimit = percentage > 85;
 
     return (
@@ -40,12 +79,12 @@ const MySubscriptionTab = ({ quota: propQuota, user: propUser }) => {
         <div className="flex justify-between text-sm mb-2">
           <span className="font-medium text-shnoor-indigoMedium">{label}</span>
           <span className="font-semibold text-shnoor-indigo">
-            {used} / {max}
+            {safeUsed} / {safeMax}
           </span>
         </div>
         <div className="w-full bg-shnoor-mist rounded-full h-2.5 overflow-hidden">
           <div 
-            className={`h-2.5 rounded-full ${isNearingLimit ? 'bg-red-500' : 'bg-shnoor-primary'} transition-all duration-500`}
+            className={`h-2.5 rounded-full ${isNearingLimit ? 'bg-red-500' : 'bg-shnoor-indigo'} transition-all duration-500`}
             style={{ width: `${percentage}%` }}
           ></div>
         </div>
