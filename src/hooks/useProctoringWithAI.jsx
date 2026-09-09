@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { io } from 'socket.io-client';
 import { useAICheatingDetection } from './useAICheatingDetection';
+import { API_URL } from '../config/api';
 
-const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const SOCKET_URL = API_URL;
 const FRAME_RATE = 2; // Reduced from 5 to lower CPU usage during active exam screens
 const FRAME_INTERVAL = 1000 / FRAME_RATE;
 const SOCKET_CONNECT_TIMEOUT_MS = 10000;

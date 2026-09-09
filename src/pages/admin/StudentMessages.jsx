@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Mail, MailOpen, Trash2, Image, Filter, RefreshCw, CheckCheck, User, AlertCircle, X, Send, Building, MessageCircle, Paperclip, Smile, CheckCircle, Star, TrendingUp, BarChart3, ThumbsUp, ThumbsDown, Clock } from 'lucide-react';
 import AdminLayout from '../../components/AdminLayout';
 import { useSupportSocket } from '../../hooks/useSupportSocket';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+import { API_URL } from '../../config/api';
 
 const EMOJI_OPTIONS = [
   '😀', '😁', '😂', '🤣', '😃', '😄', '😅', '😆', '😉', '😊', '🙂', '🙃', '😉', '😍', '🥰', '😘',

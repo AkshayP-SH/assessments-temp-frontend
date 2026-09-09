@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { io } from 'socket.io-client';
+import { API_URL } from '../config/api';
 
-const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const SOCKET_URL = API_URL;
 const FRAME_RATE = 5; // 5 frames per second
 const FRAME_INTERVAL = 1000 / FRAME_RATE; // 200ms
 

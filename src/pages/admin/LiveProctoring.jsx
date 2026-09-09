@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import { ArrowLeft, Users, Wifi, WifiOff, Camera, Clock, MessageCircle, StopCircle, AlertTriangle, Mic, MicOff } from 'lucide-react';
 import AdminChatModal from '../../components/admin/AdminChatModal';
+import { API_URL } from '../../config/api';
 
-const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const SOCKET_URL = API_URL;
 
 const LiveProctoring = () => {
   const navigate = useNavigate();

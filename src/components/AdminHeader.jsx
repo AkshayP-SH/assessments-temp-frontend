@@ -3,10 +3,9 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Video, LogOut, Settings, MessageSquare, X, Menu, Building2 } from 'lucide-react';
 import Button from './Button';
 import { useSupportSocket } from '../hooks/useSupportSocket';
+import { API_URL } from '../config/api';
 import shnoorLogo from '../assets/shnoor-logo.png';
 import ThemeSelector from './ThemeSelector';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const AdminHeader = ({ title = "Dashboard", userName = "Admin" }) => {
   const navigate = useNavigate();
