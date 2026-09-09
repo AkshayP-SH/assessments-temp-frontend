@@ -5,6 +5,7 @@ import Card from '../components/Card';
 import shnoorLogo from '../assets/shnoor-logo.png';
 import ThemeSelector from '../components/ThemeSelector';
 import { useSEO } from '../hooks/useSEO';
+import { getApiUrl } from '../config/api';
 import { usePrefetch } from '../hooks/usePrefetch';
 import { useJsonLd } from '../hooks/useJsonLd';
 
@@ -106,7 +107,7 @@ const LandingPage = () => {
 
   // Fetch pricing plans
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/api/subscription-plans`)
+    fetch(getApiUrl('api/subscription-plans'))
       .then(res => res.json())
       .then(data => {
         if (data.success) setPlans(data.plans.filter(p => p.is_active));

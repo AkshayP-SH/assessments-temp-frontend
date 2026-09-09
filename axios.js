@@ -1,8 +1,9 @@
 import axios from "axios";
 import { auth } from "./src/config/firebase";
+import { API_URL } from "./src/config/api";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: API_URL,
 });
 
 api.interceptors.request.use(

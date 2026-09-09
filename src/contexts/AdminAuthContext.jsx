@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import { API_URL } from '../config/api';
 
 const AdminAuthContext = createContext();
 
@@ -16,7 +17,7 @@ export const AdminAuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+  const API_BASE_URL = API_URL;
 
   const checkAuthStatus = useCallback(async ({ silent = false } = {}) => {
     if (!silent) {
