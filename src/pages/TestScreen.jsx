@@ -1191,15 +1191,11 @@ int main() {
                           <div key={index} className="bg-shnoor-mist rounded-xl p-4 border border-shnoor-light shadow-sm">
                             <div className="mb-3">
                               <p className="text-xs font-semibold text-shnoor-indigoMedium uppercase mb-1">Input</p>
-                              <div className="bg-shnoor-navy text-shnoor-lavender p-3 rounded-lg font-mono text-sm shadow-inner">
-                                {testCase.input}
-                              </div>
+                              <pre className="bg-shnoor-navy text-shnoor-lavender p-3 rounded-lg font-mono text-sm shadow-inner whitespace-pre-wrap break-words">{testCase.input}</pre>
                             </div>
                             <div className="mb-3">
                               <p className="text-xs font-semibold text-shnoor-indigoMedium uppercase mb-1">Output</p>
-                              <div className="bg-shnoor-navy text-shnoor-lavender p-3 rounded-lg font-mono text-sm shadow-inner">
-                                {testCase.output}
-                              </div>
+                              <pre className="bg-shnoor-navy text-shnoor-lavender p-3 rounded-lg font-mono text-sm shadow-inner whitespace-pre-wrap break-words">{testCase.output}</pre>
                             </div>
                             {testCase.explanation && (
                               <div>
@@ -1690,11 +1686,11 @@ int main() {
                                   <>
                                     <div>
                                       <span className="text-shnoor-soft">Input: </span>
-                                      <span className="text-shnoor-lavender">{result.input}</span>
+                                      <pre className="inline-block text-shnoor-lavender whitespace-pre-wrap break-words">{result.input}</pre>
                                     </div>
                                     <div>
                                       <span className="text-shnoor-soft">Expected: </span>
-                                      <span className="text-shnoor-lavender">{result.expectedOutput}</span>
+                                      <pre className="inline-block text-shnoor-lavender whitespace-pre-wrap break-words">{result.expectedOutput}</pre>
                                     </div>
                                   </>
                                 )}
