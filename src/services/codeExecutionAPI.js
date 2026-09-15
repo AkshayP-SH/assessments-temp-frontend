@@ -18,7 +18,8 @@ class CodeExecutionAPI {
         body: JSON.stringify({
           code,
           language
-        })
+        }),
+        skipGlobalErrorRedirect: true
       });
 
       if (!response.ok) {
@@ -58,7 +59,8 @@ class CodeExecutionAPI {
           code,
           language,
           input
-        })
+        }),
+        skipGlobalErrorRedirect: true
       });
 
       if (!response.ok) {
@@ -98,7 +100,8 @@ class CodeExecutionAPI {
           code,
           language,
           testCases
-        })
+        }),
+        skipGlobalErrorRedirect: true
       });
 
       if (!response.ok) {
@@ -148,7 +151,8 @@ class CodeExecutionAPI {
           testId,
           code,
           language
-        })
+        }),
+        skipGlobalErrorRedirect: true
       });
 
       if (!response.ok) {
@@ -175,7 +179,7 @@ class CodeExecutionAPI {
   async healthCheck() {
     try {
       const response = await apiFetch('api/code/health');
-      
+
       if (!response.ok) {
         throw new Error('Health check failed');
       }

@@ -469,7 +469,8 @@ int main() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: currentStateString
+        body: currentStateString,
+        skipGlobalErrorRedirect: true
       });
 
       if (response.ok) {
