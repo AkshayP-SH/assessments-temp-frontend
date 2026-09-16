@@ -16,6 +16,7 @@ import InputField from '../../components/InputField';
 import Button from '../../components/Button';
 import { useSEO } from '../../hooks/useSEO';
 import { lazy, Suspense } from 'react';
+import Pagination from '../../components/Pagination';
 
 // Lazy load large sections and modals to reduce the initial bundle size
 const CreateTestSection = lazy(() => import('../../components/admin/CreateTestSection'));
@@ -133,10 +134,10 @@ const AdminDashboard = () => {
   const [sortBy, setSortBy] = useState('latest');
 
   const [examCurrentPage, setExamCurrentPage] = useState(1);
-  const examItemsPerPage = 15;
+  const [examItemsPerPage, setExamItemsPerPage] = useState(6);
 
   const [instituteCurrentPage, setInstituteCurrentPage] = useState(1);
-  const instituteItemsPerPage = 15;
+  const [instituteItemsPerPage, setInstituteItemsPerPage] = useState(6);
 
   const [resultsCurrentPage, setResultsCurrentPage] = useState(1);
   const [resultsRowsPerPage, setResultsRowsPerPage] = useState(40);
@@ -339,7 +340,7 @@ const AdminDashboard = () => {
   const paginatedTests = useMemo(() => {
     const startIndex = (examCurrentPage - 1) * examItemsPerPage;
     return filteredTests.slice(startIndex, startIndex + examItemsPerPage);
-  }, [filteredTests, examCurrentPage]);
+  }, [filteredTests, examCurrentPage, examItemsPerPage]);
   const examTotalPages = Math.ceil(filteredTests.length / examItemsPerPage);
 
   const filteredInstitutes = useMemo(() => {
@@ -352,7 +353,7 @@ const AdminDashboard = () => {
   const paginatedInstitutes = useMemo(() => {
     const startIndex = (instituteCurrentPage - 1) * instituteItemsPerPage;
     return filteredInstitutes.slice(startIndex, startIndex + instituteItemsPerPage);
-  }, [filteredInstitutes, instituteCurrentPage]);
+  }, [filteredInstitutes, instituteCurrentPage, instituteItemsPerPage]);
   const instituteTotalPages = Math.ceil(filteredInstitutes.length / instituteItemsPerPage);
 
   useEffect(() => {
@@ -3502,26 +3503,15 @@ const AdminDashboard = () => {
                               ))}
                             </div>
 
-                            {examTotalPages > 1 && (
-                              <div className="flex justify-center items-center space-x-4 mt-8">
-                                <button
-                                  onClick={() => setExamCurrentPage(p => Math.max(1, p - 1))}
-                                  disabled={examCurrentPage === 1}
-                                  className="p-2 bg-white border border-shnoor-light rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-shnoor-lavender transition-colors"
-                                >
-                                  <ChevronLeft size={20} className="text-shnoor-indigo" />
-                                </button>
-                                <span className="text-sm text-shnoor-navy font-medium">
-                                  Page {examCurrentPage} of {examTotalPages}
-                                </span>
-                                <button
-                                  onClick={() => setExamCurrentPage(p => Math.min(examTotalPages, p + 1))}
-                                  disabled={examCurrentPage === examTotalPages}
-                                  className="p-2 bg-white border border-shnoor-light rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-shnoor-lavender transition-colors"
-                                >
-                                  <ChevronRight size={20} className="text-shnoor-indigo" />
-                                </button>
-                              </div>
+                            {filteredTests.length > 0 && (
+                              <Pagination 
+                                currentPage={examCurrentPage}
+                                totalPages={examTotalPages}
+                                onPageChange={setExamCurrentPage}
+                                itemsPerPage={examItemsPerPage}
+                                onItemsPerPageChange={setExamItemsPerPage}
+                                totalItems={filteredTests.length}
+                              />
                             )}
                           </>
                         )}
@@ -3875,26 +3865,15 @@ const AdminDashboard = () => {
                         </div>
                       )}
 
-                      {instituteTotalPages > 1 && allInstitutes.length > 0 && (
-                        <div className="flex justify-center items-center space-x-4 mt-8">
-                          <button
-                            onClick={() => setInstituteCurrentPage(p => Math.max(1, p - 1))}
-                            disabled={instituteCurrentPage === 1}
-                            className="p-2 bg-white border border-shnoor-light rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-shnoor-lavender transition-colors"
-                          >
-                            <ChevronLeft size={20} className="text-shnoor-indigo" />
-                          </button>
-                          <span className="text-sm text-shnoor-navy font-medium">
-                            Page {instituteCurrentPage} of {instituteTotalPages}
-                          </span>
-                          <button
-                            onClick={() => setInstituteCurrentPage(p => Math.min(instituteTotalPages, p + 1))}
-                            disabled={instituteCurrentPage === instituteTotalPages}
-                            className="p-2 bg-white border border-shnoor-light rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-shnoor-lavender transition-colors"
-                          >
-                            <ChevronRight size={20} className="text-shnoor-indigo" />
-                          </button>
-                        </div>
+                      {allInstitutes.length > 0 && (
+                        <Pagination 
+                          currentPage={instituteCurrentPage}
+                          totalPages={instituteTotalPages}
+                          onPageChange={setInstituteCurrentPage}
+                          itemsPerPage={instituteItemsPerPage}
+                          onItemsPerPageChange={setInstituteItemsPerPage}
+                          totalItems={filteredInstitutes.length}
+                        />
                       )}
                     </div>
                   </div>
