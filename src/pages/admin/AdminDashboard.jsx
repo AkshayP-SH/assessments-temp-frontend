@@ -5152,8 +5152,10 @@ const AdminDashboard = () => {
                                   <p className="text-sm font-bold text-shnoor-navy">Public test cases</p>
                                   {question.publicTestCases.map((testCase, testCaseIndex) => (
                                     <div key={`${question.id}-test-${testCaseIndex}`} className="p-3 rounded-lg bg-shnoor-lavender border border-shnoor-light text-sm">
-                                      <p className="text-shnoor-indigoMedium"><strong>Input:</strong> {testCase.input || '(empty)'}</p>
-                                      <p className="text-shnoor-indigoMedium"><strong>Output:</strong> {testCase.output || '(empty)'}</p>
+                                      <p className="text-shnoor-indigoMedium"><strong>Input:</strong></p>
+                                      <pre className="whitespace-pre-wrap font-mono text-shnoor-indigoMedium bg-white/60 rounded px-2 py-1 mt-1">{testCase.input || '(empty)'}</pre>
+                                      <p className="text-shnoor-indigoMedium mt-2"><strong>Output:</strong></p>
+                                      <pre className="whitespace-pre-wrap font-mono text-shnoor-indigoMedium bg-white/60 rounded px-2 py-1 mt-1">{testCase.output || '(empty)'}</pre>
                                       {testCase.explanation && <p className="mt-1 text-shnoor-soft"><strong>Explanation:</strong> {testCase.explanation}</p>}
                                     </div>
                                   ))}
