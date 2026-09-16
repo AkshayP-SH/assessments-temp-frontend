@@ -1,6 +1,5 @@
 import { lazy, Suspense } from 'react';
 
-// Lazy load Monaco Editor to reduce initial bundle size
 const MonacoEditor = lazy(() => import('@monaco-editor/react'));
 
 const LazyMonacoEditor = (props) => {

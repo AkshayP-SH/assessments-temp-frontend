@@ -102,7 +102,6 @@ const MCQBankModal = ({ question, onClose, onSave, categories, tags }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Question Text */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Question Text *
@@ -117,7 +116,6 @@ const MCQBankModal = ({ question, onClose, onSave, categories, tags }) => {
             />
           </div>
 
-          {/* Options */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -170,7 +168,6 @@ const MCQBankModal = ({ question, onClose, onSave, categories, tags }) => {
             </div>
           </div>
 
-          {/* Correct Option, Marks, Difficulty */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -220,7 +217,6 @@ const MCQBankModal = ({ question, onClose, onSave, categories, tags }) => {
             </div>
           </div>
 
-          {/* Category */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Category
@@ -240,7 +236,6 @@ const MCQBankModal = ({ question, onClose, onSave, categories, tags }) => {
             </datalist>
           </div>
 
-          {/* Tags */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Tags
@@ -287,7 +282,6 @@ const MCQBankModal = ({ question, onClose, onSave, categories, tags }) => {
             </div>
           </div>
 
-          {/* Actions */}
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
             <button
               type="button"

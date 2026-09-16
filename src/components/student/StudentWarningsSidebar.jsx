@@ -103,7 +103,6 @@ const StudentWarningsSidebar = ({
 
   return (
     <div className="bg-white border-l border-gray-200 w-80 flex flex-col h-full">
-      {/* Header */}
       <div className="border-b border-gray-200 p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
@@ -127,7 +126,6 @@ const StudentWarningsSidebar = ({
         </div>
       </div>
 
-      {/* Messages List */}
       <div className="flex-1 overflow-y-auto">
         {messages.length === 0 ? (
           <div className="p-6 text-center">
@@ -151,7 +149,6 @@ const StudentWarningsSidebar = ({
                   key={message.id || index}
                   className={`border rounded-lg p-3 transition-all duration-200 hover:shadow-sm ${messageStyle.bg}`}
                 >
-                  {/* Message Header */}
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center space-x-2 flex-1">
                       <MessageIcon size={16} className={messageStyle.iconColor} />
@@ -170,7 +167,6 @@ const StudentWarningsSidebar = ({
                     </div>
                   </div>
 
-                  {/* Message Content */}
                   <div className="text-sm text-gray-700 leading-relaxed">
                     {showFullMessage ? message.message : getMessagePreview(message.message)}
                     
@@ -194,14 +190,12 @@ const StudentWarningsSidebar = ({
                     )}
                   </div>
 
-                  {/* Timestamp */}
                   <div className="mt-2 pt-2 border-t border-gray-200 border-opacity-50">
                     <p className="text-xs text-gray-500">
                       Received at {formatTime(message.timestamp)}
                     </p>
                   </div>
 
-                  {/* Unread Indicator */}
                   {!message.read && (
                     <div className="absolute -left-1 top-1/2 transform -translate-y-1/2 w-2 h-2 bg-red-500 rounded-full"></div>
                   )}
@@ -212,7 +206,6 @@ const StudentWarningsSidebar = ({
         )}
       </div>
 
-      {/* Footer */}
       {messages.length > 0 && (
         <div className="border-t border-gray-200 p-3">
           <div className="text-center">

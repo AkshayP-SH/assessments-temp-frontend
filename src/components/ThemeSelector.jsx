@@ -100,7 +100,8 @@ const ThemeSelector = ({ className = '', variant = 'dark' }) => {
           style={{ top: menuPosition.top, left: menuPosition.left }}
           className="theme-selector-menu fixed z-50 flex gap-1 rounded-2xl p-1.5 shadow-xl"
         >
-          {THEMES.map(({ id, label, icon: Icon }) => {
+          {THEMES.map((themeOption) => {
+            const { id, label } = themeOption;
             const isActive = theme === id;
 
             return (
@@ -115,7 +116,7 @@ const ThemeSelector = ({ className = '', variant = 'dark' }) => {
                 title={label}
                 className={`theme-selector-option flex h-10 w-10 items-center justify-center rounded-xl transition-colors ${isActive ? 'is-active' : ''}`}
               >
-                <Icon size={17} />
+                <themeOption.icon size={17} />
               </button>
             );
           })}
