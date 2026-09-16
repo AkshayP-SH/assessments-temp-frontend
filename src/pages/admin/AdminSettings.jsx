@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, Settings, User, BookOpen, CreditCard } from 'lucide-react';
+import { Settings, User, BookOpen, CreditCard, ArrowLeft } from 'lucide-react';
 import AdminLayout from '../../components/AdminLayout';
 import SystemSettingsTab from '../../components/admin/SystemSettingsTab';
 import ProfileTab from '../../components/admin/ProfileTab';

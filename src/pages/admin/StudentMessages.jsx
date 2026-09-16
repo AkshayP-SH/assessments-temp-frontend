@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Mail, MailOpen, Trash2, Image, Filter, RefreshCw, CheckCheck, User, AlertCircle, X, Send, Building, MessageCircle, Paperclip, Smile, CheckCircle, Star, TrendingUp, BarChart3, ThumbsUp, ThumbsDown, Clock } from 'lucide-react';
+import { ArrowLeft, Mail, MailOpen, Trash2, Image, Filter, RefreshCw, CheckCheck, User, AlertCircle, X, Send, Building, MessageCircle, Paperclip, Smile, CheckCircle, Clock, BarChart3, TrendingUp, ThumbsUp, ThumbsDown, Star } from 'lucide-react';
 import AdminLayout from '../../components/AdminLayout';
 import { useSupportSocket } from '../../hooks/useSupportSocket';
 import { API_URL } from '../../config/api';
@@ -14,16 +14,6 @@ const EMOJI_OPTIONS = [
   '❤️', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💖', '💬', '🙇', '🙋', '🤷', '😇', '😌', '😴',
   '😐', '😑', '😶', '😬', '😮', '😯', '😲', '😳', '🥲', '😭', '😤', '😓', '😰', '😵', '🤯', '😇'
 ];
-
-const showConfirm = (message) => {
-  const confirmFn = globalThis?.['confirm'];
-  return typeof confirmFn === 'function' ? confirmFn(message) : false;
-};
-
-const showAlert = (message) => {
-  const alertFn = globalThis?.['alert'];
-  if (typeof alertFn === 'function') alertFn(message);
-};
 
 const StudentMessages = () => {
   const navigate = useNavigate();

@@ -2,18 +2,12 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Plus, FileSpreadsheet, LogOut, Download, ArrowLeft,
-  Trash2, Eye, Users, CheckCircle, XCircle, UserCheck, ChevronDown, ChevronRight, ChevronLeft, Video, Loader2, X, Building2, MoreVertical, Copy, AlertCircle, Pencil, MessageSquare, Star, TrendingUp, BarChart3, Calendar, Filter, CheckSquare, Briefcase, Search, CreditCard
+  Plus, FileSpreadsheet, Download, ArrowLeft,
+  Trash2, Eye, Users, CheckCircle, XCircle, UserCheck, ChevronDown, ChevronRight, ChevronLeft, Video, Loader2, X, Building2, MoreVertical, Copy, AlertCircle, Pencil, MessageSquare, Star, TrendingUp, BarChart3, Calendar, Filter, CheckSquare, Briefcase, Search
 } from 'lucide-react';
 
-import axios from 'axios';
 import { apiFetch } from '../../config/api';
 import AdminHeader from '../../components/AdminHeader';
-import AdminLayout from '../../components/AdminLayout';
-import Card from '../../components/Card';
-import Badge from '../../components/Badge';
-import InputField from '../../components/InputField';
-import Button from '../../components/Button';
 import { useSEO } from '../../hooks/useSEO';
 import { lazy, Suspense } from 'react';
 
@@ -51,15 +45,6 @@ const AdminDashboard = () => {
   const [selectedCandidates, setSelectedCandidates] = useState([]);
   const [statusFilter, setStatusFilter] = useState('all'); // 'all', 'pass', 'fail'
   const [showQuickSelectMenu, setShowQuickSelectMenu] = useState(false);
-
-  // Test Assignment States
-  const [institutes, setInstitutes] = useState([]);
-  const [expandedInstitutes, setExpandedInstitutes] = useState({});
-  const [instituteStudents, setInstituteStudents] = useState({});
-  const [selectedStudents, setSelectedStudents] = useState([]);
-  const [selectedTest, setSelectedTest] = useState('');
-  const [isLoadingInstitutes, setIsLoadingInstitutes] = useState(false);
-  const [isAssigning, setIsAssigning] = useState(false);
 
   // Job Role/Description Modal States
   const [showJobModal, setShowJobModal] = useState(false);
@@ -114,13 +99,6 @@ const AdminDashboard = () => {
     institute: ''
   });
   const [isAddingStudent, setIsAddingStudent] = useState(false);
-
-  // Student Tests Modal States
-  const [showStudentTestsModal, setShowStudentTestsModal] = useState(false);
-  const [selectedStudentForTests, setSelectedStudentForTests] = useState(null);
-  const [studentAssignedTests, setStudentAssignedTests] = useState([]);
-  const [isLoadingStudentTests, setIsLoadingStudentTests] = useState(false);
-  const [isUnassigningStudentTest, setIsUnassigningStudentTest] = useState(false);
   const [expandedStudentTests, setExpandedStudentTests] = useState({});
 
   // Search, Filter, Sort States
@@ -161,13 +139,10 @@ const AdminDashboard = () => {
   const [loadingFeedback, setLoadingFeedback] = useState(false);
 
   // Violations Tab States
-  const [violations, setViolations] = useState([]);
   const [flaggedStudents, setFlaggedStudents] = useState([]);
-  const [violationSummary, setViolationSummary] = useState([]);
   const [violationsByStudent, setViolationsByStudent] = useState([]);
   const [selectedTestForViolations, setSelectedTestForViolations] = useState('');
   const [isLoadingViolations, setIsLoadingViolations] = useState(false);
-  const [violationFilter, setViolationFilter] = useState('all'); // all, high, medium, low
 
   // Preview Questions Modal States
   const [showPreviewQuestionsModal, setShowPreviewQuestionsModal] = useState(false);
@@ -2280,14 +2255,6 @@ const AdminDashboard = () => {
       alert('Failed to export violations report. Please try again.');
     }
   };
-
-  // Get filtered violations
-  const getFilteredViolations = () => {
-    if (violationFilter === 'all') return violations;
-    return violations.filter(v => v.severity === violationFilter);
-  };
-
-  const filteredViolations = getFilteredViolations();
 
   return (
     <Suspense fallback={<div className="flex h-screen items-center justify-center bg-shnoor-lavender"><Loader2 className="animate-spin h-12 w-12 text-shnoor-indigo" /></div>}>
