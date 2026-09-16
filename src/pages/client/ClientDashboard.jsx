@@ -90,7 +90,7 @@ const ClientDashboard = () => {
       });
 
       if (Array.isArray(studentsData)) setStudents(studentsData);
-    } catch (err) {
+    } catch {
       setError('Failed to load dashboard data. Please refresh.');
     } finally {
       setLoading(false);
@@ -168,7 +168,7 @@ const ClientDashboard = () => {
             } else {
               alert(verifyData.message || 'Payment verification failed');
             }
-          } catch (err) {
+          } catch {
             alert('Error verifying payment');
           }
         },
@@ -186,7 +186,7 @@ const ClientDashboard = () => {
         alert(response.error.description);
       });
       rzp.open();
-    } catch (err) {
+    } catch {
       alert('Error purchasing subscription');
     }
   };
@@ -217,8 +217,8 @@ const ClientDashboard = () => {
               key={item.id}
               onClick={() => setActiveTab(item.id)}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left ${activeTab === item.id
-                  ? 'bg-shnoor-indigo text-white shadow-sm'
-                  : 'text-shnoor-navy hover:bg-shnoor-lavender'
+                ? 'bg-shnoor-indigo text-white shadow-sm'
+                : 'text-shnoor-navy hover:bg-shnoor-lavender'
                 }`}
             >
               <span>{item.icon}</span>
@@ -321,8 +321,8 @@ const ClientDashboard = () => {
                                 <td className="py-3 px-3 font-medium text-shnoor-navy">{test.title}</td>
                                 <td className="py-3 px-3">
                                   <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${test.status === 'published' ? 'bg-emerald-100 text-emerald-700' :
-                                      test.status === 'draft' ? 'bg-amber-100 text-amber-700' :
-                                        'bg-gray-100 text-gray-600'
+                                    test.status === 'draft' ? 'bg-amber-100 text-amber-700' :
+                                      'bg-gray-100 text-gray-600'
                                     }`}>
                                     {test.status}
                                   </span>
@@ -366,8 +366,8 @@ const ClientDashboard = () => {
                               <td className="py-3 px-4 font-medium text-shnoor-navy">{test.title}</td>
                               <td className="py-3 px-4">
                                 <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${test.status === 'published' ? 'bg-emerald-100 text-emerald-700' :
-                                    test.status === 'draft' ? 'bg-amber-100 text-amber-700' :
-                                      'bg-gray-100 text-gray-600'
+                                  test.status === 'draft' ? 'bg-amber-100 text-amber-700' :
+                                    'bg-gray-100 text-gray-600'
                                   }`}>
                                   {test.status}
                                 </span>
@@ -509,8 +509,8 @@ const ClientDashboard = () => {
                             onClick={() => handlePurchaseSubscription(plan)}
                             disabled={isCurrentPlan}
                             className={`w-full px-4 py-3 font-bold rounded-xl transition-colors shadow-sm ${isCurrentPlan
-                                ? 'bg-shnoor-lavender text-shnoor-indigo cursor-not-allowed'
-                                : 'bg-shnoor-indigo text-white hover:bg-shnoor-navy'
+                              ? 'bg-shnoor-lavender text-shnoor-indigo cursor-not-allowed'
+                              : 'bg-shnoor-indigo text-white hover:bg-shnoor-navy'
                               }`}
                           >
                             {isCurrentPlan ? 'Active' : `Purchase ${plan.name}`}

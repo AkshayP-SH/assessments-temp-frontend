@@ -28,7 +28,7 @@ const ClientSubscriptionPlans = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [processingPlan, setProcessingPlan] = useState(null);
-  
+
   const requiresPayment = location.state?.requiresPayment || false;
   const subscriptionExpired = location.state?.subscriptionExpired || false;
 
@@ -45,7 +45,7 @@ const ClientSubscriptionPlans = () => {
       } else {
         setError('Failed to load subscription plans');
       }
-    } catch (err) {
+    } catch {
       setError('Failed to load subscription plans');
     } finally {
       setLoading(false);
@@ -55,26 +55,26 @@ const ClientSubscriptionPlans = () => {
   const handleSelectPlan = async (planId) => {
     setProcessingPlan(planId);
     setError('');
-    
+
     try {
       // Use the configured payment mode
       const isDummyMode = DUMMY_PAYMENT_MODE;
-      
+
       if (isDummyMode) {
         // Simulate payment processing delay
         await new Promise(resolve => setTimeout(resolve, 1500));
-        
+
         // Get the token from localStorage
         const token = localStorage.getItem('clientToken') || localStorage.getItem('adminToken');
-        
+
         if (!token) {
           throw new Error('Authentication token not found. Please login again.');
         }
-        
+
         // Directly call verify payment with dummy data
         const verifyResponse = await fetch(getApiUrl('api/settings/verify-payment'), {
           method: 'POST',
-          headers: { 
+          headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
           },
@@ -88,7 +88,7 @@ const ClientSubscriptionPlans = () => {
         });
 
         const verifyData = await verifyResponse.json();
-        
+
         if (verifyData.success) {
           // Update local storage to reflect active subscription
           const storedUser = JSON.parse(localStorage.getItem('clientUser') || '{}');
@@ -97,11 +97,11 @@ const ClientSubscriptionPlans = () => {
           storedUser.subscriptionActive = true;
           localStorage.setItem('clientUser', JSON.stringify(storedUser));
           localStorage.setItem('adminUser', JSON.stringify(storedUser)); // Mirror for shared pages
-          
+
           // Payment successful, navigate to dashboard
-          navigate('/client/dashboard', { 
-            replace: true, 
-            state: { message: 'Payment successful! Your subscription is now active.' } 
+          navigate('/client/dashboard', {
+            replace: true,
+            state: { message: 'Payment successful! Your subscription is now active.' }
           });
         } else {
           setError('Payment verification failed. Please contact support.');
@@ -109,7 +109,7 @@ const ClientSubscriptionPlans = () => {
         setProcessingPlan(null);
         return;
       }
-      
+
       // REAL RAZORPAY MODE (for future use)
       // Create Razorpay order
       const orderResponse = await apiFetch('api/settings/purchase-subscription', {
@@ -117,9 +117,9 @@ const ClientSubscriptionPlans = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ plan_id: planId }),
       });
-      
+
       const orderData = await orderResponse.json();
-      
+
       if (!orderData.success) {
         throw new Error(orderData.message || 'Failed to create order');
       }
@@ -153,17 +153,17 @@ const ClientSubscriptionPlans = () => {
               });
 
               const verifyData = await verifyResponse.json();
-              
+
               if (verifyData.success) {
                 // Payment successful, navigate to dashboard
-                navigate('/client/dashboard', { 
-                  replace: true, 
-                  state: { message: 'Payment successful! Your subscription is now active.' } 
+                navigate('/client/dashboard', {
+                  replace: true,
+                  state: { message: 'Payment successful! Your subscription is now active.' }
                 });
               } else {
                 setError('Payment verification failed. Please contact support.');
               }
-            } catch (err) {
+            } catch {
               setError('Payment verification failed. Please contact support.');
             } finally {
               setProcessingPlan(null);
@@ -216,9 +216,9 @@ const ClientSubscriptionPlans = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-shnoor-lavender via-white to-shnoor-lavender">
       <AdminHeader isClientPortal={true} onLogout={handleLogout} />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        
+
         {/* Back Button (Only show if not locked out) */}
         {!(requiresPayment || subscriptionExpired) && (
           <div className="mb-6 animate-fade-in">
@@ -330,7 +330,7 @@ const ClientSubscriptionPlans = () => {
                   </h3>
                   <p className="text-sm text-shnoor-soft leading-relaxed">{plan.description}</p>
                 </div>
-                
+
                 <div className="mb-8 pb-6 border-b-2 border-shnoor-lavender">
                   <div className="flex items-baseline gap-1">
                     <span className="text-5xl font-extrabold text-shnoor-navy group-hover:text-shnoor-indigo transition-colors">
@@ -342,7 +342,7 @@ const ClientSubscriptionPlans = () => {
                 </div>
 
                 <div className="space-y-4 mb-8">
-                  {plan.features && Array.isArray(plan.features) 
+                  {plan.features && Array.isArray(plan.features)
                     ? plan.features.map((feature, idx) => (
                       <div key={idx} className="flex items-start gap-3 group/item">
                         <div className="flex-shrink-0 w-6 h-6 rounded-full bg-green-100 flex items-center justify-center group-hover/item:bg-green-200 transition-colors">
@@ -362,11 +362,10 @@ const ClientSubscriptionPlans = () => {
                 <Button
                   onClick={() => handleSelectPlan(plan.plan_id)}
                   disabled={processingPlan !== null}
-                  className={`w-full h-14 flex items-center justify-center gap-2 text-base font-bold shadow-lg transition-all duration-300 ${
-                    processingPlan === plan.plan_id
+                  className={`w-full h-14 flex items-center justify-center gap-2 text-base font-bold shadow-lg transition-all duration-300 ${processingPlan === plan.plan_id
                       ? 'opacity-50 cursor-not-allowed'
                       : 'hover:shadow-xl hover:scale-105'
-                  }`}
+                    }`}
                 >
                   {processingPlan === plan.plan_id ? (
                     <>
@@ -398,7 +397,7 @@ const ClientSubscriptionPlans = () => {
           </div>
         )}
       </div>
-      
+
       <style>{`
         @keyframes fade-in {
           from { opacity: 0; transform: translateY(-10px); }
