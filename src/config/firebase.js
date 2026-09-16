@@ -2,8 +2,7 @@ import { initializeApp } from 'firebase/app';
 import {
     getAuth,
     createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,
-    signOut
+    signInWithEmailAndPassword
 } from 'firebase/auth';
 
 // Your web app's Firebase configuration
@@ -55,6 +54,5 @@ try {
 export {
     auth,
     createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,
-    signOut
+    signInWithEmailAndPassword
 };

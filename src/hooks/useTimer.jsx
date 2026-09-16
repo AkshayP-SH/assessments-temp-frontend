@@ -4,7 +4,6 @@ export const useTimer = (initialSeconds, onTimeUp) => {
   const [timeLeft, setTimeLeft] = useState(initialSeconds);
   const [isActive, setIsActive] = useState(true);
 
-  // Update timeLeft when initialSeconds changes
   useEffect(() => {
     setTimeLeft(initialSeconds);
   }, [initialSeconds]);

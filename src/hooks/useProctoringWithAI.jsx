@@ -99,13 +99,6 @@ export const useProctoringWithAI = (onCameraLost, onAIViolation, onMessageReceiv
 
     // Send violation to backend
     if (socketRef.current && socketRef.current.connected) {
-      console.log('[Proctoring] 📤 Sending violation to backend:', {
-        type: violation.type,
-        severity: violation.severity,
-        studentId: studentDataRef.current?.studentId,
-        testId: studentDataRef.current?.testId
-      });
-      
       socketRef.current.emit('proctoring:ai-violation', {
         studentId: studentDataRef.current?.studentId,
         testId: studentDataRef.current?.testId,
@@ -119,8 +112,6 @@ export const useProctoringWithAI = (onCameraLost, onAIViolation, onMessageReceiv
 
   // Message handling functions
   const handleMessageReceived = useCallback((messageData) => {
-    console.log('[Messaging] 📩 Received message from proctor:', messageData);
-    
     // Add to messages list
     setMessages(prev => [...prev, messageData]);
     
@@ -143,8 +134,6 @@ export const useProctoringWithAI = (onCameraLost, onAIViolation, onMessageReceiv
 
   const acknowledgeMessage = useCallback((messageId) => {
     if (socketRef.current && socketRef.current.connected && studentDataRef.current) {
-      console.log('[Messaging] ✅ Acknowledging message:', messageId);
-      
       socketRef.current.emit('student:message-read', {
         messageId: messageId,
         studentId: studentDataRef.current.studentId
@@ -205,8 +194,6 @@ export const useProctoringWithAI = (onCameraLost, onAIViolation, onMessageReceiv
         // Only report if cooldown has passed (10 seconds)
         if ((now - lastTime) >= 10000) {
           lastViolationTimeRef.current['video_blur'] = now;
-          console.log(`[Blur Detection] ⚠️ BLUR DETECTED: variance ${variance.toFixed(2)}`);
-          
           const violation = {
             type: 'video_blur',
             severity: 'medium',
@@ -216,9 +203,6 @@ export const useProctoringWithAI = (onCameraLost, onAIViolation, onMessageReceiv
           
           sendViolation(violation);
           return true;
-        } else {
-          const timeLeft = Math.ceil((10000 - (now - lastTime)) / 1000);
-          console.log(`[Blur Detection] Blur detected but cooldown active (${timeLeft}s remaining)`);
         }
       }
       
@@ -254,8 +238,6 @@ export const useProctoringWithAI = (onCameraLost, onAIViolation, onMessageReceiv
         
         if ((now - lastTime) >= 10000) { // 10 second cooldown
           lastViolationTimeRef.current['loud_noise'] = now;
-          console.log(`[Audio] ⚠️ LOUD NOISE: ${Math.round(average)}`);
-          
           const violation = {
             type: 'loud_noise',
             severity: 'medium',
@@ -285,8 +267,6 @@ export const useProctoringWithAI = (onCameraLost, onAIViolation, onMessageReceiv
           
           if ((now - lastTime) >= 15000) { // 15 second cooldown
             lastViolationTimeRef.current['voice_detected'] = now;
-            console.log(`[Audio] ⚠️ VOICE ACTIVITY: ${Math.round(voiceEnergy)}`);
-            
             const violation = {
               type: 'voice_detected',
               severity: 'medium',
@@ -334,7 +314,6 @@ export const useProctoringWithAI = (onCameraLost, onAIViolation, onMessageReceiv
       const audioTracks = videoStream.getAudioTracks();
       if (audioTracks.length > 0) {
         setMicrophonePermissionGranted(true);
-        console.log('[Proctoring] Camera and microphone permissions granted');
       } else {
         setMicrophonePermissionGranted(false);
         console.error('[Proctoring] Microphone not available - MANDATORY');
@@ -380,14 +359,12 @@ export const useProctoringWithAI = (onCameraLost, onAIViolation, onMessageReceiv
     });
 
     socket.on('connect', () => {
-      console.log('[Proctoring] Socket connected');
       setIsConnected(true);
       setError(null);
       socket.emit('student:join-proctoring', studentData);
     });
 
     socket.on('disconnect', (reason) => {
-      console.log('[Proctoring] Socket disconnected:', reason);
       setIsConnected(false);
       
       if (reason === 'io server disconnect') {
@@ -409,8 +386,7 @@ export const useProctoringWithAI = (onCameraLost, onAIViolation, onMessageReceiv
       setIsConnected(false);
     });
 
-    socket.on('reconnect', (attemptNumber) => {
-      console.log('[Proctoring] Reconnected after', attemptNumber, 'attempts');
+    socket.on('reconnect', () => {
       setError(null);
       socket.emit('student:join-proctoring', studentData);
     });
@@ -419,8 +395,6 @@ export const useProctoringWithAI = (onCameraLost, onAIViolation, onMessageReceiv
     socket.on('proctoring:message-received', handleMessageReceived); 
     // Handle forced test stop from admin
     socket.on('proctoring:force-stopped', (data) => {
-      console.log('[Proctoring] 🛑 Test force-stopped by admin:', data);
-      
       // Call parent handler to trigger test submission
       if (onForceStop) {
         onForceStop(data);
@@ -451,26 +425,18 @@ export const useProctoringWithAI = (onCameraLost, onAIViolation, onMessageReceiv
 
     videoRef.current.onloadedmetadata = () => {
       videoRef.current.play().then(async () => {
-        console.log('[Proctoring] Video playing, waiting for stabilization...');
-        
         // Wait longer for video to stabilize (increased from 1s to 3s)
         await new Promise(resolve => setTimeout(resolve, 3000));
-        
-        console.log('[Proctoring] Starting AI detection...');
-        
+
         // Try to start AI detection with better error handling
         const started = await startDetection(videoRef.current);
         
-        if (started) {
-          console.log('[Proctoring] ✅ AI detection started successfully');
-        } else {
+        if (!started) {
           console.warn('[Proctoring] ⚠️ AI detection failed to start, retrying in 5s...');
           // Retry after 5 seconds
           setTimeout(async () => {
             const retryStarted = await startDetection(videoRef.current);
-            if (retryStarted) {
-              console.log('[Proctoring] ✅ AI detection started on retry');
-            } else {
+            if (!retryStarted) {
               console.error('[Proctoring] ❌ AI detection failed on retry');
             }
           }, 5000);
@@ -479,8 +445,6 @@ export const useProctoringWithAI = (onCameraLost, onAIViolation, onMessageReceiv
         // Start audio analysis
         const audioTracks = mediaStream.getAudioTracks();
         if (audioTracks.length > 0) {
-          console.log('[Proctoring] Starting audio analysis...');
-          
           try {
             const audioContext = new (window.AudioContext || window.webkitAudioContext)();
             const analyser = audioContext.createAnalyser();
@@ -500,8 +464,6 @@ export const useProctoringWithAI = (onCameraLost, onAIViolation, onMessageReceiv
               }
             }, 2000);
             
-            console.log('[Proctoring] ✅ Audio analysis started');
-
             // Stream audio chunks for admin live listening using WAV chunks for broad playback support.
             try {
               const processor = audioContext.createScriptProcessor(4096, 1, 1);
@@ -551,7 +513,6 @@ export const useProctoringWithAI = (onCameraLost, onAIViolation, onMessageReceiv
                 reader.readAsDataURL(wavBlob);
               }, 2000);
 
-              console.log('[Proctoring] ✅ WAV audio chunk streaming started');
             } catch (audioStreamErr) {
               console.error('[Proctoring] Audio chunk streaming setup failed:', audioStreamErr);
             }
