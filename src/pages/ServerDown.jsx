@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { getApiUrl } from '../config/api';
 
 const ServerDown = () => {
-    const navigate = useNavigate();
     // Attempt to get the last known retry timer from localStorage, default to 5 minutes
     const savedTimer = parseInt(localStorage.getItem('retry_timer_minutes') || '5', 10);
     const [timeLeft, setTimeLeft] = useState(savedTimer * 60); // in seconds
@@ -37,7 +35,7 @@ const ServerDown = () => {
                 sessionStorage.removeItem('redirect_after_recovery');
                 window.location.href = redirectUrl;
             }
-        } catch (error) {
+        } catch {
             // Still down
             console.log('Server still down, retrying later...');
         } finally {

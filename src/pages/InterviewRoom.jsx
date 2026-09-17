@@ -73,57 +73,7 @@ const InterviewRoom = () => {
     }
   };
 
-  // Enhanced helper function to ensure video plays
-  const ensureVideoPlays = async (videoElement, streamType) => {
-    if (!videoElement || !videoElement.srcObject) {
-      console.log(`${streamType} video: No element or stream`);
-      return false;
-    }
 
-    try {
-      if (!videoElement.paused) {
-        videoElement.pause();
-      }
-
-      // Mobile-specific video properties
-      videoElement.muted = streamType === 'Local' || streamType === 'Local-PIP';
-      videoElement.playsInline = true;
-      videoElement.autoplay = true;
-      videoElement.controls = false;
-
-      // Additional properties for remote video
-      if (streamType === 'Remote') {
-        videoElement.style.objectFit = 'cover';
-        // For mobile browsers, ensure video is not muted for remote streams
-        videoElement.muted = false;
-      }
-
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      if (videoElement.srcObject) {
-        await videoElement.play();
-        console.log(`${streamType} video playing successfully`);
-        console.log(`${streamType} video dimensions: ${videoElement.videoWidth}x${videoElement.videoHeight}`);
-        return true;
-      }
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        console.log(`${streamType} video play aborted (stream changed)`);
-        return false;
-      }
-      console.error(`${streamType} video play error:`, error);
-
-      // Mobile fallback - try to play without waiting
-      if (streamType === 'Remote' && videoElement.srcObject) {
-        try {
-          videoElement.play();
-        } catch (e) {
-          console.error('Mobile fallback play failed:', e);
-        }
-      }
-      return false;
-    }
-  };
   useEffect(() => {
     let isMounted = true;
 
