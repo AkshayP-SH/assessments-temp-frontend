@@ -9,7 +9,6 @@ const SOCKET_URL = API_URL;
  */
 const requestNotificationPermission = async () => {
   if (!('Notification' in window)) {
-    console.log('[BrowserNotification] Not supported');
     return false;
   }
 
@@ -102,7 +101,6 @@ export const useSupportSocket = ({
       timestamp: notification.createdAt || new Date().toISOString(),
       read: false
     };
-    console.log('[SupportSocket] Adding notification:', newNotification);
     setNotifications(prev => [newNotification, ...prev].slice(0, 50)); // Keep last 50
     setUnreadCount(prev => prev + 1);
 
@@ -155,7 +153,6 @@ export const useSupportSocket = ({
 
     // Listen for admin messages all read event
     const handleAllRead = () => {
-      console.log('[SupportSocket] All messages marked as read, clearing notifications');
       clearNotifications();
     };
     
@@ -182,22 +179,18 @@ export const useSupportSocket = ({
       socketRef.current = socket;
 
       socket.on('connect', () => {
-        console.log('[SupportSocket] Connected:', socket.id);
         setIsConnected(true);
         connectionAttempts = 0; // Reset on successful connection
 
         // Join appropriate room based on user type
         if (isAdmin) {
           socket.emit('admin:join-support');
-          console.log('[SupportSocket] Admin joining support room');
         } else if (rollNumber) {
           socket.emit('student:join-support', { rollNumber, studentName });
-          console.log('[SupportSocket] Student joining support room:', `support-student-${rollNumber}`);
         }
       });
 
-      socket.on('disconnect', (reason) => {
-        console.log('[SupportSocket] Disconnected:', reason);
+      socket.on('disconnect', () => {
         setIsConnected(false);
       });
 
@@ -224,7 +217,6 @@ export const useSupportSocket = ({
     // Admin notifications - new student message
     if (isAdmin && socket) {
       socket.on('support:new-student-message', (data) => {
-        console.log('[SupportSocket] New student message received:', data);
         addNotification({
           type: 'student-message',
           id: data.id,
@@ -240,23 +232,17 @@ export const useSupportSocket = ({
 
       // Real-time unread count update (when messages are marked read)
       socket.on('support:unread-count-update', (data) => {
-        console.log('[SupportSocket] Unread count update:', data);
         setUnreadCount(data.count);
         if (data.count === 0) {
           clearNotifications();
         }
       });
 
-      // Listen for confirmation that we joined the room
-      socket.on('admin:support-joined', (data) => {
-        console.log('[SupportSocket] Admin support room joined:', data);
-      });
     }
 
     // Student notifications - new admin reply
     if (!isAdmin && rollNumber) {
       socket.on('support:new-admin-reply', (data) => {
-        console.log('[SupportSocket] New admin reply received:', data);
         addNotification({
           type: 'admin-reply',
           id: data.id,
@@ -266,10 +252,6 @@ export const useSupportSocket = ({
         }, true);
       });
 
-      // Listen for confirmation that we joined the room
-      socket.on('student:support-joined', (data) => {
-        console.log('[SupportSocket] Student support room joined:', data);
-      });
     }
 
     // Cleanup on unmount

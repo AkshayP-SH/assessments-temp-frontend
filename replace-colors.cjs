@@ -53,8 +53,6 @@ const mapColor = (fullClass, prefix, color, shade) => {
     return fullClass;
 };
 
-let modifiedFilesCount = 0;
-
 walkDir('./src', (filePath) => {
     const content = fs.readFileSync(filePath, 'utf-8');
     let newContent = content.replace(/([a-z0-9:-]+-)(blue|gray|red|green|purple|yellow|indigo|pink|orange|teal|cyan|slate|zinc|neutral|stone|amber|lime|emerald|sky|violet|fuchsia|rose)-(\d{2,3})/g,
@@ -63,9 +61,5 @@ walkDir('./src', (filePath) => {
 
     if (content !== newContent) {
         fs.writeFileSync(filePath, newContent, 'utf-8');
-        modifiedFilesCount++;
-        console.log('Modified:', filePath);
     }
 });
-
-console.log('Total files modified:', modifiedFilesCount);

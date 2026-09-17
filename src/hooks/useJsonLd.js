@@ -1,16 +1,5 @@
 import { useEffect } from 'react';
 
-/**
- * useJsonLd — injects a JSON-LD <script> tag into <head> for structured data.
- *
- * Usage:
- *   useJsonLd({
- *     "@context": "https://schema.org",
- *     "@type": "Organization",
- *     "name": "SHNOOR Assessments",
- *     "url": "https://assessments.shnoor.com"
- *   });
- */
 export function useJsonLd(schema) {
   useEffect(() => {
     if (!schema) return;
@@ -20,7 +9,6 @@ export function useJsonLd(schema) {
     script.setAttribute('id', 'json-ld-schema');
     script.textContent = JSON.stringify(schema);
 
-    // Remove any existing JSON-LD tag before adding new one
     const existing = document.getElementById('json-ld-schema');
     if (existing) existing.remove();
 

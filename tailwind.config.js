@@ -1,4 +1,3 @@
-/** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
     "./index.html",
@@ -10,7 +9,6 @@ module.exports = {
         sans: ['"Plus Jakarta Sans"', 'sans-serif'],
       },
       colors: {
-        // Theme-aware colors – map to CSS variables so dark/green themes work automatically
         'theme-page':    'rgb(var(--theme-page)    / <alpha-value>)',
         'theme-card':    'rgb(var(--theme-card)    / <alpha-value>)',
         'theme-panel':   'rgb(var(--theme-panel)   / <alpha-value>)',
@@ -33,29 +31,24 @@ module.exports = {
         'theme-inv-text':'rgb(var(--theme-contrast-text)  / <alpha-value>)',
         'theme-inv-muted':'rgb(var(--theme-contrast-muted) / <alpha-value>)',
         shnoor: {
-          // The Dark Theme (Headers, Text)
-          navy: '#0E0E27',       // Deepest background & primary text
-          navyLight: '#272757',  // Lighter navy (used in the login page)
+          navy: '#0E0E27',
+          navyLight: '#272757',
 
-          // The Primary Brand (Buttons, Active States)
-          indigo: '#44448E',     // Primary call-to-action color
-          indigoMedium: '#6868AC', // Secondary icons / empty states
+          indigo: '#44448E',
+          indigoMedium: '#6868AC',
 
-          // The Soft/Disabled Theme (Secondary Buttons, Borders)
-          soft: '#8F8FC4',       // Disabled text / soft accents
-          light: '#B7B7D9',      // Subtle highlights
-          mist: '#D1D1E6',       // Input borders & subtle dividers
+          soft: '#8F8FC4',
+          light: '#B7B7D9',
+          mist: '#D1D1E6',
 
-          // The Canvas (Backgrounds)
-          lavender: '#E0E0EF',   // The main page background
+          lavender: '#E0E0EF',
 
-          // Add Semantic Colors (Tinted to match the indigo/navy aesthetic)
-          success: '#34d399',      // A modern, soft green
-          successLight: '#d1fae5', // Light green for backgrounds
-          danger: '#f87171',       // A soft, clean red
-          dangerLight: '#fee2e2',  // Light red for backgrounds
-          warning: '#fbbf24',      // Soft amber/yellow
-          warningLight: '#fef3c7', // Light yellow for backgrounds
+          success: '#34d399',
+          successLight: '#d1fae5',
+          danger: '#f87171',
+          dangerLight: '#fee2e2',
+          warning: '#fbbf24',
+          warningLight: '#fef3c7',
         }
       }
     },
