@@ -54,6 +54,15 @@ html:not([data-theme='dark']):not([data-theme='green']) select {
   background: #6b7280; /* darker grey on hover */
 }
 
+/* Scrollbar Hide Utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* Custom Checkbox Styles */
 input[type="checkbox"] {
   -webkit-appearance: none !important;

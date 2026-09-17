@@ -126,13 +126,13 @@ const LandingPage = () => {
   const scrollToSection = (e, href) => {
     e.preventDefault();
     setMobileMenuOpen(false);
-    if (href === '#home') { 
-      window.scrollTo({ top: 0, behavior: 'smooth' }); 
+    if (href === '#home') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
       document.body.scrollTo({ top: 0, behavior: 'smooth' });
       const rootEl = document.getElementById('root');
       if (rootEl) rootEl.scrollTo({ top: 0, behavior: 'smooth' });
-      return; 
+      return;
     }
     const el = document.querySelector(href);
     if (el) {
@@ -150,15 +150,15 @@ const LandingPage = () => {
         ref={navRef}
         className={`landing-nav bg-white sticky top-0 z-50 transition-shadow duration-300 ${scrolled ? 'shadow-md' : 'shadow-sm'} border-b border-shnoor-mist`}
       >
-        <div className="max-w-[1280px] mx-auto px-4 sm:px-8 flex items-center justify-between h-[72px]">
+        <div className="max-w-[1280px] mx-auto px-3 sm:px-6 lg:px-8 flex items-center justify-between h-[72px]">
           {/* Logo */}
-          <div className="flex items-center gap-3 flex-shrink-0">
-            <div className="landing-brand-logo flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center overflow-hidden rounded-xl bg-white">
-              <img src={shnoorLogo} alt="Shnoor" className="h-10 w-10 sm:h-11 sm:w-11 object-contain" width="44" height="44" loading="eager" fetchPriority="high" />
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            <div className="landing-brand-logo flex h-8 w-8 sm:h-10 sm:w-10 md:h-11 md:w-11 items-center justify-center overflow-hidden rounded-xl bg-white flex-shrink-0">
+              <img src={shnoorLogo} alt="Shnoor" className="h-8 w-8 sm:h-10 sm:w-10 md:h-11 md:w-11 object-contain" width="44" height="44" loading="eager" fetchPriority="high" />
             </div>
             <div>
-              <p className="font-extrabold text-shnoor-navy text-sm sm:text-[15px] leading-tight tracking-wide uppercase">SHNOOR INTERNATIONAL</p>
-              <p className="text-[10px] text-shnoor-soft font-semibold tracking-widest uppercase">Assessment Platform</p>
+              <p className="font-extrabold text-shnoor-navy text-xs sm:text-sm md:text-[15px] leading-tight tracking-wide uppercase">SHNOOR INTERNATIONAL</p>
+              <p className="text-[9px] sm:text-[10px] text-shnoor-soft font-semibold tracking-widest uppercase">Assessment Platform</p>
             </div>
           </div>
 
@@ -173,18 +173,18 @@ const LandingPage = () => {
           </div>
 
           {/* Right Actions */}
-          <div className="flex items-center gap-3 sm:gap-4">
+          <div className="flex items-center gap-1.5 sm:gap-3 lg:gap-4 flex-shrink-0">
             <ThemeSelector variant="light" />
             <Link to="/login" onMouseEnter={prefetchLogin} className="hidden sm:inline-flex text-sm font-semibold text-shnoor-navy hover:text-shnoor-indigo transition-colors px-3 py-2">
               Log In
             </Link>
-            <Link to="/register" onMouseEnter={prefetchRegister}>
-              <button className="bg-shnoor-navy text-white text-sm font-bold px-5 py-2.5 rounded-lg hover:bg-shnoor-indigo transition-colors">
+            <Link to="/register" onMouseEnter={prefetchRegister} className="inline-flex">
+              <button className="bg-shnoor-navy text-white text-xs sm:text-sm font-bold px-3 py-2 sm:px-5 sm:py-2.5 rounded-lg hover:bg-shnoor-indigo transition-colors whitespace-nowrap">
                 Get Started
               </button>
             </Link>
             {/* Mobile hamburger */}
-            <button className="lg:hidden flex flex-col gap-1.5 p-2" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
+            <button className="lg:hidden flex flex-col gap-1.5 p-1.5 sm:p-2 flex-shrink-0" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
               <span className={`block w-5 h-0.5 bg-shnoor-navy transition-transform duration-300 ${mobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`} />
               <span className={`block w-5 h-0.5 bg-shnoor-navy transition-opacity duration-300 ${mobileMenuOpen ? 'opacity-0' : ''}`} />
               <span className={`block w-5 h-0.5 bg-shnoor-navy transition-transform duration-300 ${mobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
@@ -236,7 +236,7 @@ const LandingPage = () => {
                   <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                 </button>
               </Link>
-              <button 
+              <button
                 onClick={(e) => scrollToSection(e, '#how-it-works')}
                 className="already-registered-btn text-sm font-bold px-7 py-3.5 rounded-xl text-shnoor-navy border-2 border-shnoor-mist hover:border-shnoor-indigo hover:bg-shnoor-lavender/40 transition-all"
               >

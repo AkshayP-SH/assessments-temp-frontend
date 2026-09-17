@@ -1,7 +1,77 @@
-import { useState, useCallback, memo } from 'react';
+import { useState, useCallback, useRef, useEffect, memo } from 'react';
 import { Search, Filter, X, ChevronDown } from 'lucide-react';
 import InputField from './InputField';
 import { useDebounce } from '../hooks/useDebounce';
+
+// Custom dropdown component
+const CustomDropdown = memo(({
+  value,
+  onChange,
+  options = [],
+  placeholder = 'Select',
+  className = '',
+  buttonClassName = '',
+  menuClassName = '',
+  minWidth = 'min-w-[130px]'
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [isOpen]);
+
+  const selectedOption = options.find(opt => String(opt.value) === String(value)) || options[0];
+
+  return (
+    <div ref={dropdownRef} className={`relative flex items-center ${minWidth} ${className}`}>
+      <button
+        type="button"
+        onClick={() => setIsOpen(prev => !prev)}
+        className={`flex items-center justify-between gap-1.5 sm:gap-2 px-3 py-2 w-full text-xs sm:text-sm border border-shnoor-mist rounded-lg focus:ring-2 focus:ring-shnoor-indigo focus:border-shnoor-indigo bg-white cursor-pointer hover:border-shnoor-indigo transition-all shadow-sm font-bold text-shnoor-navy min-h-[38px] ${buttonClassName}`}
+      >
+        <span className="truncate text-left">{selectedOption?.label || placeholder}</span>
+        <ChevronDown className={`text-shnoor-indigoMedium transition-transform duration-200 flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`} size={15} />
+      </button>
+
+      {isOpen && (
+        <div className={`absolute top-full left-0 mt-1 w-full min-w-full max-w-[calc(100vw-32px)] bg-white border border-shnoor-mist rounded-xl shadow-xl z-50 py-1 overflow-hidden animate-in fade-in zoom-in-95 duration-100 max-h-60 overflow-y-auto ${menuClassName}`}>
+          {options.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => {
+                onChange(option.value);
+                setIsOpen(false);
+              }}
+              className={`w-full text-left px-3 py-2 text-xs sm:text-sm transition-colors flex items-center justify-between ${
+                String(value) === String(option.value)
+                  ? 'bg-shnoor-lavender text-shnoor-indigo font-bold'
+                  : 'text-shnoor-navy hover:bg-shnoor-lavender/50 font-medium'
+              }`}
+            >
+              <span className="truncate">{option.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+});
+
+CustomDropdown.displayName = 'CustomDropdown';
 
 const ExamSearchFilter = memo(({
   onSearchChange,
@@ -24,7 +94,6 @@ const ExamSearchFilter = memo(({
   const debouncedSearch = useDebounce(searchTerm, 300);
 
   // Notify parent whenever debounced value settles
-  // We use a separate effect rather than inline so parent re-renders are minimized
   const [prevDebounced, setPrevDebounced] = useState('');
   if (debouncedSearch !== prevDebounced) {
     setPrevDebounced(debouncedSearch);
@@ -75,13 +144,34 @@ const ExamSearchFilter = memo(({
 
   const activeFilterBadges = getActiveFilterBadges();
 
+  const publishedOptions = [
+    { value: 'all', label: 'All Status' },
+    { value: 'published', label: 'Published' },
+    { value: 'draft', label: 'Draft' }
+  ];
+
+  const attemptedOptions = [
+    { value: 'all', label: 'All Attempts' },
+    { value: 'attempted', label: 'Attempted' },
+    { value: 'not-attempted', label: 'Not Attempted' },
+    { value: 'in-progress', label: 'In Progress' }
+  ];
+
+  const dateRangeOptions = [
+    { value: 'all', label: 'All Time' },
+    { value: 'today', label: 'Today' },
+    { value: 'week', label: 'This Week' },
+    { value: 'month', label: 'This Month' },
+    { value: 'year', label: 'This Year' }
+  ];
+
   return (
-    <div className="bg-white rounded-xl border border-shnoor-mist p-3 mb-4 shadow-[0_8px_30px_rgba(14,14,39,0.06)]">
+    <div className="bg-white rounded-xl border border-shnoor-mist p-3 mb-4 shadow-[0_8px_30px_rgba(14,14,39,0.06)] relative">
       {/* Main Controls Row */}
       <div className="flex flex-col sm:flex-row gap-2">
         {/* Search Bar */}
-        <div className="flex-1 relative group">
-          <div className="absolute left-3 top-4 text-shnoor-navy group-focus-within:text-shnoor-indigo transition-colors z-10 w-5 h-5 pointer-events-none">
+        <div className="flex-1 relative group min-w-0">
+          <div className="absolute left-3 top-3.5 text-shnoor-navy group-focus-within:text-shnoor-indigo transition-colors z-10 w-5 h-5 pointer-events-none">
             <Search size={18} />
           </div>
           <InputField
@@ -94,27 +184,20 @@ const ExamSearchFilter = memo(({
         </div>
 
         {/* Controls */}
-        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
-          {/* Sort Dropdown */}
-          <div className="relative flex items-center w-full sm:w-auto flex-1 sm:flex-none">
-            <select
-              value={sortBy}
-              onChange={(e) => handleSortChange(e.target.value)}
-              className="appearance-none px-3 py-2 pr-8 w-full text-sm border border-shnoor-mist rounded-lg focus:ring-2 focus:ring-shnoor-indigo focus:border-shnoor-indigo bg-white min-w-[140px] cursor-pointer hover:border-shnoor-indigo transition-all shadow-sm font-bold text-shnoor-navy"
-            >
-              {sortOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 text-shnoor-indigoMedium pointer-events-none" size={16} />
-          </div>
+        <div className="flex items-center gap-2 w-full sm:w-auto min-w-0">
+          {/* Custom Sort Dropdown */}
+          <CustomDropdown
+            value={sortBy}
+            onChange={handleSortChange}
+            options={sortOptions}
+            placeholder="Sort"
+            minWidth="flex-1 sm:flex-none min-w-0 sm:min-w-[150px]"
+          />
 
           {/* Filter Toggle Button */}
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg font-bold transition-all whitespace-nowrap shadow-sm ${showFilters
+            className={`flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm rounded-lg font-bold transition-all whitespace-nowrap shadow-sm flex-shrink-0 min-h-[38px] ${showFilters
               ? 'bg-shnoor-indigo text-white shadow-md'
               : 'bg-white text-shnoor-navy hover:bg-shnoor-lavender border border-shnoor-mist hover:border-shnoor-indigo'
               }`}
@@ -132,7 +215,7 @@ const ExamSearchFilter = memo(({
           {hasActiveFilters && (
             <button
               onClick={clearFilters}
-              className="flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg font-medium bg-white text-shnoor-danger hover:bg-shnoor-dangerLight transition-all border border-shnoor-dangerLight shadow-sm"
+              className="flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm rounded-lg font-medium bg-white text-shnoor-danger hover:bg-shnoor-dangerLight transition-all border border-shnoor-dangerLight shadow-sm flex-shrink-0 min-h-[38px]"
               title="Clear all filters"
             >
               <X size={16} />
@@ -161,52 +244,34 @@ const ExamSearchFilter = memo(({
         <div className="flex flex-wrap gap-2 pt-3 mt-3 border-t border-shnoor-mist animate-in slide-in-from-top-2 duration-200">
           {/* Published/Draft Filter */}
           {showPublishedFilter && (
-            <div className="relative flex items-center w-full sm:w-auto flex-1 sm:flex-none">
-              <select
-                value={filters.published}
-                onChange={(e) => handleFilterChange('published', e.target.value)}
-                className="appearance-none px-3 py-1.5 pr-8 w-full text-sm border border-shnoor-mist rounded-lg focus:ring-2 focus:ring-shnoor-indigo focus:border-shnoor-indigo bg-white cursor-pointer hover:border-shnoor-indigo transition-all shadow-sm font-bold text-shnoor-navy"
-              >
-                <option value="all">All Status</option>
-                <option value="published">Published</option>
-                <option value="draft">Draft</option>
-              </select>
-              <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 text-shnoor-indigoMedium pointer-events-none" size={14} />
-            </div>
+            <CustomDropdown
+              value={filters.published}
+              onChange={(val) => handleFilterChange('published', val)}
+              options={publishedOptions}
+              placeholder="Status"
+              minWidth="w-full sm:w-auto flex-1 sm:flex-none min-w-0 sm:min-w-[130px]"
+            />
           )}
 
           {/* Attempted Filter */}
           {showAttemptedFilter && (
-            <div className="relative flex items-center w-full sm:w-auto flex-1 sm:flex-none">
-              <select
-                value={filters.attempted}
-                onChange={(e) => handleFilterChange('attempted', e.target.value)}
-                className="appearance-none px-3 py-1.5 pr-8 w-full text-sm border border-shnoor-mist rounded-lg focus:ring-2 focus:ring-shnoor-indigo focus:border-shnoor-indigo bg-white cursor-pointer hover:border-shnoor-indigo transition-all shadow-sm font-bold text-shnoor-navy"
-              >
-                <option value="all">All Attempts</option>
-                <option value="attempted">Attempted</option>
-                <option value="not-attempted">Not Attempted</option>
-                <option value="in-progress">In Progress</option>
-              </select>
-              <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 text-shnoor-indigoMedium pointer-events-none" size={14} />
-            </div>
+            <CustomDropdown
+              value={filters.attempted}
+              onChange={(val) => handleFilterChange('attempted', val)}
+              options={attemptedOptions}
+              placeholder="Attempts"
+              minWidth="w-full sm:w-auto flex-1 sm:flex-none min-w-0 sm:min-w-[140px]"
+            />
           )}
 
           {/* Date Filter */}
-          <div className="relative flex items-center w-full sm:w-auto flex-1 sm:flex-none">
-            <select
-              value={filters.dateRange}
-              onChange={(e) => handleFilterChange('dateRange', e.target.value)}
-              className="appearance-none px-3 py-1.5 pr-8 w-full text-sm border border-shnoor-mist rounded-lg focus:ring-2 focus:ring-shnoor-indigo focus:border-shnoor-indigo bg-white cursor-pointer hover:border-shnoor-indigo transition-all shadow-sm font-bold text-shnoor-navy"
-            >
-              <option value="all">All Time</option>
-              <option value="today">Today</option>
-              <option value="week">This Week</option>
-              <option value="month">This Month</option>
-              <option value="year">This Year</option>
-            </select>
-            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 text-shnoor-indigoMedium pointer-events-none" size={14} />
-          </div>
+          <CustomDropdown
+            value={filters.dateRange}
+            onChange={(val) => handleFilterChange('dateRange', val)}
+            options={dateRangeOptions}
+            placeholder="Date Range"
+            minWidth="w-full sm:w-auto flex-1 sm:flex-none min-w-0 sm:min-w-[130px]"
+          />
         </div>
       )}
 
