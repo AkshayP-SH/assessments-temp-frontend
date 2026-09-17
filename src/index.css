@@ -25,6 +25,45 @@ html, body {
   overflow-x: hidden;
 }
 
+.admin-dashboard-root,
+.admin-dashboard-root * {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.admin-dashboard-root .max-w-7xl,
+.admin-dashboard-root .max-w-3xl,
+.admin-dashboard-root .max-w-4xl,
+.admin-dashboard-root .max-w-5xl,
+.admin-dashboard-root .max-w-md,
+.admin-dashboard-root .max-w-lg,
+.admin-dashboard-root .max-w-sm,
+.admin-dashboard-root .max-w-xl {
+  max-width: 100% !important;
+}
+
+@media (max-width: 640px) {
+  .admin-dashboard-root {
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  .admin-dashboard-root select,
+  .admin-dashboard-root input,
+  .admin-dashboard-root textarea,
+  .admin-dashboard-root button,
+  .admin-dashboard-root .rounded-xl,
+  .admin-dashboard-root .rounded-2xl,
+  .admin-dashboard-root .rounded-lg {
+    max-width: 100%;
+  }
+
+  .admin-dashboard-root select,
+  .admin-dashboard-root option {
+    max-width: calc(100vw - 2rem);
+  }
+}
+
 /* Ensure inputs default to white in light mode to fix dark inputs bug */
 html:not([data-theme='dark']):not([data-theme='green']) input:not([type="checkbox"]):not([type="radio"]), 
 html:not([data-theme='dark']):not([data-theme='green']) textarea, 

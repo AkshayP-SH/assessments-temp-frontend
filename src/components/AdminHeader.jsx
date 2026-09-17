@@ -121,7 +121,8 @@ const AdminHeader = ({ title = "Dashboard", userName = "Admin" }) => {
 
   return (
     <>
-      <header className="w-full bg-shnoor-navy h-[60px] sm:h-[72px] shadow-md relative z-50">
+      <div className="w-full">
+      <header className="w-full bg-shnoor-navy h-[60px] sm:h-[72px] shadow-md relative z-50 rounded-none">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
           <div className="flex items-center gap-3 sm:gap-4">
             {/* Logo icon */}
@@ -207,72 +208,95 @@ const AdminHeader = ({ title = "Dashboard", userName = "Admin" }) => {
 
         {/* Mobile Menu Dropdown */}
         {mobileMenuOpen && (
-          <div className="sm:hidden absolute top-[100%] left-0 w-full bg-shnoor-navy border-t border-white/10 shadow-xl z-40 pb-4 px-4 flex flex-col gap-2 pt-2">
-            <Button
-              variant="primary"
-              className="admin-header-action w-full justify-start !h-12 !px-4 text-sm border-0 relative"
-              onClick={() => {
-                navigate(`${basePath}/student-messages`);
-                setMobileMenuOpen(false);
-              }}
-            >
-              <MessageSquare size={18} className="mr-3" />
-              <span>Messages</span>
-              {unreadCount > 0 && (
-                <span className="ml-auto bg-red-500 text-white px-2 py-0.5 text-xs font-bold rounded-full">
-                  {unreadCount > 99 ? '99+' : unreadCount}
-                </span>
-              )}
-            </Button>
-            {!isClientAdmin && (
+          <div className="sm:hidden absolute top-[100%] left-1/2 -translate-x-1/2 w-[calc(100%-12px)] max-w-[420px] bg-shnoor-navy border border-white/10 shadow-xl z-40 overflow-hidden rounded-b-xl">
+            <div className="flex items-center justify-between px-3 py-3 border-b border-white/10 bg-shnoor-navy">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="site-header-logo w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0 bg-white">
+                  <img src={shnoorLogo} alt="Shnoor Logo" className="w-full h-full object-contain" />
+                </div>
+                <div className="min-w-0">
+                  <h2 className="text-white font-bold text-base leading-tight truncate">Admin Dashboard</h2>
+                  <p className="text-[10px] text-shnoor-light opacity-80 truncate">MCQ Management System</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-white p-2 hover:bg-white/10 rounded-lg transition-colors min-w-[40px] min-h-[40px] flex items-center justify-center"
+                aria-label="Close menu"
+              >
+                <X size={22} />
+              </button>
+            </div>
+
+            <div className="p-2 flex flex-col gap-2">
               <Button
                 variant="primary"
-                className="admin-header-action w-full justify-start !h-12 !px-4 text-sm border-0"
+                className="admin-header-action w-full justify-start !h-12 !px-4 text-base border-0 relative rounded-xl"
                 onClick={() => {
-                  navigate('/admin/clients');
+                  navigate(`${basePath}/student-messages`);
                   setMobileMenuOpen(false);
                 }}
               >
-                <Building2 size={18} className="mr-3" />
-                <span>Clients</span>
+                <MessageSquare size={18} className="mr-3" />
+                <span>Messages</span>
+                {unreadCount > 0 && (
+                  <span className="ml-auto bg-red-500 text-white px-2 py-0.5 text-xs font-bold rounded-full">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
               </Button>
-            )}
-            <Button
-              variant="primary"
-              className="admin-header-action w-full justify-start !h-12 !px-4 text-sm border-0"
-              onClick={() => {
-                navigate(`${basePath}/live-proctoring`);
-                setMobileMenuOpen(false);
-              }}
-            >
-              <Video size={18} className="mr-3" />
-              <span>Live Proctoring</span>
-            </Button>
-            <Button
-              variant="primary"
-              className="admin-header-action w-full justify-start !h-12 !px-4 text-sm border-0"
-              onClick={() => {
-                navigate(`${basePath}/settings`);
-                setMobileMenuOpen(false);
-              }}
-            >
-              <Settings size={18} className="mr-3" />
-              <span>Settings</span>
-            </Button>
-            <Button
-              variant="secondary"
-              className="w-full justify-start !h-12 !px-4 text-sm bg-transparent hover:bg-white/10 text-white border border-white/20"
-              onClick={() => {
-                handleLogout();
-                setMobileMenuOpen(false);
-              }}
-            >
-              <LogOut size={18} className="mr-3" />
-              <span>Logout</span>
-            </Button>
+              {!isClientAdmin && (
+                <Button
+                  variant="primary"
+                  className="admin-header-action w-full justify-start !h-12 !px-4 text-base border-0 rounded-xl"
+                  onClick={() => {
+                    navigate('/admin/clients');
+                    setMobileMenuOpen(false);
+                  }}
+                >
+                  <Building2 size={18} className="mr-3" />
+                  <span>Clients</span>
+                </Button>
+              )}
+              <Button
+                variant="primary"
+                className="admin-header-action w-full justify-start !h-12 !px-4 text-base border-0 rounded-xl"
+                onClick={() => {
+                  navigate(`${basePath}/live-proctoring`);
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <Video size={18} className="mr-3" />
+                <span>Live Proctoring</span>
+              </Button>
+              <Button
+                variant="primary"
+                className="admin-header-action w-full justify-start !h-12 !px-4 text-base border-0 rounded-xl"
+                onClick={() => {
+                  navigate(`${basePath}/settings`);
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <Settings size={18} className="mr-3" />
+                <span>Settings</span>
+              </Button>
+              <Button
+                variant="secondary"
+                className="w-full justify-start !h-12 !px-4 text-base bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-xl"
+                onClick={() => {
+                  handleLogout();
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <LogOut size={18} className="mr-3" />
+                <span>Logout</span>
+              </Button>
+            </div>
           </div>
         )}
       </header>
+      </div>
 
       {/* Toast Notification */}
       {toastNotification && (

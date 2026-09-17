@@ -916,13 +916,13 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
         <div className="space-y-6">
             {/* Step 1: Initialization */}
             {step === 'init' && (
-                <div className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-light p-8 max-w-3xl mx-auto">
-                    <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-2xl font-bold text-shnoor-navy">{isEditMode ? (viewMode ? 'View Assessment' : 'Edit Assessment') : 'Create New Assessment'}</h2>
+                <div className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-light p-4 sm:p-8 max-w-3xl w-full mx-auto">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
+                        <h2 className="text-xl sm:text-2xl font-bold text-shnoor-navy leading-tight">{isEditMode ? (viewMode ? 'View Assessment' : 'Edit Assessment') : 'Create New Assessment'}</h2>
                         {viewMode && (
                             <button
                                 onClick={() => setViewMode(false)}
-                                className="px-4 py-2 bg-shnoor-indigo text-white rounded-lg hover:bg-shnoor-indigo transition-colors font-medium flex items-center space-x-2"
+                                className="px-4 py-2 bg-shnoor-indigo text-white rounded-lg hover:bg-shnoor-indigo transition-colors font-medium flex items-center justify-center space-x-2 w-full sm:w-auto"
                             >
                                 <Pencil size={18} />
                                 <span>Edit</span>
@@ -978,13 +978,13 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
 
                         {/* Job Roles Section */}
                         <div className="space-y-4">
-                            <div className="flex items-center justify-between">
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                                 <label className="block text-sm font-bold text-shnoor-navy">Job Roles & Descriptions</label>
                                 {!viewMode && (
                                     <button
                                         type="button"
                                         onClick={handleAddJobRole}
-                                        className="flex items-center space-x-1 px-3 py-1.5 bg-white text-shnoor-indigo hover:text-shnoor-navy rounded-lg hover:bg-shnoor-light/30 border border-shnoor-light transition-colors text-sm font-medium"
+                                        className="flex items-center justify-center space-x-1 px-3 py-1.5 bg-white text-shnoor-indigo hover:text-shnoor-navy rounded-lg hover:bg-shnoor-light/30 border border-shnoor-light transition-colors text-sm font-medium w-full sm:w-auto"
                                     >
                                         <Plus size={16} />
                                         <span>Add Role</span>
@@ -993,16 +993,16 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                             </div>
 
                             {jobRoles.map((role, index) => (
-                                <div key={index} className="p-5 border border-shnoor-light rounded-xl space-y-3 bg-white shadow-sm">
-                                    <div className="flex items-center justify-between">
+                                <div key={index} className="p-3 sm:p-5 border border-shnoor-light rounded-xl space-y-3 bg-white shadow-sm">
+                                    <div className="flex items-center justify-between gap-3">
                                         <span className="text-sm font-bold text-shnoor-navy">
-                                            Role {index + 1} {index === 0 && <span className="text-shnoor-indigo ml-2 px-2 py-1 bg-shnoor-lavender rounded-md text-xs">(Default)</span>}
+                                            Role {index + 1} {index === 0 && <span className="text-shnoor-indigo ml-2 px-2 py-1 bg-shnoor-lavender rounded-md text-[10px] sm:text-xs">(Default)</span>}
                                         </span>
                                         {!viewMode && jobRoles.length > 1 && (
                                             <button
                                                 type="button"
                                                 onClick={() => handleRemoveJobRole(index)}
-                                                className="text-shnoor-danger hover:text-shnoor-danger p-1"
+                                                className="text-shnoor-danger hover:text-shnoor-danger p-1 shrink-0"
                                                 title="Remove this role"
                                             >
                                                 <Trash2 size={16} />
@@ -1037,7 +1037,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                         </div>
 
                         {/* Duration and Max Attempts */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-shnoor-navy mb-2">Duration (minutes) *</label>
                                 <input
@@ -1078,7 +1078,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                         </div>
 
                         {/* Start and End DateTime */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-shnoor-navy mb-2">Start Date & Time (Optional)</label>
                                 <input
@@ -1104,7 +1104,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                         {/* Add Coding Question Button */}
                          {!viewMode && (
                             <div className="pt-4 border-t border-shnoor-mist">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <button
                                         onClick={() => {
                                             setEditingCodingQuestionId(null);
