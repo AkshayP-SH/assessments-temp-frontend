@@ -20,11 +20,8 @@ const ExamSearchFilter = memo(({
   const [filters, setFilters] = useState(initialFilters);
   const [sortBy, setSortBy] = useState(initialSortBy);
 
-  // Debounce search so onSearchChange fires 300ms after user stops typing
   const debouncedSearch = useDebounce(searchTerm, 300);
 
-  // Notify parent whenever debounced value settles
-  // We use a separate effect rather than inline so parent re-renders are minimized
   const [prevDebounced, setPrevDebounced] = useState('');
   if (debouncedSearch !== prevDebounced) {
     setPrevDebounced(debouncedSearch);
@@ -77,9 +74,7 @@ const ExamSearchFilter = memo(({
 
   return (
     <div className="bg-white rounded-xl border border-shnoor-mist p-3 mb-4 shadow-[0_8px_30px_rgba(14,14,39,0.06)]">
-      {/* Main Controls Row */}
       <div className="flex flex-col sm:flex-row gap-2">
-        {/* Search Bar */}
         <div className="flex-1 relative group">
           <div className="absolute left-3 top-4 text-shnoor-navy group-focus-within:text-shnoor-indigo transition-colors z-10 w-5 h-5 pointer-events-none">
             <Search size={18} />
@@ -93,9 +88,7 @@ const ExamSearchFilter = memo(({
           />
         </div>
 
-        {/* Controls */}
         <div className="flex flex-wrap gap-2 w-full sm:w-auto">
-          {/* Sort Dropdown */}
           <div className="relative flex items-center w-full sm:w-auto flex-1 sm:flex-none">
             <select
               value={sortBy}
@@ -111,7 +104,6 @@ const ExamSearchFilter = memo(({
             <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 text-shnoor-indigoMedium pointer-events-none" size={16} />
           </div>
 
-          {/* Filter Toggle Button */}
           <button
             onClick={() => setShowFilters(!showFilters)}
             className={`flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg font-bold transition-all whitespace-nowrap shadow-sm ${showFilters
@@ -128,7 +120,6 @@ const ExamSearchFilter = memo(({
             )}
           </button>
 
-          {/* Clear Filters Button */}
           {hasActiveFilters && (
             <button
               onClick={clearFilters}
@@ -142,7 +133,6 @@ const ExamSearchFilter = memo(({
         </div>
       </div>
 
-      {/* Active Filter Badges */}
       {activeFilterBadges.length > 0 && !showFilters && (
         <div className="flex flex-wrap gap-2 mt-2 pt-2 border-t border-shnoor-mist">
           {activeFilterBadges.map((badge) => (
@@ -156,10 +146,8 @@ const ExamSearchFilter = memo(({
         </div>
       )}
 
-      {/* Expanded Filters */}
       {showFilters && (
         <div className="flex flex-wrap gap-2 pt-3 mt-3 border-t border-shnoor-mist animate-in slide-in-from-top-2 duration-200">
-          {/* Published/Draft Filter */}
           {showPublishedFilter && (
             <div className="relative flex items-center w-full sm:w-auto flex-1 sm:flex-none">
               <select
@@ -175,7 +163,6 @@ const ExamSearchFilter = memo(({
             </div>
           )}
 
-          {/* Attempted Filter */}
           {showAttemptedFilter && (
             <div className="relative flex items-center w-full sm:w-auto flex-1 sm:flex-none">
               <select
@@ -192,7 +179,6 @@ const ExamSearchFilter = memo(({
             </div>
           )}
 
-          {/* Date Filter */}
           <div className="relative flex items-center w-full sm:w-auto flex-1 sm:flex-none">
             <select
               value={filters.dateRange}
@@ -210,7 +196,6 @@ const ExamSearchFilter = memo(({
         </div>
       )}
 
-      {/* Result Count */}
       {resultCount !== undefined && (
         <div className="mt-2 pt-2 border-t border-shnoor-mist">
           <p className="text-xs text-shnoor-indigoMedium font-bold">

@@ -29,7 +29,6 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
     const [uploadedTestId, setUploadedTestId] = useState(null);
     const [uploadedTestName, setUploadedTestName] = useState('');
     const [isPublishing, setIsPublishing] = useState(false);
-    const [isLoadingTest, setIsLoadingTest] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
     const [viewMode, setViewMode] = useState(false); // New state for view mode
 
@@ -103,7 +102,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                         });
                     }
                 }
-            } catch (error) {
+            } catch {
                 // Keep fallback defaults silently.
             }
         };
@@ -119,7 +118,6 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
 
             setIsEditMode(true);
             setViewMode(true); // Start in view mode when editing
-            setIsLoadingTest(true);
 
             try {
                 const token = localStorage.getItem('adminToken');
@@ -219,8 +217,6 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                 console.error('Error loading test:', error);
                 alert('Failed to load test data');
                 if (onComplete) onComplete();
-            } finally {
-                setIsLoadingTest(false);
             }
         };
 
@@ -578,9 +574,6 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                     // CODE EXECUTION FEATURE - TEMPORARILY DISABLED
                     if (ENABLE_CODE_EXECUTION) {
                         // ALWAYS save coding questions (even if empty, to clear old ones)
-                        console.log('[UPDATE TEST] Saving coding questions:', codingQuestions.length);
-                        console.log('[UPDATE TEST] Coding questions data:', JSON.stringify(codingQuestions, null, 2));
-                        
                         const codingResponse = await apiFetch(`api/coding-questions/test/${uploadedTestId}`, {
                             method: 'POST',
                             headers: {
@@ -599,7 +592,6 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                             setIsUploading(false);
                             return;
                         }
-                        console.log('[UPDATE TEST] Coding questions saved successfully');
                     }
 
                     alert('Test updated successfully!');
@@ -639,9 +631,6 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                     // CODE EXECUTION FEATURE Enabled
                     if (ENABLE_CODE_EXECUTION) {
                         // ALWAYS save coding questions (even if empty, to ensure consistency)
-                        console.log('[CREATE TEST] Saving coding questions for new test:', codingQuestions.length);
-                        console.log('[CREATE TEST] Coding questions data:', JSON.stringify(codingQuestions, null, 2));
-                        
                         const codingResponse = await apiFetch(`api/coding-questions/test/${testId}`, {
                             method: 'POST',
                             headers: {
@@ -660,7 +649,6 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                             setIsUploading(false);
                             return;
                         }
-                        console.log('[CREATE TEST] Coding questions saved successfully');
                     }
 
                     setUploadedTestId(testId);
@@ -739,9 +727,6 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                     // CODE EXECUTION FEATURE 
                     if (ENABLE_CODE_EXECUTION) {
                         // Save coding questions after bulk upload in edit mode
-                        console.log('[BULK UPLOAD EDIT] Saving coding questions:', codingQuestions.length);
-                        console.log('[BULK UPLOAD EDIT] Coding questions data:', JSON.stringify(codingQuestions, null, 2));
-                        
                         const codingResponse = await apiFetch(`api/coding-questions/test/${uploadedTestId}`, {
                             method: 'POST',
                             headers: {
@@ -760,7 +745,6 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                             setIsUploading(false);
                             return;
                         }
-                        console.log('[BULK UPLOAD EDIT] Coding questions saved successfully');
                     }
 
                     alert(`Questions uploaded successfully! ${data.questionsCount} questions added. Click "Save Changes" to save.`);
@@ -824,9 +808,6 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                     // CODE EXECUTION FEATURE 
                     if (ENABLE_CODE_EXECUTION) {
                         // Save coding questions after bulk upload
-                        console.log('[BULK UPLOAD] Saving coding questions:', codingQuestions.length);
-                        console.log('[BULK UPLOAD] Coding questions data:', JSON.stringify(codingQuestions, null, 2));
-                        
                         const codingResponse = await apiFetch(`api/coding-questions/test/${testId}`, {
                             method: 'POST',
                             headers: {
@@ -845,7 +826,6 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                             setIsUploading(false);
                             return;
                         }
-                        console.log('[BULK UPLOAD] Coding questions saved successfully');
                     }
 
                     setUploadedTestId(testId);

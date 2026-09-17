@@ -52,26 +52,20 @@ const StudentMessageAlert = ({
   onDismiss, 
   autoHideDelay = 10000 
 }) => {
-  // Derive isAnimating directly from isVisible
   const isAnimating = isVisible;
   const progressRef = useRef(null);
-  
-  // Use the message id as key to reset the timer when a new message arrives
   const messageId = message?.id;
 
   useEffect(() => {
     if (!isVisible) return;
     
-    // Auto-hide timer
     const hideTimer = setTimeout(() => {
       if (onDismiss) onDismiss();
     }, autoHideDelay);
 
-    // Trigger progress bar animation
     if (progressRef.current) {
       progressRef.current.style.transition = 'none';
       progressRef.current.style.width = '100%';
-      // Force reflow
       progressRef.current.offsetHeight;
       progressRef.current.style.transition = `width ${autoHideDelay}ms linear`;
       progressRef.current.style.width = '0%';
@@ -90,7 +84,6 @@ const StudentMessageAlert = ({
 
   return (
     <>
-      {/* Backdrop */}
       <div 
         className={`fixed inset-0 bg-black bg-opacity-30 z-50 transition-opacity duration-300 ${
           isAnimating ? 'opacity-100' : 'opacity-0'
@@ -98,7 +91,6 @@ const StudentMessageAlert = ({
         onClick={onDismiss}
       />
       
-      {/* Alert Modal */}
       <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none ${
         isAnimating ? 'opacity-100' : 'opacity-0'
       }`}>
@@ -113,7 +105,6 @@ const StudentMessageAlert = ({
             ${message.priority === 'high' ? priorityStyle.animation : ''}
           `}
         >
-          {/* Header */}
           <div className={`${messageStyle.bg} ${messageStyle.textColor} p-4 rounded-t-xl`}>
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
@@ -141,13 +132,11 @@ const StudentMessageAlert = ({
             </div>
           </div>
 
-          {/* Message Content */}
           <div className="p-6">
             <div className="text-gray-800 text-lg leading-relaxed mb-4">
               {message.message}
             </div>
             
-            {/* Timestamp */}
             <div className="flex items-center space-x-2 text-sm text-gray-500">
               <Clock size={14} />
               <span>
@@ -160,7 +149,6 @@ const StudentMessageAlert = ({
             </div>
           </div>
 
-          {/* Action Bar */}
           <div className="bg-gray-50 px-6 py-4 rounded-b-xl border-t">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2 text-sm text-gray-600">
@@ -175,7 +163,6 @@ const StudentMessageAlert = ({
               </button>
             </div>
             
-            {/* Progress Bar */}
             <div className="mt-3 w-full bg-gray-200 rounded-full h-1">
               <div 
                 ref={progressRef}
@@ -187,7 +174,6 @@ const StudentMessageAlert = ({
         </div>
       </div>
 
-      {/* Sound Effect for High Priority Messages */}
       {message.priority === 'high' && isVisible && (
         <audio autoPlay>
           <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmMbBSGOzfPTgjMGJIXB9diRRwsXYrPl7oVSFgxTreP1x2EcBTGG2u7dfjAHLIXI8N2GRAwa" type="audio/wav" />

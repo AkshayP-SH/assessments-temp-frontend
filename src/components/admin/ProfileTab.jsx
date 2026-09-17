@@ -216,7 +216,6 @@ const ProfileTab = () => {
             )}
 
             <div className="grid grid-cols-1 gap-6">
-                {/* Profile Information */}
                 <Card className="p-6 border border-shnoor-light shadow-sm">
                     <div className="flex items-center mb-4 space-x-2 text-shnoor-indigo">
                         <User size={24} />
@@ -296,7 +295,6 @@ const ProfileTab = () => {
                     </div>
                 </Card>
 
-                {/* Change Password */}
                 <Card className="p-6 border border-shnoor-light shadow-sm">
                     <div className="flex items-center mb-4 space-x-2 text-shnoor-warning">
                         <Lock size={24} />

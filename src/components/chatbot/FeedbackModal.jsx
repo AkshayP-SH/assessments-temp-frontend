@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { X, Star, ThumbsUp, ThumbsDown, Clock, Send } from 'lucide-react';
 
-const FeedbackModal = ({ isOpen, onClose, onSubmit, studentName }) => {
+const FeedbackModal = ({ isOpen, onClose, onSubmit }) => {
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [helpful, setHelpful] = useState(null);

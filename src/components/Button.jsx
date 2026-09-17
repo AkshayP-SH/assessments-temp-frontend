@@ -1,8 +1,6 @@
-import React from 'react';
-
 const Button = ({ 
   children, 
-  variant = 'primary', // 'primary' | 'secondary' | 'danger'
+  variant = 'primary',
   type = 'button',
   disabled = false,
   className = '',

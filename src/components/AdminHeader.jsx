@@ -7,7 +7,7 @@ import { API_URL } from '../config/api';
 import shnoorLogo from '../assets/shnoor-logo.png';
 import ThemeSelector from './ThemeSelector';
 
-const AdminHeader = ({ title = "Dashboard", userName = "Admin" }) => {
+const AdminHeader = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [unreadCount, setUnreadCount] = useState(0);

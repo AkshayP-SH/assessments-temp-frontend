@@ -86,7 +86,6 @@ const InstituteRegistrationControl = ({ institute, onClose, onUpdate }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-        {/* Header */}
         <div className="bg-gradient-to-r from-shnoor-indigo to-shnoor-navy text-white px-6 py-4 flex justify-between items-center">
           <div>
             <h2 className="text-xl font-bold">Registration Control</h2>
@@ -101,9 +100,7 @@ const InstituteRegistrationControl = ({ institute, onClose, onUpdate }) => {
           </button>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-6">
-          {/* Error Message */}
           {error && (
             <div className="bg-shnoor-lavender border-l-4 border-shnoor-indigo text-shnoor-navy p-3 rounded-r-lg flex items-start text-sm">
               <AlertCircle size={18} className="mr-2 flex-shrink-0 mt-0.5" />
@@ -111,7 +108,6 @@ const InstituteRegistrationControl = ({ institute, onClose, onUpdate }) => {
             </div>
           )}
 
-          {/* Current Status Info */}
           {(() => {
             const now = new Date();
             const startTime = institute.registration_start_time ? new Date(institute.registration_start_time) : null;
@@ -124,14 +120,12 @@ const InstituteRegistrationControl = ({ institute, onClose, onUpdate }) => {
             let statusColor = getStatusColor(effectiveStatus);
             let statusIcon = getStatusIcon(effectiveStatus);
             
-            // Override if not yet open
             if (notYetOpen) {
               effectiveStatus = 'not_yet_open';
               statusText = 'Not Yet Open';
               statusColor = 'bg-shnoor-lavender border-shnoor-light text-shnoor-indigoMedium';
               statusIcon = <Lock className="w-5 h-5 text-shnoor-indigoMedium" />;
             }
-            // Override if deadline passed
             else if (deadlinePassed && effectiveStatus === 'open') {
               effectiveStatus = 'closed';
               statusText = 'Closed (Deadline Passed)';
@@ -172,7 +166,6 @@ const InstituteRegistrationControl = ({ institute, onClose, onUpdate }) => {
             );
           })()}
 
-          {/* Registration Status */}
           <div>
             <label className="block text-sm font-semibold text-shnoor-navy mb-3">
               Registration Status <span className="text-shnoor-indigo">*</span>
@@ -237,7 +230,6 @@ const InstituteRegistrationControl = ({ institute, onClose, onUpdate }) => {
             </div>
           </div>
 
-          {/* Registration Start Time */}
           <div>
             <label className="block text-sm font-semibold text-shnoor-navy mb-2">
               Registration Start Time (Optional)
@@ -253,7 +245,6 @@ const InstituteRegistrationControl = ({ institute, onClose, onUpdate }) => {
             </p>
           </div>
 
-          {/* Registration Deadline */}
           <div>
             <label className="block text-sm font-semibold text-shnoor-navy mb-2">
               Registration Deadline (Optional)
@@ -269,7 +260,6 @@ const InstituteRegistrationControl = ({ institute, onClose, onUpdate }) => {
             </p>
           </div>
 
-          {/* Info Box */}
           <div className="bg-shnoor-lavender border-l-4 border-shnoor-indigo p-4 rounded-r-lg">
             <div className="flex items-start">
               <AlertCircle size={16} className="text-shnoor-indigo mr-2 flex-shrink-0 mt-0.5" />
@@ -286,7 +276,6 @@ const InstituteRegistrationControl = ({ institute, onClose, onUpdate }) => {
           </div>
         </form>
 
-        {/* Footer */}
         <div className="bg-shnoor-lavender border-t border-shnoor-light px-6 py-4 flex justify-end space-x-3">
           <button
             type="button"

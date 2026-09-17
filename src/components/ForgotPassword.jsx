@@ -48,7 +48,7 @@ const ForgotPassword = () => {
       } else {
         setApiError(data.message || 'Failed to send OTP');
       }
-    } catch (error) {
+    } catch {
       setApiError('Network error. Please try again.');
     } finally {
       setIsLoading(false);
@@ -81,7 +81,7 @@ const ForgotPassword = () => {
       } else {
         setApiError(data.message || 'Invalid or expired OTP');
       }
-    } catch (error) {
+    } catch {
       setApiError('Network error. Please try again.');
     } finally {
       setIsLoading(false);
@@ -116,7 +116,7 @@ const ForgotPassword = () => {
       } else {
         setApiError(data.message || 'Failed to reset password');
       }
-    } catch (error) {
+    } catch {
       setApiError('Network error. Please try again.');
     } finally {
       setIsLoading(false);

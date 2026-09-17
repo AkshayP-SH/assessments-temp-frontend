@@ -19,7 +19,6 @@ const ViewTestDetailsModal = ({ test, onClose, onEdit }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col">
-        {/* Header */}
         <div className="bg-shnoor-indigo text-white px-6 py-4 flex justify-between items-center">
           <div>
             <h2 className="text-xl font-bold">Test Details</h2>
@@ -33,9 +32,7 @@ const ViewTestDetailsModal = ({ test, onClose, onEdit }) => {
           </Button>
         </div>
 
-        {/* Content */}
         <div className="flex-1 overflow-y-auto p-6 space-y-5">
-          {/* Test Title */}
           <div className="bg-shnoor-lavender border-l-4 border-shnoor-indigo p-4 rounded-r-lg">
             <h3 className="text-lg font-bold text-shnoor-navy mb-2">{test.name}</h3>
             <div className="flex flex-wrap items-center gap-4 text-sm text-shnoor-indigoMedium">
@@ -56,7 +53,6 @@ const ViewTestDetailsModal = ({ test, onClose, onEdit }) => {
             </div>
           </div>
 
-          {/* Job Role & Description */}
           <div className="space-y-4">
             <div className="border border-shnoor-light rounded-lg p-4 bg-white">
               <div className="flex items-center mb-2">
@@ -79,7 +75,6 @@ const ViewTestDetailsModal = ({ test, onClose, onEdit }) => {
             </div>
           </div>
 
-          {/* Date & Time */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="border border-shnoor-light rounded-lg p-3 bg-white">
               <div className="flex items-center mb-2">
@@ -102,7 +97,6 @@ const ViewTestDetailsModal = ({ test, onClose, onEdit }) => {
             </div>
           </div>
 
-          {/* Test Settings */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="border border-shnoor-light rounded-lg p-3 text-center bg-white">
               <Clock size={20} className="text-shnoor-indigo mx-auto mb-1" />
@@ -127,7 +121,6 @@ const ViewTestDetailsModal = ({ test, onClose, onEdit }) => {
           </div>
         </div>
 
-        {/* Footer */}
         <div className="bg-white border-t border-shnoor-light px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
           <p className="text-xs text-shnoor-soft">
             Created: {test.date}
