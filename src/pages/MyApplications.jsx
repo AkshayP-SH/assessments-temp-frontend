@@ -408,8 +408,8 @@ export default function MyApplications({ isEmbedded = false }) {
                                                                         <div
                                                                             key={test.test_id}
                                                                             className={`border rounded-lg p-4 transition-all ${test.is_completed
-                                                                                    ? 'border-shnoor-success bg-shnoor-successLight'
-                                                                                    : 'border-shnoor-mist bg-white hover:shadow-md'
+                                                                                ? 'border-shnoor-success bg-shnoor-successLight'
+                                                                                : 'border-shnoor-mist bg-white hover:shadow-md'
                                                                                 }`}
                                                                         >
                                                                             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">

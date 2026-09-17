@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getApiUrl } from '../config/api';
 
@@ -27,7 +27,7 @@ const Maintenance = () => {
                         navigate(redirectUrl, { replace: true });
                     }
                 }
-            } catch (error) {
+            } catch {
                 // Ignore, maybe server is down
             }
         }, 60000); // Check every minute

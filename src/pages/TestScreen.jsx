@@ -112,7 +112,6 @@ int main() {
   };
 
   const {
-    isFullscreen,
     showWarning,
     enterFullscreen
   } = useFullscreen();
@@ -182,16 +181,10 @@ int main() {
   const {
     startProctoring,
     stopProctoring,
-    isModelLoaded,
-    detectionActive,
-    violations,
-    microphonePermissionGranted,
     // Messaging functionality
     messages: proctoringMessages,
     currentMessage,
-    dismissCurrentMessage,
-    markAllAsRead,
-    unreadCount
+    dismissCurrentMessage
   } = useProctoringWithAI(handleCameraLost, handleAIViolation, null, handleForceStop);
 
   useEffect(() => {
@@ -202,19 +195,6 @@ int main() {
       window.removeEventListener('themechange', syncTheme);
       window.removeEventListener('storage', syncTheme);
     };
-  }, []);
-
-  // Helper function to get the stored JWT session token
-  const getValidToken = useCallback(async () => {
-    // Simply return the stored JWT session token
-    // No need to refresh - JWT tokens are valid for 7 days
-    const token = localStorage.getItem('studentAuthToken');
-
-    if (!token) {
-      console.warn('[Token] No token found in localStorage');
-    }
-
-    return token;
   }, []);
 
   // Submit test function - defined early so it can be used by other callbacks
@@ -330,52 +310,6 @@ int main() {
   }, [submitTest, hasStarted]);
 
   useTabSwitch(handleTabSwitch, 3);
-
-  // Handle start exam - triggers fullscreen and proctoring
-  const handleStartExam = async () => {
-    console.log('[Start Exam] User clicked start button');
-
-    const testId = localStorage.getItem('selectedTestId');
-    const studentId = localStorage.getItem('studentId') || 'unknown';
-    const studentName = localStorage.getItem('studentName') || 'Student';
-
-    console.log('[Proctoring] Student ID:', studentId);
-    console.log('[Proctoring] Student Name:', studentName);
-    console.log('[Proctoring] Starting proctoring for:', studentName);
-
-    try {
-      const proctoringResult = await startProctoring({
-        studentId: studentId,
-        studentName: studentName,
-        testId: testId,
-        testTitle: testDetails?.title || 'Test',
-        clientId: localStorage.getItem('clientId') || null,
-      });
-
-      if (proctoringResult.success) {
-        console.log('[Proctoring] Successfully started');
-      } else {
-        console.error('[Proctoring] Failed to start:', proctoringResult.error);
-        // Don't block test if proctoring fails, just log it
-      }
-    } catch (proctoringErr) {
-      console.error('[Proctoring] Error starting proctoring:', proctoringErr);
-      // Don't block test if proctoring fails
-    }
-
-    // Enter fullscreen mode
-    console.log('[Fullscreen] Requesting fullscreen mode...');
-    try {
-      await enterFullscreen();
-      console.log('[Fullscreen] Fullscreen mode activated');
-    } catch (fullscreenErr) {
-      console.error('[Fullscreen] Failed to enter fullscreen:', fullscreenErr);
-      // Don't block test if fullscreen fails - the warning modal will show
-    }
-
-    // Mark exam as started
-    setHasStarted(true);
-  };
 
 
 
@@ -1397,9 +1331,7 @@ int main() {
                               totalTestCases,
                               percentage,
                               publicTestResults,
-                              hiddenTestResults,
-                              publicTestCasesPassed,
-                              hiddenTestCasesPassed
+                              hiddenTestResults
                             } = result.result;
 
                             // Format results for console display

@@ -1,19 +1,14 @@
 // src/pages/admin/AdminDashboard.jsx
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import {
-  Plus, FileSpreadsheet, LogOut, Download, ArrowLeft,
-  Trash2, Eye, Users, CheckCircle, XCircle, UserCheck, ChevronDown, ChevronRight, ChevronLeft, Video, Loader2, X, Building2, MoreVertical, Copy, AlertCircle, Pencil, MessageSquare, Star, TrendingUp, BarChart3, Calendar, Filter, CheckSquare, Briefcase, Search, CreditCard
+  Plus, FileSpreadsheet, Download, ArrowLeft,
+  Trash2, Eye, Users, CheckCircle, XCircle, UserCheck, ChevronDown, ChevronRight, ChevronLeft, Video, Loader2, X, Building2, MoreVertical, Copy, AlertCircle, Pencil, MessageSquare, Star, TrendingUp, BarChart3, Calendar, Filter, CheckSquare, Briefcase, Search
 } from 'lucide-react';
 
-import axios from 'axios';
 import { apiFetch } from '../../config/api';
 import AdminHeader from '../../components/AdminHeader';
-import AdminLayout from '../../components/AdminLayout';
-import Card from '../../components/Card';
-import Badge from '../../components/Badge';
-import InputField from '../../components/InputField';
-import Button from '../../components/Button';
 import { useSEO } from '../../hooks/useSEO';
 import { lazy, Suspense } from 'react';
 
@@ -51,15 +46,6 @@ const AdminDashboard = () => {
   const [selectedCandidates, setSelectedCandidates] = useState([]);
   const [statusFilter, setStatusFilter] = useState('all'); // 'all', 'pass', 'fail'
   const [showQuickSelectMenu, setShowQuickSelectMenu] = useState(false);
-
-  // Test Assignment States
-  const [institutes, setInstitutes] = useState([]);
-  const [expandedInstitutes, setExpandedInstitutes] = useState({});
-  const [instituteStudents, setInstituteStudents] = useState({});
-  const [selectedStudents, setSelectedStudents] = useState([]);
-  const [selectedTest, setSelectedTest] = useState('');
-  const [isLoadingInstitutes, setIsLoadingInstitutes] = useState(false);
-  const [isAssigning, setIsAssigning] = useState(false);
 
   // Job Role/Description Modal States
   const [showJobModal, setShowJobModal] = useState(false);
@@ -114,13 +100,6 @@ const AdminDashboard = () => {
     institute: ''
   });
   const [isAddingStudent, setIsAddingStudent] = useState(false);
-
-  // Student Tests Modal States
-  const [showStudentTestsModal, setShowStudentTestsModal] = useState(false);
-  const [selectedStudentForTests, setSelectedStudentForTests] = useState(null);
-  const [studentAssignedTests, setStudentAssignedTests] = useState([]);
-  const [isLoadingStudentTests, setIsLoadingStudentTests] = useState(false);
-  const [isUnassigningStudentTest, setIsUnassigningStudentTest] = useState(false);
   const [expandedStudentTests, setExpandedStudentTests] = useState({});
 
   // Search, Filter, Sort States
@@ -161,13 +140,12 @@ const AdminDashboard = () => {
   const [loadingFeedback, setLoadingFeedback] = useState(false);
 
   // Violations Tab States
-  const [violations, setViolations] = useState([]);
+  const [, setViolations] = useState([]);
+  const [, setViolationSummary] = useState(null);
   const [flaggedStudents, setFlaggedStudents] = useState([]);
-  const [violationSummary, setViolationSummary] = useState([]);
   const [violationsByStudent, setViolationsByStudent] = useState([]);
   const [selectedTestForViolations, setSelectedTestForViolations] = useState('');
   const [isLoadingViolations, setIsLoadingViolations] = useState(false);
-  const [violationFilter, setViolationFilter] = useState('all'); // all, high, medium, low
 
   // Preview Questions Modal States
   const [showPreviewQuestionsModal, setShowPreviewQuestionsModal] = useState(false);
@@ -229,8 +207,6 @@ const AdminDashboard = () => {
       .catch(() => { });
   }, [isSuperAdmin]);
 
-  // Helper: build Authorization header + optional clientId query param for super admin
-  const buildHeaders = () => ({ 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` });
   const clientParam = (isSuperAdmin && viewAsClientId) ? `?clientId=${viewAsClientId}` : '';
 
   // Derived state: Get students for the selected exam
@@ -558,14 +534,6 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('adminToken');
-    localStorage.removeItem('adminUser');
-    localStorage.removeItem('clientToken');
-    localStorage.removeItem('clientUser');
-    navigate('/login');
-  };
-
   const handleDeleteTest = async (testId) => {
     if (!confirm('Are you sure you want to delete this test? This action cannot be undone.')) {
       return;
@@ -694,11 +662,6 @@ const AdminDashboard = () => {
       ));
     }
     fetchTests(); // Refresh the list
-  };
-
-  const handleEditTest = (test) => {
-    setEditingTest(test);
-    setShowCreateTest(true);
   };
 
   const exportToExcel = async () => {
@@ -896,162 +859,9 @@ const AdminDashboard = () => {
     }
   };
 
-
-  // Fetch Institutes
-  const fetchInstitutes = async () => {
-    try {
-      setIsLoadingInstitutes(true);
-      const token = localStorage.getItem('adminToken');
-      const response = await apiFetch('api/tests/institutes', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      const data = await response.json();
-      if (response.ok && data.success) {
-        setInstitutes(data.institutes);
-      } else {
-        console.error('Failed to fetch institutes:', data.message);
-      }
-    } catch (error) {
-      console.error('Error fetching institutes:', error);
-    } finally {
-      setIsLoadingInstitutes(false);
-    }
-  };
-
-  // Toggle Institute Expansion
-  const toggleInstitute = async (instituteName) => {
-    const isExpanded = expandedInstitutes[instituteName];
-    setExpandedInstitutes(prev => ({
-      ...prev,
-      [instituteName]: !isExpanded
-    }));
-
-    // Fetch students if not already loaded
-    if (!isExpanded && !instituteStudents[instituteName]) {
-      try {
-        const token = localStorage.getItem('adminToken');
-        const response = await apiFetch(`api/tests/institutes/${encodeURIComponent(instituteName)}/students`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        const data = await response.json();
-        if (response.ok && data.success) {
-          setInstituteStudents(prev => ({
-            ...prev,
-            [instituteName]: data.students
-          }));
-        }
-      } catch (error) {
-        console.error('Error fetching students:', error);
-      }
-    }
-  };
-
-  // Toggle All Students from an Institute
-  const toggleAllStudents = (instituteName, students) => {
-    const studentIds = students.map(s => s.id);
-    const allSelected = studentIds.every(id => selectedStudents.includes(id));
-
-    if (allSelected) {
-      // Deselect all from this institute
-      setSelectedStudents(prev => prev.filter(id => !studentIds.includes(id)));
-    } else {
-      // Select all from this institute
-      setSelectedStudents(prev => {
-        const newSelection = [...prev];
-        studentIds.forEach(id => {
-          if (!newSelection.includes(id)) {
-            newSelection.push(id);
-          }
-        });
-        return newSelection;
-      });
-    }
-  };
-
-  // Toggle Individual Student
-  const toggleStudent = (studentId) => {
-    setSelectedStudents(prev => {
-      if (prev.includes(studentId)) {
-        return prev.filter(id => id !== studentId);
-      } else {
-        return [...prev, studentId];
-      }
-    });
-  };
-
   // Helper function to get the correct passing percentage
   const getPassingPercentage = (student) => {
     return student.passingPercentage || selectedExamDetails?.passingPercentage || 50;
-  };
-
-  // Assign Test to Selected Students
-  const handleAssignTest = async () => {
-    if (!selectedTest) {
-      alert('⚠️ Please select a test to assign');
-      return;
-    }
-
-    if (selectedStudents.length === 0) {
-      alert('⚠️ Please select at least one student');
-      return;
-    }
-
-    if (!confirm(`Assign test to ${selectedStudents.length} student(s)?`)) {
-      return;
-    }
-
-    try {
-      setIsAssigning(true);
-      const token = localStorage.getItem('adminToken');
-      const response = await apiFetch('api/tests/assign', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          test_id: parseInt(selectedTest),
-          student_ids: selectedStudents
-        })
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        // Show message about assignments
-        alert(`✅ ${data.message}`);
-        setSelectedStudents([]);
-        setSelectedTest('');
-      } else {
-        // Handle case where all students already have the test (for backward compatibility)
-        if (data.already_assigned > 0 && data.newly_assigned === 0) {
-          alert(`ℹ️ ${data.message}`);
-          setSelectedStudents([]);
-          setSelectedTest('');
-        } else {
-          alert(`❌ ${data.message || 'Failed to assign test'}`);
-        }
-      }
-    } catch (error) {
-      console.error('Error assigning test:', error);
-      alert('❌ An error occurred while assigning the test');
-    } finally {
-      setIsAssigning(false);
-    }
-  };
-
-  // Helper function to capitalize institute name for display
-  const capitalizeInstitute = (instituteName) => {
-    if (!instituteName) return '';
-    return instituteName.toLowerCase().split(' ').map(word =>
-      word.charAt(0).toUpperCase() + word.slice(1)
-    ).join(' ');
   };
 
   // Handle viewing job role and description
@@ -2281,14 +2091,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // Get filtered violations
-  const getFilteredViolations = () => {
-    if (violationFilter === 'all') return violations;
-    return violations.filter(v => v.severity === violationFilter);
-  };
-
-  const filteredViolations = getFilteredViolations();
-
   return (
     <Suspense fallback={<div className="flex h-screen items-center justify-center bg-shnoor-lavender"><Loader2 className="animate-spin h-12 w-12 text-shnoor-indigo" /></div>}>
       <div className="admin-dashboard-root min-h-screen bg-shnoor-lavender">
@@ -2370,30 +2172,28 @@ const AdminDashboard = () => {
 
           {/* Subscription Expiry Banner */}
           {!isSuperAdmin && daysRemaining !== null && daysRemaining <= 7 && (
-            <div className={`mb-6 p-4 rounded-xl shadow-sm border flex items-center justify-between animate-fade-in ${
-              daysRemaining <= 1 
-                ? 'bg-red-50 border-red-200 text-red-800' 
+            <div className={`mb-6 p-4 rounded-xl shadow-sm border flex items-center justify-between animate-fade-in ${daysRemaining <= 1
+                ? 'bg-red-50 border-red-200 text-red-800'
                 : 'bg-yellow-50 border-yellow-200 text-yellow-800'
-            }`}>
+              }`}>
               <div className="flex items-center">
                 <AlertCircle size={20} className={`mr-3 ${daysRemaining <= 1 ? 'text-red-500' : 'text-yellow-600'}`} />
                 <div>
                   <h4 className="font-bold">Subscription Alert</h4>
                   <p className="text-sm mt-0.5">
-                    {daysRemaining <= 0 
+                    {daysRemaining <= 0
                       ? 'Your subscription has expired. Please renew to avoid losing access.'
                       : `Your subscription will expire in ${daysRemaining} day${daysRemaining === 1 ? '' : 's'}. Renew now to avoid interruption.`
                     }
                   </p>
                 </div>
               </div>
-              <button 
+              <button
                 onClick={() => navigate('/client/subscription-plans')}
-                className={`px-4 py-2 rounded-lg text-sm font-bold shadow-sm transition-colors ${
-                  daysRemaining <= 1 
-                    ? 'bg-red-600 hover:bg-red-700 text-white' 
+                className={`px-4 py-2 rounded-lg text-sm font-bold shadow-sm transition-colors ${daysRemaining <= 1
+                    ? 'bg-red-600 hover:bg-red-700 text-white'
                     : 'bg-yellow-500 hover:bg-yellow-600 text-white'
-                }`}
+                  }`}
               >
                 Renew Now
               </button>
@@ -2638,21 +2438,8 @@ const AdminDashboard = () => {
                   const passedCount = selectedExamStudents.filter(s =>
                     (Number(s.score) / Number(s.total) * 100) >= (s.passingPercentage || selectedExamDetails?.passingPercentage || 50)
                   ).length;
-                  const failedCount = selectedExamStudents.length - passedCount;
                   const passRate = selectedExamStudents.length > 0 ? (passedCount / selectedExamStudents.length) * 100 : 0;
                   const flaggedCount = selectedExamStudents.filter(s => s.flagged === true).length;
-
-
-                  // Filter students based on statusFilter
-                  const filteredStudents = selectedExamStudents.filter(s => {
-                    if (statusFilter === 'all') return true;
-                    const percentage = (Number(s.score) / Number(s.total) * 100);
-                    const passingPercentage = s.passingPercentage || selectedExamDetails?.passingPercentage || 50;
-                    const isPassed = percentage >= passingPercentage;
-                    if (statusFilter === 'pass') return isPassed;
-                    if (statusFilter === 'fail') return !isPassed;
-                    return true;
-                  });
 
 
                   return (
@@ -2982,11 +2769,11 @@ const AdminDashboard = () => {
                         return true;
                       });
                       if (filteredStudents.length === 0) return null;
-                      
+
                       const totalPages = Math.ceil(filteredStudents.length / resultsRowsPerPage);
                       const startIndex = (resultsCurrentPage - 1) * resultsRowsPerPage;
                       const endIndex = Math.min(startIndex + resultsRowsPerPage, filteredStudents.length);
-                      
+
                       return (
                         <div className="flex items-center justify-end px-4 py-3 bg-white border border-shnoor-light mt-4 rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)]">
                           <div className="flex items-center space-x-6 text-sm text-shnoor-indigoMedium">
@@ -3005,11 +2792,11 @@ const AdminDashboard = () => {
                                 ))}
                               </select>
                             </div>
-                            
+
                             <span>
                               {startIndex + 1} - {endIndex} of {filteredStudents.length}
                             </span>
-                            
+
                             <div className="flex items-center space-x-2">
                               <button
                                 onClick={() => setResultsCurrentPage(prev => Math.max(prev - 1, 1))}
@@ -4034,7 +3821,7 @@ const AdminDashboard = () => {
                                 </tr>
                               </thead>
                               <tbody>
-                                {violationsByStudent.map((student, idx) => (
+                                {violationsByStudent.map((student) => (
                                   <tr
                                     key={student.student_id}
                                     className={`border-b border-shnoor-light hover:bg-shnoor-lavender transition-colors ${student.total_violations >= 5 ? 'bg-shnoor-lavender/50' : ''

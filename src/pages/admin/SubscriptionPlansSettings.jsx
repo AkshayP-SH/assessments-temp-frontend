@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { apiFetch } from '../../config/api';
 
 const authHeaders = () => ({
@@ -23,7 +23,7 @@ const SubscriptionPlansSettings = () => {
       } else {
         setError(data.message || 'Failed to fetch plans');
       }
-    } catch (err) {
+    } catch {
       setError('Error fetching subscription plans');
     } finally {
       setLoading(false);
@@ -31,6 +31,7 @@ const SubscriptionPlansSettings = () => {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchPlans();
   }, [fetchPlans]);
 
@@ -49,7 +50,7 @@ const SubscriptionPlansSettings = () => {
       } else {
         alert(data.message || 'Failed to update plan');
       }
-    } catch (err) {
+    } catch {
       alert('Error updating plan');
     } finally {
       setSaving(null);
@@ -71,25 +72,25 @@ const SubscriptionPlansSettings = () => {
   return (
     <div className="p-6">
       <h2 className="text-xl font-bold text-shnoor-navy mb-6">Subscription Plans</h2>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {plans.map(plan => (
           <div key={plan.id} className="bg-white border border-shnoor-mist rounded-xl p-6 shadow-sm">
             <div className="mb-4">
               <label className="block text-xs font-bold text-shnoor-soft uppercase mb-1">Plan ID</label>
-              <input 
-                type="text" 
-                value={plan.plan_id} 
-                disabled 
+              <input
+                type="text"
+                value={plan.plan_id}
+                disabled
                 className="w-full bg-shnoor-lavender border border-shnoor-mist rounded p-2 text-sm text-shnoor-soft cursor-not-allowed"
               />
             </div>
 
             <div className="mb-4">
               <label className="block text-xs font-bold text-shnoor-soft uppercase mb-1">Name</label>
-              <input 
-                type="text" 
-                value={plan.name} 
+              <input
+                type="text"
+                value={plan.name}
                 onChange={(e) => handleChange(plan.id, 'name', e.target.value)}
                 className="w-full border border-shnoor-mist rounded p-2 text-sm text-shnoor-navy focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo outline-none"
               />
@@ -100,9 +101,9 @@ const SubscriptionPlansSettings = () => {
               <div className="grid grid-cols-3 gap-2">
                 <div>
                   <span className="block text-[10px] font-bold text-shnoor-soft mb-1 tracking-wide">30 DAYS</span>
-                  <input 
-                    type="number" 
-                    value={plan.price_monthly || ''} 
+                  <input
+                    type="number"
+                    value={plan.price_monthly || ''}
                     onChange={(e) => handleChange(plan.id, 'price_monthly', e.target.value)}
                     className="w-full border border-shnoor-mist rounded p-2 text-sm text-shnoor-navy focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo outline-none"
                     placeholder="0.00"
@@ -110,9 +111,9 @@ const SubscriptionPlansSettings = () => {
                 </div>
                 <div>
                   <span className="block text-[10px] font-bold text-shnoor-soft mb-1 tracking-wide">90 DAYS</span>
-                  <input 
-                    type="number" 
-                    value={plan.price_quarterly || ''} 
+                  <input
+                    type="number"
+                    value={plan.price_quarterly || ''}
                     onChange={(e) => handleChange(plan.id, 'price_quarterly', e.target.value)}
                     className="w-full border border-shnoor-mist rounded p-2 text-sm text-shnoor-navy focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo outline-none"
                     placeholder="0.00"
@@ -120,9 +121,9 @@ const SubscriptionPlansSettings = () => {
                 </div>
                 <div>
                   <span className="block text-[10px] font-bold text-shnoor-soft mb-1 tracking-wide">1 YEAR</span>
-                  <input 
-                    type="number" 
-                    value={plan.price_yearly || ''} 
+                  <input
+                    type="number"
+                    value={plan.price_yearly || ''}
                     onChange={(e) => handleChange(plan.id, 'price_yearly', e.target.value)}
                     className="w-full border border-shnoor-mist rounded p-2 text-sm text-shnoor-navy focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo outline-none"
                     placeholder="0.00"
@@ -133,9 +134,9 @@ const SubscriptionPlansSettings = () => {
 
             <div className="mb-4">
               <label className="block text-xs font-bold text-shnoor-soft uppercase mb-1">Description</label>
-              <input 
-                type="text" 
-                value={plan.description || ''} 
+              <input
+                type="text"
+                value={plan.description || ''}
                 onChange={(e) => handleChange(plan.id, 'description', e.target.value)}
                 className="w-full border border-shnoor-mist rounded p-2 text-sm text-shnoor-navy focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo outline-none"
               />
@@ -145,27 +146,27 @@ const SubscriptionPlansSettings = () => {
               <div className="grid grid-cols-3 gap-2">
                 <div>
                   <label className="block text-xs font-bold text-shnoor-soft uppercase mb-1">Max Institutes</label>
-                  <input 
-                    type="number" 
-                    value={plan.max_institutes || ''} 
+                  <input
+                    type="number"
+                    value={plan.max_institutes || ''}
                     onChange={(e) => handleChange(plan.id, 'max_institutes', e.target.value)}
                     className="w-full border border-shnoor-mist rounded p-2 text-sm text-shnoor-navy focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo outline-none"
                   />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-shnoor-soft uppercase mb-1">Max Tests</label>
-                  <input 
-                    type="number" 
-                    value={plan.max_tests || ''} 
+                  <input
+                    type="number"
+                    value={plan.max_tests || ''}
                     onChange={(e) => handleChange(plan.id, 'max_tests', e.target.value)}
                     className="w-full border border-shnoor-mist rounded p-2 text-sm text-shnoor-navy focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo outline-none"
                   />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-shnoor-soft uppercase mb-1">Max Students</label>
-                  <input 
-                    type="number" 
-                    value={plan.max_students || ''} 
+                  <input
+                    type="number"
+                    value={plan.max_students || ''}
                     onChange={(e) => handleChange(plan.id, 'max_students', e.target.value)}
                     className="w-full border border-shnoor-mist rounded p-2 text-sm text-shnoor-navy focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo outline-none"
                   />
@@ -175,17 +176,17 @@ const SubscriptionPlansSettings = () => {
 
             <div className="mb-4">
               <label className="block text-xs font-bold text-shnoor-soft uppercase mb-1">Features (One per line)</label>
-              <textarea 
+              <textarea
                 rows="5"
-                value={(plan.features || []).join('\n')} 
+                value={(plan.features || []).join('\n')}
                 onChange={(e) => handleFeaturesChange(plan.id, e.target.value)}
                 className="w-full border border-shnoor-mist rounded p-2 text-sm text-shnoor-navy focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo outline-none resize-none"
               />
             </div>
 
             <div className="mb-6 flex items-center">
-              <input 
-                type="checkbox" 
+              <input
+                type="checkbox"
                 id={`active-${plan.id}`}
                 checked={plan.is_active}
                 onChange={(e) => handleChange(plan.id, 'is_active', e.target.checked)}
