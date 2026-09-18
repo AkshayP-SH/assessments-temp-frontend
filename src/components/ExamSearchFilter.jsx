@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect, memo } from 'react';
+import { useState, useCallback, useRef, useEffect, useId, memo } from 'react';
 import { Search, Filter, X, ChevronDown } from 'lucide-react';
 import InputField from './InputField';
 import { useDebounce } from '../hooks/useDebounce';
@@ -15,7 +15,9 @@ const CustomDropdown = memo(({
   minWidth = 'min-w-[130px]'
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
   const dropdownRef = useRef(null);
+  const dropdownId = useId();
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -34,12 +36,60 @@ const CustomDropdown = memo(({
   }, [isOpen]);
 
   const selectedOption = options.find(opt => String(opt.value) === String(value)) || options[0];
+  const selectedIndex = Math.max(options.findIndex(opt => String(opt.value) === String(value)), 0);
+
+  useEffect(() => {
+    if (isOpen) setActiveIndex(selectedIndex);
+  }, [isOpen, selectedIndex]);
+
+  const selectOption = (option) => {
+    onChange(option.value);
+    setIsOpen(false);
+  };
+
+  const handleKeyDown = (event) => {
+    if (!options.length) return;
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      setIsOpen(false);
+      return;
+    }
+
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault();
+      setIsOpen(true);
+      setActiveIndex((index) => {
+        const direction = event.key === 'ArrowDown' ? 1 : -1;
+        return (index + direction + options.length) % options.length;
+      });
+      return;
+    }
+
+    if (event.key === 'Home' || event.key === 'End') {
+      event.preventDefault();
+      setIsOpen(true);
+      setActiveIndex(event.key === 'Home' ? 0 : options.length - 1);
+      return;
+    }
+
+    if ((event.key === 'Enter' || event.key === ' ') && isOpen) {
+      event.preventDefault();
+      selectOption(options[activeIndex]);
+    }
+  };
 
   return (
     <div ref={dropdownRef} className={`relative flex items-center ${minWidth} ${className}`}>
       <button
         type="button"
         onClick={() => setIsOpen(prev => !prev)}
+        onKeyDown={handleKeyDown}
+        role="combobox"
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
+        aria-controls={dropdownId}
+        aria-activedescendant={isOpen && options[activeIndex] ? `${dropdownId}-${activeIndex}` : undefined}
         className={`flex items-center justify-between gap-1.5 sm:gap-2 px-3 py-2 w-full text-xs sm:text-sm border border-shnoor-mist rounded-lg focus:ring-2 focus:ring-shnoor-indigo focus:border-shnoor-indigo bg-white cursor-pointer hover:border-shnoor-indigo transition-all shadow-sm font-bold text-shnoor-navy min-h-[38px] ${buttonClassName}`}
       >
         <span className="truncate text-left">{selectedOption?.label || placeholder}</span>
@@ -47,20 +97,27 @@ const CustomDropdown = memo(({
       </button>
 
       {isOpen && (
-        <div className={`absolute top-full left-0 mt-1 w-full min-w-full max-w-[calc(100vw-32px)] bg-white border border-shnoor-mist rounded-xl shadow-xl z-50 py-1 overflow-hidden animate-in fade-in zoom-in-95 duration-100 max-h-60 overflow-y-auto ${menuClassName}`}>
+        <div
+          id={dropdownId}
+          role="listbox"
+          aria-label={placeholder}
+          className={`absolute top-full left-0 mt-1 w-full min-w-full max-w-[calc(100vw-32px)] bg-white border border-shnoor-mist rounded-xl shadow-xl z-50 py-1 overflow-hidden animate-in fade-in zoom-in-95 duration-100 max-h-60 overflow-y-auto ${menuClassName}`}
+        >
           {options.map((option) => (
             <button
               key={option.value}
               type="button"
-              onClick={() => {
-                onChange(option.value);
-                setIsOpen(false);
-              }}
+              id={`${dropdownId}-${options.indexOf(option)}`}
+              role="option"
+              aria-selected={String(value) === String(option.value)}
+              tabIndex={-1}
+              onClick={() => selectOption(option)}
+              onMouseEnter={() => setActiveIndex(options.indexOf(option))}
               className={`w-full text-left px-3 py-2 text-xs sm:text-sm transition-colors flex items-center justify-between ${
                 String(value) === String(option.value)
                   ? 'bg-shnoor-lavender text-shnoor-indigo font-bold'
                   : 'text-shnoor-navy hover:bg-shnoor-lavender/50 font-medium'
-              }`}
+              } ${activeIndex === options.indexOf(option) ? 'ring-2 ring-inset ring-shnoor-indigo' : ''}`}
             >
               <span className="truncate">{option.label}</span>
             </button>
