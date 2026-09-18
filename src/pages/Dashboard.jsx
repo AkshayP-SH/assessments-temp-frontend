@@ -409,10 +409,10 @@ const Dashboard = () => {
               <ThemeSelector variant="dark" />
               <button
                 onClick={handleLogout}
-                className="admin-logout-btn flex items-center justify-center space-x-2 px-3 sm:px-5 py-2 !h-9 sm:!h-10 text-white bg-transparent border border-white/20 hover:bg-white/10 rounded-lg transition-colors text-xs sm:text-sm font-medium"
+                className="admin-logout-btn flex items-center justify-center space-x-2 px-4 sm:px-6 py-2.5 sm:py-3 !h-9 sm:!h-10 bg-shnoor-indigo text-white hover:bg-shnoor-indigo/90 rounded-xl transition-all text-sm sm:text-base font-medium"
               >
-                <LogOut size={16} className="hidden sm:block" />
-                <LogOut size={14} className="sm:hidden" />
+                <LogOut size={18} className="hidden sm:block" />
+                <LogOut size={16} className="sm:hidden" />
                 <span className="hidden sm:inline">Logout</span>
               </button>
             </div>
