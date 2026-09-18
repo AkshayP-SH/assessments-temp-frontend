@@ -32,10 +32,6 @@ const ClientSubscriptionPlans = () => {
   const requiresPayment = location.state?.requiresPayment || false;
   const subscriptionExpired = location.state?.subscriptionExpired || false;
 
-  useEffect(() => {
-    fetchPlans();
-  }, []);
-
   const fetchPlans = async () => {
     try {
       // Hardcoded plans to avoid backend dependency
@@ -73,6 +69,10 @@ const ClientSubscriptionPlans = () => {
     }
   };
 
+  useEffect(() => {
+    fetchPlans();
+  }, []);
+
   const handleSelectPlan = async (planId) => {
     setProcessingPlan(planId);
     setError('');
@@ -92,8 +92,23 @@ const ClientSubscriptionPlans = () => {
           throw new Error('Authentication token not found. Please login again.');
         }
         
-        // Mock successful verification response for frontend-only dummy mode
-        const verifyData = { success: true };
+        // Keep the backend informed even for dummy payments!
+        const verifyResponse = await fetch(getApiUrl('api/settings/verify-payment'), {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            razorpay_order_id: 'dummy_order_' + Date.now(),
+            razorpay_payment_id: 'dummy_payment_' + Date.now(),
+            razorpay_signature: 'dummy_signature',
+            plan_id: planId,
+            isDummyPayment: true,
+          }),
+        });
+
+        const verifyData = await verifyResponse.json();
         
         if (verifyData.success) {
           // Update local storage to reflect active subscription
