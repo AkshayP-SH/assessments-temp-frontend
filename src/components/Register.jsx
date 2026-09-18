@@ -723,7 +723,7 @@ const Register = () => {
       <div className="absolute top-4 right-4 sm:top-6 sm:right-6 lg:top-8 lg:right-8 z-[100]">
         <ThemeSelector variant="light" />
       </div>
-    {/* ── LEFT PANEL ────────────────────────────────────── */}
+      {/* ── LEFT PANEL ────────────────────────────────────── */}
       <div className="auth-left-panel hidden lg:flex lg:w-[38%] flex-col justify-between bg-shnoor-navy px-12 py-12 relative overflow-hidden">
         <div className="absolute top-[-80px] right-[-60px] w-80 h-80 rounded-full bg-shnoor-indigo opacity-20 blur-3xl pointer-events-none" />
         <div className="absolute bottom-[-60px] left-[-40px] w-60 h-60 rounded-full bg-[#6868AC] opacity-15 blur-3xl pointer-events-none" />
