@@ -147,7 +147,6 @@ const ExamSearchFilter = memo(({
   const [filters, setFilters] = useState(initialFilters);
   const [sortBy, setSortBy] = useState(initialSortBy);
 
-  // Debounce search so onSearchChange fires 300ms after user stops typing
   const debouncedSearch = useDebounce(searchTerm, 300);
 
   // Notify parent whenever debounced value settles
@@ -251,7 +250,6 @@ const ExamSearchFilter = memo(({
             minWidth="flex-1 sm:flex-none min-w-0 sm:min-w-[150px]"
           />
 
-          {/* Filter Toggle Button */}
           <button
             onClick={() => setShowFilters(!showFilters)}
             className={`flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm rounded-lg font-bold transition-all whitespace-nowrap shadow-sm flex-shrink-0 min-h-[38px] ${showFilters
@@ -268,7 +266,6 @@ const ExamSearchFilter = memo(({
             )}
           </button>
 
-          {/* Clear Filters Button */}
           {hasActiveFilters && (
             <button
               onClick={clearFilters}
@@ -282,7 +279,6 @@ const ExamSearchFilter = memo(({
         </div>
       </div>
 
-      {/* Active Filter Badges */}
       {activeFilterBadges.length > 0 && !showFilters && (
         <div className="flex flex-wrap gap-2 mt-2 pt-2 border-t border-shnoor-mist">
           {activeFilterBadges.map((badge) => (
@@ -296,10 +292,8 @@ const ExamSearchFilter = memo(({
         </div>
       )}
 
-      {/* Expanded Filters */}
       {showFilters && (
         <div className="flex flex-wrap gap-2 pt-3 mt-3 border-t border-shnoor-mist animate-in slide-in-from-top-2 duration-200">
-          {/* Published/Draft Filter */}
           {showPublishedFilter && (
             <CustomDropdown
               value={filters.published}
@@ -310,7 +304,6 @@ const ExamSearchFilter = memo(({
             />
           )}
 
-          {/* Attempted Filter */}
           {showAttemptedFilter && (
             <CustomDropdown
               value={filters.attempted}
@@ -332,7 +325,6 @@ const ExamSearchFilter = memo(({
         </div>
       )}
 
-      {/* Result Count */}
       {resultCount !== undefined && (
         <div className="mt-2 pt-2 border-t border-shnoor-mist">
           <p className="text-xs text-shnoor-indigoMedium font-bold">

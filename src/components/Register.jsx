@@ -148,7 +148,9 @@ const Register = () => {
         const res = await apiFetch(url, { method: 'GET' });
         const data = await res.json();
         if (data.success && data.institutes) setInstitutes(data.institutes);
-      } catch { }
+      } catch {
+        // Public institute loading is optional for the initial render.
+      }
     })();
 
     // Validate clientToken and fetch client info for display
@@ -163,7 +165,9 @@ const Register = () => {
           if (data.success) {
             setClientInfo(data.client);
           }
-        } catch { }
+        } catch {
+          // Invalid client tokens are handled by the normal registration flow.
+        }
       })();
     }
   }, [clientToken]);

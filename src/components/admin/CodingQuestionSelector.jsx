@@ -60,7 +60,6 @@ const CodingQuestionSelector = ({ onClose, onSelect, selectedQuestionIds = [], s
   const filterQuestions = () => {
     let filtered = [...questions];
 
-    // Search filter
     if (searchTerm) {
       filtered = filtered.filter(q =>
         q.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -68,23 +67,19 @@ const CodingQuestionSelector = ({ onClose, onSelect, selectedQuestionIds = [], s
       );
     }
 
-    // Difficulty filter
     if (selectedDifficulty) {
       filtered = filtered.filter(q => q.difficulty === selectedDifficulty);
     }
 
-    // Category filter
     if (selectedCategory) {
       filtered = filtered.filter(q => q.category === selectedCategory);
     }
 
-    // Role-based recommendation (sort by relevance)
     if (selectedRoles && selectedRoles.length > 0) {
       filtered = filtered.map(q => {
         const roleKeywords = selectedRoles.map(r => r.job_role.toLowerCase()).join(' ');
         const questionText = `${q.title} ${q.description} ${q.category} ${(q.tags || []).join(' ')}`.toLowerCase();
         
-        // Calculate relevance score
         let relevanceScore = 0;
         const keywords = roleKeywords.split(/\s+/);
         keywords.forEach(keyword => {
@@ -145,7 +140,6 @@ const CodingQuestionSelector = ({ onClose, onSelect, selectedQuestionIds = [], s
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col">
-        {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div>
             <h2 className="text-2xl font-bold text-gray-900">Select Coding Questions</h2>
@@ -161,7 +155,6 @@ const CodingQuestionSelector = ({ onClose, onSelect, selectedQuestionIds = [], s
           </button>
         </div>
 
-        {/* Filters */}
         <div className="p-6 border-b border-gray-200 bg-gray-50">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="relative">
@@ -206,7 +199,6 @@ const CodingQuestionSelector = ({ onClose, onSelect, selectedQuestionIds = [], s
           )}
         </div>
 
-        {/* Questions List */}
         <div className="flex-1 overflow-y-auto p-6">
           {loading ? (
             <div className="text-center py-12">
@@ -286,7 +278,6 @@ const CodingQuestionSelector = ({ onClose, onSelect, selectedQuestionIds = [], s
           )}
         </div>
 
-        {/* Footer */}
         <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50">
           <button
             onClick={onClose}
@@ -304,7 +295,6 @@ const CodingQuestionSelector = ({ onClose, onSelect, selectedQuestionIds = [], s
         </div>
       </div>
 
-      {/* Preview Modal */}
       {showPreview && previewQuestion && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
@@ -320,7 +310,6 @@ const CodingQuestionSelector = ({ onClose, onSelect, selectedQuestionIds = [], s
 
             <div className="flex-1 overflow-y-auto p-6">
               <div className="space-y-6">
-                {/* Title and Metadata */}
                 <div>
                   <h2 className="text-2xl font-bold text-gray-900 mb-3">{previewQuestion.title}</h2>
                   <div className="flex flex-wrap gap-2 mb-4">
@@ -342,13 +331,11 @@ const CodingQuestionSelector = ({ onClose, onSelect, selectedQuestionIds = [], s
                   </div>
                 </div>
 
-                {/* Description */}
                 <div>
                   <h4 className="font-semibold text-gray-900 mb-2">Description</h4>
                   <p className="text-gray-700 whitespace-pre-wrap">{previewQuestion.description}</p>
                 </div>
 
-                {/* Test Cases */}
                 {previewQuestion.testCases && previewQuestion.testCases.length > 0 && (
                   <div>
                     <h4 className="font-semibold text-gray-900 mb-3">Test Cases</h4>
@@ -385,7 +372,6 @@ const CodingQuestionSelector = ({ onClose, onSelect, selectedQuestionIds = [], s
                   </div>
                 )}
 
-                {/* Tags */}
                 {previewQuestion.tags && previewQuestion.tags.length > 0 && (
                   <div>
                     <h4 className="font-semibold text-gray-900 mb-2">Tags</h4>

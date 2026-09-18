@@ -33,8 +33,8 @@ export default function AdminJobOpenings() {
     const [publishingId, setPublishingId] = useState(null);
     const [deletingId, setDeletingId] = useState(null);
     const [expandedId, setExpandedId] = useState(null);
-    const [toast, setToast] = useState(null); // { type: 'success'|'error', msg }
-    const [showTestLinkModal, setShowTestLinkModal] = useState(null); // jobId when modal open
+    const [toast, setToast] = useState(null);
+    const [showTestLinkModal, setShowTestLinkModal] = useState(null);
     const [tests, setTests] = useState([]);
     const [linkedTests, setLinkedTests] = useState({});
     const [linkingTest, setLinkingTest] = useState(false);
@@ -44,7 +44,6 @@ export default function AdminJobOpenings() {
         setTimeout(() => setToast(null), 4500);
     };
 
-    // ── Fetch jobs ─────────────────────────────────────────────────────────
     const fetchJobs = useCallback(async () => {
         setLoading(true);
         try {
@@ -59,7 +58,6 @@ export default function AdminJobOpenings() {
         }
     }, []);
 
-    // ── Fetch all tests for linking ───────────────────────────────────────
     const fetchTests = async () => {
         try {
             const res = await apiFetch('/api/tests', { headers: adminHeaders() });
@@ -75,13 +73,11 @@ export default function AdminJobOpenings() {
                 }));
                 setTests(normalizedTests);
             }
-        } catch (err) {
-            console.error('Failed to fetch tests:', err);
+        } catch {
             showToast('error', 'Failed to load tests');
         }
     };
 
-    // ── Fetch linked tests for a job ──────────────────────────────────────
     const fetchLinkedTests = async (jobId) => {
         try {
             const res = await apiFetch(`/api/job-openings/${jobId}/linked-tests`, {
@@ -96,7 +92,6 @@ export default function AdminJobOpenings() {
         }
     };
 
-    // ── Link test to job ───────────────────────────────────────────────────
     const handleLinkTest = async (jobId, testId) => {
         setLinkingTest(true);
         try {
@@ -116,14 +111,13 @@ export default function AdminJobOpenings() {
             } else {
                 showToast('error', data.message || 'Failed to link test');
             }
-        } catch (err) {
+        } catch {
             showToast('error', 'Network error');
         } finally {
             setLinkingTest(false);
         }
     };
 
-    // ── Unlink test from job ───────────────────────────────────────────────
     const handleUnlinkTest = async (jobId, testId) => {
         if (!window.confirm('Remove this test from the job opening?')) return;
 
@@ -139,12 +133,11 @@ export default function AdminJobOpenings() {
             } else {
                 showToast('error', data.message || 'Failed to unlink test');
             }
-        } catch (err) {
+        } catch {
             showToast('error', 'Network error');
         }
     };
 
-    // ── Open test link modal ───────────────────────────────────────────────
     const openTestLinkModal = async (jobId) => {
         setShowTestLinkModal(jobId);
         if (tests.length === 0) await fetchTests();
@@ -153,7 +146,6 @@ export default function AdminJobOpenings() {
 
     useEffect(() => { fetchJobs(); }, [fetchJobs]);
 
-    // ── Create draft ───────────────────────────────────────────────────────
     const handleCreate = async (e) => {
         e.preventDefault();
         setSaving(true);
@@ -179,7 +171,6 @@ export default function AdminJobOpenings() {
         }
     };
 
-    // ── Publish & send emails ──────────────────────────────────────────────
     const handlePublish = async (id) => {
         if (!window.confirm('This will send an email to ALL registered students. Proceed?')) return;
         setPublishingId(id);
@@ -206,7 +197,6 @@ export default function AdminJobOpenings() {
         }
     };
 
-    // ── Delete ─────────────────────────────────────────────────────────────
     const handleDelete = async (id) => {
         if (!window.confirm('Delete this job opening permanently?')) return;
         setDeletingId(id);
@@ -229,7 +219,6 @@ export default function AdminJobOpenings() {
         }
     };
 
-    // ── Render ─────────────────────────────────────────────────────────────
     return (
         <div className="space-y-6">
             {/* Toast */}

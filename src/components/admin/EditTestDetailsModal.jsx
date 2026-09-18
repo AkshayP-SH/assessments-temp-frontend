@@ -33,13 +33,10 @@ const EditTestDetailsModal = ({ test, onClose, onSave }) => {
 
   const formatDateTimeForInput = (dateTimeString) => {
     if (!dateTimeString) return '';
-    // Parse the datetime from backend and convert to Asia/Kolkata timezone
     const date = new Date(dateTimeString);
 
-    // Convert to Asia/Kolkata timezone (IST)
     const istDate = new Date(date.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
 
-    // Format for datetime-local input (YYYY-MM-DDTHH:MM)
     const year = istDate.getFullYear();
     const month = String(istDate.getMonth() + 1).padStart(2, '0');
     const day = String(istDate.getDate()).padStart(2, '0');
@@ -85,12 +82,10 @@ const EditTestDetailsModal = ({ test, onClose, onSave }) => {
 
   const convertISTToUTC = (dateTimeString) => {
     if (!dateTimeString) return null;
-    // Parse the datetime-local value as IST and convert to UTC
     const [datePart, timePart] = dateTimeString.split('T');
     const [year, month, day] = datePart.split('-');
     const [hours, minutes] = timePart.split(':');
 
-    // Create date string in IST format
     const istDateString = `${year}-${month}-${day}T${hours}:${minutes}:00+05:30`;
     const date = new Date(istDateString);
 
@@ -147,7 +142,6 @@ const EditTestDetailsModal = ({ test, onClose, onSave }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col">
-        {/* Header */}
         <div className="bg-shnoor-indigo text-white px-6 py-4 flex justify-between items-center">
           <div>
             <h2 className="text-xl font-bold">Edit Test Details</h2>
@@ -162,9 +156,7 @@ const EditTestDetailsModal = ({ test, onClose, onSave }) => {
           </Button>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-5">
-          {/* Error Message */}
           {saveError && (
             <div className="bg-shnoor-dangerLight border-l-4 border-shnoor-danger text-shnoor-danger p-3 rounded-r-lg flex items-start text-sm">
               <AlertCircle size={18} className="mr-2 flex-shrink-0 mt-0.5" />
@@ -172,7 +164,6 @@ const EditTestDetailsModal = ({ test, onClose, onSave }) => {
             </div>
           )}
 
-          {/* Job Role */}
           <div>
             <label className="block text-sm font-semibold text-shnoor-navy mb-2">
               Job Role
@@ -194,7 +185,6 @@ const EditTestDetailsModal = ({ test, onClose, onSave }) => {
             )}
           </div>
 
-          {/* Description */}
           <div>
             <label className="block text-sm font-semibold text-shnoor-navy mb-2">
               Job Description
@@ -209,7 +199,6 @@ const EditTestDetailsModal = ({ test, onClose, onSave }) => {
             />
           </div>
 
-          {/* Date & Time */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold text-shnoor-navy mb-2">
@@ -245,7 +234,6 @@ const EditTestDetailsModal = ({ test, onClose, onSave }) => {
             </div>
           </div>
 
-          {/* Test Settings */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-semibold text-shnoor-navy mb-2">
@@ -305,7 +293,6 @@ const EditTestDetailsModal = ({ test, onClose, onSave }) => {
             </div>
           </div>
 
-          {/* Info Box */}
           {test.status === 'published' && (
             <div className="bg-shnoor-lavender border-l-4 border-shnoor-indigo p-3 rounded-r-lg">
               <div className="flex items-start">
@@ -318,7 +305,6 @@ const EditTestDetailsModal = ({ test, onClose, onSave }) => {
           )}
         </form>
 
-        {/* Footer */}
         <div className="bg-white border-t border-shnoor-light px-6 py-4 flex justify-end space-x-3">
           <Button
             type="Button"
