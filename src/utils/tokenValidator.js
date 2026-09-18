@@ -25,15 +25,15 @@ export const isSessionToken = (token) => {
       .padEnd(Math.ceil(base64Url.length / 4) * 4, '=');
     const payload = JSON.parse(atob(base64));
     console.log('[TokenValidator] Token payload:', { 
-      hasIat: payload.hasOwnProperty('iat'), 
-      hasExp: payload.hasOwnProperty('exp'),
+      hasIat: Object.prototype.hasOwnProperty.call(payload, 'iat'), 
+      hasExp: Object.prototype.hasOwnProperty.call(payload, 'exp'),
       role: payload.role,
       type: payload.type 
     });
 
     // Check if it has JWT fields (iat, exp) - this means it's our JWT, not Firebase
     // Firebase tokens are much longer and have different structure
-    const isValid = payload.hasOwnProperty('iat') && payload.hasOwnProperty('exp');
+    const isValid = Object.prototype.hasOwnProperty.call(payload, 'iat') && Object.prototype.hasOwnProperty.call(payload, 'exp');
     console.log('[TokenValidator] Token is valid JWT:', isValid);
     return isValid;
   } catch (error) {

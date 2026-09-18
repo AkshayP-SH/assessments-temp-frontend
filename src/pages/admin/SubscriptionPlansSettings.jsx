@@ -23,7 +23,7 @@ const SubscriptionPlansSettings = () => {
       } else {
         setError(data.message || 'Failed to fetch plans');
       }
-    } catch (err) {
+    } catch {
       setError('Error fetching subscription plans');
     } finally {
       setLoading(false);
@@ -31,6 +31,7 @@ const SubscriptionPlansSettings = () => {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchPlans();
   }, [fetchPlans]);
 
@@ -49,7 +50,7 @@ const SubscriptionPlansSettings = () => {
       } else {
         alert(data.message || 'Failed to update plan');
       }
-    } catch (err) {
+    } catch {
       alert('Error updating plan');
     } finally {
       setSaving(null);

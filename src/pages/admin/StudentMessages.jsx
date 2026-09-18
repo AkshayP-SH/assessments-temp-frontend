@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Mail, MailOpen, Trash2, Image, Filter, RefreshCw, CheckCheck, User, AlertCircle, X, Send, Building, MessageCircle, Paperclip, Smile, CheckCircle, Star, TrendingUp, BarChart3, ThumbsUp, ThumbsDown, Clock } from 'lucide-react';
+import { ArrowLeft, Mail, MailOpen, Trash2, Image, Filter, RefreshCw, CheckCheck, User, AlertCircle, X, Send, Building, MessageCircle, Paperclip, Smile, CheckCircle, Clock, BarChart3, TrendingUp, ThumbsUp, ThumbsDown, Star } from 'lucide-react';
 import AdminLayout from '../../components/AdminLayout';
 import { useSupportSocket } from '../../hooks/useSupportSocket';
 import { API_URL } from '../../config/api';
@@ -14,16 +14,6 @@ const EMOJI_OPTIONS = [
   '❤️', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💖', '💬', '🙇', '🙋', '🤷', '😇', '😌', '😴',
   '😐', '😑', '😶', '😬', '😮', '😯', '😲', '😳', '🥲', '😭', '😤', '😓', '😰', '😵', '🤯', '😇'
 ];
-
-const showConfirm = (message) => {
-  const confirmFn = globalThis?.['confirm'];
-  return typeof confirmFn === 'function' ? confirmFn(message) : false;
-};
-
-const showAlert = (message) => {
-  const alertFn = globalThis?.['alert'];
-  if (typeof alertFn === 'function') alertFn(message);
-};
 
 const StudentMessages = () => {
   const navigate = useNavigate();
@@ -44,7 +34,7 @@ const StudentMessages = () => {
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
   const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, pages: 0 });
-  
+
   // New states for bulk delete and analytics
   const [selectedConversations, setSelectedConversations] = useState(new Set());
   const [bulkDeleteMode, setBulkDeleteMode] = useState(false);
@@ -58,7 +48,9 @@ const StudentMessages = () => {
   const selectedMessageRef = useRef(null);
   const fileInputRef = useRef(null);
   const emojiPickerRef = useRef(null);
-  const processedSocketEventsRef = useRef(new Set());
+
+  const showAlert = (message) => alert(message);
+  const showConfirm = (message) => window.confirm(message);
 
   // Keep ref in sync with state so socket handler always has latest value
   useEffect(() => {
@@ -199,17 +191,6 @@ const StudentMessages = () => {
   }, [showEmojiPicker]);
 
 
-  const markAsRead = async (messageId) => {
-    try {
-      const token = localStorage.getItem('adminToken');
-      await fetch(`${API_URL}/api/student-messages/${messageId}/read`, {
-        method: 'PATCH',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-    } catch (err) {
-      console.error('Error marking as read:', err);
-    }
-  };
 
   const markConversationAsRead = async (msg) => {
     if (!msg.student_id || !parseInt(msg.unread_count)) return;
@@ -369,7 +350,7 @@ const StudentMessages = () => {
       removeImage();
       return;
     }
-    
+
     setSelectedMessage(msg);
     markConversationAsRead(msg);
     fetchConversationThread(msg.id);
@@ -403,7 +384,7 @@ const StudentMessages = () => {
 
   const handleBulkDelete = async () => {
     if (selectedConversations.size === 0) return;
-    
+
     const confirmed = showConfirm(
       `Delete ${selectedConversations.size} selected conversations? This cannot be undone.`
     );
@@ -552,11 +533,10 @@ const StudentMessages = () => {
           <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto mt-2 sm:mt-0">
             <button
               onClick={() => setShowAnalytics(!showAnalytics)}
-              className={`flex items-center gap-2 px-3 py-2 text-sm border rounded-lg transition-colors ${
-                showAnalytics 
-                  ? 'bg-shnoor-indigo text-white border-shnoor-indigo' 
+              className={`flex items-center gap-2 px-3 py-2 text-sm border rounded-lg transition-colors ${showAnalytics
+                  ? 'bg-shnoor-indigo text-white border-shnoor-indigo'
                   : 'bg-white border-shnoor-mist hover:bg-shnoor-lavender'
-              }`}
+                }`}
             >
               <BarChart3 size={16} />
               Analytics
@@ -566,11 +546,10 @@ const StudentMessages = () => {
                 setBulkDeleteMode(!bulkDeleteMode);
                 setSelectedConversations(new Set());
               }}
-              className={`flex items-center gap-2 px-3 py-2 text-sm border rounded-lg transition-colors ${
-                bulkDeleteMode 
-                  ? 'bg-red-600 text-white border-red-600' 
+              className={`flex items-center gap-2 px-3 py-2 text-sm border rounded-lg transition-colors ${bulkDeleteMode
+                  ? 'bg-red-600 text-white border-red-600'
                   : 'bg-white border-shnoor-mist hover:bg-shnoor-lavender'
-              }`}
+                }`}
             >
               <Trash2 size={16} />
               {bulkDeleteMode ? 'Cancel' : 'Bulk Delete'}
@@ -777,15 +756,13 @@ const StudentMessages = () => {
               <button
                 key={key}
                 onClick={() => { setFilter(key); setPagination(prev => ({ ...prev, page: 1 })); }}
-                className={`px-3 py-1.5 text-sm rounded-lg transition-colors flex items-center gap-1.5 ${
-                  filter === key ? 'bg-shnoor-indigo text-white' : 'bg-shnoor-lavender text-shnoor-navy hover:bg-shnoor-indigo/10'
-                }`}
+                className={`px-3 py-1.5 text-sm rounded-lg transition-colors flex items-center gap-1.5 ${filter === key ? 'bg-shnoor-indigo text-white' : 'bg-shnoor-lavender text-shnoor-navy hover:bg-shnoor-indigo/10'
+                  }`}
               >
                 {label}
                 {key === 'unread' && unreadCount > 0 && (
-                  <span className={`px-1.5 py-0.5 rounded-full text-xs font-semibold ${
-                    filter === 'unread' ? 'bg-white text-shnoor-indigo' : 'bg-red-500 text-white'
-                  }`}>{unreadCount}</span>
+                  <span className={`px-1.5 py-0.5 rounded-full text-xs font-semibold ${filter === 'unread' ? 'bg-white text-shnoor-indigo' : 'bg-red-500 text-white'
+                    }`}>{unreadCount}</span>
                 )}
               </button>
             ))}
@@ -851,9 +828,8 @@ const StudentMessages = () => {
               messages.map(msg => (
                 <div
                   key={msg.id}
-                  className={`p-4 cursor-pointer hover:bg-shnoor-lavender/50 transition-colors ${
-                    selectedMessage?.id === msg.id ? 'bg-shnoor-lavender' : ''
-                  } ${msg.unread_count > 0 ? 'bg-shnoor-indigo/5' : ''}`}
+                  className={`p-4 cursor-pointer hover:bg-shnoor-lavender/50 transition-colors ${selectedMessage?.id === msg.id ? 'bg-shnoor-lavender' : ''
+                    } ${msg.unread_count > 0 ? 'bg-shnoor-indigo/5' : ''}`}
                 >
                   <div className="flex items-start gap-3">
                     {bulkDeleteMode && msg.student_id && (
@@ -1010,9 +986,8 @@ const StudentMessages = () => {
                         <div className={`max-w-[80%] ${isAdmin ? 'order-2' : 'order-1'}`}>
                           {!isAdmin && <p className="text-xs text-shnoor-navy font-medium mb-1 ml-1">{selectedMessage.name}</p>}
                           {isAdmin && <p className="text-xs text-shnoor-indigo font-medium mb-1 mr-1 text-right">Admin</p>}
-                          <div className={`p-4 rounded-xl shadow-sm ${
-                            isAdmin ? 'bg-shnoor-indigo text-white rounded-tr-none' : 'bg-white border border-shnoor-mist text-shnoor-navy rounded-tl-none'
-                          }`}>
+                          <div className={`p-4 rounded-xl shadow-sm ${isAdmin ? 'bg-shnoor-indigo text-white rounded-tr-none' : 'bg-white border border-shnoor-mist text-shnoor-navy rounded-tl-none'
+                            }`}>
                             <p className="whitespace-pre-wrap">{msg.message}</p>
                             {msg.image_path && (
                               <img

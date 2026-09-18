@@ -38,7 +38,7 @@ const OrganisationSignup = () => {
     useCase: '',
     phone: '',
   });
-  
+
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -55,9 +55,9 @@ const OrganisationSignup = () => {
       setError('Please fill in required fields (Name, Email, Password).');
       return;
     }
-    
+
     setLoading(true);
-    
+
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/signup/organisation`, {
         method: 'POST',
@@ -126,7 +126,7 @@ const OrganisationSignup = () => {
                 <p className="text-white/60 text-xs mt-1 leading-relaxed">Host technical drives with thousands of candidates seamlessly.</p>
               </div>
             </div>
-            
+
             <div className="flex items-start gap-4">
               <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
                 <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -149,7 +149,7 @@ const OrganisationSignup = () => {
       {/* ── RIGHT PANEL ───────────────────────────────────── */}
       <div className="auth-right-panel flex-1 bg-white flex items-center justify-center px-6 py-10 overflow-auto">
         <div className="w-full max-w-[440px]">
-          
+
           {/* Mobile brand */}
           <div className="flex items-center gap-3 mb-8 lg:hidden">
             <img src={shnoorLogo} alt="Shnoor" className="h-10 w-10 object-contain" />
@@ -293,8 +293,8 @@ const OrganisationSignup = () => {
               </div>
 
               <div className="pt-2">
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   className="w-full h-[52px] shadow-lg shadow-shnoor-indigo/20 flex justify-center items-center gap-2"
                   disabled={loading}
                 >
