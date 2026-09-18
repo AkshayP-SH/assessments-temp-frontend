@@ -55,14 +55,14 @@ const ORG_FEATURES = [
 
 // ── Portal Tab Switcher ────────────────────────────────────────────────────
 const PortalTabs = ({ active, onChange }) => (
-  <div className="flex rounded-xl border border-shnoor-mist bg-shnoor-lavender p-1 mb-8 gap-1">
+  <div className="flex rounded-xl bg-gray-100/80 p-1 mb-8 gap-1 relative z-10 border border-gray-200/60 shadow-inner">
     <button
       type="button"
       onClick={() => onChange('student')}
-      className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-sm font-semibold transition-all duration-200 ${
+      className={`flex-1 flex items-center justify-center gap-2 py-3 px-3 rounded-lg text-sm font-semibold transition-all duration-300 ${
         active === 'student'
-          ? 'bg-white text-shnoor-navy shadow-sm'
-          : 'text-shnoor-indigoMedium hover:text-shnoor-navy'
+          ? 'bg-white text-shnoor-navy shadow-[0_2px_10px_rgba(0,0,0,0.06)]'
+          : 'text-gray-500 hover:text-shnoor-navy hover:bg-gray-200/50'
       }`}
     >
       <StudentIcon />
@@ -71,10 +71,10 @@ const PortalTabs = ({ active, onChange }) => (
     <button
       type="button"
       onClick={() => onChange('org')}
-      className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-sm font-semibold transition-all duration-200 ${
+      className={`flex-1 flex items-center justify-center gap-2 py-3 px-3 rounded-lg text-sm font-semibold transition-all duration-300 ${
         active === 'org'
-          ? 'bg-white text-shnoor-navy shadow-sm'
-          : 'text-shnoor-indigoMedium hover:text-shnoor-navy'
+          ? 'bg-white text-shnoor-navy shadow-[0_2px_10px_rgba(0,0,0,0.06)]'
+          : 'text-gray-500 hover:text-shnoor-navy hover:bg-gray-200/50'
       }`}
     >
       <OrgIcon />
@@ -278,70 +278,72 @@ const Login = () => {
   const features = portal === 'org' ? ORG_FEATURES : STUDENT_FEATURES;
 
   return (
-    <main className="min-h-[100dvh] w-full flex flex-col lg:flex-row font-['Plus_Jakarta_Sans',sans-serif] relative">
+    <main className="h-screen w-full flex flex-col lg:flex-row font-['Plus_Jakarta_Sans',sans-serif] relative overflow-hidden">
       <div className="absolute right-4 top-4 z-20 sm:right-6 sm:top-6 lg:right-8 lg:top-8">
         <ThemeSelector variant="light" />
       </div>
 
       {/* ── LEFT PANEL ──────────────────────────────────────────────────── */}
-      <div className="auth-left-panel hidden lg:flex lg:w-[45%] flex-col justify-between bg-shnoor-navy px-14 py-12 relative overflow-hidden">
-        <div className="absolute top-[-60px] left-[-60px] w-72 h-72 rounded-full bg-shnoor-indigo opacity-20 blur-3xl pointer-events-none" />
-        <div className="absolute bottom-[-40px] right-[-40px] w-56 h-56 rounded-full bg-[#6868AC] opacity-15 blur-3xl pointer-events-none" />
+      <div className="auth-left-panel hidden lg:flex lg:w-[45%] flex-col justify-between h-full bg-shnoor-navy px-14 py-12 relative overflow-hidden">
+        {/* Dynamic Gradient Lighting */}
+        <div className="absolute top-[-60px] left-[-60px] w-80 h-80 rounded-full bg-shnoor-indigo opacity-30 blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-[-40px] right-[-40px] w-72 h-72 rounded-full bg-indigo-500 opacity-20 blur-[100px] pointer-events-none" />
+        <div className="absolute top-1/2 left-1/4 w-96 h-96 rounded-full bg-purple-500 opacity-10 blur-[120px] pointer-events-none transform -translate-y-1/2" />
 
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-12">
-            <div className="site-header-logo flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl bg-white">
-              <img src={shnoorLogo} alt="Shnoor" className="h-11 w-11 object-contain" width="44" height="44" loading="eager" fetchPriority="high" />
+            <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl bg-white/5 border border-white/10 shadow-lg backdrop-blur-md">
+              <img src={shnoorLogo} alt="Shnoor" className="h-8 w-8 object-contain" width="32" height="32" loading="eager" fetchPriority="high" />
             </div>
             <div>
-              <p className="font-extrabold text-white text-lg leading-tight">SHNOOR Assessments</p>
-              <p className="auth-brand-subtitle text-[11px] uppercase tracking-widest font-semibold">Secure Examination Portal</p>
+              <p className="font-extrabold text-white text-xl tracking-tight leading-tight">SHNOOR Assessments</p>
+              <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold mt-0.5">Secure Examination Portal</p>
             </div>
           </div>
 
-          <h2 className="text-3xl font-extrabold text-white leading-tight mb-3">
+          <h2 className="text-4xl xl:text-5xl font-extrabold text-white leading-[1.1] tracking-tight mb-4">
             {portal === 'org' ? (
-              <>Welcome back to<br /><span className="auth-hero-accent">your organisation</span></>
+              <>Welcome back to<br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-300">your organisation</span></>
             ) : (
-              <>Welcome back to<br /><span className="auth-hero-accent">your portal</span></>
+              <>Welcome back to<br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-300">your portal</span></>
             )}
           </h2>
-          <p className="auth-left-muted text-sm leading-relaxed mb-10">
+          <p className="text-gray-300 text-base leading-relaxed mb-12 max-w-md">
             {portal === 'org'
               ? 'Sign in to manage your assessments, monitor candidates, and access detailed reports.'
               : 'Sign in to access your assigned assessments, track your progress, and complete recruitment tests.'}
           </p>
 
-          <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-6">
             {features.map(f => (
-              <div key={f.label} className="flex items-center gap-4">
-                <div className="auth-feature-icon-shell w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <svg className="auth-feature-icon w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <div key={f.label} className="flex items-center gap-4 group">
+                <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0 group-hover:bg-white/10 group-hover:border-white/20 transition-all duration-300 shadow-sm backdrop-blur-sm">
+                  <svg className="w-5 h-5 text-blue-300 group-hover:text-blue-200 transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d={f.icon} />
                   </svg>
                 </div>
-                <span className="auth-feature-text text-sm font-medium">{f.label}</span>
+                <span className="text-sm xl:text-base text-gray-200 font-medium tracking-wide group-hover:text-white transition-colors">{f.label}</span>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="auth-bottom-divider relative z-10 border-t pt-6">
-          <p className="auth-bottom-copy text-xs italic leading-relaxed">
+        <div className="relative z-10 border-t border-white/10 pt-6 mt-8">
+          <p className="text-xs text-gray-400 italic leading-relaxed">
             "These measures ensure a fair and secure assessment process for all candidates."
           </p>
         </div>
       </div>
 
       {/* ── RIGHT PANEL ─────────────────────────────────────────────────── */}
-      <div className="auth-right-panel flex-1 flex items-center justify-center bg-white px-4 sm:px-6 py-6 sm:py-10 lg:py-12 min-h-[100dvh] lg:min-h-screen overflow-auto">
-        <div className="w-full max-w-[440px]">
+      <div className="auth-right-panel flex-1 flex items-center justify-center bg-shnoor-lavender px-4 sm:px-6 py-6 sm:py-10 lg:py-12 h-full overflow-y-auto relative">
+        <div className="w-full max-w-[460px] bg-white rounded-[2rem] shadow-[0_8px_40px_rgba(0,0,0,0.04)] border border-gray-100 p-6 sm:p-10 relative z-10">
           {/* Mobile brand */}
-          <div className="flex items-center gap-3 mb-8 lg:hidden">
-            <img src={shnoorLogo} alt="Shnoor" loading="lazy" className="h-9 w-9 object-contain" width="36" height="36" decoding="async" />
+          <div className="flex items-center justify-center gap-3 mb-8 lg:hidden">
+            <img src={shnoorLogo} alt="Shnoor" loading="lazy" className="h-10 w-10 object-contain" width="40" height="40" decoding="async" />
             <div>
-              <p className="font-extrabold text-shnoor-navy text-base">SHNOOR Assessments</p>
-              <p className="text-[10px] text-shnoor-indigoMedium uppercase tracking-widest">Secure Examination Portal</p>
+              <p className="font-extrabold text-shnoor-navy text-xl tracking-tight">SHNOOR</p>
+              <p className="text-[10px] text-shnoor-indigoMedium uppercase tracking-widest font-bold">Assessments</p>
             </div>
           </div>
 
@@ -349,10 +351,10 @@ const Login = () => {
           <PortalTabs active={portal} onChange={handlePortalChange} />
 
           {/* Heading */}
-          <div className="mb-6">
-            <h1 className="text-2xl font-extrabold text-shnoor-navy mb-1">Sign In</h1>
-            <p className="text-sm text-shnoor-indigoMedium">
-              {portal === 'org' ? 'Access your organisation dashboard' : 'Enter your credentials'}
+          <div className="mb-8 text-center sm:text-left">
+            <h1 className="text-3xl font-extrabold text-shnoor-navy mb-2 tracking-tight">Sign In</h1>
+            <p className="text-sm text-gray-500 font-medium">
+              {portal === 'org' ? 'Access your organisation dashboard' : 'Enter your credentials to continue'}
             </p>
           </div>
 
@@ -412,22 +414,22 @@ const Login = () => {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-[37px] text-shnoor-indigoMedium hover:text-shnoor-navy transition-colors p-1"
+                className="absolute right-3 top-[37px] text-gray-400 hover:text-shnoor-indigo transition-colors p-1 bg-white"
                 tabIndex={-1}
                 disabled={isLoading}
               >
                 {showPassword ? <EyeOff /> : <EyeOpen />}
               </button>
               {errors.password && <p className="text-xs text-shnoor-danger mt-1">{errors.password}</p>}
-              <div className="text-right mt-1">
-                <Link to="/forgot-password" className="text-xs text-shnoor-indigo hover:text-shnoor-navy transition-colors">
+              <div className="text-right mt-2">
+                <Link to="/forgot-password" className="text-[13px] font-semibold text-shnoor-indigo hover:text-indigo-700 transition-colors">
                   Forgot password?
                 </Link>
               </div>
             </div>
 
-            <Button type="submit" variant="primary" className="w-full !h-[52px] text-base" disabled={isLoading}>
-              {isLoading && <div className="w-5 h-5 border-[3px] border-white border-t-transparent rounded-full animate-spin" />}
+            <Button type="submit" variant="primary" className="w-full !h-[54px] text-base font-bold tracking-wide mt-2 shadow-lg shadow-indigo-200/50 hover:shadow-indigo-300/50 hover:-translate-y-0.5 transition-all duration-300" disabled={isLoading}>
+              {isLoading && <div className="w-5 h-5 border-[3px] border-white/30 border-t-white rounded-full animate-spin mr-2" />}
               {isLoading ? 'Signing In...' : 'Sign In'}
             </Button>
           </form>

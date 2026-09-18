@@ -224,7 +224,7 @@ const AdminReports = () => {
                                 onClick={handleDownload}
                                 disabled={isDownloading || isLoading}
                                 variant="primary"
-                                className="w-full sm:w-auto min-w-[200px]"
+                                className="w-full sm:w-auto min-w-[200px] flex items-center justify-center gap-2"
                             >
                                 {isDownloading ? (
                                     <>
