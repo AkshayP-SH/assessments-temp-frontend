@@ -38,13 +38,34 @@ const ClientSubscriptionPlans = () => {
 
   const fetchPlans = async () => {
     try {
-      const response = await apiFetch('api/subscription-plans');
-      const data = await response.json();
-      if (data.success) {
-        setPlans(data.plans);
-      } else {
-        setError('Failed to load subscription plans');
-      }
+      // Hardcoded plans to avoid backend dependency
+      const dummyPlans = [
+        {
+          id: 1,
+          plan_id: 'plan_basic',
+          name: 'Basic Plan',
+          description: 'Essential features for small teams',
+          price_monthly: 999,
+          features: ['Up to 50 Candidates', 'Basic Analytics', 'Standard Support']
+        },
+        {
+          id: 2,
+          plan_id: 'plan_pro',
+          name: 'Pro Plan',
+          description: 'Advanced features for growing organizations',
+          price_monthly: 2499,
+          features: ['Up to 200 Candidates', 'Advanced Analytics', 'Priority Support', 'Live Proctoring']
+        },
+        {
+          id: 3,
+          plan_id: 'plan_enterprise',
+          name: 'Enterprise Plan',
+          description: 'Custom solutions for large scale needs',
+          price_monthly: 4999,
+          features: ['Unlimited Candidates', 'Custom Branding', '24/7 Dedicated Support', 'API Access']
+        }
+      ];
+      setPlans(dummyPlans);
     } catch (err) {
       setError('Failed to load subscription plans');
     } finally {
@@ -71,23 +92,8 @@ const ClientSubscriptionPlans = () => {
           throw new Error('Authentication token not found. Please login again.');
         }
         
-        // Directly call verify payment with dummy data
-        const verifyResponse = await fetch(getApiUrl('api/settings/verify-payment'), {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            razorpay_order_id: 'dummy_order_' + Date.now(),
-            razorpay_payment_id: 'dummy_payment_' + Date.now(),
-            razorpay_signature: 'dummy_signature',
-            plan_id: planId,
-            isDummyPayment: true,
-          }),
-        });
-
-        const verifyData = await verifyResponse.json();
+        // Mock successful verification response for frontend-only dummy mode
+        const verifyData = { success: true };
         
         if (verifyData.success) {
           // Update local storage to reflect active subscription

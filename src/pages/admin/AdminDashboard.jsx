@@ -2448,51 +2448,40 @@ const AdminDashboard = () => {
             </div>
           )}
 
-          {/* Sidebar Layout */}
-          <div className="flex flex-col lg:flex-row gap-8">
-            {/* Sidebar Navigation */}
-            {!showCreateTest && !selectedExamId && (
-              <div className="lg:w-64 flex-shrink-0">
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 sticky top-6">
-                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 px-3">Menu</h3>
-                  <div className="flex flex-col gap-1">
-                    {[
-                      { id: 'exams', label: 'Manage Exams', icon: FileSpreadsheet },
-                      { id: 'institutes', label: 'Manage Institutes', icon: Building2 },
-                      { id: 'reports', label: 'Reports', icon: FileSpreadsheet },
-                      { id: 'bulk-upload', label: 'Bulk Upload', icon: Users },
-                      { id: 'violations', label: 'Violations', icon: AlertCircle },
-                      { id: 'interviews', label: 'Interviews', icon: Video },
-                      { id: 'job-openings', label: 'Job Openings', icon: Briefcase },
-                      ...(isSuperAdmin ? [{ id: 'subscription-plans', label: 'Subscription Plans', icon: FileSpreadsheet }] : [])
-                    ].map((tab) => (
-                      <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
-                        className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all text-sm w-full text-left ${
-                          activeTab === tab.id 
-                            ? 'bg-shnoor-indigo text-white shadow-md' 
-                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                        }`}
-                      >
-                        <tab.icon size={18} className={activeTab === tab.id ? 'text-white' : 'text-gray-400'} />
-                        <span className="truncate">{tab.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
+          {/* Horizontal Navigation */}
+          {!showCreateTest && !selectedExamId && (
+            <div className="mb-6 overflow-x-auto pb-2 border-b border-gray-200">
+              <div className="flex items-center gap-2 min-w-max px-2">
+                {[
+                  { id: 'exams', label: 'Manage Exams', icon: FileSpreadsheet },
+                  { id: 'institutes', label: 'Manage Institutes', icon: Building2 },
+                  { id: 'reports', label: 'Reports', icon: FileSpreadsheet },
+                  { id: 'bulk-upload', label: 'Bulk Upload', icon: Users },
+                  { id: 'violations', label: 'Violations', icon: AlertCircle },
+                  { id: 'interviews', label: 'Interviews', icon: Video },
+                  { id: 'job-openings', label: 'Job Openings', icon: Briefcase },
+                  ...(isSuperAdmin ? [{ id: 'subscription-plans', label: 'Subscription Plans', icon: FileSpreadsheet }] : [])
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-medium transition-all text-sm whitespace-nowrap ${
+                      activeTab === tab.id 
+                        ? 'bg-shnoor-navy text-white shadow-md' 
+                        : 'text-gray-500 hover:text-gray-800'
+                    }`}
+                  >
+                    <tab.icon size={18} className={activeTab === tab.id ? 'text-white' : 'text-gray-400'} />
+                    <span>{tab.label}</span>
+                  </button>
+                ))}
               </div>
-            )}
+            </div>
+          )}
 
-            {/* Main Content Area */}
-            <div className="flex-1 min-w-0">
-              {/* Dashboard Header */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 sm:mb-8 gap-4">
-                <div>
-                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">Admin Dashboard</h1>
-                  <p className="text-sm text-gray-500 mt-1">Manage tests, users, and organization settings.</p>
-                </div>
-              </div>
+          {/* Main Content Area */}
+          <div className="w-full">
+            <div className="w-full">
 
           {/* Create Test Modal/Section */}
           {showCreateTest ? (
@@ -2862,7 +2851,7 @@ const AdminDashboard = () => {
                       );
                     })()}
 
-                    <div className="overflow-x-auto rounded-xl border border-shnoor-light shadow-[0_8px_30px_rgba(14,14,39,0.06)]">
+                    <div className="mt-6 overflow-x-auto rounded-xl border border-shnoor-light shadow-[0_8px_30px_rgba(14,14,39,0.06)]">
                       <table className="w-full">
                         <thead className="bg-shnoor-indigo text-white">
                           <tr>
@@ -4096,7 +4085,7 @@ const AdminDashboard = () => {
                             <p className="text-sm text-shnoor-indigoMedium mt-1">All students followed exam guidelines</p>
                           </div>
                         ) : (
-                          <div className="overflow-x-auto">
+                          <div className="mt-6 overflow-x-auto">
                             <h3 className="text-lg font-bold text-shnoor-navy mb-4">
                               Student Violations Summary
                             </h3>

@@ -1018,7 +1018,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
 
                         {/* Duration and Max Attempts */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
-                            <div>
+                            <div className="flex flex-col justify-end">
                                 <label className="block text-sm font-medium text-shnoor-navy mb-2">Duration (minutes) *</label>
                                 <input
                                     type="number"
@@ -1030,7 +1030,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                                     required
                                 />
                             </div>
-                            <div>
+                            <div className="flex flex-col justify-end">
                                 <label className="block text-sm font-medium text-shnoor-navy mb-2">Max Attempts *</label>
                                 <input
                                     type="number"
@@ -1042,7 +1042,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                                     required
                                 />
                             </div>
-                            <div>
+                            <div className="flex flex-col justify-end">
                                 <label className="block text-sm font-medium text-shnoor-navy mb-2">Passing % *</label>
                                 <input
                                     type="number"
@@ -1400,7 +1400,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                                 <textarea
                                     value={currentQuestion.text}
                                     onChange={(e) => setCurrentQuestion({ ...currentQuestion, text: e.target.value })}
-                                    rows={6}
+                                    rows={4}
                                     className={`w-full px-4 py-3 border border-shnoor-mist rounded-lg focus:ring-2 focus:ring-shnoor-navyLight focus:border-transparent text-sm ${currentQuestion.format === 'code' ? 'font-mono' : ''
                                         }`}
                                     placeholder="Enter Question here"
@@ -1413,10 +1413,10 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                                 </p>
                             </div>
 
-                            <div className="space-y-3">
+                            <div className="space-y-2 mt-4">
                                 <label className="block text-sm font-medium text-shnoor-navy">Options</label>
                                 {currentQuestion.options.map((opt, idx) => (
-                                    <div key={idx} className="flex items-center space-x-3">
+                                    <div key={idx} className="flex items-center space-x-2">
                                         <span className="w-6 text-sm text-shnoor-navy font-medium">{String.fromCharCode(65 + idx)}</span>
                                         <input
                                             type="text"
@@ -1426,12 +1426,12 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                                                 newOptions[idx] = e.target.value;
                                                 setCurrentQuestion({ ...currentQuestion, options: newOptions });
                                             }}
-                                            className={`flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-shnoor-navyLight focus:border-transparent ${currentQuestion.correctOption === idx ? 'border-shnoor-success bg-shnoor-successLight' : 'border-shnoor-mist'}`}
+                                            className={`flex-1 px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-shnoor-navyLight focus:border-transparent transition-colors ${currentQuestion.correctOption === idx ? 'border-shnoor-success bg-shnoor-successLight/30' : 'border-shnoor-mist hover:border-gray-400'}`}
                                             placeholder={`Option ${idx + 1}`}
                                         />
                                         <button
                                             onClick={() => setCurrentQuestion({ ...currentQuestion, correctOption: idx })}
-                                            className={`p-2 rounded-full transition-colors ${currentQuestion.correctOption === idx ? 'bg-shnoor-successLight text-shnoor-success' : 'bg-shnoor-lavender text-shnoor-navy hover:bg-shnoor-lavender'}`}
+                                            className={`p-1.5 rounded-full transition-colors flex-shrink-0 ${currentQuestion.correctOption === idx ? 'bg-shnoor-success text-white' : 'bg-shnoor-lavender text-shnoor-navy hover:bg-gray-200'}`}
                                             title="Mark as correct answer"
                                         >
                                             <CheckCircle size={20} />
@@ -1443,7 +1443,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                             <button
                                 type="button"
                                 onClick={handleAddQuestion}
-                                className="w-full py-3 bg-theme-accent hover:bg-theme-accent2 text-white font-semibold rounded-lg transition-colors flex items-center justify-center space-x-2"
+                                className="w-full py-2.5 mt-4 bg-shnoor-indigo/10 hover:bg-shnoor-indigo/20 text-shnoor-indigo border border-shnoor-indigo/20 font-semibold rounded-lg transition-colors flex items-center justify-center space-x-2 text-sm"
                             >
                                 <Plus size={20} />
                                 <span>Add Question to Test</span>
@@ -1456,7 +1456,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                                     <button
                                         onClick={handleManualSubmit}
                                         disabled={questions.length === 0 || isUploading}
-                                        className={`flex-1 py-4 bg-shnoor-indigo hover:bg-shnoor-indigo text-white font-bold rounded-lg transition-colors shadow-sm flex items-center justify-center space-x-2 ${questions.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                        className={`flex-1 py-3 text-sm bg-shnoor-indigo hover:bg-shnoor-indigo text-white font-bold rounded-lg transition-colors shadow-sm flex items-center justify-center space-x-2 ${questions.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     >
                                         {isUploading ? (
                                             <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
@@ -1688,7 +1688,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
 
                             {/* Marks, Time Limit, Memory Limit */}
                             <div className="grid grid-cols-3 gap-4">
-                                <div>
+                                <div className="flex flex-col justify-end">
                                     <label className="block text-sm font-medium text-shnoor-navy mb-2">Marks *</label>
                                     <input
                                         type="number"
@@ -1698,7 +1698,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                                         className="w-full px-4 py-3 border border-shnoor-mist rounded-lg focus:ring-2 focus:ring-shnoor-navyLight focus:border-transparent"
                                     />
                                 </div>
-                                <div>
+                                <div className="flex flex-col justify-end">
                                     <label className="block text-sm font-medium text-shnoor-navy mb-2">Time Limit (sec) *</label>
                                     <input
                                         type="number"
@@ -1709,7 +1709,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                                         className="w-full px-4 py-3 border border-shnoor-mist rounded-lg focus:ring-2 focus:ring-shnoor-navyLight focus:border-transparent"
                                     />
                                 </div>
-                                <div>
+                                <div className="flex flex-col justify-end">
                                     <label className="block text-sm font-medium text-shnoor-navy mb-2">Memory Limit (MB) *</label>
                                     <input
                                         type="number"
