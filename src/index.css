@@ -646,3 +646,8 @@ html[data-theme='dark'] select,html[data-theme='dark'] option { color-scheme: da
 :is(html[data-theme='dark'],html[data-theme='green']) body :is(.bg-shnoor-indigo\/30,.bg-shnoor-indigo\/50) { background-color: rgb(var(--theme-accent) / 0.35) !important; }
 :is(html[data-theme='dark'],html[data-theme='green']) body .hover\:bg-shnoor-indigo\/50:hover { background-color: rgb(var(--theme-accent) / 0.55) !important; }
 :is(html[data-theme='dark'],html[data-theme='green']) body :is(.border-shnoor-indigo\/30,.border-shnoor-indigo\/50) { border-color: rgb(var(--theme-accent) / 0.4) !important; }
+
+/* Hide scrollbar */
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+

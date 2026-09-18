@@ -169,7 +169,7 @@ const MCQBankModal = ({ question, onClose, onSave, categories, tags }) => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
+            <div className="flex flex-col justify-end">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Correct Option *
               </label>
@@ -186,7 +186,7 @@ const MCQBankModal = ({ question, onClose, onSave, categories, tags }) => {
               </select>
             </div>
 
-            <div>
+            <div className="flex flex-col justify-end">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Marks *
               </label>
@@ -200,7 +200,7 @@ const MCQBankModal = ({ question, onClose, onSave, categories, tags }) => {
               />
             </div>
 
-            <div>
+            <div className="flex flex-col justify-end">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Difficulty *
               </label>

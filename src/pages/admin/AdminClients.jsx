@@ -97,11 +97,11 @@ const EditClientModal = ({ client, onClose, onUpdated, subscriptionPlans = [] })
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto flex flex-col">
-        <div className="px-6 py-5 border-b border-shnoor-mist flex items-center justify-between sticky top-0 bg-white z-10 flex-shrink-0">
-          <h2 className="text-base font-bold text-shnoor-navy">Edit Client</h2>
-          <button onClick={onClose} className="text-shnoor-soft hover:text-shnoor-navy">✕</button>
+    <div className="fixed inset-0 bg-black/50 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div className="bg-white w-full h-full sm:h-auto sm:max-h-[90vh] sm:rounded-2xl shadow-2xl sm:max-w-xl overflow-y-auto flex flex-col animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200">
+        <div className="px-6 py-4 border-b border-shnoor-mist flex items-center justify-between sticky top-0 bg-white z-10 flex-shrink-0">
+          <h2 className="text-lg font-bold text-shnoor-navy">Edit Client</h2>
+          <button onClick={onClose} className="text-shnoor-soft hover:text-shnoor-navy p-2 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors">✕</button>
         </div>
         <form onSubmit={handleSubmit} className="px-6 py-5 flex flex-col gap-4">
           {error && <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">{error}</div>}
@@ -251,15 +251,17 @@ const EditClientModal = ({ client, onClose, onUpdated, subscriptionPlans = [] })
             </div>
           </div>
 
-          <div className="flex gap-3 pt-1">
-            <button type="button" onClick={onClose} disabled={loading}
-              className="flex-1 h-[44px] border border-shnoor-mist text-shnoor-navy rounded-lg text-sm font-semibold hover:bg-shnoor-lavender transition-colors">
-              Cancel
-            </button>
-            <button type="submit" disabled={loading}
-              className="flex-1 h-[44px] bg-shnoor-indigo text-white rounded-lg text-sm font-semibold hover:bg-shnoor-navy transition-colors">
-              {loading ? 'Saving...' : 'Save Changes'}
-            </button>
+          <div className="px-6 py-4 border-t border-shnoor-mist bg-white sticky bottom-0 z-10 flex-shrink-0">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button type="button" onClick={onClose} disabled={loading}
+                className="flex-1 h-[42px] border border-shnoor-mist text-shnoor-navy rounded-lg text-sm font-semibold hover:bg-shnoor-lavender transition-colors">
+                Cancel
+              </button>
+              <button type="submit" disabled={loading}
+                className="flex-1 h-[42px] bg-shnoor-indigo text-white rounded-lg text-sm font-semibold hover:bg-shnoor-navy transition-colors">
+                {loading ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
           </div>
         </form>
       </div>
@@ -428,11 +430,11 @@ const CreateClientModal = ({ onClose, onCreated, subscriptionPlans = [] }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="px-6 py-5 border-b border-shnoor-mist flex items-center justify-between sticky top-0 bg-white z-10">
-          <h2 className="text-base font-bold text-shnoor-navy">Create New Client</h2>
-          <button onClick={onClose} className="text-shnoor-soft hover:text-shnoor-navy">✕</button>
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div className="bg-white w-full h-full sm:h-auto sm:max-h-[90vh] sm:rounded-2xl shadow-2xl sm:max-w-2xl overflow-y-auto flex flex-col animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200">
+        <div className="px-6 py-4 border-b border-shnoor-mist flex items-center justify-between sticky top-0 bg-white z-10 flex-shrink-0">
+          <h2 className="text-lg font-bold text-shnoor-navy">Create New Client</h2>
+          <button onClick={onClose} className="text-shnoor-soft hover:text-shnoor-navy p-2 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors">✕</button>
         </div>
         <form onSubmit={handleSubmit} className="px-6 py-5 flex flex-col gap-4">
           {errors.submit && (
@@ -650,26 +652,28 @@ const CreateClientModal = ({ onClose, onCreated, subscriptionPlans = [] }) => {
             </p>
           </div>
           
-          <div className="flex gap-3 pt-2 border-t border-shnoor-mist mt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={loading}
-              className="flex-1 h-[46px] border border-shnoor-mist text-shnoor-navy rounded-lg text-sm font-semibold hover:bg-shnoor-lavender transition-colors disabled:opacity-50"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex-1 h-[46px] bg-shnoor-indigo text-white rounded-lg text-sm font-semibold hover:bg-shnoor-navy transition-colors relative disabled:opacity-50"
-            >
-              {loading ? (
-                <div className="absolute top-1/2 left-1/2 -ml-2.5 -mt-2.5 w-5 h-5 border-[3px] border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                'Create Client'
-              )}
-            </button>
+          <div className="px-6 py-4 border-t border-shnoor-mist bg-white sticky bottom-0 z-10 flex-shrink-0">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={loading}
+                className="flex-1 h-[42px] border border-shnoor-mist text-shnoor-navy rounded-lg text-sm font-semibold hover:bg-shnoor-lavender transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="flex-1 h-[42px] bg-shnoor-indigo text-white rounded-lg text-sm font-semibold hover:bg-shnoor-navy transition-colors relative disabled:opacity-50"
+              >
+                {loading ? (
+                  <div className="absolute top-1/2 left-1/2 -ml-2.5 -mt-2.5 w-5 h-5 border-[3px] border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  'Create Client'
+                )}
+              </button>
+            </div>
           </div>
         </form>
       </div>
@@ -781,15 +785,15 @@ const ClientDetailPanel = ({ client, onClose, onStatusChange, onDelete, onClient
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-lg max-h-[90vh] overflow-y-auto">
-        <div className="px-6 py-4 border-b border-shnoor-mist flex items-center justify-between sticky top-0 bg-white z-10">
+      <div className="bg-white w-full h-full sm:h-auto sm:max-h-[90vh] sm:rounded-2xl shadow-2xl sm:max-w-lg flex flex-col animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200">
+        <div className="px-6 py-4 border-b border-shnoor-mist flex items-center justify-between sticky top-0 bg-white z-10 flex-shrink-0">
           <div>
-            <h2 className="text-base font-bold text-shnoor-navy">{client.company_name || client.name}</h2>
+            <h2 className="text-lg font-bold text-shnoor-navy">{client.company_name || client.name}</h2>
             <p className="text-xs text-shnoor-soft">{client.email}</p>
           </div>
-          <button onClick={onClose} className="text-shnoor-soft hover:text-shnoor-navy p-1">✕</button>
+          <button onClick={onClose} className="text-shnoor-soft hover:text-shnoor-navy p-2 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors">✕</button>
         </div>
-        <div className="px-6 py-5 flex flex-col gap-5">
+        <div className="px-6 py-5 flex flex-col gap-6 overflow-y-auto flex-1">
           <div className="flex items-center justify-between flex-wrap gap-3">
             <StatusBadge active={client.status === 'active'} />
             {loadingStats
@@ -804,46 +808,53 @@ const ClientDetailPanel = ({ client, onClose, onStatusChange, onDelete, onClient
           <div>
             <label className="block text-xs font-bold text-shnoor-soft uppercase tracking-wide mb-1.5">Student Registration URL</label>
             <div className="flex items-center gap-2">
-              <input readOnly value={regUrl} className="flex-1 h-9 px-3 rounded-lg border border-shnoor-mist bg-shnoor-lavender text-xs font-mono text-shnoor-navy" />
+              <input readOnly value={regUrl} className="flex-1 h-[42px] px-3 rounded-lg border border-shnoor-mist bg-shnoor-lavender text-xs font-mono text-shnoor-navy" />
               <button onClick={copy}
-                className={`flex-shrink-0 h-9 px-3 rounded-lg text-xs font-semibold transition-colors ${copiedUrl ? 'bg-emerald-100 text-emerald-700' : 'bg-shnoor-indigo text-white hover:bg-shnoor-navy'}`}>
-                {copiedUrl ? '✓' : <Copy size={14} />}
+                className={`flex-shrink-0 h-[42px] px-4 rounded-lg text-xs font-semibold transition-colors flex items-center justify-center gap-2 ${copiedUrl ? 'bg-emerald-100 text-emerald-700' : 'bg-shnoor-indigo text-white hover:bg-shnoor-navy'}`}>
+                {copiedUrl ? '✓ Copied' : <Copy size={14} />}
               </button>
               <a href={regUrl} target="_blank" rel="noopener noreferrer"
-                className="flex-shrink-0 h-9 px-3 rounded-lg border border-shnoor-mist text-shnoor-soft hover:text-shnoor-indigo transition-colors flex items-center">
-                <ExternalLink size={14} />
+                className="flex-shrink-0 h-[42px] px-4 rounded-lg border border-shnoor-mist text-shnoor-soft hover:text-shnoor-indigo transition-colors flex items-center justify-center">
+                <ExternalLink size={16} />
               </a>
             </div>
           </div>
           <div>
             <label className="block text-xs font-bold text-shnoor-soft uppercase tracking-wide mb-1.5">Registration Token</label>
-            <code className="block bg-shnoor-lavender rounded-lg px-3 py-2 text-xs font-mono text-shnoor-navy break-all">{client.registration_token}</code>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs border-y border-shnoor-mist py-4">
-            <div><span className="text-shnoor-soft">Plan</span><p className="font-semibold text-shnoor-navy mt-0.5">{subscriptionPlans.find(p => p.plan_id === client.plan_id)?.name || client.plan_id || 'Basic'}</p></div>
-            <div><span className="text-shnoor-soft">Duration</span><p className="font-semibold text-shnoor-navy mt-0.5 capitalize">{client.subscription_duration?.toLowerCase().replace('_', ' ') || '30 days'}</p></div>
-            <div>
-              <span className="text-shnoor-soft">Payment</span>
-              <p className={`font-semibold mt-0.5 ${client.payment_status === 'PAID' ? 'text-emerald-600' : 'text-red-600'}`}>
-                {client.payment_status || 'UNPAID'}
-              </p>
+            <div className="bg-shnoor-lavender rounded-lg px-4 py-3 border border-shnoor-mist">
+              <code className="text-xs font-mono text-shnoor-navy break-all">{client.registration_token}</code>
             </div>
-            <div><span className="text-shnoor-soft">Start Date</span><p className="font-semibold text-shnoor-navy mt-0.5">{client.subscription_start_date ? new Date(client.subscription_start_date).toLocaleDateString('en-IN') : '-'}</p></div>
-            <div><span className="text-shnoor-soft">Expiry Date</span><p className="font-semibold text-shnoor-navy mt-0.5">{client.subscription_end_date ? new Date(client.subscription_end_date).toLocaleDateString('en-IN') : '-'}</p></div>
-            <div><span className="text-shnoor-soft">Created On</span><p className="font-semibold text-shnoor-navy mt-0.5">{new Date(client.created_at).toLocaleDateString('en-IN')}</p></div>
           </div>
-          <div className="flex gap-3 pt-1">
+          <div className="bg-gray-50 rounded-xl border border-shnoor-mist p-4">
+            <h3 className="text-xs font-bold text-shnoor-navy uppercase tracking-wide mb-4">Subscription Details</h3>
+            <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-xs">
+              <div><span className="text-shnoor-soft block mb-1">Plan</span><p className="font-semibold text-shnoor-navy">{subscriptionPlans.find(p => p.plan_id === client.plan_id)?.name || client.plan_id || 'Basic'}</p></div>
+              <div><span className="text-shnoor-soft block mb-1">Duration</span><p className="font-semibold text-shnoor-navy capitalize">{client.subscription_duration?.toLowerCase().replace('_', ' ') || '30 days'}</p></div>
+              <div>
+                <span className="text-shnoor-soft block mb-1">Payment</span>
+                <p className={`font-semibold ${client.payment_status === 'PAID' ? 'text-emerald-600' : 'text-red-600'}`}>
+                  {client.payment_status || 'UNPAID'}
+                </p>
+              </div>
+              <div><span className="text-shnoor-soft block mb-1">Created On</span><p className="font-semibold text-shnoor-navy">{new Date(client.created_at).toLocaleDateString('en-IN')}</p></div>
+              <div><span className="text-shnoor-soft block mb-1">Start Date</span><p className="font-semibold text-shnoor-navy">{client.subscription_start_date ? new Date(client.subscription_start_date).toLocaleDateString('en-IN') : '-'}</p></div>
+              <div><span className="text-shnoor-soft block mb-1">Expiry Date</span><p className="font-semibold text-shnoor-navy">{client.subscription_end_date ? new Date(client.subscription_end_date).toLocaleDateString('en-IN') : '-'}</p></div>
+            </div>
+          </div>
+        </div>
+        <div className="px-6 py-4 border-t border-shnoor-mist bg-white sticky bottom-0 z-10 flex-shrink-0">
+          <div className="flex flex-col sm:flex-row gap-3">
             <button onClick={() => setShowEdit(true)} disabled={actionLoading}
-              className="flex-1 h-10 bg-shnoor-lavender text-shnoor-navy rounded-lg text-sm font-semibold hover:bg-shnoor-mist transition-colors flex items-center justify-center gap-2">
-              <Pencil size={14} /> Edit Client
+              className="flex-1 h-[42px] border border-shnoor-mist text-shnoor-navy rounded-lg text-sm font-semibold hover:bg-shnoor-lavender transition-colors flex items-center justify-center gap-2">
+              <Pencil size={16} /> Edit Client
             </button>
             <button onClick={toggleStatus} disabled={actionLoading}
-              className={`flex-1 h-10 rounded-lg text-sm font-semibold transition-colors ${client.status === 'active' ? 'bg-amber-100 text-amber-700 hover:bg-amber-200' : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'}`}>
+              className={`flex-1 h-[42px] rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-2 ${client.status === 'active' ? 'bg-amber-100 text-amber-700 hover:bg-amber-200' : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'}`}>
               {client.status === 'active' ? 'Suspend Client' : 'Activate Client'}
             </button>
             <button onClick={handleDelete} disabled={actionLoading}
-              className="flex-1 h-10 bg-red-50 text-red-600 rounded-lg text-sm font-semibold hover:bg-red-100 transition-colors flex items-center justify-center gap-2">
-              <Trash2 size={14} /> Delete
+              className="flex-1 h-[42px] bg-red-50 text-red-600 rounded-lg text-sm font-semibold hover:bg-red-100 transition-colors flex items-center justify-center gap-2">
+              <Trash2 size={16} /> Delete
             </button>
           </div>
         </div>
@@ -1024,7 +1035,7 @@ const AdminClients = () => {
           </div>
         ) : (
           <div className="bg-white rounded-xl border border-shnoor-mist overflow-hidden shadow-sm">
-            <div className="overflow-x-auto">
+            <div className="mt-6 overflow-x-auto">
               <table className="w-full text-left text-sm whitespace-nowrap">
                 <thead className="bg-shnoor-lavender text-shnoor-navy border-b border-shnoor-mist">
                   <tr>

@@ -182,8 +182,8 @@ const AdminHeader = () => {
               <span>Settings</span>
             </Button>
             <Button
-              variant="secondary"
-              className="admin-logout-btn !h-10 !px-5 text-sm bg-transparent hover:bg-white/10 text-white border border-white/20"
+              variant="primary"
+              className="admin-header-action !h-10 !px-5 text-sm hover:shadow-[0_0_15px_rgba(107,107,229,0.4)] hover:-translate-y-0.5 transition-all border-0"
               onClick={handleLogout}
             >
               <LogOut size={16} className="mr-2" />
@@ -282,8 +282,8 @@ const AdminHeader = () => {
                 <span>Settings</span>
               </Button>
               <Button
-                variant="secondary"
-                className="w-full justify-start !h-12 !px-4 text-base bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-xl"
+                variant="primary"
+                className="admin-header-action w-full justify-start !h-12 !px-4 text-base border-0 rounded-xl"
                 onClick={() => {
                   handleLogout();
                   setMobileMenuOpen(false);

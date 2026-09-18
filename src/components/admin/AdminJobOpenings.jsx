@@ -408,7 +408,7 @@ export default function AdminJobOpenings() {
                                         <button
                                             onClick={() => setExpandedId(expandedId === job.id ? null : job.id)}
                                             title="Toggle details"
-                                            className="p-2 rounded-lg text-shnoor-indigoMedium hover:bg-shnoor-lavender transition-colors"
+                                            className="flex items-center justify-center p-2 rounded-lg text-shnoor-indigoMedium hover:bg-shnoor-lavender transition-colors"
                                         >
                                             {expandedId === job.id ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                                         </button>
@@ -418,7 +418,7 @@ export default function AdminJobOpenings() {
                                                 <button
                                                     onClick={() => navigate(`/admin/job-applicants/${job.id}`)}
                                                     title="View applicants"
-                                                    className="flex items-center space-x-1.5 px-4 py-2 bg-shnoor-indigo hover:bg-[#4d4d9c] text-white rounded-xl text-sm font-semibold transition-all shadow-sm"
+                                                    className="flex items-center justify-center space-x-1.5 px-4 py-2 bg-shnoor-indigo hover:bg-[#4d4d9c] text-white rounded-xl text-sm font-semibold transition-all shadow-sm"
                                                 >
                                                     <Users size={16} />
                                                     <span>View Applicants</span>
@@ -427,7 +427,7 @@ export default function AdminJobOpenings() {
                                                 <button
                                                     onClick={() => openTestLinkModal(job.id)}
                                                     title="Link tests to this job"
-                                                    className="flex items-center space-x-1.5 px-4 py-2 bg-shnoor-indigoMedium hover:bg-shnoor-indigo text-white rounded-xl text-sm font-semibold transition-all shadow-sm"
+                                                    className="flex items-center justify-center space-x-1.5 px-4 py-2 bg-shnoor-indigoMedium hover:bg-shnoor-indigo text-white rounded-xl text-sm font-semibold transition-all shadow-sm"
                                                 >
                                                     <TestTube size={16} />
                                                     <span>Link Tests</span>
@@ -440,7 +440,7 @@ export default function AdminJobOpenings() {
                                                 onClick={() => handlePublish(job.id)}
                                                 disabled={publishingId === job.id}
                                                 title="Publish & send emails"
-                                                className="flex items-center space-x-1.5 px-4 py-2 bg-shnoor-indigo hover:bg-shnoor-navy text-white rounded-xl text-sm font-semibold transition-all disabled:opacity-60"
+                                                className="flex items-center justify-center space-x-1.5 px-4 py-2 bg-shnoor-indigo hover:bg-shnoor-navy text-white rounded-xl text-sm font-semibold transition-all disabled:opacity-60"
                                             >
                                                 {publishingId === job.id
                                                     ? <Loader2 size={16} className="animate-spin" />
@@ -453,7 +453,7 @@ export default function AdminJobOpenings() {
                                             onClick={() => handleDelete(job.id)}
                                             disabled={deletingId === job.id}
                                             title="Delete"
-                                            className="p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors disabled:opacity-60"
+                                            className="flex items-center justify-center p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors disabled:opacity-60"
                                         >
                                             {deletingId === job.id
                                                 ? <Loader2 size={18} className="animate-spin" />

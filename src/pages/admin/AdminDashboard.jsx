@@ -11,6 +11,7 @@ import { apiFetch } from '../../config/api';
 import AdminHeader from '../../components/AdminHeader';
 import { useSEO } from '../../hooks/useSEO';
 import { lazy, Suspense } from 'react';
+import Select from 'react-select';
 
 // Lazy load large sections and modals to reduce the initial bundle size
 const CreateTestSection = lazy(() => import('../../components/admin/CreateTestSection'));
@@ -2215,7 +2216,7 @@ const AdminDashboard = () => {
         )}
 
         {/* Main Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="w-full max-w-none px-0 sm:px-2 lg:px-4 py-8">
 
           {/* Subscription Expiry Banner */}
           {!isSuperAdmin && daysRemaining !== null && daysRemaining <= 7 && (
@@ -2247,10 +2248,10 @@ const AdminDashboard = () => {
             </div>
           )}
 
-          {/* Tab Navigation */}
+          {/* Horizontal Navigation */}
           {!showCreateTest && !selectedExamId && (
-            <div className="mb-3 sm:mb-8 overflow-x-auto pb-2 sm:pb-0 hide-scrollbar">
-              <div className="admin-tab-shell bg-white rounded-xl sm:rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-mist p-1.5 sm:p-2 flex min-w-max gap-1.5 sm:gap-2">
+            <div className="mb-6 overflow-x-auto pb-2 border-b border-gray-200">
+              <div className="flex items-center gap-2 min-w-max px-2">
                 {[
                   { id: 'exams', label: 'Manage Exams', icon: FileSpreadsheet },
                   { id: 'institutes', label: 'Manage Institutes', icon: Building2 },
@@ -2264,15 +2265,23 @@ const AdminDashboard = () => {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`admin-tab-button flex items-center gap-1.5 sm:gap-2 px-3 py-2 sm:px-6 sm:py-3 rounded-lg sm:rounded-xl font-medium transition-all shrink-0 text-[11px] sm:text-base ${activeTab === tab.id ? 'is-active' : ''}`}
+                    className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-medium transition-all text-sm whitespace-nowrap ${
+                      activeTab === tab.id 
+                        ? 'bg-shnoor-navy text-white shadow-md' 
+                        : 'text-gray-500 hover:text-gray-800'
+                    }`}
                   >
-                    <tab.icon size={16} className="sm:w-5 sm:h-5" />
-                    <span className="whitespace-nowrap">{tab.label}</span>
+                    <tab.icon size={18} className={activeTab === tab.id ? 'text-white' : 'text-gray-400'} />
+                    <span>{tab.label}</span>
                   </button>
                 ))}
               </div>
             </div>
           )}
+
+          {/* Main Content Area */}
+          <div className="w-full">
+            <div className="w-full">
 
           {/* Create Test Modal/Section */}
           {showCreateTest ? (
@@ -2287,6 +2296,7 @@ const AdminDashboard = () => {
                   title={editingTest ? 'Cancel Editing' : 'Back to Exams'}
                 >
                   <ArrowLeft size={22} className="group-hover:-translate-x-1 transition-transform" />
+                  <span className="font-semibold text-sm">Back</span>
                 </button>
               </div>
               <CreateTestSection
@@ -2628,7 +2638,7 @@ const AdminDashboard = () => {
                       );
                     })()}
 
-                    <div className="overflow-x-auto rounded-xl border border-shnoor-light shadow-[0_8px_30px_rgba(14,14,39,0.06)]">
+                    <div className="mt-6 overflow-x-auto rounded-xl border border-shnoor-light shadow-[0_8px_30px_rgba(14,14,39,0.06)]">
                       <table className="w-full">
                         <thead className="bg-shnoor-indigo text-white">
                           <tr>
@@ -3694,7 +3704,7 @@ const AdminDashboard = () => {
                                       </button>
                                       <button
                                         onClick={() => handleDeleteInstitute(institute.id, institute.display_name)}
-                                        className="py-2 px-3 text-shnoor-danger hover:bg-shnoor-dangerLight rounded-lg transition-colors text-sm font-medium"
+                                        className="py-2 px-3 bg-shnoor-lavender text-shnoor-danger hover:bg-shnoor-danger hover:text-white rounded-lg transition-colors text-sm font-medium"
                                         title="Delete Institute"
                                       >
                                         <Trash2 size={16} className="inline mr-1" />
@@ -3779,18 +3789,30 @@ const AdminDashboard = () => {
                       <label className="block text-sm font-bold text-shnoor-navy mb-2">
                         Select Test to View Violations
                       </label>
-                      <select
-                        value={selectedTestForViolations}
-                        onChange={(e) => setSelectedTestForViolations(e.target.value)}
-                        className="w-full px-4 py-3 border border-shnoor-light rounded-xl focus:ring-4 focus:ring-shnoor-lavender focus:border-shnoor-indigo bg-white text-shnoor-navy font-medium transition-all"
-                      >
-                        <option value="">-- Select a test --</option>
-                        {tests.map((test) => (
-                          <option key={test.id} value={test.id}>
-                            {test.name} ({test.attempts} attempts)
-                          </option>
-                        ))}
-                      </select>
+                      <Select
+                        options={tests.map(test => ({ value: test.id, label: `${test.name} (${test.attempts} attempts)` }))}
+                        value={tests.map(test => ({ value: test.id, label: `${test.name} (${test.attempts} attempts)` })).find(option => option.value === selectedTestForViolations) || null}
+                        onChange={(selectedOption) => setSelectedTestForViolations(selectedOption ? selectedOption.value : '')}
+                        className="basic-single"
+                        classNamePrefix="select"
+                        placeholder="-- Select a test --"
+                        isClearable={true}
+                        isSearchable={true}
+                        menuPosition="fixed"
+                        menuPlacement="auto"
+                        styles={{
+                          control: (base) => ({
+                            ...base,
+                            padding: '6px',
+                            borderRadius: '0.75rem',
+                            borderColor: '#e5e7eb',
+                            boxShadow: 'none',
+                            '&:hover': {
+                              borderColor: '#d1d5db'
+                            }
+                          })
+                        }}
+                      />
                     </div>
 
                     {selectedTestForViolations && (
@@ -3810,12 +3832,14 @@ const AdminDashboard = () => {
                                 >
                                   <div className="flex items-center justify-between">
                                     <div className="flex-1">
-                                      <h4 className="font-bold text-shnoor-navy">{student.student_name}</h4>
+                                      <h4 className="font-bold text-shnoor-navy text-base">{student.student_name}</h4>
                                       <p className="text-sm text-shnoor-indigoMedium">{student.student_email}</p>
                                     </div>
-                                    <div className="text-right">
-                                      <p className="text-2xl font-bold text-shnoor-indigo">{student.total_violations}</p>
-                                      <p className="text-xs text-shnoor-indigoMedium">Total Violations</p>
+                                    <div className="text-right flex flex-col items-end">
+                                      <span className="flex items-center justify-center bg-shnoor-danger/10 text-shnoor-danger font-bold text-xl px-4 py-1.5 rounded-lg mb-1">
+                                        {student.total_violations}
+                                      </span>
+                                      <p className="text-xs text-shnoor-indigoMedium font-medium uppercase tracking-wider">Violations</p>
                                     </div>
                                   </div>
                                   <div className="mt-3 flex space-x-4 text-sm">
@@ -3848,7 +3872,7 @@ const AdminDashboard = () => {
                             <p className="text-sm text-shnoor-indigoMedium mt-1">All students followed exam guidelines</p>
                           </div>
                         ) : (
-                          <div className="overflow-x-auto">
+                          <div className="mt-6 overflow-x-auto">
                             <h3 className="text-lg font-bold text-shnoor-navy mb-4">
                               Student Violations Summary
                             </h3>
@@ -5162,6 +5186,8 @@ const AdminDashboard = () => {
               }}
             />
           )}
+        </div>
+        </div>
         </div>
         </div>
       </div>

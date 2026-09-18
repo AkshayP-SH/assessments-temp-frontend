@@ -32,10 +32,6 @@ const ClientSubscriptionPlans = () => {
   const requiresPayment = location.state?.requiresPayment || false;
   const subscriptionExpired = location.state?.subscriptionExpired || false;
 
-  useEffect(() => {
-    fetchPlans();
-  }, []);
-
   const fetchPlans = async () => {
     try {
       const response = await apiFetch('api/subscription-plans');
@@ -45,12 +41,16 @@ const ClientSubscriptionPlans = () => {
       } else {
         setError('Failed to load subscription plans');
       }
-    } catch {
+    } catch (err) {
       setError('Failed to load subscription plans');
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchPlans();
+  }, []);
 
   const handleSelectPlan = async (planId) => {
     setProcessingPlan(planId);
@@ -70,7 +70,7 @@ const ClientSubscriptionPlans = () => {
         if (!token) {
           throw new Error('Authentication token not found. Please login again.');
         }
-
+        
         // Directly call verify payment with dummy data
         const verifyResponse = await fetch(getApiUrl('api/settings/verify-payment'), {
           method: 'POST',
@@ -79,8 +79,8 @@ const ClientSubscriptionPlans = () => {
             'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify({
-            razorpay_order_id: 'dummy_order_' + Date.now(),
-            razorpay_payment_id: 'dummy_payment_' + Date.now(),
+            razorpay_order_id: 'dummy_order_' + new Date().getTime(),
+            razorpay_payment_id: 'dummy_payment_' + new Date().getTime(),
             razorpay_signature: 'dummy_signature',
             plan_id: planId,
             isDummyPayment: true,
@@ -163,7 +163,7 @@ const ClientSubscriptionPlans = () => {
               } else {
                 setError('Payment verification failed. Please contact support.');
               }
-            } catch {
+            } catch (err) {
               setError('Payment verification failed. Please contact support.');
             } finally {
               setProcessingPlan(null);

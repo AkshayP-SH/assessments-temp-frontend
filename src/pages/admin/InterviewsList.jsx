@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Video, Calendar, Clock, Users, Trash2, Edit2 } from 'lucide-react';
+import Select from 'react-select';
 import { apiFetch } from '../../config/api';
 
 const InterviewsList = () => {
@@ -176,43 +177,59 @@ const InterviewsList = () => {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-800 mb-4">Interviews</h1>
         
-        <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0 md:items-end">
-          <div className="w-full md:w-auto">
+        <div className="flex flex-col md:flex-row gap-4 md:items-end">
+          <div className="w-full md:w-auto flex-1">
             <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
-            <input
-              type="date"
-              value={filter.date}
-              onChange={(e) => setFilter({ ...filter, date: e.target.value })}
-              disabled={showAllDates}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-            />
+            <div className="flex flex-col sm:flex-row gap-2">
+              <input
+                type="date"
+                value={filter.date}
+                onChange={(e) => setFilter({ ...filter, date: e.target.value })}
+                disabled={showAllDates}
+                className="w-full sm:w-auto flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+              />
+              <button
+                onClick={() => setShowAllDates(!showAllDates)}
+                className={`w-full sm:w-auto px-4 py-2 flex items-center justify-center rounded-lg font-medium transition-colors whitespace-nowrap ${
+                  showAllDates
+                    ? 'bg-blue-600 text-white hover:bg-blue-700'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                {showAllDates ? 'Show Today Only' : 'Show All Dates'}
+              </button>
+            </div>
           </div>
           
-          <div className="w-full md:w-auto">
-            <button
-              onClick={() => setShowAllDates(!showAllDates)}
-              className={`w-full px-4 py-2 rounded-lg font-medium transition-colors ${
-                showAllDates
-                  ? 'bg-blue-600 text-white hover:bg-blue-700'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              {showAllDates ? 'Show Today Only' : 'Show All Dates'}
-            </button>
-          </div>
-          
-          <div className="w-full md:w-auto">
+          <div className="w-full md:w-64">
             <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-            <select
-              value={filter.status}
-              onChange={(e) => setFilter({ ...filter, status: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">All</option>
-              <option value="scheduled">Scheduled</option>
-              <option value="in_progress">In Progress</option>
-              <option value="completed">Completed</option>
-            </select>
+            <Select
+              value={[{ value: '', label: 'All' }, { value: 'scheduled', label: 'Scheduled' }, { value: 'in_progress', label: 'In Progress' }, { value: 'completed', label: 'Completed' }].find(opt => opt.value === filter.status) || { value: '', label: 'All' }}
+              onChange={(selectedOption) => setFilter({ ...filter, status: selectedOption ? selectedOption.value : '' })}
+              options={[
+                { value: '', label: 'All' },
+                { value: 'scheduled', label: 'Scheduled' },
+                { value: 'in_progress', label: 'In Progress' },
+                { value: 'completed', label: 'Completed' }
+              ]}
+              className="basic-single"
+              classNamePrefix="select"
+              isSearchable={false}
+              menuPosition="fixed"
+              menuPlacement="auto"
+              styles={{
+                control: (base) => ({
+                  ...base,
+                  padding: '2px',
+                  borderRadius: '0.5rem',
+                  borderColor: '#d1d5db',
+                  boxShadow: 'none',
+                  '&:hover': {
+                    borderColor: '#9ca3af'
+                  }
+                })
+              }}
+            />
           </div>
         </div>
       </div>
@@ -266,7 +283,7 @@ const InterviewsList = () => {
                   
                   <button
                     onClick={() => openEditModal(interview)}
-                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors shrink-0"
+                    className="p-2 flex items-center justify-center text-blue-600 hover:bg-blue-50 rounded-lg transition-colors shrink-0"
                     title="Edit schedule"
                   >
                     <Edit2 size={18} />
@@ -274,7 +291,7 @@ const InterviewsList = () => {
                   
                   <button
                     onClick={() => deleteInterview(interview.id, interview.student_name)}
-                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors shrink-0"
+                    className="p-2 flex items-center justify-center text-red-600 hover:bg-red-50 rounded-lg transition-colors shrink-0"
                     title="Delete interview"
                   >
                     <Trash2 size={18} />
