@@ -34,6 +34,7 @@ const ClientSubscriptionPlans = () => {
 
   const fetchPlans = async () => {
     try {
+      await Promise.resolve(); // Prevent synchronous setState in useEffect
       // Hardcoded plans to avoid backend dependency
       const dummyPlans = [
         {
@@ -63,6 +64,7 @@ const ClientSubscriptionPlans = () => {
       ];
       setPlans(dummyPlans);
     } catch (err) {
+      console.error(err);
       setError('Failed to load subscription plans');
     } finally {
       setLoading(false);
@@ -100,8 +102,8 @@ const ClientSubscriptionPlans = () => {
             'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify({
-            razorpay_order_id: 'dummy_order_' + Date.now(),
-            razorpay_payment_id: 'dummy_payment_' + Date.now(),
+            razorpay_order_id: 'dummy_order_' + new Date().getTime(),
+            razorpay_payment_id: 'dummy_payment_' + new Date().getTime(),
             razorpay_signature: 'dummy_signature',
             plan_id: planId,
             isDummyPayment: true,
@@ -185,6 +187,7 @@ const ClientSubscriptionPlans = () => {
                 setError('Payment verification failed. Please contact support.');
               }
             } catch (err) {
+              console.error(err);
               setError('Payment verification failed. Please contact support.');
             } finally {
               setProcessingPlan(null);

@@ -59,6 +59,7 @@ const ClientDashboard = () => {
     setLoading(true);
     setError('');
     try {
+      await Promise.resolve();
       const headers = authHeaders();
 
       const [testsRes, institutesRes, studentsRes, plansRes, profileRes] = await Promise.all([
@@ -91,6 +92,7 @@ const ClientDashboard = () => {
 
       if (Array.isArray(studentsData)) setStudents(studentsData);
     } catch (err) {
+      console.error(err);
       setError('Failed to load dashboard data. Please refresh.');
     } finally {
       setLoading(false);
@@ -169,6 +171,7 @@ const ClientDashboard = () => {
               alert(verifyData.message || 'Payment verification failed');
             }
           } catch (err) {
+            console.error(err);
             alert('Error verifying payment');
           }
         },
@@ -187,6 +190,7 @@ const ClientDashboard = () => {
       });
       rzp.open();
     } catch (err) {
+      console.error(err);
       alert('Error purchasing subscription');
     }
   };
