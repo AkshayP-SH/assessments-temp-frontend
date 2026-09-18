@@ -3704,7 +3704,7 @@ const AdminDashboard = () => {
                                       </button>
                                       <button
                                         onClick={() => handleDeleteInstitute(institute.id, institute.display_name)}
-                                        className="py-2 px-3 text-shnoor-danger hover:bg-shnoor-dangerLight rounded-lg transition-colors text-sm font-medium"
+                                        className="py-2 px-3 bg-shnoor-lavender text-shnoor-danger hover:bg-shnoor-danger hover:text-white rounded-lg transition-colors text-sm font-medium"
                                         title="Delete Institute"
                                       >
                                         <Trash2 size={16} className="inline mr-1" />

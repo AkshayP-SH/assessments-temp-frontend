@@ -428,7 +428,7 @@ const Login = () => {
               </div>
             </div>
 
-            <Button type="submit" variant="primary" className="w-full !h-[54px] text-base font-bold tracking-wide mt-2 shadow-lg shadow-indigo-200/50 hover:shadow-indigo-300/50 hover:-translate-y-0.5 transition-all duration-300" disabled={isLoading}>
+            <Button type="submit" variant="primary" className="w-full !h-[54px] text-base font-bold tracking-wide mt-2 shadow-lg shadow-emerald-200/50 hover:shadow-emerald-300/50 hover:-translate-y-0.5 transition-all duration-300 !bg-shnoor-success hover:!bg-emerald-500 text-white" disabled={isLoading}>
               {isLoading && <div className="w-5 h-5 border-[3px] border-white/30 border-t-white rounded-full animate-spin mr-2" />}
               {isLoading ? 'Signing In...' : 'Sign In'}
             </Button>
