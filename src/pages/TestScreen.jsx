@@ -6,27 +6,16 @@ import { useTabSwitch } from '../hooks/useTabSwitch';
 import { useProctoringWithAI } from '../hooks/useProctoringWithAI';
 import FullscreenWarning from '../components/FullscreenWarning';
 import AIViolationAlert from '../components/AIViolationAlert';
-import ThemeSelector from '../components/ThemeSelector';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-
 import StudentMessageAlert from '../components/student/StudentMessageAlert';
 import QuestionPaletteSidebar from '../components/student/QuestionPaletteSidebar';
-import LazyMonacoEditor from '../components/LazyMonacoEditor';
 import ErrorBoundary from '../components/ErrorBoundary';
-import {
-  Clock,
-  AlertTriangle,
-  ChevronLeft,
-  ChevronRight,
-  Flag,
-  CheckCircle,
-  StopCircle,
-  XCircle,
-  WifiOff
-} from 'lucide-react';
+import TestHeader from '../components/test/TestHeader';
+import McqQuestionView from '../components/test/McqQuestionView';
+import CodingProblemView from '../components/test/CodingProblemView';
+import CodingEditorPanel from '../components/test/CodingEditorPanel';
+import TerminationModal from '../components/test/TerminationModal';
+import { AlertTriangle, WifiOff } from 'lucide-react';
 import { apiFetch } from '../config/api';
-import codeExecutionAPI from '../services/codeExecutionAPI';
 import { getSavedTheme } from '../utils/theme';
 
 const TestScreen = () => {
@@ -37,19 +26,19 @@ const TestScreen = () => {
   const [error, setError] = useState(null);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
-  const [codingConsoleOutput, setCodingConsoleOutput] = useState({}); // Store console output per question
+  const [codingConsoleOutput, setCodingConsoleOutput] = useState({});
   const [markedForReview, setMarkedForReview] = useState(new Set());
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const lastSavedStateRef = useRef(null);
+
   // Termination modal state
   const [showTerminationModal, setShowTerminationModal] = useState(false);
   const [terminationData, setTerminationData] = useState(null);
 
-  // Warnings sidebar state
+  // Navigation & panels state
   const [warningsSidebarCollapsed, setWarningsSidebarCollapsed] = useState(false);
   const [activeCodingTab, setActiveCodingTab] = useState('questions'); // questions, description, code
   const [bottomPanelTab, setBottomPanelTab] = useState('testCases'); // testCases, console
-
 
   // Resizable panel states
   const [leftPanelWidth, setLeftPanelWidth] = useState(33); // percentage
@@ -57,7 +46,7 @@ const TestScreen = () => {
   const [isResizingHorizontal, setIsResizingHorizontal] = useState(false);
   const [isResizingVertical, setIsResizingVertical] = useState(false);
 
-  // Starter code templates for each language
+  // Starter code templates
   const getStarterCode = (language) => {
     const templates = {
       java: `public class Solution {
@@ -83,58 +72,44 @@ int main() {
     };
     return templates[language] || templates.java;
   };
+
   const [visited, setVisited] = useState(new Set([0]));
   const [warningCount, setWarningCount] = useState(0);
   const [showTabWarning, setShowTabWarning] = useState(false);
-  const [initialTimeRemaining, setInitialTimeRemaining] = useState(3600); // Default 60 minutes in seconds
+  const [initialTimeRemaining, setInitialTimeRemaining] = useState(3600);
   const [hasStarted, setHasStarted] = useState(false);
   const [testDetails, setTestDetails] = useState(null);
   const [currentAIViolation, setCurrentAIViolation] = useState(null);
   const [aiViolationCount, setAiViolationCount] = useState(0);
   const [editorTheme, setEditorTheme] = useState(getSavedTheme());
 
-  // Calculate total questions (MCQ + Coding)
   const totalQuestions = questions.length + codingQuestions.length;
 
-  // Helper function to format errors for display
-  const formatErrorForDisplay = (error) => {
-    if (!error) return '';
-
-    // Clean up Docker noise for display only
-    return error
+  const formatErrorForDisplay = (err) => {
+    if (!err) return '';
+    return err
       .replace(/Tip: Install JDK \(javac\) or start Docker Desktop\./g, 'Tip: To fix this, please install Java JDK on your computer or start Docker Desktop.')
       .replace(/Command failed with exit code \d+:\s*/g, '')
       .replace(/Error: Command failed:\s*/g, '')
       .replace(/^.*alpine.*$/gm, '')
       .replace(/\/app\//g, '')
       .replace(/^\s*[\r\n]/gm, '')
-      .trim() || error;
+      .trim() || err;
   };
 
-  const {
-    showWarning,
-    enterFullscreen
-  } = useFullscreen();
+  const { showWarning, enterFullscreen } = useFullscreen();
 
-  // Handle auto-submit on time up
-  const handleTimeUp = useCallback(() => {
-    // Will be called by submitTest
-  }, []);
+  const handleTimeUp = useCallback(() => {}, []);
 
   const { timeLeft, formattedTime, stopTimer } = useTimer(
     initialTimeRemaining,
     handleTimeUp
   );
 
-  // Handle camera loss - force exit exam
   const handleCameraLost = useCallback((reason) => {
     alert(`⚠️ ${reason}\n\nYour exam has been terminated.`);
     stopTimer();
-
-    // Clear test data
     localStorage.removeItem('selectedTestId');
-
-    // Navigate back to dashboard
     navigate('/dashboard', {
       replace: true,
       state: {
@@ -144,23 +119,17 @@ int main() {
     });
   }, [navigate, stopTimer]);
 
-  // Handle AI violations
   const handleAIViolation = useCallback((violation) => {
     console.log('[AI Violation Detected]', violation);
-
-    // Show alert to student
     setCurrentAIViolation(violation);
     setAiViolationCount(prev => prev + 1);
 
-    // Auto-dismiss after 5 seconds
     setTimeout(() => {
       setCurrentAIViolation(null);
     }, 5000);
 
-    // If too many high-severity violations, terminate exam
     if (violation.severity === 'high') {
       const highSeverityCount = aiViolationCount + 1;
-
       if (highSeverityCount >= 5) {
         alert('⚠️ EXAM TERMINATED\n\nMultiple cheating attempts detected by AI monitoring system.\n\nYour exam has been flagged and submitted automatically.');
         submitTest('ai_violation_limit');
@@ -168,20 +137,15 @@ int main() {
     }
   }, [aiViolationCount]);
 
-  // Handle forced test stop from admin
   const handleForceStop = useCallback((data) => {
     console.log('[Force Stop] Admin stopped test:', data);
-    // Show termination modal with reason
-    // Note: stopProctoring() will be called by submitTest() when user clicks "Continue"
     setTerminationData(data);
     setShowTerminationModal(true);
   }, []);
 
-  // Proctoring hook with AI - pass camera loss and AI violation handlers
   const {
     startProctoring,
     stopProctoring,
-    // Messaging functionality
     messages: proctoringMessages,
     currentMessage,
     dismissCurrentMessage
@@ -197,11 +161,8 @@ int main() {
     };
   }, []);
 
-  // Submit test function - defined early so it can be used by other callbacks
   const submitTest = useCallback(async (reason = 'manual') => {
     stopTimer();
-
-    // IMPORTANT: Stop proctoring immediately when test ends
     stopProctoring();
 
     const testId = localStorage.getItem('selectedTestId');
@@ -212,28 +173,21 @@ int main() {
     console.log('=== SUBMITTING TEST ===');
     console.log('Test ID:', testId);
     console.log('Student ID:', studentId);
-    console.log('Has Token:', !!token);
     console.log('Answers:', answers);
     console.log('Reason:', reason);
-    console.log('Proctoring stopped');
 
     try {
-      // Build headers
-      const headers = {
-        'Content-Type': 'application/json'
-      };
-
+      const headers = { 'Content-Type': 'application/json' };
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      // Submit to backend - include studentId so backend can skip token validation
       const response = await apiFetch('api/student/submit-exam', {
         method: 'POST',
         headers: headers,
         body: JSON.stringify({
           testId: testId,
-          studentId: studentId, // Send student ID for progress-based auth
+          studentId: studentId,
           applicationId: applicationId ? parseInt(applicationId, 10) : null,
           answers: answers,
           submissionReason: reason,
@@ -242,19 +196,14 @@ int main() {
         })
       });
 
-      console.log('Response status:', response.status);
       const data = await response.json();
       console.log('Response data:', data);
 
       if (data.success) {
-        // Store testId for feedback submission
         localStorage.setItem('lastTestId', testId);
-
-        // Clear test-specific data
         localStorage.removeItem('selectedTestId');
         localStorage.removeItem('currentApplicationId');
 
-        // Navigate to results with backend response, testId, and studentId
         navigate('/result', {
           state: {
             result: {
@@ -268,22 +217,19 @@ int main() {
       } else {
         alert('Failed to submit exam: ' + data.message);
       }
-    } catch (error) {
-      console.error('Error submitting exam:', error);
+    } catch (err) {
+      console.error('Error submitting exam:', err);
       alert('Error submitting exam. Please try again.');
     }
   }, [answers, warningCount, timeLeft, stopTimer, navigate, stopProctoring]);
 
-  // Update handleTimeUp to use submitTest
   useEffect(() => {
     if (timeLeft === 0 && hasStarted) {
       submitTest('time_up');
     }
   }, [timeLeft, submitTest, hasStarted]);
 
-  // Handle tab switch
   const handleTabSwitch = useCallback((count, max) => {
-    // Don't count tab switches before exam starts
     if (!hasStarted) {
       console.log('[Tab Switch] Ignored - exam not started yet');
       return;
@@ -293,27 +239,18 @@ int main() {
     setShowTabWarning(true);
 
     if (count >= max) {
-      // Final warning - auto submit
       alert(`[FINAL WARNING] ${count}/${max}\n\nYou have exceeded the maximum number of tab switches!\n\nYour test will be submitted automatically now.`);
-
-      // Auto-submit the test immediately
       setTimeout(() => {
         submitTest('tab_switch_violation');
       }, 100);
     } else {
-      // Regular warning
       alert(`[WARNING] ${count}/${max}\n\nDo not switch tabs during the examination!\n\nPlease return to the test immediately.`);
-
-      // Hide warning modal after 3 seconds
       setTimeout(() => setShowTabWarning(false), 3000);
     }
   }, [submitTest, hasStarted]);
 
   useTabSwitch(handleTabSwitch, 3);
 
-
-
-  // Offline Syncing function
   const syncOfflineProgress = useCallback(async () => {
     const testId = localStorage.getItem('selectedTestId');
     if (!testId) return;
@@ -340,13 +277,12 @@ int main() {
           console.log('✅ Offline progress synced successfully');
           localStorage.removeItem(offlineKey);
         }
-      } catch (error) {
-        console.error('Error syncing offline progress:', error);
+      } catch (err) {
+        console.error('Error syncing offline progress:', err);
       }
     }
   }, []);
 
-  // Online / Offline Listeners
   useEffect(() => {
     const handleOnline = () => {
       setIsOffline(false);
@@ -363,9 +299,7 @@ int main() {
     };
   }, [syncOfflineProgress]);
 
-  // Manual save function - used for Save & Next, Skip, and Background Auto-Save
   const saveProgressNow = useCallback(async (isBackground = false) => {
-    // Get JWT session token from localStorage
     const token = localStorage.getItem('studentAuthToken');
     const testId = localStorage.getItem('selectedTestId');
 
@@ -384,7 +318,7 @@ int main() {
 
       const currentStateString = JSON.stringify(payload);
       if (isBackground && lastSavedStateRef.current === currentStateString) {
-        return true; // No changes to save
+        return true;
       }
 
       lastSavedStateRef.current = currentStateString;
@@ -415,13 +349,12 @@ int main() {
         console.error('Failed to save progress:', errorData);
         return false;
       }
-    } catch (error) {
-      console.error('Error saving progress:', error);
+    } catch (err) {
+      console.error('Error saving progress:', err);
       return false;
     }
   }, [answers, currentQuestion, markedForReview, visited, timeLeft, warningCount, questions.length]);
 
-  // Background Auto-Save Interval
   useEffect(() => {
     if (!hasStarted || totalQuestions === 0) return;
 
@@ -432,9 +365,6 @@ int main() {
     return () => clearInterval(intervalId);
   }, [hasStarted, totalQuestions, saveProgressNow]);
 
-  // Progress only saves when user clicks Save & Next or Skip buttons
-
-  // Security: Prevent copy-paste and right click
   useEffect(() => {
     const preventAction = (e) => {
       e.preventDefault();
@@ -446,7 +376,6 @@ int main() {
     document.addEventListener('cut', preventAction);
     document.addEventListener('paste', preventAction);
 
-    // Prevent keyboard shortcuts
     const preventKeys = (e) => {
       if (
         (e.ctrlKey && (e.key === 'c' || e.key === 'v' || e.key === 'x' || e.key === 'a')) ||
@@ -460,7 +389,6 @@ int main() {
 
     document.addEventListener('keydown', preventKeys);
 
-    // Check authentication and fetch questions
     const fetchData = async () => {
       const token = localStorage.getItem('studentAuthToken');
       const testId = localStorage.getItem('selectedTestId');
@@ -489,23 +417,17 @@ int main() {
         const data = await response.json();
         if (data.success && data.test && data.test.questions) {
           console.log('Test data received:', data.test);
-          console.log('MCQ Questions:', data.test.questions.length);
-          console.log('Coding Questions:', data.test.codingQuestions);
-
           setQuestions(data.test.questions);
           setCodingQuestions(data.test.codingQuestions || []);
 
-          // Store test details for instruction screen
           setTestDetails({
             title: data.test.title || 'Assessment',
             duration: data.test.duration || 60,
             totalQuestions: data.test.questions.length + (data.test.codingQuestions?.length || 0)
           });
 
-          // Get test duration from backend
           const duration = data.test.duration || 60;
 
-          // Load saved progress if available
           if (data.savedProgress) {
             console.log('Loading saved progress:', data.savedProgress);
             setAnswers(data.savedProgress.answers || {});
@@ -514,17 +436,14 @@ int main() {
             setVisited(new Set(data.savedProgress.visitedQuestions || [0]));
             setWarningCount(data.savedProgress.warningCount || 0);
 
-            // Set time remaining from saved progress (in seconds)
             if (data.savedProgress.timeRemaining) {
               setInitialTimeRemaining(data.savedProgress.timeRemaining);
             } else {
-              setInitialTimeRemaining(duration * 60); // Convert minutes to seconds
+              setInitialTimeRemaining(duration * 60);
             }
 
-            // If there's saved progress, user has already started
             setHasStarted(true);
 
-            // Resume proctoring and fullscreen for resumed exams
             const studentId = localStorage.getItem('studentId') || 'unknown';
             const studentName = localStorage.getItem('studentName') || 'Student';
 
@@ -545,17 +464,13 @@ int main() {
             }
 
             try {
-              // Enter fullscreen on resume
               await enterFullscreen();
               console.log('[Fullscreen] Fullscreen mode activated on resume');
             } catch (fullscreenErr) {
               console.error('[Fullscreen] Failed to resume fullscreen:', fullscreenErr);
-              // Don't block - the warning modal will show
             }
           } else {
-            // No saved progress, use full duration
             setInitialTimeRemaining(duration * 60);
-            // Redirect to instructions page for first-time users
             console.log('[TestScreen] No saved progress found - redirecting to instructions');
             navigate('/instructions', { replace: true });
             return;
@@ -571,21 +486,17 @@ int main() {
       }
     };
 
-    // Warn before unload
     const handleBeforeUnload = (e) => {
       e.preventDefault();
       e.returnValue = '';
-      // Stop proctoring when browser is closing
       stopProctoring();
     };
     window.addEventListener('beforeunload', handleBeforeUnload);
 
-    // Block browser back button during exam
     const blockBackButton = (e) => {
       e.preventDefault();
       window.history.pushState(null, '', window.location.href);
 
-      // Confirm if user really wants to exit
       const confirmExit = window.confirm(
         '⚠️ Warning: Going back will exit the exam!\n\n' +
         'Your progress will be saved, but you will need to resume the exam.\n\n' +
@@ -593,19 +504,14 @@ int main() {
       );
 
       if (confirmExit) {
-        // Stop proctoring and save progress before exiting
         stopProctoring();
         navigate('/dashboard', { replace: true });
       }
     };
 
-    // Push initial state and listen for popstate
     window.history.pushState(null, '', window.location.href);
     window.addEventListener('popstate', blockBackButton);
 
-    // Handle visibility change (tab switch, minimize, etc.)
-    // Note: We don't restart proctoring on visibility change to avoid request loops
-    // The proctoring hook handles camera state internally
     const handleVisibilityChange = () => {
       if (document.hidden) {
         console.log('[Proctoring] Page hidden');
@@ -626,20 +532,15 @@ int main() {
       window.removeEventListener('beforeunload', handleBeforeUnload);
       window.removeEventListener('popstate', blockBackButton);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-
-      // Stop proctoring when leaving test
       stopProctoring();
     };
   }, [navigate, stopProctoring]);
 
   const handleAnswerSelect = (optionIndex) => {
-    setAnswers(prev => {
-      const newAnswers = {
-        ...prev,
-        [currentQuestion]: optionIndex
-      };
-      return newAnswers;
-    });
+    setAnswers(prev => ({
+      ...prev,
+      [currentQuestion]: optionIndex
+    }));
   };
 
   const handleNavigate = (index) => {
@@ -687,7 +588,6 @@ int main() {
       const containerRect = container.getBoundingClientRect();
       const newWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
 
-      // Limit between 20% and 50%
       if (newWidth >= 20 && newWidth <= 50) {
         setLeftPanelWidth(newWidth);
       }
@@ -724,7 +624,6 @@ int main() {
       const containerRect = container.getBoundingClientRect();
       const newHeight = containerRect.bottom - e.clientY;
 
-      // Limit between 100px and 500px
       if (newHeight >= 100 && newHeight <= 500) {
         setConsolePanelHeight(newHeight);
       }
@@ -749,9 +648,7 @@ int main() {
     const isAnswered = answers[index] !== undefined;
     const isMarked = markedForReview.has(index);
 
-    // If marked for review, always show yellow regardless of answer status
     if (isMarked) return 'review';
-    // Only show green if answered AND not marked
     if (isAnswered) return 'answered';
     if (visited.has(index)) return 'visited';
     return 'not-visited';
@@ -783,7 +680,6 @@ int main() {
     );
   }
 
-  // Determine if current question is MCQ or Coding
   const isCodingQuestion = currentQuestion >= questions.length;
   const currentQ = isCodingQuestion
     ? codingQuestions[currentQuestion - questions.length]
@@ -832,45 +728,20 @@ int main() {
         />
       )}
 
-      {/* Top Bar */}
-      <header className="bg-white border-b border-shnoor-light shadow-lg flex-shrink-0">
-        <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap sm:flex-nowrap justify-between items-center h-auto sm:h-16 py-3 sm:py-0 gap-3 sm:gap-0">
-            {/* Left: Logo and Title */}
-            <div className="flex items-center space-x-3 sm:space-x-4 w-full sm:w-auto">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-shnoor-navy to-shnoor-indigo rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
-                <span className="text-white font-bold text-xs sm:text-base">EX</span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <h1 className="text-sm sm:text-lg font-bold text-shnoor-navy truncate max-w-full">{testDetails?.title || 'Assessment'}</h1>
-                <p className="text-[10px] sm:text-xs text-shnoor-indigoMedium truncate">Question {currentQuestion + 1} of {totalQuestions}</p>
-              </div>
-            </div>
+      {/* Top Bar Header */}
+      <TestHeader
+        title={testDetails?.title || 'Assessment'}
+        currentQuestion={currentQuestion}
+        totalQuestions={totalQuestions}
+        formattedTime={formattedTime}
+        editorTheme={editorTheme}
+        onFinish={() => {
+          if (window.confirm('Are you sure you want to finish and submit the test? This action cannot be undone.')) {
+            submitTest('manual');
+          }
+        }}
+      />
 
-            {/* Center: Timer */}
-            <div className="flex items-center space-x-1.5 sm:space-x-2 bg-shnoor-lavender px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl shadow-inner border border-shnoor-light flex-shrink-0">
-              <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-shnoor-indigo" />
-              <span className="text-sm sm:text-xl font-mono font-bold text-shnoor-navy">{formattedTime}</span>
-            </div>
-
-            {/* Right: Finish Test Button */}
-            <div className="flex items-center justify-end gap-2 lg:flex-none">
-              <ThemeSelector variant={editorTheme === 'default' ? 'light' : 'dark'} />
-              <button
-                onClick={() => {
-                  if (window.confirm('Are you sure you want to finish and submit the test? This action cannot be undone.')) {
-                    submitTest('manual');
-                  }
-                }}
-                className="flex items-center space-x-1 sm:space-x-2 px-3 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-shnoor-danger to-shnoor-danger hover:from-shnoor-danger hover:to-shnoor-danger text-white font-bold rounded-xl shadow-lg transition-all duration-200 hover:scale-105 border-2 border-shnoor-danger text-xs sm:text-base flex-shrink-0"
-              >
-                <CheckCircle size={16} className="sm:w-5 sm:h-5" />
-                <span>Finish<span className="hidden sm:inline"> Test</span></span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
       {/* Main Content */}
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         {/* Left Sidebar - Question Palette (MCQ view) */}
@@ -889,146 +760,26 @@ int main() {
               isCollapsed={warningsSidebarCollapsed}
               onToggleCollapse={() => setWarningsSidebarCollapsed(prev => !prev)}
               isMobileVisible={true}
-              className="order-2 lg:order-1"
+              className="order-2 lg:order-1 max-h-72 lg:max-h-none"
             />
           </ErrorBoundary>
         )}
 
         {/* Main Question Area - MCQ */}
         {!isCodingQuestion && (
-          <main className="flex-1 flex flex-col bg-shnoor-lavender p-3 sm:p-6 overflow-hidden order-1 lg:order-2">
-            {/* Question Card - Fixed Height with Internal Scrolling */}
-            <div className="flex-1 bg-white rounded-xl sm:rounded-2xl shadow-xl border border-shnoor-light p-4 sm:p-8 flex flex-col overflow-hidden min-h-0">
-              {/* Question Header */}
-              <div className="flex items-center justify-between mb-4 sm:mb-6 flex-shrink-0 gap-2">
-                <div className="flex items-center space-x-2 sm:space-x-3">
-                  <span className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-shnoor-indigo to-shnoor-navy text-white rounded-lg sm:rounded-xl flex items-center justify-center font-bold shadow-lg text-sm sm:text-base flex-shrink-0">
-                    Q{currentQuestion + 1}
-                  </span>
-                  {markedForReview.has(currentQuestion) && (
-                    <span className="flex items-center space-x-1 text-shnoor-warning bg-shnoor-warningLight px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-xs sm:text-sm font-medium border border-shnoor-warningLight shadow-sm">
-                      <Flag size={12} className="sm:w-[14px] sm:h-[14px]" />
-                      <span className="hidden sm:inline">Marked for Review</span>
-                      <span className="sm:hidden">Marked</span>
-                    </span>
-                  )}
-                </div>
-                <button
-                  onClick={toggleMarkForReview}
-                  className={`
-                    flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium transition-all duration-200 shadow-sm flex-shrink-0
-                    ${markedForReview.has(currentQuestion)
-                      ? 'bg-shnoor-warningLight text-shnoor-warning hover:bg-shnoor-warningLight border border-shnoor-warningLight'
-                      : 'bg-shnoor-lavender text-shnoor-indigo hover:bg-shnoor-mist border border-shnoor-light'}
-                  `}
-                >
-                  <Flag size={14} className="sm:w-[18px] sm:h-[18px]" />
-                  <span className="hidden sm:inline">{markedForReview.has(currentQuestion) ? 'Unmark' : 'Mark for Review'}</span>
-                  <span className="sm:hidden">{markedForReview.has(currentQuestion) ? 'Unmark' : 'Review'}</span>
-                </button>
-              </div>
-
-              {/* Layout: Question & Options */}
-              <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:gap-6 flex-1 overflow-y-auto lg:overflow-hidden min-h-0">
-                {/* Left Side: Question Text */}
-                <div className="col-span-1 lg:col-span-3 bg-shnoor-lavender/30 rounded-xl p-4 sm:p-6 border-2 border-shnoor-mist overflow-y-visible lg:overflow-y-auto h-auto lg:h-full">
-                  <h3 className="text-sm font-semibold text-shnoor-indigoMedium mb-4 uppercase tracking-wide">Question</h3>
-                  {currentQ.format === 'paragraph' ? (
-                    <div className="text-lg text-shnoor-navy leading-relaxed prose prose-lg max-w-none">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {currentQ.question}
-                      </ReactMarkdown>
-                    </div>
-                  ) : currentQ.format === 'code' ? (
-                    <pre className="text-sm text-shnoor-navy leading-relaxed bg-gray-50 p-4 rounded-lg overflow-x-auto font-mono border border-shnoor-mist">
-                      <code>{currentQ.question}</code>
-                    </pre>
-                  ) : (
-                    <p className="text-lg text-shnoor-navy leading-relaxed whitespace-pre-wrap font-medium">
-                      {currentQ.question}
-                    </p>
-                  )}
-                </div>
-
-                {/* Right Side: Options */}
-                <div className="col-span-1 lg:col-span-2 bg-shnoor-lavender/30 rounded-xl p-4 sm:p-6 border-2 border-shnoor-mist overflow-y-visible lg:overflow-y-auto h-auto lg:h-full">
-                  <h3 className="text-sm font-semibold text-shnoor-indigoMedium mb-4 uppercase tracking-wide">Choose Your Answer</h3>
-                  <div className="space-y-3">
-                    {currentQ.options.map((option, index) => (
-                      <label
-                        key={index}
-                        className={`
-                          flex items-center p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 shadow-sm bg-white
-                          ${answers[currentQuestion] === index
-                            ? 'border-shnoor-indigo bg-shnoor-lavender shadow-lg'
-                            : 'border-shnoor-light hover:border-shnoor-soft hover:bg-shnoor-mist/30'}
-                        `}
-                      >
-                        <input
-                          type="radio"
-                          name={`question-${currentQuestion}`}
-                          checked={answers[currentQuestion] === index}
-                          onChange={() => handleAnswerSelect(index)}
-                          className="w-5 h-5 text-shnoor-indigo border-shnoor-light focus:ring-shnoor-indigo"
-                        />
-                        <span className="ml-4 text-shnoor-navy font-medium">{option}</span>
-                        {answers[currentQuestion] === index && (
-                          <CheckCircle className="ml-auto w-5 h-5 text-shnoor-indigo" />
-                        )}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Floating Navigation Buttons - Fixed at Bottom */}
-            <div className="flex justify-between items-center mt-4 sm:mt-6 flex-shrink-0 gap-2">
-              <button
-                onClick={handlePrevious}
-                disabled={currentQuestion === 0}
-                className={`
-                  flex items-center justify-center space-x-1 sm:space-x-2 px-3 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl font-semibold transition-all duration-200 shadow-lg text-sm sm:text-base flex-1 sm:flex-none
-                  ${currentQuestion === 0
-                    ? 'bg-shnoor-mist text-shnoor-soft cursor-not-allowed'
-                    : 'bg-white border-2 border-shnoor-light text-shnoor-navy hover:border-shnoor-soft hover:bg-shnoor-mist/30 hover:shadow-xl'}
-                `}
-              >
-                <ChevronLeft size={16} className="sm:w-5 sm:h-5" />
-                <span className="hidden sm:inline">Previous</span>
-                <span className="sm:hidden">Prev</span>
-              </button>
-
-              <div className="flex space-x-2 sm:space-x-3 flex-1 sm:flex-none justify-end">
-                <button
-                  onClick={() => {
-                    saveProgressNow(); // Save in background without blocking
-                    handleNext();
-                  }}
-                  className="px-4 sm:px-6 py-2 sm:py-3 bg-white border-2 border-shnoor-light text-shnoor-indigoMedium rounded-lg sm:rounded-xl font-semibold hover:border-shnoor-soft hover:bg-shnoor-mist/30 transition-all duration-200 shadow-lg hover:shadow-xl text-sm sm:text-base"
-                >
-                  Skip
-                </button>
-
-                <button
-                  onClick={() => {
-                    if (answers[currentQuestion] !== undefined) {
-                      saveProgressNow(); // Save in background without blocking
-                      handleNext();
-                    } else {
-                      alert('Please select an answer or click Skip');
-                    }
-                  }}
-                  className="flex items-center justify-center space-x-1 sm:space-x-2 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-shnoor-indigo to-shnoor-navy hover:from-shnoor-navy hover:to-shnoor-indigo text-white rounded-lg sm:rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl text-sm sm:text-base flex-shrink-0"
-                >
-                  <span className="hidden sm:inline">Save & Next</span>
-                  <span className="sm:hidden">Next</span>
-                  <ChevronRight size={16} className="sm:w-5 sm:h-5" />
-                </button>
-              </div>
-            </div>
-          </main>
+          <McqQuestionView
+            currentQ={currentQ}
+            currentQuestion={currentQuestion}
+            answers={answers}
+            markedForReview={markedForReview}
+            toggleMarkForReview={toggleMarkForReview}
+            handleAnswerSelect={handleAnswerSelect}
+            handlePrevious={handlePrevious}
+            handleNext={handleNext}
+            saveProgressNow={saveProgressNow}
+          />
         )}
+
         {/* Coding Question - Tabbed Layout */}
         {isCodingQuestion && (
           <div className="flex-1 flex flex-col bg-shnoor-lavender overflow-hidden coding-container relative">
@@ -1039,13 +790,18 @@ int main() {
                   <button
                     key={tab}
                     onClick={() => setActiveCodingTab(tab)}
-                    className={`flex-1 py-4 text-xs font-bold uppercase tracking-widest transition-all relative ${activeCodingTab === tab ? 'text-shnoor-indigo' : 'text-slate-400 hover:text-slate-600'}`}
+                    className={`flex-1 py-4 text-xs font-bold uppercase tracking-widest transition-all relative ${
+                      activeCodingTab === tab ? 'text-shnoor-indigo' : 'text-slate-400 hover:text-slate-600'
+                    }`}
                   >
                     <div className="flex flex-col items-center gap-1">
                       {tab === 'questions' ? (
                         <span>Palette</span>
                       ) : tab === 'description' ? (
-                        <><span className="hidden sm:inline">Description</span><span className="sm:hidden">Desc</span></>
+                        <>
+                          <span className="hidden sm:inline">Description</span>
+                          <span className="sm:hidden">Desc</span>
+                        </>
                       ) : (
                         <div className="flex flex-col items-center gap-1">
                           <div className="relative">
@@ -1066,8 +822,7 @@ int main() {
 
             {/* Panels Area */}
             <div className="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
-
-              {/* Column 1 - Question Palette - Collapsible */}
+              {/* Column 1 - Question Palette */}
               <ErrorBoundary>
                 <QuestionPaletteSidebar
                   questions={questions}
@@ -1087,63 +842,11 @@ int main() {
 
               {/* Column 2 - Problem Description (resizable) */}
               <ErrorBoundary>
-                <div
-                  style={{ width: `${leftPanelWidth}%` }}
-                  className={`bg-white overflow-y-auto custom-scrollbar pb-16 lg:pb-0 border-r border-shnoor-mist flex-shrink-0 ${activeCodingTab === 'description' ? 'flex flex-col w-full' : 'hidden'} lg:flex lg:flex-col`}
-                >
-                  {/* Description Header */}
-                  <div className="flex items-center justify-between px-4 py-2 border-b border-shnoor-mist bg-shnoor-lavender/30">
-                    <h4 className="text-sm font-bold text-shnoor-navy">Problem Description</h4>
-                  </div>
-
-                  <div className="p-4 sm:p-6">
-                    {/* Title */}
-                    <div className="mb-4">
-                      <h3 className="text-xl font-bold text-shnoor-navy mb-2">{currentQ.title}</h3>
-                      <div className="flex items-center space-x-2">
-                        <span className="px-3 py-1 bg-gradient-to-r from-shnoor-warningLight to-shnoor-warningLight text-shnoor-warning text-xs font-semibold rounded-full border border-shnoor-warningLight shadow-sm">
-                          MEDIUM
-                        </span>
-                        <span className="px-3 py-1 bg-gradient-to-r from-shnoor-indigo to-shnoor-navy text-white text-xs font-semibold rounded-full shadow-sm">
-                          {currentQ.marks || 10} Marks
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Description */}
-                    <div className="mb-6">
-                      <h4 className="text-sm font-semibold text-shnoor-indigoMedium uppercase mb-2">Description</h4>
-                      <div className="text-shnoor-navy text-sm leading-relaxed">
-                        <pre className="whitespace-pre-wrap font-sans">{currentQ.description}</pre>
-                      </div>
-                    </div>
-
-                    {/* Examples */}
-                    <div>
-                      <h4 className="text-sm font-semibold text-shnoor-indigoMedium uppercase mb-3">Examples</h4>
-                      <div className="space-y-4">
-                        {currentQ.testCases && currentQ.testCases.map((testCase, index) => (
-                          <div key={index} className="bg-shnoor-mist rounded-xl p-4 border border-shnoor-light shadow-sm">
-                            <div className="mb-3">
-                              <p className="text-xs font-semibold text-shnoor-indigoMedium uppercase mb-1">Input</p>
-                              <pre className="bg-shnoor-navy text-shnoor-lavender p-3 rounded-lg font-mono text-sm shadow-inner whitespace-pre-wrap break-words">{testCase.input}</pre>
-                            </div>
-                            <div className="mb-3">
-                              <p className="text-xs font-semibold text-shnoor-indigoMedium uppercase mb-1">Output</p>
-                              <pre className="bg-shnoor-navy text-shnoor-lavender p-3 rounded-lg font-mono text-sm shadow-inner whitespace-pre-wrap break-words">{testCase.output}</pre>
-                            </div>
-                            {testCase.explanation && (
-                              <div>
-                                <p className="text-xs font-semibold text-shnoor-indigoMedium uppercase mb-1">Explanation</p>
-                                <p className="text-sm text-shnoor-navy">{testCase.explanation}</p>
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <CodingProblemView
+                  currentQ={currentQ}
+                  leftPanelWidth={leftPanelWidth}
+                  isMobileVisible={activeCodingTab === 'description'}
+                />
               </ErrorBoundary>
 
               {/* Horizontal Resizer */}
@@ -1153,676 +856,42 @@ int main() {
               />
 
               {/* Column 3 - Code Editor + Console */}
-              <div className={`flex-1 flex-col bg-shnoor-navy code-editor-container min-w-0 shadow-xl pb-16 lg:pb-0 ${activeCodingTab === 'code' ? 'flex w-full' : 'hidden'} lg:flex`}>
-                {/* Editor Header */}
-                <div className="flex items-center justify-between px-4 py-2 bg-shnoor-navy border-b border-shnoor-indigo/30">
-                  <select
-                    value={answers[currentQuestion]?.language || 'java'}
-                    onChange={(e) => {
-                      const newLanguage = e.target.value;
-                      setAnswers(prev => {
-                        const currentAnswer = prev[currentQuestion] || {};
-                        const currentLang = currentAnswer.language || 'java';
-
-                        const updatedCodes = {
-                          ...currentAnswer.codes,
-                          [currentLang]: currentAnswer.code || currentAnswer.codes?.[currentLang] || getStarterCode(currentLang)
-                        };
-
-                        const newCode = updatedCodes[newLanguage] || getStarterCode(newLanguage);
-
-                        return {
-                          ...prev,
-                          [currentQuestion]: {
-                            language: newLanguage,
-                            code: newCode,
-                            codes: updatedCodes
-                          }
-                        };
-                      });
-                    }}
-                    className="px-3 py-1.5 bg-shnoor-indigo text-shnoor-lavender text-sm rounded-lg border border-shnoor-indigo/50 focus:ring-2 focus:ring-shnoor-lavender focus:border-transparent shadow-sm"
-                  >
-                    <option value="java">Java</option>
-                    <option value="python">Python</option>
-                    <option value="cpp">C++</option>
-                  </select>
-                  <div className="flex items-center space-x-2">
-                    <button
-                      onClick={async () => {
-                        const currentAnswer = answers[currentQuestion];
-                        const currentLang = currentAnswer?.language || 'java';
-                        const currentCode = currentAnswer?.code || currentAnswer?.codes?.[currentLang] || getStarterCode(currentLang);
-
-                        if (!currentCode.trim()) {
-                          alert('Please write some code first!');
-                          return;
-                        }
-
-                        setCodingConsoleOutput(prev => ({
-                          ...prev,
-                          [currentQuestion]: {
-                            running: true,
-                            results: []
-                          }
-                        }));
-
-                        try {
-                          // Get test cases for this question
-                          const testCases = currentQ.testCases || currentQ.publicTestCases || [];
-
-                          if (testCases.length === 0) {
-                            // No test cases, just run the code
-                            const result = await codeExecutionAPI.executeCode(currentCode, currentLang);
-
-                            setCodingConsoleOutput(prev => ({
-                              ...prev,
-                              [currentQuestion]: {
-                                running: false,
-                                results: [{
-                                  testCase: 1,
-                                  input: 'No input',
-                                  expectedOutput: 'N/A',
-                                  actualOutput: result.output || result.error,
-                                  passed: result.success,
-                                  executionTime: result.executionTime + 'ms',
-                                  error: result.error
-                                }],
-                                timestamp: new Date().toLocaleTimeString()
-                              }
-                            }));
-                          } else {
-                            // Run against test cases
-                            const evaluation = await codeExecutionAPI.evaluateWithTestCases(
-                              currentCode,
-                              currentLang,
-                              testCases.map(tc => ({
-                                input: tc.input,
-                                output: tc.output || tc.expectedOutput,
-                                expected_output: tc.output || tc.expectedOutput,
-                                is_hidden: tc.isHidden || false
-                              }))
-                            );
-
-                            const results = evaluation.testResults.map((result, idx) => ({
-                              testCase: idx + 1,
-                              input: result.input,
-                              expectedOutput: result.expectedOutput,
-                              actualOutput: result.actualOutput,
-                              passed: result.passed,
-                              executionTime: result.executionTime + 'ms',
-                              error: result.error
-                            }));
-
-                            setCodingConsoleOutput(prev => ({
-                              ...prev,
-                              [currentQuestion]: {
-                                running: false,
-                                results: results,
-                                summary: evaluation.summary,
-                                timestamp: new Date().toLocaleTimeString()
-                              }
-                            }));
-                          }
-                        } catch (error) {
-                          console.error('Code execution error:', error);
-                          setCodingConsoleOutput(prev => ({
-                            ...prev,
-                            [currentQuestion]: {
-                              running: false,
-                              results: [{
-                                testCase: 1,
-                                input: 'Error',
-                                expectedOutput: 'N/A',
-                                actualOutput: error.message,
-                                passed: false,
-                                executionTime: '0ms',
-                                error: error.message
-                              }],
-                              timestamp: new Date().toLocaleTimeString()
-                            }
-                          }));
-                        }
-                      }}
-                      disabled={codingConsoleOutput[currentQuestion]?.running}
-                      className="px-4 py-1.5 bg-shnoor-success hover:bg-shnoor-success text-white text-sm rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 shadow-sm"
-                    >
-                      <span>▶</span>
-                      <span>{codingConsoleOutput[currentQuestion]?.running ? 'Running...' : 'Run'}</span>
-                    </button>
-                    <button
-                      onClick={async () => {
-                        const currentAnswer = answers[currentQuestion];
-                        const currentLang = currentAnswer?.language || 'java';
-                        const currentCode = currentAnswer?.code || currentAnswer?.codes?.[currentLang] || getStarterCode(currentLang);
-
-                        if (!currentCode.trim()) {
-                          alert('Please write some code first!');
-                          return;
-                        }
-
-                        // Get student and test IDs
-                        const studentId = localStorage.getItem('studentId');
-                        const testId = localStorage.getItem('selectedTestId');
-                        const codingQuestionId = currentQ.id;
-
-                        // Show loading state
-                        setCodingConsoleOutput(prev => ({
-                          ...prev,
-                          [currentQuestion]: {
-                            running: true
-                          }
-                        }));
-
-                        try {
-                          // Submit code - runs against all test cases and saves to DB
-                          const result = await codeExecutionAPI.submitCodingSolution(
-                            studentId,
-                            codingQuestionId,
-                            testId,
-                            currentCode,
-                            currentLang
-                          );
-
-                          if (result.success) {
-                            const {
-                              passed,
-                              testCasesPassed,
-                              totalTestCases,
-                              percentage,
-                              publicTestResults,
-                              hiddenTestResults
-                            } = result.result;
-
-                            // Format results for console display
-                            const formattedResults = [];
-
-                            // Add public test cases with full details
-                            if (publicTestResults && publicTestResults.length > 0) {
-                              publicTestResults.forEach((tc, idx) => {
-                                formattedResults.push({
-                                  testCase: idx + 1,
-                                  passed: tc.passed,
-                                  input: tc.input || '(no input)',
-                                  expectedOutput: tc.expectedOutput,
-                                  actualOutput: tc.actualOutput || tc.actual || tc.output || '(no output)',
-                                  error: tc.error || null,
-                                  executionTime: tc.executionTime || 'N/A',
-                                  isHidden: false,
-                                  explanation: tc.explanation || null
-                                });
-                              });
-                            }
-
-                            // Add hidden test cases (only pass/fail)
-                            if (hiddenTestResults && hiddenTestResults.length > 0) {
-                              hiddenTestResults.forEach((tc) => {
-                                formattedResults.push({
-                                  testCase: publicTestResults.length + tc.testNumber,
-                                  passed: tc.passed,
-                                  isHidden: true,
-                                  input: '🔒 Hidden',
-                                  expectedOutput: '🔒 Hidden',
-                                  actualOutput: '🔒 Hidden',
-                                  error: null,
-                                  executionTime: 'N/A'
-                                });
-                              });
-                            }
-
-                            setCodingConsoleOutput(prev => ({
-                              ...prev,
-                              [currentQuestion]: {
-                                results: formattedResults,
-                                summary: {
-                                  passedTestCases: testCasesPassed,
-                                  failedTestCases: totalTestCases - testCasesPassed,
-                                  totalTestCases: totalTestCases,
-                                  percentage: percentage.toFixed(1)
-                                },
-                                timestamp: new Date().toLocaleTimeString(),
-                                isLoading: false
-                              }
-                            }));
-
-                            // Save the coding answer with submission status
-                            setAnswers(prev => ({
-                              ...prev,
-                              [currentQuestion]: {
-                                ...currentAnswer,
-                                language: currentLang,
-                                code: currentCode,
-                                codes: {
-                                  ...currentAnswer?.codes,
-                                  [currentLang]: currentCode
-                                },
-                                submitted: true,
-                                submittedAt: new Date().toISOString(),
-                                testCasesPassed,
-                                totalTestCases,
-                                passed
-                              }
-                            }));
-
-                            // Save progress to backend
-                            await saveProgressNow();
-                          } else {
-                            setCodingConsoleOutput(prev => ({
-                              ...prev,
-                              [currentQuestion]: {
-                                results: [{
-                                  testCase: 1,
-                                  passed: false,
-                                  input: 'N/A',
-                                  expectedOutput: 'N/A',
-                                  actualOutput: 'N/A',
-                                  error: `Submission failed: ${result.message}`,
-                                  executionTime: 'N/A',
-                                  isHidden: false
-                                }],
-                                summary: {
-                                  passedTestCases: 0,
-                                  failedTestCases: 1,
-                                  totalTestCases: 1,
-                                  percentage: '0.0'
-                                },
-                                timestamp: new Date().toLocaleTimeString(),
-                                running: false
-                              }
-                            }));
-                          }
-                        } catch (error) {
-                          console.error('Submit error:', error);
-                          setCodingConsoleOutput(prev => ({
-                            ...prev,
-                            [currentQuestion]: {
-                              results: [{
-                                testCase: 1,
-                                passed: false,
-                                input: 'N/A',
-                                expectedOutput: 'N/A',
-                                actualOutput: 'N/A',
-                                error: `Error: ${error.message}`,
-                                executionTime: 'N/A',
-                                isHidden: false
-                              }],
-                              summary: {
-                                passedTestCases: 0,
-                                failedTestCases: 1,
-                                totalTestCases: 1,
-                                percentage: '0.0'
-                              },
-                              timestamp: new Date().toLocaleTimeString(),
-                              running: false
-                            }
-                          }));
-                        }
-                      }}
-                      className="px-4 py-1.5 bg-gradient-to-r from-shnoor-indigo to-shnoor-navy hover:from-shnoor-navy hover:to-shnoor-indigo text-white text-sm rounded-lg font-medium transition-all duration-200 shadow-sm"
-                    >
-                      Submit
-                    </button>
-                  </div>
-                </div>
-                {/* Code Editor */}
-                <div className="flex-1 overflow-hidden">
-                  <ErrorBoundary>
-                    <LazyMonacoEditor
-                      height="100%"
-                      language={(() => {
-                        const currentAnswer = answers[currentQuestion];
-                        const lang = currentAnswer?.language || 'java';
-                        // Map to Monaco language identifiers
-                        return lang === 'cpp' ? 'cpp' : lang;
-                      })()}
-                      value={(() => {
-                        const currentAnswer = answers[currentQuestion];
-                        if (!currentAnswer) {
-                          return getStarterCode('java');
-                        }
-                        const currentLang = currentAnswer.language || 'java';
-                        return currentAnswer.code || currentAnswer.codes?.[currentLang] || getStarterCode(currentLang);
-                      })()}
-                      onChange={(value) => {
-                        setAnswers(prev => {
-                          const currentAnswer = prev[currentQuestion] || {};
-                          const currentLang = currentAnswer.language || 'java';
-
-                          return {
-                            ...prev,
-                            [currentQuestion]: {
-                              ...currentAnswer,
-                              language: currentLang,
-                              code: value,
-                              codes: {
-                                ...currentAnswer.codes,
-                                [currentLang]: value
-                              }
-                            }
-                          };
-                        });
-                      }}
-                      theme={editorTheme === 'default' ? 'light' : 'vs-dark'}
-                      options={{
-                        minimap: { enabled: false },
-                        fontSize: 14,
-                        lineNumbers: 'on',
-                        roundedSelection: false,
-                        scrollBeyondLastLine: false,
-                        automaticLayout: true,
-                        tabSize: 4,
-                        wordWrap: 'off',
-                        autoClosingBrackets: 'always',
-                        autoClosingQuotes: 'always',
-                        formatOnPaste: true,
-                        formatOnType: true,
-                        suggestOnTriggerCharacters: true,
-                        acceptSuggestionOnEnter: 'on',
-                        quickSuggestions: true,
-                        parameterHints: { enabled: true },
-                        bracketPairColorization: { enabled: true },
-                        guides: {
-                          bracketPairs: true,
-                          indentation: true
-                        }
-                      }}
-                    />
-                  </ErrorBoundary>
-                </div>
-
-                {/* Vertical Resize Handle */}
-                {/* Vertical Resize Handle */}
-                <div
-                  className="hidden lg:block h-1 bg-shnoor-indigo/30 hover:bg-shnoor-indigo cursor-row-resize flex-shrink-0 transition-colors duration-200"
-                  onMouseDown={handleVerticalMouseDown}
-                  style={{ cursor: 'row-resize' }}
-                />
-
-                {/* Test Cases / Console Tabs */}
-                <div
-                  className="border-t border-shnoor-indigo/30 flex flex-col"
-                  style={{ height: window.innerWidth >= 1024 ? `${consolePanelHeight}px` : 'auto', minHeight: window.innerWidth < 1024 ? '200px' : 'auto', maxHeight: window.innerWidth < 1024 ? '300px' : 'none' }}
-                >
-                  <div className="flex items-center space-x-4 px-4 py-2 bg-shnoor-navy border-b border-shnoor-indigo/30">
-                    <button
-                      onClick={() => setBottomPanelTab('testCases')}
-                      className={`text-sm font-medium pb-2 transition-all ${bottomPanelTab === 'testCases' ? 'text-shnoor-lavender border-b-2 border-shnoor-lavender' : 'text-shnoor-soft hover:text-shnoor-lavender'}`}
-                    >
-                      Test Cases
-                    </button>
-                    <button
-                      onClick={() => setBottomPanelTab('console')}
-                      className={`text-sm font-medium pb-2 transition-all ${bottomPanelTab === 'console' ? 'text-shnoor-lavender border-b-2 border-shnoor-lavender' : 'text-shnoor-soft hover:text-shnoor-lavender'}`}
-                    >
-                      Console
-                    </button>
-                  </div>
-
-                  <div className="flex-1 overflow-y-auto p-4 bg-shnoor-navy">
-                    {bottomPanelTab === 'testCases' ? (
-                      codingConsoleOutput[currentQuestion]?.running ? (
-                        <div className="flex items-center space-x-2 text-shnoor-warning">
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-shnoor-warning"></div>
-                          <span className="text-sm">Running test cases...</span>
-                        </div>
-                      ) : codingConsoleOutput[currentQuestion]?.results ? (
-                        <div className="space-y-3">
-                          {/* Summary */}
-                          {codingConsoleOutput[currentQuestion]?.summary && (
-                            <div className="mb-4 p-3 bg-shnoor-indigo/20 rounded-lg border border-shnoor-indigo/30">
-                              <div className="flex items-center justify-between mb-2">
-                                <span className="text-sm font-semibold text-shnoor-lavender">Test Results Summary</span>
-                                <span className="text-xs text-shnoor-soft">
-                                  {codingConsoleOutput[currentQuestion].timestamp}
-                                </span>
-                              </div>
-                              <div className="grid grid-cols-3 gap-4 text-sm">
-                                <div className="text-center">
-                                  <div className="text-lg font-bold text-shnoor-success">
-                                    {codingConsoleOutput[currentQuestion].summary.passedTestCases}
-                                  </div>
-                                  <div className="text-shnoor-soft">Passed</div>
-                                </div>
-                                <div className="text-center">
-                                  <div className="text-lg font-bold text-shnoor-danger">
-                                    {codingConsoleOutput[currentQuestion].summary.failedTestCases}
-                                  </div>
-                                  <div className="text-shnoor-soft">Failed</div>
-                                </div>
-                                <div className="text-center">
-                                  <div className="text-lg font-bold text-shnoor-lavender">
-                                    {codingConsoleOutput[currentQuestion].summary.percentage}%
-                                  </div>
-                                  <div className="text-shnoor-soft">Score</div>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Individual Test Results */}
-                          {codingConsoleOutput[currentQuestion].results.map((result, idx) => (
-                            <div
-                              key={idx}
-                              className={`p-3 rounded-lg border shadow-sm ${result.passed
-                                ? 'bg-shnoor-success/20 border-shnoor-success/50'
-                                : 'bg-shnoor-danger/20 border-shnoor-danger/50'
-                                }`}
-                            >
-                              <div className="flex items-center justify-between mb-2">
-                                <span className={`text-sm font-semibold ${result.passed ? 'text-shnoor-success' : 'text-shnoor-danger'}`}>
-                                  TEST CASE {result.testCase}: {result.passed ? '✓ PASSED' : '✗ FAILED'}
-                                </span>
-                                <span className="text-xs text-shnoor-soft">{result.executionTime}</span>
-                              </div>
-                              <div className="text-xs font-mono space-y-1">
-                                {!result.isHidden && (
-                                  <>
-                                    <div>
-                                      <span className="text-shnoor-soft">Input: </span>
-                                      <pre className="inline-block text-shnoor-lavender whitespace-pre-wrap break-words">{result.input}</pre>
-                                    </div>
-                                    <div>
-                                      <span className="text-shnoor-soft">Expected: </span>
-                                      <pre className="inline-block text-shnoor-lavender whitespace-pre-wrap break-words">{result.expectedOutput}</pre>
-                                    </div>
-                                  </>
-                                )}
-                                <div>
-                                  <span className="text-shnoor-soft">Got: </span>
-                                  <div className={`mt-1 ${result.passed ? 'text-shnoor-success' : 'text-shnoor-danger'}`}>
-                                    {result.actualOutput && (result.actualOutput.includes('🐍') || result.actualOutput.includes('☕') || result.actualOutput.includes('🔧') || result.actualOutput.includes('🟨') || result.actualOutput.includes('Error:')) ? (
-                                      <pre className="text-sm font-mono whitespace-pre-wrap leading-relaxed bg-gray-900/30 p-2 rounded border border-gray-600/30">
-                                        {formatErrorForDisplay(result.actualOutput)}
-                                      </pre>
-                                    ) : (
-                                      <span className="font-mono text-sm">
-                                        {result.actualOutput}
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                                {result.error && (
-                                  <div className="mt-2">
-                                    <span className="text-shnoor-soft text-xs uppercase tracking-wide">Error Details:</span>
-                                    <div className="mt-1 p-3 bg-red-900/20 border border-red-500/30 rounded-lg">
-                                      <pre className="text-shnoor-danger text-sm font-mono whitespace-pre-wrap leading-relaxed">
-                                        {formatErrorForDisplay(result.error)}
-                                      </pre>
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="text-center text-shnoor-soft text-sm py-8">
-                          Click "Run" or "Submit" to see test results
-                        </div>
-                      )
-                    ) : (
-                      /* Console View */
-                      <div className="font-mono text-sm text-shnoor-lavender bg-black/30 p-4 rounded-lg min-h-[100px] border border-shnoor-indigo/20">
-                        {codingConsoleOutput[currentQuestion]?.running ? (
-                          <div className="flex items-center space-x-2 text-shnoor-warning">
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-shnoor-warning"></div>
-                            <span>Executing code...</span>
-                          </div>
-                        ) : (
-                          <div className="whitespace-pre-wrap">
-                            {codingConsoleOutput[currentQuestion]?.results?.map((r, i) => (
-                              <div key={i} className="mb-2">
-                                <span className="text-shnoor-soft">[{codingConsoleOutput[currentQuestion].timestamp}] </span>
-                                <span className={r.passed ? 'text-shnoor-success' : 'text-shnoor-danger'}>
-                                  {r.actualOutput || r.error || 'No output'}
-                                </span>
-                              </div>
-                            )) || 'No execution history'}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Action Buttons - Desktop Only */}
-                <div className="hidden lg:flex items-center justify-between px-4 py-3 bg-shnoor-navy border-t border-shnoor-indigo/30">
-                  <div className="flex items-center space-x-3">
-                    <button
-                      onClick={handlePrevious}
-                      disabled={currentQuestion === 0}
-                      className={`
-                          flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200
-                          ${currentQuestion === 0
-                          ? 'bg-shnoor-indigo/20 text-shnoor-soft cursor-not-allowed'
-                          : 'bg-shnoor-indigo/30 hover:bg-shnoor-indigo/50 text-shnoor-lavender'}
-                        `}
-                    >
-                      <ChevronLeft size={18} />
-                      <span>Previous</span>
-                    </button>
-                    <button
-                      onClick={handleNext}
-                      disabled={currentQuestion >= totalQuestions - 1}
-                      className={`
-                          flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200
-                          ${currentQuestion >= totalQuestions - 1
-                          ? 'bg-shnoor-indigo/20 text-shnoor-soft cursor-not-allowed'
-                          : 'bg-shnoor-indigo/30 hover:bg-shnoor-indigo/50 text-shnoor-lavender'}
-                        `}
-                    >
-                      <span>Next</span>
-                      <ChevronRight size={18} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Action Buttons - Mobile Fixed Bottom Bar */}
-              <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-3 bg-shnoor-navy border-t border-shnoor-indigo/30 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
-                <div className="flex flex-1 justify-between items-center max-w-lg mx-auto w-full">
-                  <button
-                    onClick={handlePrevious}
-                    disabled={currentQuestion === 0}
-                    className={`
-                    flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg font-medium transition-all duration-200 flex-1 mr-2
-                    ${currentQuestion === 0
-                        ? 'bg-shnoor-indigo/20 text-shnoor-soft cursor-not-allowed'
-                        : 'bg-shnoor-indigo border border-shnoor-indigo/50 text-white shadow-md'}
-                  `}
-                  >
-                    <ChevronLeft size={18} />
-                    <span>Previous</span>
-                  </button>
-                  <button
-                    onClick={handleNext}
-                    disabled={currentQuestion >= totalQuestions - 1}
-                    className={`
-                    flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg font-medium transition-all duration-200 flex-1 ml-2
-                    ${currentQuestion >= totalQuestions - 1
-                        ? 'bg-shnoor-indigo/20 text-shnoor-soft cursor-not-allowed'
-                        : 'bg-shnoor-indigo border border-shnoor-indigo/50 text-white shadow-md'}
-                  `}
-                  >
-                    <span>Next</span>
-                    <ChevronRight size={18} />
-                  </button>
-                </div>
-              </div>
+              <CodingEditorPanel
+                currentQ={currentQ}
+                currentQuestion={currentQuestion}
+                totalQuestions={totalQuestions}
+                answers={answers}
+                setAnswers={setAnswers}
+                codingConsoleOutput={codingConsoleOutput}
+                setCodingConsoleOutput={setCodingConsoleOutput}
+                editorTheme={editorTheme}
+                getStarterCode={getStarterCode}
+                formatErrorForDisplay={formatErrorForDisplay}
+                saveProgressNow={saveProgressNow}
+                handlePrevious={handlePrevious}
+                handleNext={handleNext}
+                handleVerticalMouseDown={handleVerticalMouseDown}
+                consolePanelHeight={consolePanelHeight}
+                bottomPanelTab={bottomPanelTab}
+                setBottomPanelTab={setBottomPanelTab}
+                isMobileVisible={activeCodingTab === 'code'}
+              />
             </div>
           </div>
         )}
-
       </div>
 
       {/* Force Termination Modal */}
-      {showTerminationModal && terminationData && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[9999] p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full animate-fadeIn">
-            {/* Modal Header */}
-            <div className="bg-gradient-to-r from-red-600 to-red-700 text-white px-6 py-5 rounded-t-2xl">
-              <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-                  <StopCircle size={28} className="text-white" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold">Examination Terminated</h2>
-                  <p className="text-red-100 text-sm mt-1">Your test has been stopped by the administrator</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Modal Body */}
-            <div className="p-6 space-y-4">
-              {/* Notice Box */}
-              <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
-                <div className="flex items-start space-x-3">
-                  <AlertTriangle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="font-semibold text-red-800 mb-1">Test Terminated</p>
-                    <p className="text-sm text-red-700">The exam administrator has stopped your examination. Your current progress has been recorded and submitted.</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Reason Section */}
-              <div className="bg-gray-50 rounded-lg p-5 border border-gray-200">
-                <div className="flex items-start space-x-2 mb-2">
-                  <span className="text-sm font-semibold text-gray-700">Reason for Termination:</span>
-                </div>
-                <div className="bg-white p-4 rounded-md border border-gray-200 shadow-sm">
-                  <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">{terminationData.reason}</p>
-                </div>
-              </div>
-
-              {/* Information Box */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p className="text-sm text-blue-800">
-                  <span className="font-semibold">Next Steps:</span> You will be redirected to provide feedback about your exam experience. If you believe this action was taken in error, please contact the examination office.
-                </p>
-              </div>
-            </div>
-
-            {/* Modal Footer */}
-            <div className="px-6 py-4 bg-gray-50 rounded-b-2xl flex justify-end">
-              <button
-                onClick={() => {
-                  setShowTerminationModal(false);
-                  // Submit test with forced termination reason
-                  submitTest('forced_termination');
-                }}
-                className="px-8 py-3 bg-gradient-to-r from-shnoor-indigo to-shnoor-navy hover:from-shnoor-navy hover:to-shnoor-indigo text-white font-bold rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl flex items-center space-x-2"
-              >
-                <span>Continue to Feedback</span>
-                <ChevronRight size={20} />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <TerminationModal
+        isOpen={showTerminationModal && !!terminationData}
+        terminationData={terminationData}
+        onContinue={() => {
+          setShowTerminationModal(false);
+          submitTest('forced_termination');
+        }}
+      />
     </div>
   );
-
 };
 
 export default TestScreen;

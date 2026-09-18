@@ -175,7 +175,7 @@ const EditClientModal = ({ client, onClose, onUpdated, subscriptionPlans = [] })
               </select>
             </div>
           </div>
-          
+
 
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -201,8 +201,8 @@ const EditClientModal = ({ client, onClose, onUpdated, subscriptionPlans = [] })
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div>
                 <label className="block text-xs font-semibold text-shnoor-navy uppercase tracking-wide mb-1.5">Plan</label>
-                <select 
-                  value={form.plan_id} 
+                <select
+                  value={form.plan_id}
                   onChange={e => {
                     const newPlanId = e.target.value;
                     const selectedPlan = subscriptionPlans.find(p => p.plan_id === newPlanId);
@@ -328,28 +328,28 @@ const CreateClientModal = ({ onClose, onCreated, subscriptionPlans = [] }) => {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     // Organization Name
     if (!form.name.trim()) {
       newErrors.name = 'Organization name is required';
     } else if (form.name.trim().length < 2) {
       newErrors.name = 'Organization name must be at least 2 characters';
     }
-    
+
     // Company Name
     if (!form.company_name.trim()) {
       newErrors.company_name = 'Company/Display name is required';
     } else if (form.company_name.trim().length < 2) {
       newErrors.company_name = 'Company name must be at least 2 characters';
     }
-    
+
     // Email
     if (!form.email.trim()) {
       newErrors.email = 'Admin email is required';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
       newErrors.email = 'Please enter a valid email address';
     }
-    
+
     // Password
     if (!form.password) {
       newErrors.password = 'Password is required';
@@ -360,17 +360,17 @@ const CreateClientModal = ({ onClose, onCreated, subscriptionPlans = [] }) => {
     } else if (!/[0-9]/.test(form.password)) {
       newErrors.password = 'Password must contain at least one number';
     }
-    
+
     // Phone (optional but validate format if provided)
     if (form.phone && !/^[\d\s\+\-\(\)]{10,}$/.test(form.phone)) {
       newErrors.phone = 'Please enter a valid phone number';
     }
-    
+
     // Website (optional but validate format if provided)
     if (form.company_website && !/^https?:\/\/.+\..+/.test(form.company_website)) {
       newErrors.company_website = 'Please enter a valid website URL (e.g., https://example.com)';
     }
-    
+
     return newErrors;
   };
 
@@ -378,11 +378,11 @@ const CreateClientModal = ({ onClose, onCreated, subscriptionPlans = [] }) => {
     e.preventDefault();
     const newErrors = validateForm();
     setErrors(newErrors);
-    
+
     if (Object.keys(newErrors).length > 0) {
       return;
     }
-    
+
     setLoading(true);
     try {
       const payload = {
@@ -400,15 +400,15 @@ const CreateClientModal = ({ onClose, onCreated, subscriptionPlans = [] }) => {
         subscription_duration: form.subscription_duration,
         payment_status: form.payment_status
       };
-      
+
       const res = await fetch(`${API_URL}/api/clients`, {
         method: 'POST',
         headers: adminHeaders(),
         body: JSON.stringify(payload),
       });
-      
+
       const data = await res.json();
-      
+
       if (!res.ok || !data.success) {
         // Handle specific error messages from backend
         if (data.error?.includes('Email already exists')) {
@@ -420,7 +420,7 @@ const CreateClientModal = ({ onClose, onCreated, subscriptionPlans = [] }) => {
         }
         return;
       }
-      
+
       onCreated(data.client);
     } catch (err) {
       setErrors({ submit: 'Network error. Please try again.' });
@@ -443,53 +443,53 @@ const CreateClientModal = ({ onClose, onCreated, subscriptionPlans = [] }) => {
               <span>{errors.submit}</span>
             </div>
           )}
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <InputField 
-              label="Organization Name" 
-              name="name" 
-              placeholder="e.g., Acme Corp" 
-              required 
+            <InputField
+              label="Organization Name"
+              name="name"
+              placeholder="e.g., Acme Corp"
+              required
               value={form.name}
               onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
               disabled={loading}
               error={errors.name}
             />
-            <InputField 
-              label="Company / Display Name" 
-              name="company_name" 
-              placeholder="e.g., Acme Corporation Pvt Ltd" 
-              required 
+            <InputField
+              label="Company / Display Name"
+              name="company_name"
+              placeholder="e.g., Acme Corporation Pvt Ltd"
+              required
               value={form.company_name}
               onChange={e => setForm(p => ({ ...p, company_name: e.target.value }))}
               disabled={loading}
               error={errors.company_name}
             />
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <InputField 
-              label="Admin Email" 
-              name="email" 
-              type="email" 
-              placeholder="admin@acme.com" 
-              required 
+            <InputField
+              label="Admin Email"
+              name="email"
+              type="email"
+              placeholder="admin@acme.com"
+              required
               value={form.email}
               onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
               disabled={loading}
               error={errors.email}
             />
-            <InputField 
-              label="Phone Number" 
-              name="phone" 
-              placeholder="+91 98765 43210" 
+            <InputField
+              label="Phone Number"
+              name="phone"
+              placeholder="+91 98765 43210"
               value={form.phone}
               onChange={e => setForm(p => ({ ...p, phone: e.target.value }))}
               disabled={loading}
               error={errors.phone}
             />
           </div>
-          
+
           <div>
             <label className="block text-xs font-semibold text-shnoor-navy uppercase tracking-wide mb-1.5">
               Password <span className="text-red-500">*</span>
@@ -518,17 +518,17 @@ const CreateClientModal = ({ onClose, onCreated, subscriptionPlans = [] }) => {
               </p>
             )}
           </div>
-          
-          <InputField 
-            label="Company Website" 
-            name="company_website" 
-            placeholder="https://www.acme.com" 
+
+          <InputField
+            label="Company Website"
+            name="company_website"
+            placeholder="https://www.acme.com"
             value={form.company_website}
             onChange={e => setForm(p => ({ ...p, company_website: e.target.value }))}
             disabled={loading}
             error={errors.company_website}
           />
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <InputField
               label="Company Size"
@@ -561,17 +561,17 @@ const CreateClientModal = ({ onClose, onCreated, subscriptionPlans = [] }) => {
                 { value: 'Other', label: 'Other' }
               ]}
             />
-            <InputField 
-              label="Country" 
-              name="country" 
-              placeholder="e.g., India" 
+            <InputField
+              label="Country"
+              name="country"
+              placeholder="e.g., India"
               value={form.country}
               onChange={e => setForm(p => ({ ...p, country: e.target.value }))}
               disabled={loading}
               error={errors.country}
             />
           </div>
-          
+
           <InputField
             label="Primary Use Case"
             name="use_case"
@@ -612,13 +612,13 @@ const CreateClientModal = ({ onClose, onCreated, subscriptionPlans = [] }) => {
                 }}
                 disabled={loading}
                 required
-                options={subscriptionPlans.length > 0 
+                options={subscriptionPlans.length > 0
                   ? subscriptionPlans.map(plan => ({ value: plan.plan_id, label: plan.name }))
                   : [
-                      { value: 'Basic', label: 'Basic' },
-                      { value: 'Premium', label: 'Premium' },
-                      { value: 'Super Premium', label: 'Super Premium' }
-                    ]
+                    { value: 'Basic', label: 'Basic' },
+                    { value: 'Premium', label: 'Premium' },
+                    { value: 'Super Premium', label: 'Super Premium' }
+                  ]
                 }
               />
               <InputField
@@ -651,7 +651,6 @@ const CreateClientModal = ({ onClose, onCreated, subscriptionPlans = [] }) => {
               Note: Duration starts from today.
             </p>
           </div>
-          
           <div className="px-6 py-4 border-t border-shnoor-mist bg-white sticky bottom-0 z-10 flex-shrink-0">
             <div className="flex flex-col sm:flex-row gap-3">
               <button
@@ -799,10 +798,10 @@ const ClientDetailPanel = ({ client, onClose, onStatusChange, onDelete, onClient
             {loadingStats
               ? <div className="w-5 h-5 border-2 border-shnoor-indigo border-t-transparent rounded-full animate-spin" />
               : <div className="flex gap-2">
-                  <StatPill label="Tests" value={stats?.total_tests} />
-                  <StatPill label="Students" value={stats?.total_students} />
-                  <StatPill label="Institutes" value={stats?.total_institutes} />
-                </div>
+                <StatPill label="Tests" value={stats?.total_tests} />
+                <StatPill label="Students" value={stats?.total_students} />
+                <StatPill label="Institutes" value={stats?.total_institutes} />
+              </div>
             }
           </div>
           <div>
@@ -913,8 +912,8 @@ const AdminClients = () => {
     }
   }, []);
 
-  useEffect(() => { 
-    fetchClients(); 
+  useEffect(() => {
+    fetchClients();
     fetchSubscriptionPlans();
   }, [fetchClients, fetchSubscriptionPlans]);
 

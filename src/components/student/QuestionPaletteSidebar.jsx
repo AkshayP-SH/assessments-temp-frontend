@@ -21,8 +21,8 @@ const QuestionPaletteSidebar = ({
   return (
     <aside
       className={`bg-white border-b lg:border-b-0 border-r border-shnoor-mist flex flex-col flex-shrink-0 overflow-y-auto pb-16 lg:pb-0 transition-all duration-300 ${
-        isMobileVisible ? 'flex w-full' : 'hidden'
-      } lg:flex ${isCollapsed ? 'lg:w-14' : 'lg:w-64'} max-h-72 lg:max-h-none lg:h-full ${className}`}
+        isMobileVisible ? 'flex w-full h-full flex-1' : 'hidden'
+      } lg:flex ${isCollapsed ? 'lg:w-14' : 'lg:w-64'} lg:h-full ${className}`}
     >
       {/* Collapse Toggle Button - Desktop Only */}
       <button

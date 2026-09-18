@@ -150,15 +150,15 @@ const LandingPage = () => {
         ref={navRef}
         className={`landing-nav bg-white sticky top-0 z-50 transition-shadow duration-300 ${scrolled ? 'shadow-md' : 'shadow-sm'} border-b border-shnoor-mist`}
       >
-        <div className="max-w-[1280px] mx-auto px-3 sm:px-6 lg:px-8 flex items-center justify-between h-[72px]">
+        <div className="max-w-[1280px] mx-auto px-2.5 sm:px-6 lg:px-8 flex items-center justify-between h-[64px] sm:h-[72px]">
           {/* Logo */}
-          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-3 min-w-0">
             <div className="landing-brand-logo flex h-8 w-8 sm:h-10 sm:w-10 md:h-11 md:w-11 items-center justify-center overflow-hidden rounded-xl bg-white flex-shrink-0">
               <img src={shnoorLogo} alt="Shnoor" className="h-8 w-8 sm:h-10 sm:w-10 md:h-11 md:w-11 object-contain" width="44" height="44" loading="eager" fetchPriority="high" />
             </div>
-            <div>
-              <p className="font-extrabold text-shnoor-navy text-xs sm:text-sm md:text-[15px] leading-tight tracking-wide uppercase">SHNOOR INTERNATIONAL</p>
-              <p className="text-[9px] sm:text-[10px] text-shnoor-soft font-semibold tracking-widest uppercase">Assessment Platform</p>
+            <div className="min-w-0">
+              <p className="font-extrabold text-shnoor-navy text-[11px] sm:text-sm md:text-[15px] leading-tight tracking-tight sm:tracking-wide uppercase truncate sm:whitespace-normal">SHNOOR INTERNATIONAL</p>
+              <p className="text-[8px] sm:text-[10px] text-shnoor-soft font-semibold tracking-wider sm:tracking-widest uppercase truncate sm:whitespace-normal">Assessment Platform</p>
             </div>
           </div>
 
@@ -179,15 +179,15 @@ const LandingPage = () => {
               Log In
             </Link>
             <Link to="/register" onMouseEnter={prefetchRegister} className="inline-flex">
-              <button className="bg-shnoor-navy text-white text-xs sm:text-sm font-bold px-3 py-2 sm:px-5 sm:py-2.5 rounded-lg hover:bg-shnoor-indigo transition-colors whitespace-nowrap">
+              <button className="bg-shnoor-navy text-white text-[11px] sm:text-sm font-bold px-2.5 py-1.5 sm:px-5 sm:py-2.5 rounded-lg hover:bg-shnoor-indigo transition-colors whitespace-nowrap">
                 Get Started
               </button>
             </Link>
             {/* Mobile hamburger */}
-            <button className="lg:hidden flex flex-col gap-1.5 p-1.5 sm:p-2 flex-shrink-0" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
-              <span className={`block w-5 h-0.5 bg-shnoor-navy transition-transform duration-300 ${mobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`} />
+            <button className="lg:hidden flex flex-col justify-center items-center gap-1 sm:gap-1.5 p-1.5 sm:p-2 flex-shrink-0 rounded-lg hover:bg-shnoor-lavender/30 transition-colors" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
+              <span className={`block w-5 h-0.5 bg-shnoor-navy transition-transform duration-300 ${mobileMenuOpen ? 'rotate-45 translate-y-1.5 sm:translate-y-2' : ''}`} />
               <span className={`block w-5 h-0.5 bg-shnoor-navy transition-opacity duration-300 ${mobileMenuOpen ? 'opacity-0' : ''}`} />
-              <span className={`block w-5 h-0.5 bg-shnoor-navy transition-transform duration-300 ${mobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
+              <span className={`block w-5 h-0.5 bg-shnoor-navy transition-transform duration-300 ${mobileMenuOpen ? '-rotate-45 -translate-y-1.5 sm:-translate-y-2' : ''}`} />
             </button>
           </div>
         </div>
