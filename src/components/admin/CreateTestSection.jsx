@@ -896,7 +896,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
         <div className="space-y-6">
             {/* Step 1: Initialization */}
             {step === 'init' && (
-                <div className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-light p-4 sm:p-8 max-w-3xl w-full mx-auto">
+                <div className="bg-theme-card rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-light p-4 sm:p-8 max-w-3xl w-full mx-auto">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
                         <h2 className="text-xl sm:text-2xl font-bold text-shnoor-navy leading-tight">{isEditMode ? (viewMode ? 'View Assessment' : 'Edit Assessment') : 'Create New Assessment'}</h2>
                         {viewMode && (
@@ -924,8 +924,8 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                                         nameAvailability.available === false
                                             ? 'border-shnoor-danger bg-shnoor-dangerLight'
                                             : nameAvailability.available === true
-                                                ? 'border-shnoor-success bg-white'
-                                                : 'border-shnoor-light bg-white'
+                                                ? 'border-shnoor-success bg-theme-card'
+                                                : 'border-shnoor-light bg-theme-card'
                                         }`}
                                     placeholder="e.g., Java Fundamentals - Batch A"
                                     required
@@ -964,7 +964,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                                     <button
                                         type="button"
                                         onClick={handleAddJobRole}
-                                        className="flex items-center justify-center space-x-1 px-3 py-1.5 bg-white text-shnoor-indigo hover:text-shnoor-navy rounded-lg hover:bg-shnoor-light/30 border border-shnoor-light transition-colors text-sm font-medium w-full sm:w-auto"
+                                        className="flex items-center justify-center space-x-1 px-3 py-1.5 bg-theme-card text-shnoor-indigo hover:text-shnoor-navy rounded-lg hover:bg-shnoor-light/30 border border-shnoor-light transition-colors text-sm font-medium w-full sm:w-auto"
                                     >
                                         <Plus size={16} />
                                         <span>Add Role</span>
@@ -973,7 +973,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                             </div>
 
                             {jobRoles.map((role, index) => (
-                                <div key={index} className="p-3 sm:p-5 border border-shnoor-light rounded-xl space-y-3 bg-white shadow-sm">
+                                <div key={index} className="p-3 sm:p-5 border border-shnoor-light rounded-xl space-y-3 bg-theme-card shadow-sm">
                                     <div className="flex items-center justify-between gap-3">
                                         <span className="text-sm font-bold text-shnoor-navy">
                                             Role {index + 1} {index === 0 && <span className="text-shnoor-indigo ml-2 px-2 py-1 bg-shnoor-lavender rounded-md text-[10px] sm:text-xs">(Default)</span>}
@@ -996,7 +996,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                                             value={role.job_role}
                                             onChange={(e) => handleJobRoleChange(index, 'job_role', e.target.value)}
                                             disabled={viewMode}
-                                            className={`w-full px-4 py-3 border-2 border-shnoor-light rounded-xl focus:ring-4 focus:ring-shnoor-indigo/20 focus:border-shnoor-indigo transition-all font-medium text-shnoor-navy ${viewMode ? 'bg-shnoor-light opacity-50 cursor-not-allowed' : 'bg-white'}`}
+                                            className={`w-full px-4 py-3 border-2 border-shnoor-light rounded-xl focus:ring-4 focus:ring-shnoor-indigo/20 focus:border-shnoor-indigo transition-all font-medium text-shnoor-navy ${viewMode ? 'bg-shnoor-light opacity-50 cursor-not-allowed' : 'bg-theme-card'}`}
                                             placeholder="e.g., Senior Software Engineer, Junior Developer"
                                         />
                                     </div>
@@ -1099,7 +1099,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                                             });
                                             setShowCodingModal(true);
                                         }}
-                                        className="py-3 bg-white border-2 border-shnoor-mist hover:border-shnoor-indigo text-shnoor-navy hover:text-shnoor-indigo font-semibold rounded-lg transition-all flex items-center justify-center space-x-2"
+                                        className="py-3 bg-theme-card border-2 border-shnoor-mist hover:border-shnoor-indigo text-shnoor-navy hover:text-shnoor-indigo font-semibold rounded-lg transition-all flex items-center justify-center space-x-2"
                                     >
                                         <Plus size={20} />
                                         <span>Create New Coding Question</span>
@@ -1120,7 +1120,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                             <div className="pt-4 space-y-3">
                                 <h4 className="font-semibold text-shnoor-navy mb-3">Coding Questions ({codingQuestions.length})</h4>
                                 {codingQuestions.map((q, idx) => (
-                                    <div key={q.id} className="bg-white border-2 border-shnoor-mist rounded-lg p-4 hover:border-shnoor-mist transition-colors">
+                                    <div key={q.id} className="bg-theme-card border-2 border-shnoor-mist rounded-lg p-4 hover:border-shnoor-mist transition-colors">
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center space-x-3">
                                                 <div className="w-10 h-10 bg-shnoor-lavender rounded-lg flex items-center justify-center">
@@ -1190,7 +1190,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                                             <button
                                                 onClick={() => handleStart('manual')}
-                                                className="p-6 border-2 border-shnoor-mist rounded-xl text-left transition-all hover:border-shnoor-indigo hover:shadow-lg group bg-white"
+                                                className="p-6 border-2 border-shnoor-mist rounded-xl text-left transition-all hover:border-shnoor-indigo hover:shadow-lg group bg-theme-card"
                                             >
                                                 <div className="w-12 h-12 bg-shnoor-lavender rounded-full flex items-center justify-center mb-4 group-hover:bg-shnoor-indigo transition-colors">
                                                     <FileText className="w-6 h-6 text-shnoor-indigo group-hover:text-white" />
@@ -1205,7 +1205,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
 
                                             <button
                                                 onClick={() => handleStart('bulk')}
-                                                className="p-6 border-2 border-shnoor-mist rounded-xl text-left transition-all hover:border-shnoor-danger hover:shadow-lg group bg-white"
+                                                className="p-6 border-2 border-shnoor-mist rounded-xl text-left transition-all hover:border-shnoor-danger hover:shadow-lg group bg-theme-card"
                                             >
                                                 <div className="w-12 h-12 bg-shnoor-dangerLight rounded-full flex items-center justify-center mb-4 group-hover:bg-shnoor-danger transition-colors">
                                                     <Upload className="w-6 h-6 text-shnoor-danger group-hover:text-white" />
@@ -1266,7 +1266,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
                                 <button
                                     onClick={() => handleStart('manual')}
-                                    className={`p-6 border-2 border-shnoor-mist rounded-xl text-left transition-all hover:border-shnoor-indigo group bg-white ${!testTitle || nameAvailability.available === false || nameAvailability.checking
+                                    className={`p-6 border-2 border-shnoor-mist rounded-xl text-left transition-all hover:border-shnoor-indigo group bg-theme-card ${!testTitle || nameAvailability.available === false || nameAvailability.checking
                                         ? 'opacity-50 cursor-not-allowed'
                                         : 'hover:shadow-md'
                                         }`}
@@ -1281,7 +1281,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
 
                                 <button
                                     onClick={() => handleStart('bulk')}
-                                    className={`p-6 border-2 border-shnoor-mist rounded-xl text-left transition-all hover:border-shnoor-indigo group bg-white ${!testTitle || nameAvailability.available === false || nameAvailability.checking
+                                    className={`p-6 border-2 border-shnoor-mist rounded-xl text-left transition-all hover:border-shnoor-indigo group bg-theme-card ${!testTitle || nameAvailability.available === false || nameAvailability.checking
                                         ? 'opacity-50 cursor-not-allowed'
                                         : 'hover:shadow-md'
                                         }`}
@@ -1301,7 +1301,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
 
             {/* Step 2: Manual Entry */}
             {step === 'manual' && (
-                <div className="bg-white rounded-xl shadow-sm border border-shnoor-mist p-6">
+                <div className="bg-theme-card rounded-xl shadow-sm border border-shnoor-mist p-6">
                     <div className="flex items-center justify-between mb-6 pb-6 border-b border-shnoor-mist">
                         <div className="flex items-center space-x-4">
                             <button onClick={() => setStep('init')} className="p-2 hover:bg-shnoor-lavender rounded-full transition-colors">
@@ -1327,7 +1327,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                                     onClick={() => setQuestionInputMode('type')}
                                     className={`flex-1 py-2.5 px-4 rounded-md text-sm font-semibold transition-colors flex items-center justify-center gap-2 ${
                                         questionInputMode === 'type'
-                                            ? 'bg-white text-shnoor-indigo shadow-sm'
+                                            ? 'bg-theme-card text-shnoor-indigo shadow-sm'
                                             : 'text-shnoor-navy hover:text-shnoor-indigo'
                                     }`}
                                 >
@@ -1339,7 +1339,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                                     onClick={() => setQuestionInputMode('bank')}
                                     className={`flex-1 py-2.5 px-4 rounded-md text-sm font-semibold transition-colors flex items-center justify-center gap-2 ${
                                         questionInputMode === 'bank'
-                                            ? 'bg-white text-shnoor-indigo shadow-sm'
+                                            ? 'bg-theme-card text-shnoor-indigo shadow-sm'
                                             : 'text-shnoor-navy hover:text-shnoor-indigo'
                                     }`}
                                 >
@@ -1367,7 +1367,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                                             onClick={() => setCurrentQuestion({ ...currentQuestion, format: 'paragraph' })}
                                             className={`p-2 rounded transition-colors ${currentQuestion.format === 'paragraph'
                                                 ? 'bg-shnoor-indigo text-white'
-                                                : 'text-shnoor-navy hover:bg-white'
+                                                : 'text-shnoor-navy hover:bg-theme-card'
                                                 }`}
                                             title="Paragraph format (Markdown supported)"
                                         >
@@ -1378,7 +1378,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                                             onClick={() => setCurrentQuestion({ ...currentQuestion, format: 'line' })}
                                             className={`p-2 rounded transition-colors ${currentQuestion.format === 'line'
                                                 ? 'bg-shnoor-indigo text-white'
-                                                : 'text-shnoor-navy hover:bg-white'
+                                                : 'text-shnoor-navy hover:bg-theme-card'
                                                 }`}
                                             title="Line format (preserves line breaks)"
                                         >
@@ -1389,7 +1389,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                                             onClick={() => setCurrentQuestion({ ...currentQuestion, format: 'code' })}
                                             className={`p-2 rounded transition-colors ${currentQuestion.format === 'code'
                                                 ? 'bg-shnoor-indigo text-white'
-                                                : 'text-shnoor-navy hover:bg-white'
+                                                : 'text-shnoor-navy hover:bg-theme-card'
                                                 }`}
                                             title="Code format (monospace, syntax highlighting)"
                                         >
@@ -1495,7 +1495,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                             ) : (
                                 <div className="space-y-4">
                                     {questions.map((q, idx) => (
-                                        <div key={q.id} className="bg-white p-4 rounded-lg border border-shnoor-mist shadow-sm">
+                                        <div key={q.id} className="bg-theme-card p-4 rounded-lg border border-shnoor-mist shadow-sm">
                                             <div className="flex justify-between items-start mb-2 gap-2">
                                                 <div className="flex flex-wrap items-center gap-1.5">
                                                     <span className="font-bold text-xs text-shnoor-navy bg-shnoor-lavender px-2 py-1 rounded">Q{idx + 1}</span>
@@ -1531,7 +1531,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
 
             {/* Step 2: Bulk Upload */}
             {step === 'bulk' && (
-                <div className="bg-white rounded-xl shadow-sm border border-shnoor-mist p-6 max-w-2xl mx-auto">
+                <div className="bg-theme-card rounded-xl shadow-sm border border-shnoor-mist p-6 max-w-2xl mx-auto">
                     <div className="flex items-center space-x-4 mb-6 pb-6 border-b border-shnoor-mist">
                         <button onClick={() => setStep('init')} className="p-2 hover:bg-shnoor-lavender rounded-full transition-colors">
                             <ArrowLeft size={20} className="text-shnoor-navy" />
@@ -1544,7 +1544,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
 
                     <div className="border-2 border-dashed border-shnoor-mist rounded-lg p-12 text-center hover:border-shnoor-indigo transition-colors relative">
                         {isUploading && (
-                            <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10">
+                            <div className="absolute inset-0 bg-theme-card/80 flex items-center justify-center z-10">
                                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-shnoor-indigo"></div>
                             </div>
                         )}
@@ -1582,7 +1582,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
 
             {/* Step 3: Success Screen */}
             {step === 'success' && (
-                <div className="bg-white rounded-xl shadow-sm border border-shnoor-mist p-8 max-w-2xl mx-auto">
+                <div className="bg-theme-card rounded-xl shadow-sm border border-shnoor-mist p-8 max-w-2xl mx-auto">
                     <div className="text-center">
                         {/* Success Icon */}
                         <div className="w-20 h-20 bg-shnoor-successLight rounded-full flex items-center justify-center mx-auto mb-6">
@@ -1648,8 +1648,8 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
             {/* Coding Question Modal */}
             {showCodingModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-                    <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-                        <div className="sticky top-0 bg-white border-b border-shnoor-mist p-6 flex items-center justify-between">
+                    <div className="bg-theme-card rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                        <div className="sticky top-0 bg-theme-card border-b border-shnoor-mist p-6 flex items-center justify-between">
                             <h3 className="text-xl font-bold text-shnoor-navy">
                                 {editingCodingQuestionId ? 'Edit Coding Question' : 'Add Coding Question'}
                             </h3>
@@ -1881,8 +1881,8 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
             {/* Coding Question View Modal */}
             {showCodingViewModal && viewingCodingQuestion && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-                    <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-                        <div className="sticky top-0 bg-white border-b border-shnoor-mist p-6 flex items-center justify-between">
+                    <div className="bg-theme-card rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                        <div className="sticky top-0 bg-theme-card border-b border-shnoor-mist p-6 flex items-center justify-between">
                             <h3 className="text-xl font-bold text-shnoor-navy">View Coding Question</h3>
                             <button
                                 onClick={() => setShowCodingViewModal(false)}
@@ -1946,11 +1946,11 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                                             <div className="grid grid-cols-2 gap-3 text-sm">
                                                 <div>
                                                     <span className="text-shnoor-navy font-medium">Input:</span>
-                                                    <pre className="mt-1 p-2 bg-white rounded text-shnoor-navy">{tc.input}</pre>
+                                                    <pre className="mt-1 p-2 bg-theme-card rounded text-shnoor-navy">{tc.input}</pre>
                                                 </div>
                                                 <div>
                                                     <span className="text-shnoor-navy font-medium">Output:</span>
-                                                    <pre className="mt-1 p-2 bg-white rounded text-shnoor-navy">{tc.output}</pre>
+                                                    <pre className="mt-1 p-2 bg-theme-card rounded text-shnoor-navy">{tc.output}</pre>
                                                 </div>
                                             </div>
                                         </div>

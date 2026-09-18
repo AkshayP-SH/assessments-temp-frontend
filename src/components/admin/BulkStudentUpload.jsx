@@ -94,7 +94,7 @@ Robert Johnson,robert.johnson@example.com,5551234567,Harvard University`;
     };
 
     return (
-        <div className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] p-8 border border-shnoor-light">
+        <div className="bg-theme-card rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] p-8 border border-shnoor-light">
             <h2 className="text-2xl font-bold mb-4 text-shnoor-navy">Bulk Student Upload</h2>
 
             {/* Instructions */}
@@ -120,23 +120,23 @@ Robert Johnson,robert.johnson@example.com,5551234567,Harvard University`;
             </div>
 
             {/* File Upload Section */}
-            <div className="mb-8 p-6 bg-white border border-shnoor-light rounded-xl shadow-sm">
+            <div className="mb-8 p-6 bg-theme-card border border-shnoor-light rounded-xl shadow-sm">
                 <label className="block text-sm font-bold text-shnoor-navy mb-3">
                     Select CSV or Excel File
                 </label>
                 <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+                    <label 
+                        htmlFor="fileInput"
+                        className="py-2.5 px-5 rounded-xl border-0 text-sm font-semibold bg-theme-panel text-theme-text hover:bg-theme-accent cursor-pointer transition-colors inline-block"
+                    >
+                        Choose File
+                    </label>
                     <input
                         id="fileInput"
                         type="file"
                         accept=".csv,.xlsx,.xls"
                         onChange={handleFileChange}
-                        className="block w-full text-sm text-shnoor-navy font-medium
-                            file:mr-4 file:py-2.5 file:px-5
-                            file:rounded-xl file:border-0
-                            file:text-sm file:font-semibold
-                            file:bg-shnoor-lavender file:text-shnoor-indigo
-                            hover:file:bg-[#e0e0ef] file:cursor-pointer file:transition-colors
-                            cursor-pointer"
+                        className="hidden"
                     />
                 </div>
                 {file && (
@@ -183,7 +183,7 @@ Robert Johnson,robert.johnson@example.com,5551234567,Harvard University`;
 
                     {/* Summary */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                        <div className="bg-white border border-shnoor-light p-4 rounded-xl text-center">
+                        <div className="bg-theme-card border border-shnoor-light p-4 rounded-xl text-center">
                             <p className="text-3xl font-bold text-shnoor-navy">{result.results.total}</p>
                             <p className="text-sm text-shnoor-indigoMedium font-medium mt-1">Total Rows</p>
                         </div>

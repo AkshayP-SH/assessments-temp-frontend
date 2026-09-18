@@ -2106,7 +2106,7 @@ const AdminDashboard = () => {
 
         {/* Super Admin — Client Scope Selector */}
         {isSuperAdmin && (
-          <div className="bg-white border-b border-shnoor-mist shadow-sm">
+          <div className="bg-theme-card border-b border-shnoor-mist shadow-sm">
             <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2 sm:py-2.5 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
               <div className="flex items-center gap-1.5 text-[10px] sm:text-xs font-semibold text-shnoor-indigoMedium uppercase tracking-wide flex-shrink-0">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="sm:w-[14px] sm:h-[14px]"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
@@ -2115,7 +2115,7 @@ const AdminDashboard = () => {
               <div className="flex-1 min-w-0 w-full sm:w-auto relative client-selector-container">
                 <button
                   onClick={() => setIsClientSelectorOpen(!isClientSelectorOpen)}
-                  className="w-full max-w-full sm:max-w-sm h-9 sm:h-8 px-3 rounded-md border border-shnoor-mist bg-white text-xs sm:text-sm text-shnoor-navy focus:outline-none focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo transition-colors flex items-center justify-between"
+                  className="w-full max-w-full sm:max-w-sm h-9 sm:h-8 px-3 rounded-md border border-shnoor-mist bg-theme-card text-xs sm:text-sm text-shnoor-navy focus:outline-none focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo transition-colors flex items-center justify-between"
                 >
                   <span className="truncate">
                     {viewAsClientId 
@@ -2132,7 +2132,7 @@ const AdminDashboard = () => {
                 </button>
 
                 {isClientSelectorOpen && (
-                  <div className="absolute top-full left-0 mt-1 w-full sm:w-[300px] bg-white border border-shnoor-mist rounded-md shadow-lg z-[60] py-1 max-h-60 overflow-y-auto">
+                  <div className="absolute top-full left-0 mt-1 w-full sm:w-[300px] bg-theme-card border border-shnoor-mist rounded-md shadow-lg z-[60] py-1 max-h-60 overflow-y-auto">
                     <button
                       onClick={() => {
                         setViewAsClientId('');
@@ -2189,7 +2189,7 @@ const AdminDashboard = () => {
 
         {/* Client Admin — Usage Stats Bar */}
         {!isSuperAdmin && quota && (
-          <div className="bg-white border-b border-shnoor-mist">
+          <div className="bg-theme-card border-b border-shnoor-mist">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-wrap items-center gap-4">
               {[
                 { label: 'Tests', used: quota.limits?.tests?.used, max: quota.limits?.tests?.max },
@@ -2285,7 +2285,7 @@ const AdminDashboard = () => {
 
           {/* Create Test Modal/Section */}
           {showCreateTest ? (
-            <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-light p-8 mb-6">
+            <div className="bg-theme-card rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-theme-border p-8 mb-6">
               <div className="flex items-center justify-between mb-8">
                 <button
                   onClick={() => {
@@ -2308,7 +2308,7 @@ const AdminDashboard = () => {
             </div>
           ) : selectedExamId ? (
             /* Detail View: Student Results for a specific exam */
-            <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-light overflow-hidden">
+            <div className="bg-theme-card rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-light overflow-hidden">
               <div className="p-8">
                 <button
                   onClick={() => {
@@ -2355,7 +2355,7 @@ const AdminDashboard = () => {
                               className="fixed inset-0 z-[9999]"
                               onClick={() => setShowQuickSelectMenu(false)}
                             />
-                            <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-[0_20px_60px_rgba(14,14,39,0.15)] border border-shnoor-light z-[10000] overflow-hidden">
+                            <div className="absolute right-0 mt-2 w-56 bg-theme-card rounded-xl shadow-[0_20px_60px_rgba(14,14,39,0.15)] border border-shnoor-light z-[10000] overflow-hidden">
                               <div className="py-2">
                                 <button
                                   onClick={() => {
@@ -2500,7 +2500,7 @@ const AdminDashboard = () => {
 
 
                   return (
-                    <div className="bg-white border border-shnoor-light rounded-lg p-4 mb-6 shadow-[0_8px_30px_rgba(14,14,39,0.06)]">
+                    <div className="bg-theme-card border border-shnoor-light rounded-lg p-4 mb-6 shadow-[0_8px_30px_rgba(14,14,39,0.06)]">
                       <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
                         {/* Total Attempts */}
                         <div className="text-center">
@@ -2575,7 +2575,7 @@ const AdminDashboard = () => {
                               <Filter size={18} className="sm:size-5" />
                               <span>All</span>
                               <span className={`ml-1 px-2 py-0.5 rounded-full text-xs font-semibold ${statusFilter === 'all'
-                                ? 'bg-white bg-opacity-20'
+                                ? 'bg-theme-card bg-opacity-20'
                                 : 'bg-shnoor-indigo bg-opacity-20'
                                 }`}>
                                 {selectedExamStudents.length}
@@ -2591,7 +2591,7 @@ const AdminDashboard = () => {
                               <CheckCircle size={18} className="sm:size-5" />
                               <span>Passed</span>
                               <span className={`ml-1 px-2 py-0.5 rounded-full text-xs font-semibold ${statusFilter === 'pass'
-                                ? 'bg-white bg-opacity-20'
+                                ? 'bg-theme-card bg-opacity-20'
                                 : 'bg-shnoor-success bg-opacity-20'
                                 }`}>
                                 {passedCount}
@@ -2607,7 +2607,7 @@ const AdminDashboard = () => {
                               <XCircle size={18} className="sm:size-5" />
                               <span>Failed</span>
                               <span className={`ml-1 px-2 py-0.5 rounded-full text-xs font-semibold ${statusFilter === 'fail'
-                                ? 'bg-white bg-opacity-20'
+                                ? 'bg-theme-card bg-opacity-20'
                                 : 'bg-shnoor-danger bg-opacity-20'
                                 }`}>
                                 {failedCount}
@@ -2697,7 +2697,7 @@ const AdminDashboard = () => {
                             <th className="px-4 py-4 text-center text-xs font-bold uppercase tracking-wider">Actions</th>
                           </tr>
                         </thead>
-                        <tbody className="bg-white divide-y divide-[#E5E7EB]">
+                        <tbody className="bg-theme-card divide-y divide-[#E5E7EB]">
                           {(() => {
                             // Filter students based on statusFilter
                             const filteredStudents = selectedExamStudents.filter(s => {
@@ -2832,7 +2832,7 @@ const AdminDashboard = () => {
                       const endIndex = Math.min(startIndex + resultsRowsPerPage, filteredStudents.length);
 
                       return (
-                        <div className="flex items-center justify-end px-4 py-3 bg-white border border-shnoor-light mt-4 rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)]">
+                        <div className="flex items-center justify-end px-4 py-3 bg-theme-card border border-shnoor-light mt-4 rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)]">
                           <div className="flex items-center space-x-6 text-sm text-shnoor-indigoMedium">
                             <div className="flex items-center space-x-2">
                               <span>Rows per page:</span>
@@ -2885,7 +2885,7 @@ const AdminDashboard = () => {
                         <Loader2 className="animate-spin text-shnoor-indigo" size={48} />
                       </div>
                     ) : feedbackData.length === 0 ? (
-                      <div className="text-center py-12 bg-white rounded-xl border border-shnoor-light">
+                      <div className="text-center py-12 bg-theme-card rounded-xl border border-shnoor-light">
                         <MessageSquare size={48} className="mx-auto text-shnoor-mist mb-3" />
                         <p className="text-shnoor-indigoMedium text-lg">No feedback submitted yet</p>
                       </div>
@@ -2953,7 +2953,7 @@ const AdminDashboard = () => {
                         <div className="space-y-4">
                           <h3 className="text-lg font-bold text-shnoor-navy mb-4">Student Feedback</h3>
                           {feedbackData.map((feedback, idx) => (
-                            <div key={idx} className="border border-shnoor-light rounded-lg p-4 hover:shadow-md transition-shadow bg-white">
+                            <div key={idx} className="border border-shnoor-light rounded-lg p-4 hover:shadow-md transition-shadow bg-theme-card">
                               <div className="flex justify-between items-start mb-3">
                                 <div>
                                   <p className="font-semibold text-shnoor-navy">{feedback.student_name || 'Anonymous'}</p>
@@ -2989,7 +2989,7 @@ const AdminDashboard = () => {
                               )}
 
                               {feedback.feedback_text && (
-                                <div className="bg-white rounded-lg p-3">
+                                <div className="bg-theme-card rounded-lg p-3">
                                   <p className="text-sm text-shnoor-indigo whitespace-pre-wrap">{feedback.feedback_text}</p>
                                 </div>
                               )}
@@ -3010,7 +3010,7 @@ const AdminDashboard = () => {
             /* List View: All Exams */
             <>
               {activeTab === 'exams' && (
-                <div className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-light overflow-hidden">
+                <div className="bg-theme-card rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-light overflow-hidden">
                   <div className="p-4 sm:p-6">
                     <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 space-y-4 sm:space-y-0">
                       <div className="flex items-start sm:items-center space-x-3">
@@ -3072,7 +3072,7 @@ const AdminDashboard = () => {
                         ) : (
                           <>
                             {/* Bulk Actions Bar */}
-                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 p-4 bg-white rounded-xl border border-shnoor-light space-y-3 sm:space-y-0">
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 p-4 bg-theme-card rounded-xl border border-shnoor-light space-y-3 sm:space-y-0">
                               <label className="flex items-center space-x-3 cursor-pointer">
                                 <input
                                   type="checkbox"
@@ -3099,7 +3099,7 @@ const AdminDashboard = () => {
                               {paginatedTests.map((test) => (
                                 <div
                                   key={test.id}
-                                  className="bg-white border border-shnoor-light rounded-xl p-6 hover:shadow-[0_8px_30px_rgba(14,14,39,0.06)] hover:border-shnoor-indigo transition-all group relative min-h-[400px] flex flex-col"
+                                  className="bg-theme-card border border-shnoor-light rounded-xl p-6 hover:shadow-[0_8px_30px_rgba(14,14,39,0.06)] hover:border-shnoor-indigo transition-all group relative min-h-[400px] flex flex-col"
                                 >
                                   {/* Checkbox for selection */}
                                   <div className="absolute top-4 left-4 z-10">
@@ -3146,7 +3146,7 @@ const AdminDashboard = () => {
 
                                       {/* Dropdown Menu */}
                                       {openMenuId === test.id && (
-                                        <div className="absolute right-0 mt-2 w-48 bg-white border border-shnoor-light rounded-lg shadow-[0_8px_30px_rgba(14,14,39,0.06)] z-50">
+                                        <div className="absolute right-0 mt-2 w-48 bg-theme-card border border-shnoor-light rounded-lg shadow-[0_8px_30px_rgba(14,14,39,0.06)] z-50">
                                           {/* For draft tests, only show Clone option */}
                                           {test.status === 'draft' ? (
                                             <>
@@ -3351,7 +3351,7 @@ const AdminDashboard = () => {
                                 <button
                                   onClick={() => setExamCurrentPage(p => Math.max(1, p - 1))}
                                   disabled={examCurrentPage === 1}
-                                  className="p-2 bg-white border border-shnoor-light rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-shnoor-lavender transition-colors"
+                                  className="p-2 bg-theme-card border border-shnoor-light rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-shnoor-lavender transition-colors"
                                 >
                                   <ChevronLeft size={20} className="text-shnoor-indigo" />
                                 </button>
@@ -3361,7 +3361,7 @@ const AdminDashboard = () => {
                                 <button
                                   onClick={() => setExamCurrentPage(p => Math.min(examTotalPages, p + 1))}
                                   disabled={examCurrentPage === examTotalPages}
-                                  className="p-2 bg-white border border-shnoor-light rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-shnoor-lavender transition-colors"
+                                  className="p-2 bg-theme-card border border-shnoor-light rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-shnoor-lavender transition-colors"
                                 >
                                   <ChevronRight size={20} className="text-shnoor-indigo" />
                                 </button>
@@ -3377,7 +3377,7 @@ const AdminDashboard = () => {
 
               {activeTab === 'institutes' && (
                 <div className="space-y-6">
-                  <div className="admin-surface-card bg-white rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-light p-3 sm:p-8">
+                  <div className="admin-surface-card bg-theme-card rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-light p-3 sm:p-8">
                     <div className="mb-4 sm:mb-8 flex flex-col gap-3 sm:flex-row sm:items-start justify-between">
                       <div>
                         <h2 className="text-xl sm:text-3xl font-bold text-shnoor-navy mb-1.5 sm:mb-2 flex items-center">
@@ -3395,13 +3395,13 @@ const AdminDashboard = () => {
                           placeholder="Search institutes..."
                           value={instituteSearchTerm}
                           onChange={(e) => setInstituteSearchTerm(e.target.value)}
-                          className="w-full pl-9 pr-3 py-2.5 border border-shnoor-light rounded-xl focus:ring-2 focus:ring-shnoor-lavender focus:border-shnoor-indigo bg-white text-shnoor-navy transition-all shadow-[0_4px_15px_rgba(14,14,39,0.04)] text-sm"
+                          className="w-full pl-9 pr-3 py-2.5 border border-shnoor-light rounded-xl focus:ring-2 focus:ring-shnoor-lavender focus:border-shnoor-indigo bg-theme-card text-shnoor-navy transition-all shadow-[0_4px_15px_rgba(14,14,39,0.04)] text-sm"
                         />
                       </div>
                     </div>
 
                     {/* Add Institute Form */}
-                    <div className="admin-subsurface-card mb-4 sm:mb-8 p-3 sm:p-6 bg-white rounded-2xl border border-shnoor-light shadow-[0_8px_30px_rgba(14,14,39,0.06)]">
+                    <div className="admin-subsurface-card mb-4 sm:mb-8 p-3 sm:p-6 bg-theme-card rounded-2xl border border-shnoor-light shadow-[0_8px_30px_rgba(14,14,39,0.06)]">
                       <label className="text-sm font-bold text-shnoor-navy mb-2.5 flex items-center">
                         <Plus size={18} className="mr-2 text-shnoor-indigo" />
                         Add New Institute
@@ -3412,7 +3412,7 @@ const AdminDashboard = () => {
                           value={newInstituteName}
                           onChange={(e) => setNewInstituteName(e.target.value)}
                           placeholder="Enter institute name"
-                          className="flex-1 px-4 py-3 sm:px-5 sm:py-4 border border-shnoor-light rounded-xl focus:ring-4 focus:ring-shnoor-mist focus:border-shnoor-indigo bg-white text-shnoor-navy font-medium shadow-[0_8px_30px_rgba(14,14,39,0.06)] text-sm sm:text-base"
+                          className="flex-1 px-4 py-3 sm:px-5 sm:py-4 border border-shnoor-light rounded-xl focus:ring-4 focus:ring-shnoor-mist focus:border-shnoor-indigo bg-theme-card text-shnoor-navy font-medium shadow-[0_8px_30px_rgba(14,14,39,0.06)] text-sm sm:text-base"
                           onKeyPress={(e) => {
                             if (e.key === 'Enter') {
                               handleAddInstitute();
@@ -3463,7 +3463,7 @@ const AdminDashboard = () => {
                                 {selectedInstitutes.map(instId => {
                                   const inst = allInstitutes.find(i => i.id === instId);
                                   return inst ? (
-                                    <span key={instId} className="px-3 py-1 bg-white rounded-lg text-xs font-medium text-shnoor-navy border border-shnoor-light">
+                                    <span key={instId} className="px-3 py-1 bg-theme-card rounded-lg text-xs font-medium text-shnoor-navy border border-shnoor-light">
                                       {inst.display_name}
                                     </span>
                                   ) : null;
@@ -3480,7 +3480,7 @@ const AdminDashboard = () => {
                               <button
                                 type="button"
                                 onClick={() => setIsTestDropdownOpen(!isTestDropdownOpen)}
-                                className="w-full px-4 py-3 border border-shnoor-light rounded-xl bg-white text-shnoor-navy font-medium transition-all flex items-center justify-between hover:border-shnoor-indigo focus:ring-4 focus:ring-shnoor-lavender focus:border-shnoor-indigo"
+                                className="w-full px-4 py-3 border border-shnoor-light rounded-xl bg-theme-card text-shnoor-navy font-medium transition-all flex items-center justify-between hover:border-shnoor-indigo focus:ring-4 focus:ring-shnoor-lavender focus:border-shnoor-indigo"
                               >
                                 <span className={selectedTestsForMultipleInstitutes.length === 0 ? 'text-shnoor-indigoMedium' : 'text-shnoor-navy'}>
                                   {selectedTestsForMultipleInstitutes.length === 0
@@ -3493,7 +3493,7 @@ const AdminDashboard = () => {
 
                               {/* Dropdown Menu with Checkboxes */}
                               {isTestDropdownOpen && (
-                                <div className="admin-dropdown-menu absolute z-50 w-full mt-2 bg-white border border-shnoor-light rounded-xl shadow-lg max-h-64 overflow-y-auto">
+                                <div className="admin-dropdown-menu absolute z-50 w-full mt-2 bg-theme-card border border-shnoor-light rounded-xl shadow-lg max-h-64 overflow-y-auto">
                                   {tests.filter(test => test.status === 'published').length === 0 ? (
                                     <div className="p-4 text-center text-shnoor-indigoMedium text-sm">
                                       No published tests available
@@ -3586,12 +3586,12 @@ const AdminDashboard = () => {
                       </div>
 
                       {isLoadingAllInstitutes ? (
-                        <div className="flex items-center justify-center py-12 bg-white rounded-2xl border border-shnoor-light">
+                        <div className="flex items-center justify-center py-12 bg-theme-card rounded-2xl border border-shnoor-light">
                           <Loader2 className="animate-spin text-shnoor-indigo" size={32} />
                           <span className="ml-3 text-shnoor-indigoMedium font-medium">Loading institutes...</span>
                         </div>
                       ) : allInstitutes.length === 0 ? (
-                        <div className="text-center py-16 bg-white rounded-2xl border border-shnoor-light">
+                        <div className="text-center py-16 bg-theme-card rounded-2xl border border-shnoor-light">
                           <Building2 className="mx-auto mb-4 text-shnoor-mist" size={64} />
                           <p className="text-shnoor-navy font-medium text-lg">No institutes found</p>
                           <p className="text-shnoor-indigoMedium text-sm mt-2">Add your first institute using the form above</p>
@@ -3630,7 +3630,7 @@ const AdminDashboard = () => {
                             return (
                               <div
                                 key={institute.id}
-                                className={`border rounded-2xl p-6 bg-white hover:shadow-[0_8px_30px_rgba(14,14,39,0.06)] transition-all ${isInstituteSelected ? 'border-shnoor-indigo border-2 bg-shnoor-indigo/5' : 'border-shnoor-light'
+                                className={`border rounded-2xl p-6 bg-theme-card hover:shadow-[0_8px_30px_rgba(14,14,39,0.06)] transition-all ${isInstituteSelected ? 'border-shnoor-indigo border-2 bg-shnoor-indigo/5' : 'border-shnoor-light'
                                   }`}
                               >
                                 <div className="flex items-start space-x-3 mb-4">
@@ -3680,14 +3680,14 @@ const AdminDashboard = () => {
                                     <div className="grid grid-cols-2 gap-2 mt-4">
                                       <button
                                         onClick={() => handleViewAssignedTests(institute)}
-                                        className="py-2 px-3 bg-shnoor-lavender text-shnoor-indigo hover:bg-shnoor-indigo hover:text-white rounded-lg text-sm font-medium transition-colors"
+                                        className="py-2 px-3 bg-theme-panel hover:bg-theme-accent text-theme-text hover:text-white rounded-lg text-sm font-medium transition-colors border border-theme-border"
                                       >
                                         <FileSpreadsheet size={16} className="inline mr-1" />
                                         Tests
                                       </button>
                                       <button
                                         onClick={() => handleManageStudents(institute)}
-                                        className="py-2 px-3 bg-shnoor-successLight text-shnoor-success hover:bg-shnoor-success hover:text-white rounded-lg text-sm font-medium transition-colors"
+                                        className="py-2 px-3 bg-theme-panel hover:bg-theme-accent text-theme-text hover:text-white rounded-lg text-sm font-medium transition-colors border border-theme-border"
                                       >
                                         <Users size={16} className="inline mr-1" />
                                         Students
@@ -3697,14 +3697,14 @@ const AdminDashboard = () => {
                                           setSelectedInstituteForRegistration(institute);
                                           setShowRegistrationControlModal(true);
                                         }}
-                                        className="py-2 px-3 bg-shnoor-lavender text-shnoor-indigo hover:bg-shnoor-indigo hover:text-white rounded-lg text-sm font-medium transition-colors"
+                                        className="py-2 px-3 bg-theme-panel hover:bg-theme-accent text-theme-text hover:text-white rounded-lg text-sm font-medium transition-colors border border-theme-border"
                                       >
                                         <Calendar size={16} className="inline mr-1" />
                                         Registration
                                       </button>
                                       <button
                                         onClick={() => handleDeleteInstitute(institute.id, institute.display_name)}
-                                        className="py-2 px-3 bg-shnoor-lavender text-shnoor-danger hover:bg-shnoor-danger hover:text-white rounded-lg transition-colors text-sm font-medium"
+                                        className="py-2 px-3 bg-theme-panel hover:bg-shnoor-danger text-shnoor-danger hover:text-white rounded-lg text-sm font-medium transition-colors border border-theme-border"
                                         title="Delete Institute"
                                       >
                                         <Trash2 size={16} className="inline mr-1" />
@@ -3724,7 +3724,7 @@ const AdminDashboard = () => {
                           <button
                             onClick={() => setInstituteCurrentPage(p => Math.max(1, p - 1))}
                             disabled={instituteCurrentPage === 1}
-                            className="p-2 bg-white border border-shnoor-light rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-shnoor-lavender transition-colors"
+                            className="p-2 bg-theme-card border border-shnoor-light rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-shnoor-lavender transition-colors"
                           >
                             <ChevronLeft size={20} className="text-shnoor-indigo" />
                           </button>
@@ -3734,7 +3734,7 @@ const AdminDashboard = () => {
                           <button
                             onClick={() => setInstituteCurrentPage(p => Math.min(instituteTotalPages, p + 1))}
                             disabled={instituteCurrentPage === instituteTotalPages}
-                            className="p-2 bg-white border border-shnoor-light rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-shnoor-lavender transition-colors"
+                            className="p-2 bg-theme-card border border-shnoor-light rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-shnoor-lavender transition-colors"
                           >
                             <ChevronRight size={20} className="text-shnoor-indigo" />
                           </button>
@@ -3763,7 +3763,7 @@ const AdminDashboard = () => {
               {activeTab === 'violations' && (
                 <div className="space-y-6">
                   {/* Header */}
-                  <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-light p-4 sm:p-8 flex flex-col">
+                  <div className="bg-theme-card rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-light p-4 sm:p-8 flex flex-col">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 space-y-4 sm:space-y-0">
                       <div>
                         <h2 className="text-2xl sm:text-3xl font-bold text-shnoor-navy flex items-center">
@@ -3800,16 +3800,48 @@ const AdminDashboard = () => {
                         isSearchable={true}
                         menuPosition="fixed"
                         menuPlacement="auto"
-                        styles={{
+                                                styles={{
                           control: (base) => ({
                             ...base,
-                            padding: '6px',
-                            borderRadius: '0.75rem',
-                            borderColor: '#e5e7eb',
+                            backgroundColor: 'rgb(var(--theme-card))',
+                            borderColor: 'rgb(var(--theme-border))',
+                            color: 'rgb(var(--theme-text))',
                             boxShadow: 'none',
                             '&:hover': {
-                              borderColor: '#d1d5db'
+                              borderColor: 'rgb(var(--theme-accent))'
                             }
+                          }),
+                          menu: (base) => ({
+                            ...base,
+                            backgroundColor: 'rgb(var(--theme-card))',
+                            border: '1px solid rgb(var(--theme-border))',
+                            zIndex: 50
+                          }),
+                          option: (base, state) => ({
+                            ...base,
+                            backgroundColor: state.isSelected 
+                              ? 'rgb(var(--theme-accent))' 
+                              : state.isFocused 
+                                ? 'rgb(var(--theme-panel))' 
+                                : 'transparent',
+                            color: state.isSelected ? '#fff' : 'rgb(var(--theme-text))',
+                            '&:active': {
+                              backgroundColor: 'rgb(var(--theme-accent))',
+                              color: '#fff'
+                            },
+                            cursor: 'pointer'
+                          }),
+                          singleValue: (base) => ({
+                            ...base,
+                            color: 'rgb(var(--theme-text))'
+                          }),
+                          input: (base) => ({
+                            ...base,
+                            color: 'rgb(var(--theme-text))'
+                          }),
+                          placeholder: (base) => ({
+                            ...base,
+                            color: 'rgba(var(--theme-text-rgb, 120, 120, 130), 0.5)'
                           })
                         }}
                       />
@@ -3980,7 +4012,7 @@ const AdminDashboard = () => {
           {/* Clone Test Modal */}
           {showCloneModal && testToClone && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-              <div className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] max-w-md w-full">
+              <div className="bg-theme-card rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] max-w-md w-full">
                 <div className="bg-gradient-to-r from-shnoor-indigo to-shnoor-navy px-6 py-4 flex justify-between items-center">
                   <div>
                     <h3 className="text-xl font-bold text-white">Clone Test</h3>
@@ -3993,7 +4025,7 @@ const AdminDashboard = () => {
                       setCloneTestName('');
                       setCloneError('');
                     }}
-                    className="text-white hover:bg-white/20 rounded-full p-2 transition-colors"
+                    className="text-white hover:bg-theme-card/20 rounded-full p-2 transition-colors"
                     disabled={isCloning}
                   >
                     <X size={24} />
@@ -4101,7 +4133,7 @@ const AdminDashboard = () => {
           {/* Job Role/Description Modal */}
           {showJobModal && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-              <div className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] max-w-3xl w-full max-h-[90vh] overflow-hidden">
+              <div className="bg-theme-card rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] max-w-3xl w-full max-h-[90vh] overflow-hidden">
                 <div className="bg-gradient-to-r from-shnoor-indigo to-shnoor-navy px-6 py-4 flex justify-between items-center">
                   <div>
                     <h3 className="text-xl font-bold text-white">{selectedJobTest?.name}</h3>
@@ -4109,7 +4141,7 @@ const AdminDashboard = () => {
                   </div>
                   <button
                     onClick={() => setShowJobModal(false)}
-                    className="text-white hover:bg-white/20 rounded-full p-2 transition-colors"
+                    className="text-white hover:bg-theme-card/20 rounded-full p-2 transition-colors"
                   >
                     <X size={24} />
                   </button>
@@ -4130,7 +4162,7 @@ const AdminDashboard = () => {
                         <select
                           value={selectedJobRoleIndex}
                           onChange={(e) => setSelectedJobRoleIndex(parseInt(e.target.value))}
-                          className="w-full px-4 py-3 border border-shnoor-light rounded-xl focus:ring-4 focus:ring-shnoor-mist focus:border-shnoor-indigo bg-white text-shnoor-navy font-medium"
+                          className="w-full px-4 py-3 border border-shnoor-light rounded-xl focus:ring-4 focus:ring-shnoor-mist focus:border-shnoor-indigo bg-theme-card text-shnoor-navy font-medium"
                         >
                           {jobRoles.map((role, index) => (
                             <option key={index} value={index}>
@@ -4158,7 +4190,7 @@ const AdminDashboard = () => {
                         </div>
 
                         {jobRoles.map((role, index) => (
-                          <div key={index} className="p-4 border border-shnoor-light rounded-lg space-y-3 bg-white">
+                          <div key={index} className="p-4 border border-shnoor-light rounded-lg space-y-3 bg-theme-card">
                             <div className="flex items-center justify-between">
                               <span className="text-sm font-semibold text-shnoor-indigo">
                                 Role {index + 1} {index === 0 && <span className="text-shnoor-indigo">(Default)</span>}
@@ -4180,7 +4212,7 @@ const AdminDashboard = () => {
                                 type="text"
                                 value={role.jobRole}
                                 onChange={(e) => handleJobRoleChange(index, 'jobRole', e.target.value)}
-                                className="w-full px-4 py-3 border border-shnoor-light rounded-xl focus:ring-4 focus:ring-shnoor-mist focus:border-shnoor-indigo bg-white text-shnoor-navy font-medium"
+                                className="w-full px-4 py-3 border border-shnoor-light rounded-xl focus:ring-4 focus:ring-shnoor-mist focus:border-shnoor-indigo bg-theme-card text-shnoor-navy font-medium"
                                 placeholder="e.g., Senior Software Engineer"
                               />
                             </div>
@@ -4190,7 +4222,7 @@ const AdminDashboard = () => {
                                 value={role.jobDescription}
                                 onChange={(e) => handleJobRoleChange(index, 'jobDescription', e.target.value)}
                                 rows={4}
-                                className="w-full px-4 py-3 border border-shnoor-light rounded-xl focus:ring-4 focus:ring-shnoor-mist focus:border-shnoor-indigo bg-white text-shnoor-navy resize-none"
+                                className="w-full px-4 py-3 border border-shnoor-light rounded-xl focus:ring-4 focus:ring-shnoor-mist focus:border-shnoor-indigo bg-theme-card text-shnoor-navy resize-none"
                                 placeholder="Enter job description, requirements, responsibilities..."
                               />
                             </div>
@@ -4277,7 +4309,7 @@ const AdminDashboard = () => {
           {/* Assigned Tests Modal */}
           {showAssignedTestsModal && selectedInstituteForTests && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-              <div className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+              <div className="bg-theme-card rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
                 <div className="bg-gradient-to-r from-shnoor-indigo to-shnoor-navy px-6 py-4 flex justify-between items-center flex-shrink-0">
                   <div>
                     <h3 className="text-xl font-bold text-white">{selectedInstituteForTests.display_name}</h3>
@@ -4288,7 +4320,7 @@ const AdminDashboard = () => {
                       setShowAssignedTestsModal(false);
                       setSelectedTestsForUnassign([]);
                     }}
-                    className="text-white hover:bg-white/20 rounded-full p-2 transition-colors"
+                    className="text-white hover:bg-theme-card/20 rounded-full p-2 transition-colors"
                   >
                     <X size={24} />
                   </button>
@@ -4305,7 +4337,7 @@ const AdminDashboard = () => {
                       <button
                         type="button"
                         onClick={() => setIsInstituteTestDropdownOpen(!isInstituteTestDropdownOpen)}
-                        className="w-full px-4 py-3 border border-shnoor-light rounded-xl bg-white text-shnoor-navy font-medium transition-all flex items-center justify-between hover:border-shnoor-indigo focus:ring-4 focus:ring-shnoor-lavender focus:border-shnoor-indigo"
+                        className="w-full px-4 py-3 border border-shnoor-light rounded-xl bg-theme-card text-shnoor-navy font-medium transition-all flex items-center justify-between hover:border-shnoor-indigo focus:ring-4 focus:ring-shnoor-lavender focus:border-shnoor-indigo"
                       >
                         <span className={selectedTestsForInstitute.length === 0 ? 'text-shnoor-indigoMedium' : 'text-shnoor-navy'}>
                           {selectedTestsForInstitute.length === 0
@@ -4318,7 +4350,7 @@ const AdminDashboard = () => {
 
                       {/* Dropdown Menu with Checkboxes */}
                       {isInstituteTestDropdownOpen && (
-                        <div className="absolute z-50 w-full mt-2 bg-white border border-shnoor-light rounded-xl shadow-lg max-h-64 overflow-y-auto">
+                        <div className="absolute z-50 w-full mt-2 bg-theme-card border border-shnoor-light rounded-xl shadow-lg max-h-64 overflow-y-auto">
                           {tests.filter(test => test.status === 'published').length === 0 ? (
                             <div className="p-4 text-center text-shnoor-indigoMedium text-sm flex items-center justify-center">
                               <AlertCircle size={16} className="mr-1" />
@@ -4424,7 +4456,7 @@ const AdminDashboard = () => {
                     ) : (
                       <>
                         {/* Select All Checkbox */}
-                        <div className="flex items-center space-x-3 mb-3 p-3 bg-white rounded-lg">
+                        <div className="flex items-center space-x-3 mb-3 p-3 bg-theme-card rounded-lg">
                           <input
                             type="checkbox"
                             checked={selectedTestsForUnassign.length === assignedTests.length && assignedTests.length > 0}
@@ -4442,7 +4474,7 @@ const AdminDashboard = () => {
                               key={test.id}
                               className={`flex items-center justify-between p-4 border rounded-xl hover:shadow-md transition-all ${selectedTestsForUnassign.includes(test.id)
                                 ? 'bg-shnoor-lavender border-shnoor-indigo'
-                                : 'bg-white border-shnoor-light'
+                                : 'bg-theme-card border-shnoor-light'
                                 }`}
                             >
                               <div className="flex items-center space-x-3 flex-1">
@@ -4497,7 +4529,7 @@ const AdminDashboard = () => {
           {/* Student Management Modal */}
           {showStudentManagementModal && selectedInstituteForStudents && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-              <div className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+              <div className="bg-theme-card rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col">
                 <div className="bg-gradient-to-r from-shnoor-indigo to-shnoor-navy px-6 py-4 flex justify-between items-center flex-shrink-0">
                   <div>
                     <h3 className="text-xl font-bold text-white">{selectedInstituteForStudents.display_name}</h3>
@@ -4510,7 +4542,7 @@ const AdminDashboard = () => {
                       setSelectedTestsForStudentModal([]);
                       setStudentSearchTerm('');
                     }}
-                    className="text-white hover:bg-white/20 rounded-full p-2 transition-colors"
+                    className="text-white hover:bg-theme-card/20 rounded-full p-2 transition-colors"
                   >
                     <X size={24} />
                   </button>
@@ -4535,21 +4567,21 @@ const AdminDashboard = () => {
                           placeholder="Full Name *"
                           value={newStudentData.full_name}
                           onChange={(e) => setNewStudentData({ ...newStudentData, full_name: e.target.value })}
-                          className="px-4 py-3 border border-shnoor-light rounded-xl focus:ring-4 focus:ring-shnoor-lavender focus:border-shnoor-indigo bg-white text-shnoor-navy transition-all"
+                          className="px-4 py-3 border border-shnoor-light rounded-xl focus:ring-4 focus:ring-shnoor-lavender focus:border-shnoor-indigo bg-theme-card text-shnoor-navy transition-all"
                         />
                         <input
                           type="email"
                           placeholder="Email *"
                           value={newStudentData.email}
                           onChange={(e) => setNewStudentData({ ...newStudentData, email: e.target.value })}
-                          className="px-4 py-3 border border-shnoor-light rounded-xl focus:ring-4 focus:ring-shnoor-lavender focus:border-shnoor-indigo bg-white text-shnoor-navy transition-all"
+                          className="px-4 py-3 border border-shnoor-light rounded-xl focus:ring-4 focus:ring-shnoor-lavender focus:border-shnoor-indigo bg-theme-card text-shnoor-navy transition-all"
                         />
                         <input
                           type="text"
                           placeholder="Roll Number (Optional)"
                           value={newStudentData.roll_number}
                           onChange={(e) => setNewStudentData({ ...newStudentData, roll_number: e.target.value })}
-                          className="px-4 py-3 border border-shnoor-light rounded-xl focus:ring-4 focus:ring-shnoor-lavender focus:border-shnoor-indigo bg-white text-shnoor-navy transition-all"
+                          className="px-4 py-3 border border-shnoor-light rounded-xl focus:ring-4 focus:ring-shnoor-lavender focus:border-shnoor-indigo bg-theme-card text-shnoor-navy transition-all"
                         />
                         <input
                           type="text"
@@ -4592,7 +4624,7 @@ const AdminDashboard = () => {
                               placeholder="Search students..."
                               value={studentSearchTerm}
                               onChange={(e) => setStudentSearchTerm(e.target.value)}
-                              className="w-48 pl-9 pr-3 py-2 text-sm border border-shnoor-light rounded-lg focus:ring-2 focus:ring-shnoor-lavender focus:border-shnoor-indigo bg-white text-shnoor-navy transition-all"
+                              className="w-48 pl-9 pr-3 py-2 text-sm border border-shnoor-light rounded-lg focus:ring-2 focus:ring-shnoor-lavender focus:border-shnoor-indigo bg-theme-card text-shnoor-navy transition-all"
                             />
                           </div>
                           <button
@@ -4634,7 +4666,7 @@ const AdminDashboard = () => {
                             <button
                               type="button"
                               onClick={() => setIsStudentTestDropdownOpen(!isStudentTestDropdownOpen)}
-                              className="w-full px-4 py-3 border border-shnoor-light rounded-xl bg-white text-shnoor-navy font-medium transition-all flex items-center justify-between hover:border-shnoor-indigo focus:ring-4 focus:ring-shnoor-lavender focus:border-shnoor-indigo"
+                              className="w-full px-4 py-3 border border-shnoor-light rounded-xl bg-theme-card text-shnoor-navy font-medium transition-all flex items-center justify-between hover:border-shnoor-indigo focus:ring-4 focus:ring-shnoor-lavender focus:border-shnoor-indigo"
                             >
                               <span className={selectedTestsForStudentModal.length === 0 ? 'text-shnoor-indigoMedium' : 'text-shnoor-navy'}>
                                 {selectedTestsForStudentModal.length === 0
@@ -4647,7 +4679,7 @@ const AdminDashboard = () => {
 
                             {/* Dropdown Menu with Checkboxes */}
                             {isStudentTestDropdownOpen && (
-                              <div className="absolute z-50 w-full mt-2 bg-white border border-shnoor-light rounded-xl shadow-lg max-h-64 overflow-y-auto">
+                              <div className="absolute z-50 w-full mt-2 bg-theme-card border border-shnoor-light rounded-xl shadow-lg max-h-64 overflow-y-auto">
                                 {tests.filter(test => test.status === 'published').length === 0 ? (
                                   <div className="p-4 text-center text-shnoor-indigoMedium text-sm flex items-center justify-center">
                                     <AlertCircle size={16} className="mr-1" />
@@ -4756,7 +4788,7 @@ const AdminDashboard = () => {
                         <>
                           {/* Select All Checkbox */}
                           {/* Selection Controls */}
-                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3 p-3 bg-white rounded-lg">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3 p-3 bg-theme-card rounded-lg">
                             <div className="flex items-center space-x-3">
                               <input
                                 type="checkbox"
@@ -4805,7 +4837,7 @@ const AdminDashboard = () => {
                                 <div
                                   className={`flex items-center justify-between p-4 border rounded-xl hover:shadow-md transition-all ${selectedStudentsForDelete.includes(student.id)
                                     ? 'bg-shnoor-lavender border-shnoor-indigo'
-                                    : 'bg-white border-shnoor-light'
+                                    : 'bg-theme-card border-shnoor-light'
                                     }`}
                                 >
                                   <div className="flex items-center space-x-3 flex-1">
@@ -4878,7 +4910,7 @@ const AdminDashboard = () => {
                                         {expandedStudentTests[student.id].tests.map((test) => (
                                           <div
                                             key={test.id}
-                                            className="flex items-center justify-between p-3 bg-white rounded-lg border border-shnoor-light hover:shadow-sm transition-all"
+                                            className="flex items-center justify-between p-3 bg-theme-card rounded-lg border border-shnoor-light hover:shadow-sm transition-all"
                                           >
                                             <div className="flex-1">
                                               <h6 className="text-sm font-semibold text-shnoor-navy">{test.title}</h6>
@@ -4953,7 +4985,7 @@ const AdminDashboard = () => {
           {/* Preview Questions Modal */}
           {showPreviewQuestionsModal && previewTest && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-              <div className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] max-w-4xl w-full max-h-[90vh] overflow-hidden">
+              <div className="bg-theme-card rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] max-w-4xl w-full max-h-[90vh] overflow-hidden">
                 <div className="bg-gradient-to-r from-shnoor-indigo to-shnoor-navy px-6 py-4 flex justify-between items-center">
                   <div>
                     <h3 className="text-xl font-bold text-white">{previewTest.name}</h3>
@@ -4961,7 +4993,7 @@ const AdminDashboard = () => {
                   </div>
                   <button
                     onClick={() => setShowPreviewQuestionsModal(false)}
-                    className="text-white hover:bg-white/20 rounded-full p-2 transition-colors"
+                    className="text-white hover:bg-theme-card/20 rounded-full p-2 transition-colors"
                   >
                     <X size={24} />
                   </button>
@@ -4981,7 +5013,7 @@ const AdminDashboard = () => {
                   ) : (
                     <div className="space-y-6">
                       {previewQuestions.map((question, index) => (
-                        <div key={question.id} className="p-4 bg-white rounded-xl border border-shnoor-light">
+                        <div key={question.id} className="p-4 bg-theme-card rounded-xl border border-shnoor-light">
                           <div className="flex items-start space-x-3 mb-3">
                             <span className="flex-shrink-0 w-8 h-8 bg-shnoor-lavender text-shnoor-indigo rounded-full flex items-center justify-center font-bold text-sm">
                               {index + 1}
@@ -5011,9 +5043,9 @@ const AdminDashboard = () => {
                                   {question.publicTestCases.map((testCase, testCaseIndex) => (
                                     <div key={`${question.id}-test-${testCaseIndex}`} className="p-3 rounded-lg bg-shnoor-lavender border border-shnoor-light text-sm">
                                       <p className="text-shnoor-indigoMedium"><strong>Input:</strong></p>
-                                      <pre className="whitespace-pre-wrap font-mono text-shnoor-indigoMedium bg-white/60 rounded px-2 py-1 mt-1">{testCase.input || '(empty)'}</pre>
+                                      <pre className="whitespace-pre-wrap font-mono text-shnoor-indigoMedium bg-theme-card/60 rounded px-2 py-1 mt-1">{testCase.input || '(empty)'}</pre>
                                       <p className="text-shnoor-indigoMedium mt-2"><strong>Output:</strong></p>
-                                      <pre className="whitespace-pre-wrap font-mono text-shnoor-indigoMedium bg-white/60 rounded px-2 py-1 mt-1">{testCase.output || '(empty)'}</pre>
+                                      <pre className="whitespace-pre-wrap font-mono text-shnoor-indigoMedium bg-theme-card/60 rounded px-2 py-1 mt-1">{testCase.output || '(empty)'}</pre>
                                       {testCase.explanation && <p className="mt-1 text-shnoor-soft"><strong>Explanation:</strong> {testCase.explanation}</p>}
                                     </div>
                                   ))}
@@ -5032,7 +5064,7 @@ const AdminDashboard = () => {
                                   key={option.label}
                                   className={`p-3 rounded-lg border ${question.correct_option === option.label
                                     ? 'bg-shnoor-successLight border-shnoor-success text-shnoor-success'
-                                    : 'bg-white border-shnoor-light text-shnoor-indigoMedium'
+                                    : 'bg-theme-card border-shnoor-light text-shnoor-indigoMedium'
                                     }`}
                                 >
                                   <span className="font-bold mr-2">{option.label}.</span>
@@ -5068,7 +5100,7 @@ const AdminDashboard = () => {
           {/* Test History Modal */}
           {showTestHistoryModal && testHistory && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-              <div className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] max-w-2xl w-full">
+              <div className="bg-theme-card rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] max-w-2xl w-full">
                 <div className="bg-gradient-to-r from-shnoor-indigo to-shnoor-navy px-6 py-4 flex justify-between items-center">
                   <div>
                     <h3 className="text-xl font-bold text-white">Test History</h3>
@@ -5076,7 +5108,7 @@ const AdminDashboard = () => {
                   </div>
                   <button
                     onClick={() => setShowTestHistoryModal(false)}
-                    className="text-white hover:bg-white/20 rounded-full p-2 transition-colors"
+                    className="text-white hover:bg-theme-card/20 rounded-full p-2 transition-colors"
                   >
                     <X size={24} />
                   </button>

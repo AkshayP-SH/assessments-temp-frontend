@@ -217,19 +217,51 @@ const InterviewsList = () => {
               isSearchable={false}
               menuPosition="fixed"
               menuPlacement="auto"
-              styles={{
-                control: (base) => ({
-                  ...base,
-                  padding: '2px',
-                  borderRadius: '0.5rem',
-                  borderColor: '#d1d5db',
-                  boxShadow: 'none',
-                  '&:hover': {
-                    borderColor: '#9ca3af'
-                  }
-                })
-              }}
-            />
+                              styles={{
+                          control: (base) => ({
+                            ...base,
+                            backgroundColor: 'rgb(var(--theme-card))',
+                            borderColor: 'rgb(var(--theme-border))',
+                            color: 'rgb(var(--theme-text))',
+                            boxShadow: 'none',
+                            '&:hover': {
+                              borderColor: 'rgb(var(--theme-accent))'
+                            }
+                          }),
+                          menu: (base) => ({
+                            ...base,
+                            backgroundColor: 'rgb(var(--theme-card))',
+                            border: '1px solid rgb(var(--theme-border))',
+                            zIndex: 50
+                          }),
+                          option: (base, state) => ({
+                            ...base,
+                            backgroundColor: state.isSelected 
+                              ? 'rgb(var(--theme-accent))' 
+                              : state.isFocused 
+                                ? 'rgb(var(--theme-panel))' 
+                                : 'transparent',
+                            color: state.isSelected ? '#fff' : 'rgb(var(--theme-text))',
+                            '&:active': {
+                              backgroundColor: 'rgb(var(--theme-accent))',
+                              color: '#fff'
+                            },
+                            cursor: 'pointer'
+                          }),
+                          singleValue: (base) => ({
+                            ...base,
+                            color: 'rgb(var(--theme-text))'
+                          }),
+                          input: (base) => ({
+                            ...base,
+                            color: 'rgb(var(--theme-text))'
+                          }),
+                          placeholder: (base) => ({
+                            ...base,
+                            color: 'rgba(var(--theme-text-rgb, 120, 120, 130), 0.5)'
+                          })
+                        }}
+              />
           </div>
         </div>
       </div>
