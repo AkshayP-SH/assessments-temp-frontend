@@ -165,6 +165,7 @@ const AdminDashboard = () => {
   // Super admin client filter — lets super admin scope the dashboard to a specific client
   const [clientsList, setClientsList] = useState([]);
   const [viewAsClientId, setViewAsClientId] = useState(''); // '' = all clients (super admin default)
+  const [isClientSelectorOpen, setIsClientSelectorOpen] = useState(false);
   const [quota, setQuota] = useState(null); // plan quota for client admin
   const isSuperAdmin = (() => {
     try {
@@ -388,10 +389,14 @@ const AdminDashboard = () => {
       if (isStudentTestDropdownOpen && !event.target.closest('.relative')) {
         setIsStudentTestDropdownOpen(false);
       }
+      // Close client selector dropdown
+      if (isClientSelectorOpen && !event.target.closest('.client-selector-container')) {
+        setIsClientSelectorOpen(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [openMenuId, isTestDropdownOpen, isInstituteTestDropdownOpen, isStudentTestDropdownOpen]);
+  }, [openMenuId, isTestDropdownOpen, isInstituteTestDropdownOpen, isStudentTestDropdownOpen, isClientSelectorOpen]);
 
   const fetchTests = async () => {
     try {
@@ -2094,44 +2099,86 @@ const AdminDashboard = () => {
   return (
     <Suspense fallback={<div className="flex h-screen items-center justify-center bg-shnoor-lavender"><Loader2 className="animate-spin h-12 w-12 text-shnoor-indigo" /></div>}>
       <div className="admin-dashboard-root min-h-screen bg-shnoor-lavender">
+        <div className="mx-auto w-full">
         {/* Header */}
         <AdminHeader />
 
         {/* Super Admin — Client Scope Selector */}
         {isSuperAdmin && (
           <div className="bg-white border-b border-shnoor-mist shadow-sm">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center gap-3">
-              <div className="flex items-center gap-2 text-xs font-semibold text-shnoor-indigoMedium uppercase tracking-wide flex-shrink-0">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
+            <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2 sm:py-2.5 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+              <div className="flex items-center gap-1.5 text-[10px] sm:text-xs font-semibold text-shnoor-indigoMedium uppercase tracking-wide flex-shrink-0">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="sm:w-[14px] sm:h-[14px]"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
                 Viewing as:
               </div>
-              <select
-                value={viewAsClientId}
-                onChange={e => {
-                  setViewAsClientId(e.target.value);
-                  setTests([]);
-                  setAllInstitutes([]);
-                }}
-                className="h-8 pl-3 pr-8 rounded-lg border border-shnoor-mist bg-white text-sm text-shnoor-navy focus:outline-none focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo transition-colors"
-              >
-                <option value="">All Clients (Platform View)</option>
-                {clientsList.map(c => (
-                  <option key={c.id} value={c.id}>
-                    {c.company_name || c.name} {c.status !== 'active' ? '(suspended)' : ''}
-                  </option>
-                ))}
-              </select>
+              <div className="flex-1 min-w-0 w-full sm:w-auto relative client-selector-container">
+                <button
+                  onClick={() => setIsClientSelectorOpen(!isClientSelectorOpen)}
+                  className="w-full max-w-full sm:max-w-sm h-9 sm:h-8 px-3 rounded-md border border-shnoor-mist bg-white text-xs sm:text-sm text-shnoor-navy focus:outline-none focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo transition-colors flex items-center justify-between"
+                >
+                  <span className="truncate">
+                    {viewAsClientId 
+                      ? (() => {
+                          const c = clientsList.find(c => String(c.id) === String(viewAsClientId));
+                          if (!c) return 'All Clients (Platform)';
+                          const name = c.company_name || c.name;
+                          const suffix = c.status !== 'active' ? ' (suspended)' : '';
+                          return `${name}${suffix}`;
+                        })()
+                      : 'All Clients (Platform)'}
+                  </span>
+                  <ChevronDown className="h-4 w-4 text-gray-400 flex-shrink-0 ml-2" />
+                </button>
+
+                {isClientSelectorOpen && (
+                  <div className="absolute top-full left-0 mt-1 w-full sm:w-[300px] bg-white border border-shnoor-mist rounded-md shadow-lg z-[60] py-1 max-h-60 overflow-y-auto">
+                    <button
+                      onClick={() => {
+                        setViewAsClientId('');
+                        setTests([]);
+                        setAllInstitutes([]);
+                        setIsClientSelectorOpen(false);
+                      }}
+                      className={`w-full text-left px-3 py-2 text-xs sm:text-sm hover:bg-shnoor-indigo/10 ${!viewAsClientId ? 'bg-shnoor-indigo/5 text-shnoor-indigo font-medium' : 'text-shnoor-navy'}`}
+                    >
+                      All Clients (Platform)
+                    </button>
+                    {clientsList.map(c => {
+                      const name = c.company_name || c.name;
+                      const suffix = c.status !== 'active' ? ' (suspended)' : '';
+                      const displayStr = `${name}${suffix}`;
+                      const isSelected = String(c.id) === String(viewAsClientId);
+                      
+                      return (
+                        <button
+                          key={c.id}
+                          onClick={() => {
+                            setViewAsClientId(c.id);
+                            setTests([]);
+                            setAllInstitutes([]);
+                            setIsClientSelectorOpen(false);
+                          }}
+                          className={`w-full text-left px-3 py-2 text-xs sm:text-sm hover:bg-shnoor-indigo/10 truncate ${isSelected ? 'bg-shnoor-indigo/5 text-shnoor-indigo font-medium' : 'text-shnoor-navy'}`}
+                          title={displayStr}
+                        >
+                          {displayStr}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
               {viewAsClientId && (
                 <button
                   onClick={() => { setViewAsClientId(''); setTests([]); setAllInstitutes([]); }}
-                  className="text-xs text-shnoor-danger hover:underline flex items-center gap-1"
+                  className="text-[11px] sm:text-xs text-shnoor-danger hover:underline flex items-center gap-1 whitespace-nowrap flex-shrink-0"
                 >
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="sm:w-3 sm:h-3"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
                   Clear filter
                 </button>
               )}
               {viewAsClientId && (
-                <span className="ml-auto text-xs bg-shnoor-indigo text-white px-2.5 py-1 rounded-full font-medium">
+                <span className="text-[10px] sm:text-xs bg-shnoor-indigo text-white px-2 py-1 rounded-full font-medium max-w-full truncate">
                   Scoped to: {clientsList.find(c => String(c.id) === String(viewAsClientId))?.company_name || clientsList.find(c => String(c.id) === String(viewAsClientId))?.name || 'Client'}
                 </span>
               )}
@@ -2202,8 +2249,8 @@ const AdminDashboard = () => {
 
           {/* Tab Navigation */}
           {!showCreateTest && !selectedExamId && (
-            <div className="mb-4 sm:mb-8 overflow-x-auto pb-4 sm:pb-0 hide-scrollbar">
-              <div className="admin-tab-shell bg-white rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-mist p-2 flex sm:inline-flex space-x-2 min-w-max">
+            <div className="mb-3 sm:mb-8 overflow-x-auto pb-2 sm:pb-0 hide-scrollbar">
+              <div className="admin-tab-shell bg-white rounded-xl sm:rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-mist p-1.5 sm:p-2 flex min-w-max gap-1.5 sm:gap-2">
                 {[
                   { id: 'exams', label: 'Manage Exams', icon: FileSpreadsheet },
                   { id: 'institutes', label: 'Manage Institutes', icon: Building2 },
@@ -2217,10 +2264,10 @@ const AdminDashboard = () => {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`admin-tab-button flex items-center space-x-2 px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-medium transition-all shrink-0 text-sm sm:text-base ${activeTab === tab.id ? 'is-active' : ''}`}
+                    className={`admin-tab-button flex items-center gap-1.5 sm:gap-2 px-3 py-2 sm:px-6 sm:py-3 rounded-lg sm:rounded-xl font-medium transition-all shrink-0 text-[11px] sm:text-base ${activeTab === tab.id ? 'is-active' : ''}`}
                   >
-                    <tab.icon size={20} />
-                    <span>{tab.label}</span>
+                    <tab.icon size={16} className="sm:w-5 sm:h-5" />
+                    <span className="whitespace-nowrap">{tab.label}</span>
                   </button>
                 ))}
               </div>
@@ -3320,32 +3367,32 @@ const AdminDashboard = () => {
 
               {activeTab === 'institutes' && (
                 <div className="space-y-6">
-                  <div className="admin-surface-card bg-white rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-light p-4 sm:p-8">
-                    <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-start justify-between">
+                  <div className="admin-surface-card bg-white rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-light p-3 sm:p-8">
+                    <div className="mb-4 sm:mb-8 flex flex-col gap-3 sm:flex-row sm:items-start justify-between">
                       <div>
-                        <h2 className="text-2xl sm:text-3xl font-bold text-shnoor-navy mb-2 flex items-center">
-                          <Building2 className="mr-2 sm:mr-3 text-shnoor-indigo h-6 w-6 sm:h-8 sm:w-8" />
+                        <h2 className="text-xl sm:text-3xl font-bold text-shnoor-navy mb-1.5 sm:mb-2 flex items-center">
+                          <Building2 className="mr-2 sm:mr-3 text-shnoor-indigo h-5 w-5 sm:h-8 sm:w-8" />
                           Manage Institutes
                         </h2>
-                        <p className="text-sm sm:text-base text-shnoor-indigoMedium ml-8 sm:ml-11">Add, view, and manage institutes and their students</p>
+                        <p className="text-xs sm:text-base text-shnoor-indigoMedium ml-0 sm:ml-11">Add, view, and manage institutes and their students</p>
                       </div>
 
                       {/* Search Institutes */}
-                      <div className="mt-4 sm:mt-0 relative w-full sm:w-64">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-shnoor-indigoMedium" size={18} />
+                      <div className="relative w-full sm:w-64">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-shnoor-indigoMedium" size={16} />
                         <input
                           type="text"
                           placeholder="Search institutes..."
                           value={instituteSearchTerm}
                           onChange={(e) => setInstituteSearchTerm(e.target.value)}
-                          className="w-full pl-10 pr-4 py-2 border border-shnoor-light rounded-xl focus:ring-2 focus:ring-shnoor-lavender focus:border-shnoor-indigo bg-white text-shnoor-navy transition-all shadow-[0_4px_15px_rgba(14,14,39,0.04)]"
+                          className="w-full pl-9 pr-3 py-2.5 border border-shnoor-light rounded-xl focus:ring-2 focus:ring-shnoor-lavender focus:border-shnoor-indigo bg-white text-shnoor-navy transition-all shadow-[0_4px_15px_rgba(14,14,39,0.04)] text-sm"
                         />
                       </div>
                     </div>
 
                     {/* Add Institute Form */}
-                    <div className="admin-subsurface-card mb-6 sm:mb-8 p-4 sm:p-6 bg-white rounded-2xl border border-shnoor-light shadow-[0_8px_30px_rgba(14,14,39,0.06)]">
-                      <label className="text-sm font-bold text-shnoor-navy mb-3 flex items-center">
+                    <div className="admin-subsurface-card mb-4 sm:mb-8 p-3 sm:p-6 bg-white rounded-2xl border border-shnoor-light shadow-[0_8px_30px_rgba(14,14,39,0.06)]">
+                      <label className="text-sm font-bold text-shnoor-navy mb-2.5 flex items-center">
                         <Plus size={18} className="mr-2 text-shnoor-indigo" />
                         Add New Institute
                       </label>
@@ -3355,7 +3402,7 @@ const AdminDashboard = () => {
                           value={newInstituteName}
                           onChange={(e) => setNewInstituteName(e.target.value)}
                           placeholder="Enter institute name"
-                          className="flex-1 px-5 py-4 border border-shnoor-light rounded-xl focus:ring-4 focus:ring-shnoor-mist focus:border-shnoor-indigo bg-white text-shnoor-navy font-medium shadow-[0_8px_30px_rgba(14,14,39,0.06)]"
+                          className="flex-1 px-4 py-3 sm:px-5 sm:py-4 border border-shnoor-light rounded-xl focus:ring-4 focus:ring-shnoor-mist focus:border-shnoor-indigo bg-white text-shnoor-navy font-medium shadow-[0_8px_30px_rgba(14,14,39,0.06)] text-sm sm:text-base"
                           onKeyPress={(e) => {
                             if (e.key === 'Enter') {
                               handleAddInstitute();
@@ -3365,7 +3412,7 @@ const AdminDashboard = () => {
                         <button
                           onClick={handleAddInstitute}
                           disabled={isAddingInstitute || !newInstituteName.trim()}
-                          className={`w-full sm:w-auto px-6 py-4 rounded-xl font-bold transition-all flex items-center justify-center space-x-2 shadow-[0_8px_30px_rgba(14,14,39,0.06)] ${!isAddingInstitute && newInstituteName.trim()
+                          className={`w-full sm:w-auto px-4 py-3 sm:px-6 sm:py-4 rounded-xl font-bold transition-all flex items-center justify-center space-x-2 shadow-[0_8px_30px_rgba(14,14,39,0.06)] text-sm sm:text-base ${!isAddingInstitute && newInstituteName.trim()
                             ? 'bg-shnoor-indigo hover:bg-shnoor-navy text-white hover:shadow-[0_8px_30px_rgba(14,14,39,0.06)] transform hover:-translate-y-0.5'
                             : 'bg-shnoor-light text-shnoor-soft cursor-not-allowed'
                             }`}
@@ -3373,7 +3420,7 @@ const AdminDashboard = () => {
                           {isAddingInstitute && (
                             <Loader2 className="animate-spin" size={20} />
                           )}
-                          <Plus size={20} />
+                          <Plus size={18} className="sm:w-5 sm:h-5" />
                           <span>{isAddingInstitute ? 'Adding...' : 'Add'}</span>
                         </button>
                       </div>
@@ -5115,6 +5162,7 @@ const AdminDashboard = () => {
               }}
             />
           )}
+        </div>
         </div>
       </div>
     </Suspense>

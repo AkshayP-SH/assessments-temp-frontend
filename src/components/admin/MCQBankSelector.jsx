@@ -70,7 +70,6 @@ const MCQBankSelector = ({
 
   const filterQuestions = () => {
     let filtered = [...questions];
-    console.log('[MCQBankSelector] Filtering questions, total:', questions.length);
 
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
@@ -104,8 +103,6 @@ const MCQBankSelector = ({
         .sort((a, b) => b.relevanceScore - a.relevanceScore);
     }
 
-    console.log('[MCQBankSelector] Filtered questions:', filtered.length);
-    console.log('[MCQBankSelector] First filtered question:', filtered[0]);
     setFilteredQuestions(filtered);
   };
 
@@ -344,10 +341,7 @@ function MotionlessSpinner() {
 }
 
 function MotionlessQuestionRow({ q, added, selected, selectedRoles, getDifficultyColor, onPreview }) {
-  console.log('[motionlessQuestionRow] Rendering question:', q);
-  
   if (!q || !q.question_text) {
-    console.error('[motionlessQuestionRow] Invalid question data:', q);
     return <div className="text-red-500">Invalid question data</div>;
   }
   

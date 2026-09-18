@@ -12,7 +12,6 @@ function BulkStudentUpload({ clientId }) {
     const handleFileChange = (e) => {
         const selectedFile = e.target.files[0];
         if (selectedFile) {
-            // Validate file type
             const validTypes = ['text/csv', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
             const isValid = validTypes.includes(selectedFile.type) ||
                 selectedFile.name.endsWith('.csv') ||
@@ -40,26 +39,21 @@ function BulkStudentUpload({ clientId }) {
         try {
             const formData = new FormData();
             formData.append('file', file);
-            // Pass client_id so super admin uploads land in the right tenant
             if (clientId) {
                 formData.append('client_id', clientId);
             }
 
             const token = localStorage.getItem('adminToken');
-            
-            // Fix: Safely clean the base URL to prevent double slashes (//)
             const cleanBaseUrl = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
 
             const response = await fetch(`${cleanBaseUrl}/api/upload/students`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`
-                    // Do NOT set Content-Type here; browser sets it automatically for FormData
                 },
                 body: formData
             });
 
-            // Catch HTML error pages from CloudFront/Express before they break JSON parsing
             const contentType = response.headers.get("content-type");
             if (contentType && contentType.indexOf("application/json") === -1) {
                 throw new Error("Server returned HTML instead of JSON. The API endpoint route might be incorrect.");
@@ -78,7 +72,6 @@ function BulkStudentUpload({ clientId }) {
             document.getElementById('fileInput').value = '';
 
         } catch (error) {
-            console.error('Upload error:', error);
             alert(error.message || 'Failed to upload students. Please try again.');
         } finally {
             setUploading(false);

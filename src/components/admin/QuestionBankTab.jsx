@@ -155,13 +155,11 @@ const QuestionBankTab = () => {
 
   return (
     <div>
-      {/* Header */}
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-shnoor-navy mb-2">Question Bank</h2>
         <p className="text-shnoor-soft">Manage reusable questions for your tests</p>
       </div>
 
-      {/* Sub-tabs */}
       <div className="border-b border-shnoor-light mb-6">
         <nav className="flex -mb-px">
           <button
@@ -189,7 +187,6 @@ const QuestionBankTab = () => {
         </nav>
       </div>
 
-      {/* Filters and Search */}
       <div className="mb-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="relative">
@@ -243,7 +240,6 @@ const QuestionBankTab = () => {
         </div>
       </div>
 
-      {/* Questions List */}
       <div>
         {loading ? (
           <div className="text-center py-12">

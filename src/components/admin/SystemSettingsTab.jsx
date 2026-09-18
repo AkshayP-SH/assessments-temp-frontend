@@ -72,7 +72,6 @@ const SystemSettingsTab = () => {
             if (data.success) {
                 setMessage({ type: 'success', text: 'Settings updated successfully!' });
 
-                // Also update local storage for the frontend to pick up if it crashes
                 localStorage.setItem('retry_timer_minutes', settings.retry_timer_minutes);
             } else {
                 setMessage({ type: 'error', text: data.message || 'Failed to update settings' });
@@ -114,7 +113,6 @@ const SystemSettingsTab = () => {
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Disaster Recovery Settings */}
                 <Card className="p-6 border border-shnoor-light shadow-sm">
                     <div className="flex items-center mb-4 space-x-2 text-shnoor-indigo">
                         <Clock size={24} />
@@ -145,7 +143,6 @@ const SystemSettingsTab = () => {
                     </div>
                 </Card>
 
-                {/* Maintenance Mode Settings */}
                 <Card className="p-6 border border-shnoor-light shadow-sm">
                     <div className="flex items-center mb-4 space-x-2 text-shnoor-warning">
                         <AlertTriangle size={24} />
@@ -194,7 +191,6 @@ const SystemSettingsTab = () => {
                     </div>
                 </Card>
 
-                {/* Test Defaults Settings */}
                 <Card className="p-6 border border-shnoor-light shadow-sm">
                     <div className="flex items-center mb-4 space-x-2 text-shnoor-indigo">
                         <Save size={24} />

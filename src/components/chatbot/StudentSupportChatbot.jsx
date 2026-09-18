@@ -14,7 +14,7 @@ const Icon = ({ d, className = 'w-5 h-5' }) => (
 
 const StudentSupportChatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [currentView, setCurrentView] = useState('topics'); // 'topics', 'questions', 'chat', 'contact'
+  const [currentView, setCurrentView] = useState('topics');
   const [selectedTopic, setSelectedTopic] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
@@ -28,10 +28,9 @@ const StudentSupportChatbot = () => {
   const [showToastNotification, setShowToastNotification] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
   
-  // Feedback state
   const [feedbackState, setFeedbackState] = useState({
     active: false,
-    step: null, // 'rating', 'helpful', 'responseTime', 'comments', 'complete'
+    step: null,
     data: {
       rating: null,
       helpful: null,
@@ -42,11 +41,10 @@ const StudentSupportChatbot = () => {
 
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
-  const processedNotificationsRef = useRef(new Set()); // Track which notifications we've processed
+  const processedNotificationsRef = useRef(new Set());
   const currentViewRef = useRef(currentView);
   const isOpenRef = useRef(isOpen);
 
-  // Keep refs in sync so socket handlers always have latest values
   useEffect(() => {
     currentViewRef.current = currentView;
   }, [currentView]);
@@ -55,20 +53,16 @@ const StudentSupportChatbot = () => {
     isOpenRef.current = isOpen;
   }, [isOpen]);
 
-  // Get student info from localStorage
   const studentName = localStorage.getItem('studentName') || 'Student';
   const studentEmail = localStorage.getItem('studentEmail') || '';
-  // Use rollNumber as student_id for consistent message tracking
   const studentId = localStorage.getItem('rollNumber') || '';
   const institute = localStorage.getItem('institute') || '';
 
-  // Support socket for real-time notifications
   const {
     notifications,
     markAllRead: socketMarkAllRead,
     notificationPermission,
     requestPermission,
-    isConnected,
     getSocket
   } = useSupportSocket({
     isAdmin: false,
@@ -97,15 +91,11 @@ const StudentSupportChatbot = () => {
     }
   }, [studentId, socketMarkAllRead]);
 
-  // Real-time: append incoming admin replies to open conversation
   useEffect(() => {
     const socket = getSocket();
     if (!socket) return;
 
     const handleAdminReply = (data) => {
-      console.log('[StudentChatbot] Admin reply received:', data);
-      console.log('[StudentChatbot] Chat open:', isOpenRef.current, 'Current view:', currentViewRef.current);
-      
       setConversationHistory(prev => {
         if (prev.find(m => m.id === data.id)) return prev;
         return [...prev, {
@@ -117,22 +107,16 @@ const StudentSupportChatbot = () => {
         }];
       });
 
-      // If contact view is open, mark as read immediately; otherwise bump unread count
       if (isOpenRef.current && currentViewRef.current === 'contact') {
-        console.log('[StudentChatbot] Chat is open, marking as read immediately');
         markMessagesAsRead();
       } else {
-        console.log('[StudentChatbot] Chat is closed, incrementing unread count');
         setUnreadCount(prev => prev + 1);
       }
     };
 
-    // Handle student's own message echo (for real-time display)
     const handleStudentMessageEcho = (data) => {
-      console.log('[StudentChatbot] Own message echo:', data);
       if (data.studentId === studentId) {
         setConversationHistory(prev => {
-          // Check if message already exists
           if (prev.find(m => m.id === data.id)) return prev;
           return [...prev, {
             id: data.id,
@@ -145,28 +129,15 @@ const StudentSupportChatbot = () => {
       }
     };
 
-    // Handle conversation closed event - Start feedback in chat
     const handleConversationClosed = (data) => {
-      console.log('[StudentChatbot] Conversation closed event received:', data);
-      console.log('[StudentChatbot] Current studentId:', studentId);
-      console.log('[StudentChatbot] Data studentId:', data.studentId);
-      console.log('[StudentChatbot] Request feedback:', data.requestFeedback);
-      console.log('[StudentChatbot] Current view:', currentViewRef.current);
-      console.log('[StudentChatbot] Is open:', isOpenRef.current);
-      
       if (data.requestFeedback && data.studentId === studentId) {
-        console.log('[StudentChatbot] Activating feedback mode...');
-        
-        // Activate feedback mode
         setFeedbackState({
           active: true,
           step: 'rating',
           data: { rating: null, helpful: null, responseTime: null, comments: null }
         });
         
-        // Add feedback questions as chat messages
         setTimeout(() => {
-          console.log('[StudentChatbot] Adding feedback messages to conversation...');
           setConversationHistory(prev => {
             const newMessages = [...prev, {
               id: `feedback-start-${Date.now()}`,
@@ -182,12 +153,9 @@ const StudentSupportChatbot = () => {
               image_path: null,
               feedbackStep: 'rating'
             }];
-            console.log('[StudentChatbot] New conversation history length:', newMessages.length);
             return newMessages;
           });
         }, 500);
-      } else {
-        console.log('[StudentChatbot] Feedback not triggered - conditions not met');
       }
     };
 
@@ -202,20 +170,6 @@ const StudentSupportChatbot = () => {
     };
   }, [getSocket, markMessagesAsRead, studentId]);
 
-  // Debug: Log socket connection status
-  useEffect(() => {
-    console.log('[StudentChatbot] Socket connection status:', isConnected);
-    console.log('[StudentChatbot] Student ID (rollNumber):', studentId);
-    
-    // Debug: Log socket rooms
-    const socket = getSocket();
-    if (socket && socket.connected) {
-      console.log('[StudentChatbot] Socket ID:', socket.id);
-      console.log('[StudentChatbot] Socket rooms:', Array.from(socket.rooms || []));
-    }
-  }, [isConnected, studentId, getSocket]);
-
-  // Request notification permission on first user interaction
   useEffect(() => {
     if (notificationPermission === 'default') {
       const handleClick = () => {
@@ -226,7 +180,6 @@ const StudentSupportChatbot = () => {
     }
   }, [notificationPermission, requestPermission]);
 
-  // Fetch unread count on mount
   useEffect(() => {
     const fetchUnreadCount = async () => {
       if (!studentId) return;
@@ -249,7 +202,6 @@ const StudentSupportChatbot = () => {
     return () => clearInterval(interval);
   }, [studentId]);
 
-  // Handle socket notifications for toast popups only (count is managed by handleAdminReply)
   useEffect(() => {
     if (notifications.length > 0) {
       const latestNotification = notifications[0];
@@ -272,7 +224,6 @@ const StudentSupportChatbot = () => {
     }
   }, [messages, conversationHistory]);
 
-  // Clear send status after 3 seconds
   useEffect(() => {
     if (sendStatus) {
       const timer = setTimeout(() => setSendStatus(null), 3000);
@@ -280,7 +231,6 @@ const StudentSupportChatbot = () => {
     }
   }, [sendStatus]);
 
-  // Fetch conversation history when Contact/Support is opened
   const fetchConversationHistory = useCallback(async () => {
     if (!studentId) return;
 
@@ -333,13 +283,10 @@ const StudentSupportChatbot = () => {
   const handleTopicSelect = (topic) => {
     setSelectedTopic(topic);
 
-    // If Contact/Support topic, go directly to chat view
     if (topic.id === 'contact') {
       setCurrentView('contact');
       fetchConversationHistory();
-      // Also clear the unread count immediately for better UX
       setUnreadCount(0);
-      // Mark admin replies as read when opening support chat
       markMessagesAsRead();
     } else {
       setCurrentView('questions');
@@ -406,7 +353,6 @@ const StudentSupportChatbot = () => {
       return;
     }
 
-    // Check if we're in feedback mode
     if (feedbackState.active) {
       handleFeedbackResponse(newMessage.trim());
       return;
@@ -429,9 +375,7 @@ const StudentSupportChatbot = () => {
         formData.append('image', selectedImage);
       }
 
-      // Clear message immediately for better UX
       const messageCopy = newMessage.trim();
-      const imageCopy = selectedImage;
       setNewMessage('');
       removeImage();
 
@@ -447,7 +391,6 @@ const StudentSupportChatbot = () => {
 
       if (data.success) {
         setSendStatus('success');
-        // Add message immediately after API confirm; socket echo will be deduped by id check
         setConversationHistory(prev => {
           if (prev.find(m => m.id === data.data?.id)) return prev;
           return [...prev, {
@@ -469,12 +412,8 @@ const StudentSupportChatbot = () => {
     }
   };
 
-  // Handle feedback responses in chat
   const handleFeedbackResponse = async (response) => {
-    console.log('[StudentChatbot] Handling feedback response:', response);
-    console.log('[StudentChatbot] Current feedback state:', feedbackState);
-    
-    const { step, data } = feedbackState;
+    const { step } = feedbackState;
 
     // Add user response to chat
     setConversationHistory(prev => [...prev, {
@@ -487,9 +426,7 @@ const StudentSupportChatbot = () => {
     setNewMessage('');
 
     if (step === 'rating') {
-      // Parse rating (1-5)
       const rating = parseInt(response);
-      console.log('[StudentChatbot] Parsed rating:', rating);
       
       if (rating >= 1 && rating <= 5) {
         setFeedbackState(prev => ({
@@ -498,7 +435,6 @@ const StudentSupportChatbot = () => {
           data: { ...prev.data, rating }
         }));
         
-        // Ask next question
         setTimeout(() => {
           setConversationHistory(prev => [...prev, {
             id: `feedback-q2-${Date.now()}`,
@@ -518,7 +454,6 @@ const StudentSupportChatbot = () => {
       }
     } else if (step === 'helpful') {
       const helpful = response.toLowerCase().includes('yes') || response.includes('👍');
-      console.log('[StudentChatbot] Helpful response:', helpful);
       
       setFeedbackState(prev => ({
         ...prev,
@@ -550,7 +485,6 @@ const StudentSupportChatbot = () => {
       };
       
       const responseTime = timeMap[response.toLowerCase()] || timeMap[response];
-      console.log('[StudentChatbot] Response time:', responseTime);
       
       if (responseTime) {
         setFeedbackState(prev => ({
@@ -578,15 +512,10 @@ const StudentSupportChatbot = () => {
       }
     } else if (step === 'comments') {
       const comments = response.toLowerCase() === 'skip' ? '' : response;
-      console.log('[StudentChatbot] Comments:', comments);
-      
-      // Submit feedback
       const finalData = {
         ...feedbackState.data,
         comments
       };
-      
-      console.log('[StudentChatbot] Submitting feedback:', finalData);
       
       try {
         const token = localStorage.getItem('studentAuthToken');
@@ -603,7 +532,6 @@ const StudentSupportChatbot = () => {
         );
 
         const result = await submitResponse.json();
-        console.log('[StudentChatbot] Feedback submission result:', result);
         
         if (result.success) {
           setConversationHistory(prev => [...prev, {
@@ -630,36 +558,6 @@ const StudentSupportChatbot = () => {
           created_at: new Date().toISOString()
         }]);
       }
-    }
-  };
-
-  // Handle feedback submission
-  const handleFeedbackSubmit = async (feedback) => {
-    try {
-      const token = localStorage.getItem('studentAuthToken');
-      const response = await fetch(
-        `${API_URL}/api/student-messages/conversation/${encodeURIComponent(studentId)}/feedback`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(feedback)
-        }
-      );
-
-      const data = await response.json();
-      if (data.success) {
-        alert('Thank you for your feedback!');
-        setShowFeedbackModal(false);
-        setFeedbackData(null);
-      } else {
-        throw new Error(data.message || 'Failed to submit feedback');
-      }
-    } catch (error) {
-      console.error('Error submitting feedback:', error);
-      throw error;
     }
   };
 

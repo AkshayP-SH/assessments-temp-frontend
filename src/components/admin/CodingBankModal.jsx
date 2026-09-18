@@ -19,7 +19,6 @@ const CodingBankModal = ({ question, onClose, onSave, categories, tags }) => {
 
   useEffect(() => {
     if (question) {
-      // Fetch full question details with test cases
       fetchQuestionDetails(question.id);
     }
   }, [question]);
@@ -76,8 +75,7 @@ const CodingBankModal = ({ question, onClose, onSave, categories, tags }) => {
       } else {
         alert(data.message || 'Failed to save question');
       }
-    } catch (error) {
-      console.error('Error saving question:', error);
+    } catch {
       alert('Failed to save question');
     } finally {
       setSaving(false);

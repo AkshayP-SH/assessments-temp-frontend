@@ -52,11 +52,9 @@ const CustomDateTimePicker = ({ value, onChange, placeholder, disabled }) => {
     const startingDayOfWeek = firstDay.getDay();
     
     const days = [];
-    // Previous month days
     for (let i = 0; i < startingDayOfWeek; i++) {
       days.push(null);
     }
-    // Current month days
     for (let i = 1; i <= daysInMonth; i++) {
       days.push(new Date(year, month, i));
     }
@@ -105,7 +103,6 @@ const CustomDateTimePicker = ({ value, onChange, placeholder, disabled }) => {
     const val = e.target.value;
     setInputValue(val);
     
-    // Try to parse: YYYY-MM-DD HH:MM
     const match = val.match(/^(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2})$/);
     if (match) {
       const [, year, month, day, hrs, mins] = match;
@@ -165,9 +162,7 @@ const CustomDateTimePicker = ({ value, onChange, placeholder, disabled }) => {
       {isOpen && (
         <div className="absolute z-50 mt-2 bg-white border-2 border-shnoor-light rounded-xl shadow-2xl overflow-hidden">
           <div className="flex">
-            {/* Calendar Section */}
             <div className="p-4" style={{ width: '320px' }}>
-              {/* Month/Year Navigation */}
               <div className="flex items-center justify-between mb-4">
                 <button
                   type="button"
@@ -205,7 +200,6 @@ const CustomDateTimePicker = ({ value, onChange, placeholder, disabled }) => {
                 </button>
               </div>
 
-              {/* Day Names */}
               <div className="grid grid-cols-7 gap-1 mb-2">
                 {dayNames.map(day => (
                   <div key={day} className="text-center text-xs font-semibold text-shnoor-indigoMedium py-1">
@@ -214,7 +208,6 @@ const CustomDateTimePicker = ({ value, onChange, placeholder, disabled }) => {
                 ))}
               </div>
 
-              {/* Calendar Days */}
               <div className="grid grid-cols-7 gap-1">
                 {days.map((date, idx) => {
                   if (!date) {
@@ -250,7 +243,6 @@ const CustomDateTimePicker = ({ value, onChange, placeholder, disabled }) => {
               </div>
             </div>
 
-            {/* Time Section */}
             <div className="border-l-2 border-shnoor-light p-4 bg-shnoor-mist" style={{ width: '200px' }}>
               <div className="flex items-center gap-2 mb-3">
                 <Clock size={16} className="text-shnoor-indigo" />
@@ -258,7 +250,6 @@ const CustomDateTimePicker = ({ value, onChange, placeholder, disabled }) => {
               </div>
               
               <div className="space-y-3">
-                {/* Hour Selection */}
                 <div>
                   <label className="text-xs font-semibold text-shnoor-navy mb-1 block">Hour</label>
                   <select
@@ -275,7 +266,6 @@ const CustomDateTimePicker = ({ value, onChange, placeholder, disabled }) => {
                   </select>
                 </div>
 
-                {/* Minute Selection */}
                 <div>
                   <label className="text-xs font-semibold text-shnoor-navy mb-1 block">Minute</label>
                   <select
@@ -292,7 +282,6 @@ const CustomDateTimePicker = ({ value, onChange, placeholder, disabled }) => {
                   </select>
                 </div>
 
-                {/* Preview */}
                 {selectedDate && (
                   <div className="mt-4 p-3 bg-white rounded-lg border-2 border-shnoor-light">
                     <div className="text-xs text-shnoor-indigoMedium mb-1">Selected:</div>

@@ -182,7 +182,7 @@ const Login = () => {
       } else {
         setApiError(result.message || 'Invalid credentials. Please try again.');
       }
-    } catch (err) {
+    } catch {
       setApiError('Login failed. Please check your credentials.');
     } finally {
       setIsLoading(false);
@@ -218,7 +218,7 @@ const Login = () => {
           navigate('/admin/dashboard', { replace: true });
           return;
         }
-      } catch (_) { /* not admin, continue */ }
+      } catch { /* not admin, continue */ }
 
       // Firebase student login
       const { auth, signInWithEmailAndPassword } = await import('../config/firebase');
