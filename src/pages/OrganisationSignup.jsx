@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import Button from '../components/Button';
 import InputField from '../components/InputField';
 import ThemeSelector from '../components/ThemeSelector';
@@ -26,6 +27,8 @@ const OrganisationSignup = () => {
     title: 'Register Organisation - SHNOOR Assessments',
     description: 'Create your organisation account on SHNOOR Assessments to streamline your technical hiring and proctoring.',
   });
+
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     orgName: '',
@@ -93,8 +96,8 @@ const OrganisationSignup = () => {
 
       {/* ── LEFT PANEL ────────────────────────────────────── */}
       <div className="auth-left-panel hidden lg:flex lg:w-[38%] flex-col justify-between bg-shnoor-navy px-12 py-12 relative overflow-hidden">
-        <div className="absolute top-[-80px] right-[-60px] w-80 h-80 rounded-full bg-shnoor-indigo opacity-20 blur-3xl pointer-events-none" />
-        <div className="absolute bottom-[-60px] left-[-40px] w-60 h-60 rounded-full bg-[#6868AC] opacity-15 blur-3xl pointer-events-none" />
+        <div className="absolute top-[-80px] right-[-60px] w-80 h-80 rounded-full bg-theme-accent opacity-25 blur-3xl pointer-events-none" />
+        <div className="absolute bottom-[-60px] left-[-40px] w-60 h-60 rounded-full bg-theme-auth-acc opacity-20 blur-3xl pointer-events-none" />
 
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-12">
@@ -108,9 +111,9 @@ const OrganisationSignup = () => {
           </div>
 
           <h2 className="text-3xl font-extrabold text-white leading-tight mb-4">
-            Scale your <span className="auth-hero-accent text-shnoor-lavender">Hiring</span><br />with SHNOOR
+            Scale your <span className="auth-hero-accent text-theme-auth-acc">Hiring</span><br />with SHNOOR
           </h2>
-          <p className="auth-left-muted text-sm text-white/70 leading-relaxed mb-10 max-w-sm">
+          <p className="auth-left-muted text-sm leading-relaxed mb-10 max-w-sm">
             Create an organisation account to manage technical assessments, live proctoring, and comprehensive candidate reports all in one place.
           </p>
 
@@ -123,7 +126,7 @@ const OrganisationSignup = () => {
               </div>
               <div>
                 <p className="text-white font-bold text-sm">Bulk Assessment Delivery</p>
-                <p className="text-white/60 text-xs mt-1 leading-relaxed">Host technical drives with thousands of candidates seamlessly.</p>
+                <p className="auth-left-muted text-xs mt-1 leading-relaxed">Host technical drives with thousands of candidates seamlessly.</p>
               </div>
             </div>
 
@@ -135,14 +138,14 @@ const OrganisationSignup = () => {
               </div>
               <div>
                 <p className="text-white font-bold text-sm">AI-Powered Proctoring</p>
-                <p className="text-white/60 text-xs mt-1 leading-relaxed">Ensure integrity with automated cheating detection and live video feeds.</p>
+                <p className="auth-left-muted text-xs mt-1 leading-relaxed">Ensure integrity with automated cheating detection and live video feeds.</p>
               </div>
             </div>
           </div>
         </div>
 
         <div className="relative z-10 mt-12">
-          <p className="auth-bottom-copy text-xs text-white/50">© {new Date().getFullYear()} SHNOOR International. All rights reserved.</p>
+          <p className="auth-bottom-copy text-xs">© {new Date().getFullYear()} SHNOOR International. All rights reserved.</p>
         </div>
       </div>
 
@@ -150,9 +153,22 @@ const OrganisationSignup = () => {
       <div className="auth-right-panel flex-1 bg-white flex items-center justify-center px-6 py-10 overflow-auto">
         <div className="w-full max-w-[440px]">
 
+          {/* Back navigation */}
+          <div className="mb-5">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-shnoor-soft hover:text-shnoor-indigo transition-colors group cursor-pointer"
+            >
+              <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+              <span>Back to home</span>
+            </Link>
+          </div>
+
           {/* Mobile brand */}
           <div className="flex items-center gap-3 mb-8 lg:hidden">
-            <img src={shnoorLogo} alt="Shnoor" className="h-10 w-10 object-contain" />
+            <div className="site-header-logo flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white shadow-xs p-1 flex-shrink-0">
+              <img src={shnoorLogo} alt="Shnoor" className="h-full w-full object-contain" />
+            </div>
             <div>
               <p className="font-extrabold text-shnoor-navy text-lg">SHNOOR Assessments</p>
               <p className="text-[10px] text-shnoor-soft uppercase tracking-widest font-bold">Enterprise Portal</p>
@@ -190,7 +206,7 @@ const OrganisationSignup = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <InputField
-                  label="Organisation Name *"
+                  label="Organisation Name"
                   name="orgName"
                   placeholder="e.g. Acme Corp"
                   value={formData.orgName}
@@ -198,7 +214,7 @@ const OrganisationSignup = () => {
                   required
                 />
                 <InputField
-                  label="Work Email Address *"
+                  label="Work Email Address"
                   name="email"
                   type="email"
                   placeholder="admin@organisation.com"
@@ -274,7 +290,7 @@ const OrganisationSignup = () => {
 
               <div className="relative">
                 <InputField
-                  label="Password *"
+                  label="Password"
                   name="password"
                   type={showPassword ? 'text' : 'password'}
                   placeholder="••••••••"

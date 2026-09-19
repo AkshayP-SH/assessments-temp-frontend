@@ -6,17 +6,20 @@ import { Flag, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 const McqQuestionView = ({
   currentQ,
   currentQuestion,
+  totalQuestions = 1,
   answers,
   markedForReview,
   toggleMarkForReview,
   handleAnswerSelect,
   handlePrevious,
   handleNext,
+  onSubmitTest,
   saveProgressNow
 }) => {
   if (!currentQ) return null;
 
   const isMarked = markedForReview.has(currentQuestion);
+  const isLastQuestion = currentQuestion >= totalQuestions - 1;
 
   return (
     <main className="flex-1 flex flex-col bg-shnoor-lavender p-3 sm:p-6 overflow-hidden order-1 lg:order-2">
@@ -127,31 +130,45 @@ const McqQuestionView = ({
         </button>
 
         <div className="flex space-x-2 sm:space-x-3 flex-1 sm:flex-none justify-end">
-          <button
-            onClick={() => {
-              saveProgressNow();
-              handleNext();
-            }}
-            className="px-4 sm:px-6 py-2 sm:py-3 bg-white border-2 border-shnoor-light text-shnoor-indigoMedium rounded-lg sm:rounded-xl font-semibold hover:border-shnoor-soft hover:bg-shnoor-mist/30 transition-all duration-200 shadow-lg hover:shadow-xl text-sm sm:text-base"
-          >
-            Skip
-          </button>
-
-          <button
-            onClick={() => {
-              if (answers[currentQuestion] !== undefined) {
+          {!isLastQuestion && (
+            <button
+              onClick={() => {
                 saveProgressNow();
                 handleNext();
-              } else {
-                alert('Please select an answer or click Skip');
-              }
-            }}
-            className="flex items-center justify-center space-x-1 sm:space-x-2 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-shnoor-indigo to-shnoor-navy hover:from-shnoor-navy hover:to-shnoor-indigo text-white rounded-lg sm:rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl text-sm sm:text-base flex-shrink-0"
-          >
-            <span className="hidden sm:inline">Save & Next</span>
-            <span className="sm:hidden">Next</span>
-            <ChevronRight size={16} className="sm:w-5 sm:h-5" />
-          </button>
+              }}
+              className="px-4 sm:px-6 py-2 sm:py-3 bg-white border-2 border-shnoor-light text-shnoor-indigoMedium rounded-lg sm:rounded-xl font-semibold hover:border-shnoor-soft hover:bg-shnoor-mist/30 transition-all duration-200 shadow-lg hover:shadow-xl text-sm sm:text-base"
+            >
+              Skip
+            </button>
+          )}
+
+          {isLastQuestion ? (
+            <button
+              onClick={() => {
+                saveProgressNow();
+                if (onSubmitTest) {
+                  onSubmitTest();
+                }
+              }}
+              className="flex items-center justify-center space-x-1 sm:space-x-2 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white rounded-lg sm:rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl text-sm sm:text-base flex-shrink-0"
+            >
+              <CheckCircle size={16} className="sm:w-5 sm:h-5" />
+              <span className="hidden sm:inline">Save & Submit Exam</span>
+              <span className="sm:hidden">Submit Exam</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                saveProgressNow();
+                handleNext();
+              }}
+              className="flex items-center justify-center space-x-1 sm:space-x-2 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-shnoor-indigo to-shnoor-navy hover:from-shnoor-navy hover:to-shnoor-indigo text-white rounded-lg sm:rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl text-sm sm:text-base flex-shrink-0"
+            >
+              <span className="hidden sm:inline">Save & Next</span>
+              <span className="sm:hidden">Next</span>
+              <ChevronRight size={16} className="sm:w-5 sm:h-5" />
+            </button>
+          )}
         </div>
       </div>
     </main>

@@ -1,7 +1,7 @@
 import React from 'react';
 import LazyMonacoEditor from '../LazyMonacoEditor';
 import ErrorBoundary from '../ErrorBoundary';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
 import codeExecutionAPI from '../../services/codeExecutionAPI';
 
 const CodingEditorPanel = ({
@@ -18,6 +18,7 @@ const CodingEditorPanel = ({
   saveProgressNow,
   handlePrevious,
   handleNext,
+  onSubmitTest,
   handleVerticalMouseDown,
   consolePanelHeight = 256,
   bottomPanelTab = 'testCases',
@@ -585,19 +586,34 @@ const CodingEditorPanel = ({
             <span>Previous</span>
           </button>
           <button
-            onClick={handleNext}
-            disabled={currentQuestion >= totalQuestions - 1}
+            onClick={() => {
+              if (currentQuestion >= totalQuestions - 1) {
+                saveProgressNow();
+                if (onSubmitTest) onSubmitTest();
+              } else {
+                handleNext();
+              }
+            }}
             className={`
               flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200
               ${
                 currentQuestion >= totalQuestions - 1
-                  ? 'bg-shnoor-indigo/20 text-shnoor-soft cursor-not-allowed'
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white shadow-md'
                   : 'bg-shnoor-indigo/30 hover:bg-shnoor-indigo/50 text-shnoor-lavender'
               }
             `}
           >
-            <span>Next</span>
-            <ChevronRight size={18} />
+            {currentQuestion >= totalQuestions - 1 ? (
+              <>
+                <CheckCircle size={18} />
+                <span>Submit Exam</span>
+              </>
+            ) : (
+              <>
+                <span>Next</span>
+                <ChevronRight size={18} />
+              </>
+            )}
           </button>
         </div>
       </div>
@@ -621,19 +637,34 @@ const CodingEditorPanel = ({
             <span>Previous</span>
           </button>
           <button
-            onClick={handleNext}
-            disabled={currentQuestion >= totalQuestions - 1}
+            onClick={() => {
+              if (currentQuestion >= totalQuestions - 1) {
+                saveProgressNow();
+                if (onSubmitTest) onSubmitTest();
+              } else {
+                handleNext();
+              }
+            }}
             className={`
               flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg font-medium transition-all duration-200 flex-1 ml-2
               ${
                 currentQuestion >= totalQuestions - 1
-                  ? 'bg-shnoor-indigo/20 text-shnoor-soft cursor-not-allowed'
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-700 text-white shadow-md'
                   : 'bg-shnoor-indigo border border-shnoor-indigo/50 text-white shadow-md'
               }
             `}
           >
-            <span>Next</span>
-            <ChevronRight size={18} />
+            {currentQuestion >= totalQuestions - 1 ? (
+              <>
+                <CheckCircle size={18} />
+                <span>Submit Exam</span>
+              </>
+            ) : (
+              <>
+                <span>Next</span>
+                <ChevronRight size={18} />
+              </>
+            )}
           </button>
         </div>
       </div>

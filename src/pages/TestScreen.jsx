@@ -14,6 +14,7 @@ import McqQuestionView from '../components/test/McqQuestionView';
 import CodingProblemView from '../components/test/CodingProblemView';
 import CodingEditorPanel from '../components/test/CodingEditorPanel';
 import TerminationModal from '../components/test/TerminationModal';
+import SubmitConfirmModal from '../components/test/SubmitConfirmModal';
 import { AlertTriangle, WifiOff } from 'lucide-react';
 import { apiFetch } from '../config/api';
 import { getSavedTheme } from '../utils/theme';
@@ -30,6 +31,10 @@ const TestScreen = () => {
   const [markedForReview, setMarkedForReview] = useState(new Set());
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const lastSavedStateRef = useRef(null);
+
+  // Submit modal state
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Termination modal state
   const [showTerminationModal, setShowTerminationModal] = useState(false);
@@ -84,6 +89,8 @@ int main() {
   const [editorTheme, setEditorTheme] = useState(getSavedTheme());
 
   const totalQuestions = questions.length + codingQuestions.length;
+  const answeredCount = Object.keys(answers).filter(k => answers[k] !== undefined).length;
+  const markedForReviewCount = markedForReview.size;
 
   const formatErrorForDisplay = (err) => {
     if (!err) return '';
@@ -162,6 +169,7 @@ int main() {
   }, []);
 
   const submitTest = useCallback(async (reason = 'manual') => {
+    setIsSubmitting(true);
     stopTimer();
     stopProctoring();
 
@@ -215,9 +223,11 @@ int main() {
           }
         });
       } else {
+        setIsSubmitting(false);
         alert('Failed to submit exam: ' + data.message);
       }
     } catch (err) {
+      setIsSubmitting(false);
       console.error('Error submitting exam:', err);
       alert('Error submitting exam. Please try again.');
     }
@@ -736,9 +746,8 @@ int main() {
         formattedTime={formattedTime}
         editorTheme={editorTheme}
         onFinish={() => {
-          if (window.confirm('Are you sure you want to finish and submit the test? This action cannot be undone.')) {
-            submitTest('manual');
-          }
+          saveProgressNow();
+          setShowSubmitModal(true);
         }}
       />
 
@@ -770,12 +779,14 @@ int main() {
           <McqQuestionView
             currentQ={currentQ}
             currentQuestion={currentQuestion}
+            totalQuestions={totalQuestions}
             answers={answers}
             markedForReview={markedForReview}
             toggleMarkForReview={toggleMarkForReview}
             handleAnswerSelect={handleAnswerSelect}
             handlePrevious={handlePrevious}
             handleNext={handleNext}
+            onSubmitTest={() => setShowSubmitModal(true)}
             saveProgressNow={saveProgressNow}
           />
         )}
@@ -870,6 +881,7 @@ int main() {
                 saveProgressNow={saveProgressNow}
                 handlePrevious={handlePrevious}
                 handleNext={handleNext}
+                onSubmitTest={() => setShowSubmitModal(true)}
                 handleVerticalMouseDown={handleVerticalMouseDown}
                 consolePanelHeight={consolePanelHeight}
                 bottomPanelTab={bottomPanelTab}
@@ -880,6 +892,20 @@ int main() {
           </div>
         )}
       </div>
+
+      {/* Submit Confirmation Modal */}
+      <SubmitConfirmModal
+        isOpen={showSubmitModal}
+        onClose={() => setShowSubmitModal(false)}
+        onConfirm={() => {
+          setShowSubmitModal(false);
+          submitTest('manual');
+        }}
+        totalQuestions={totalQuestions}
+        answeredCount={answeredCount}
+        markedForReviewCount={markedForReviewCount}
+        isSubmitting={isSubmitting}
+      />
 
       {/* Force Termination Modal */}
       <TerminationModal

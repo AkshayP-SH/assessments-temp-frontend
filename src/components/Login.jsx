@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { apiFetch } from '../config/api';
 import { useAdminAuth } from '../contexts/AdminAuthContext';
 import { useClientAuth } from '../contexts/ClientAuthContext';
@@ -55,30 +56,30 @@ const ORG_FEATURES = [
 
 // ── Portal Tab Switcher ────────────────────────────────────────────────────
 const PortalTabs = ({ active, onChange }) => (
-  <div className="flex rounded-xl bg-gray-100/80 p-1 mb-8 gap-1 relative z-10 border border-gray-200/60 shadow-inner">
+  <div className="flex rounded-xl bg-theme-panel p-1.5 mb-8 gap-1.5 relative z-10 border border-theme-border/50 shadow-xs">
     <button
       type="button"
       onClick={() => onChange('student')}
-      className={`flex-1 flex items-center justify-center gap-2 py-3 px-3 rounded-lg text-sm font-semibold transition-all duration-300 ${
+      className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ${
         active === 'student'
-          ? 'bg-white text-shnoor-navy shadow-[0_2px_10px_rgba(0,0,0,0.06)]'
-          : 'text-gray-500 hover:text-shnoor-navy hover:bg-gray-200/50'
+          ? 'bg-theme-card text-theme-text shadow-sm'
+          : 'text-theme-muted hover:text-theme-text'
       }`}
     >
       <StudentIcon />
-      Student / Candidate
+      <span>Student / Candidate</span>
     </button>
     <button
       type="button"
       onClick={() => onChange('org')}
-      className={`flex-1 flex items-center justify-center gap-2 py-3 px-3 rounded-lg text-sm font-semibold transition-all duration-300 ${
+      className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ${
         active === 'org'
-          ? 'bg-white text-shnoor-navy shadow-[0_2px_10px_rgba(0,0,0,0.06)]'
-          : 'text-gray-500 hover:text-shnoor-navy hover:bg-gray-200/50'
+          ? 'bg-theme-card text-theme-text shadow-sm'
+          : 'text-theme-muted hover:text-theme-text'
       }`}
     >
       <OrgIcon />
-      Organisation
+      <span>Organisation</span>
     </button>
   </div>
 );
@@ -278,37 +279,37 @@ const Login = () => {
   const features = portal === 'org' ? ORG_FEATURES : STUDENT_FEATURES;
 
   return (
-    <main className="h-screen w-full flex flex-col lg:flex-row font-['Plus_Jakarta_Sans',sans-serif] relative overflow-hidden">
+    <main className="h-screen w-full flex flex-col lg:flex-row font-['Plus_Jakarta_Sans',sans-serif] relative overflow-hidden bg-theme-page">
       <div className="absolute right-4 top-4 z-20 sm:right-6 sm:top-6 lg:right-8 lg:top-8">
         <ThemeSelector variant="light" />
       </div>
 
       {/* ── LEFT PANEL ──────────────────────────────────────────────────── */}
-      <div className="auth-left-panel hidden lg:flex lg:w-[45%] flex-col justify-between h-full bg-shnoor-navy px-14 py-12 relative overflow-hidden">
+      <div className="auth-left-panel hidden lg:flex lg:w-[45%] flex-col justify-between h-full bg-shnoor-navy px-12 xl:px-16 py-12 relative overflow-hidden">
         {/* Dynamic Gradient Lighting */}
-        <div className="absolute top-[-60px] left-[-60px] w-80 h-80 rounded-full bg-shnoor-indigo opacity-30 blur-[100px] pointer-events-none" />
-        <div className="absolute bottom-[-40px] right-[-40px] w-72 h-72 rounded-full bg-indigo-500 opacity-20 blur-[100px] pointer-events-none" />
-        <div className="absolute top-1/2 left-1/4 w-96 h-96 rounded-full bg-purple-500 opacity-10 blur-[120px] pointer-events-none transform -translate-y-1/2" />
+        <div className="absolute top-[-60px] left-[-60px] w-80 h-80 rounded-full bg-theme-accent opacity-25 blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-[-40px] right-[-40px] w-72 h-72 rounded-full bg-theme-auth-acc opacity-20 blur-[100px] pointer-events-none" />
+        <div className="absolute top-1/2 left-1/4 w-96 h-96 rounded-full bg-theme-accent opacity-10 blur-[120px] pointer-events-none transform -translate-y-1/2" />
 
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-12">
-            <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl bg-white/5 border border-white/10 shadow-lg backdrop-blur-md">
-              <img src={shnoorLogo} alt="Shnoor" className="h-8 w-8 object-contain" width="32" height="32" loading="eager" fetchPriority="high" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-sm p-1.5 flex-shrink-0">
+              <img src={shnoorLogo} alt="Shnoor" className="h-full w-full object-contain" width="40" height="40" loading="eager" fetchPriority="high" />
             </div>
             <div>
-              <p className="font-extrabold text-white text-xl tracking-tight leading-tight">SHNOOR Assessments</p>
-              <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold mt-0.5">Secure Examination Portal</p>
+              <p className="font-extrabold text-white text-base tracking-wide uppercase leading-tight">SHNOOR Assessments</p>
+              <p className="auth-brand-subtitle text-[10px] font-bold uppercase tracking-widest mt-0.5">Secure Examination Portal</p>
             </div>
           </div>
 
-          <h2 className="text-4xl xl:text-5xl font-extrabold text-white leading-[1.1] tracking-tight mb-4">
+          <h2 className="text-4xl xl:text-5xl font-extrabold text-white leading-[1.15] tracking-tight mb-4">
             {portal === 'org' ? (
-              <>Welcome back to<br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-300">your organisation</span></>
+              <>Welcome back to<br /><span className="auth-hero-accent">your organisation</span></>
             ) : (
-              <>Welcome back to<br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-300">your portal</span></>
+              <>Welcome back to<br /><span className="auth-hero-accent">your portal</span></>
             )}
           </h2>
-          <p className="text-gray-300 text-base leading-relaxed mb-12 max-w-md">
+          <p className="auth-left-muted text-sm xl:text-base leading-relaxed mb-10 max-w-md">
             {portal === 'org'
               ? 'Sign in to manage your assessments, monitor candidates, and access detailed reports.'
               : 'Sign in to access your assigned assessments, track your progress, and complete recruitment tests.'}
@@ -316,64 +317,77 @@ const Login = () => {
 
           <div className="flex flex-col gap-6">
             {features.map(f => (
-              <div key={f.label} className="flex items-center gap-4 group">
-                <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0 group-hover:bg-white/10 group-hover:border-white/20 transition-all duration-300 shadow-sm backdrop-blur-sm">
-                  <svg className="w-5 h-5 text-blue-300 group-hover:text-blue-200 transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <div key={f.label} className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-full bg-white/10 border border-white/15 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-5 h-5 text-white/90" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d={f.icon} />
                   </svg>
                 </div>
-                <span className="text-sm xl:text-base text-gray-200 font-medium tracking-wide group-hover:text-white transition-colors">{f.label}</span>
+                <span className="text-sm text-white/90 font-medium tracking-wide">{f.label}</span>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="relative z-10 border-t border-white/10 pt-6 mt-8">
-          <p className="text-xs text-gray-400 italic leading-relaxed">
+        <div className="relative z-10 border-t border-white/15 pt-6 mt-12">
+          <p className="auth-bottom-copy text-xs italic leading-relaxed">
             "These measures ensure a fair and secure assessment process for all candidates."
           </p>
         </div>
       </div>
 
       {/* ── RIGHT PANEL ─────────────────────────────────────────────────── */}
-      <div className="auth-right-panel flex-1 flex items-center justify-center bg-shnoor-lavender px-4 sm:px-6 py-6 sm:py-10 lg:py-12 h-full overflow-y-auto relative">
-        <div className="w-full max-w-[460px] bg-white rounded-[2rem] shadow-[0_8px_40px_rgba(0,0,0,0.04)] border border-gray-100 p-6 sm:p-10 relative z-10">
+      <div className="auth-right-panel flex-1 flex items-center justify-center bg-theme-card px-6 sm:px-10 py-10 h-full overflow-y-auto relative">
+        <div className="w-full max-w-[440px]">
           {/* Mobile brand */}
           <div className="flex items-center justify-center gap-3 mb-8 lg:hidden">
-            <img src={shnoorLogo} alt="Shnoor" loading="lazy" className="h-10 w-10 object-contain" width="40" height="40" decoding="async" />
-            <div>
-              <p className="font-extrabold text-shnoor-navy text-xl tracking-tight">SHNOOR</p>
-              <p className="text-[10px] text-shnoor-indigoMedium uppercase tracking-widest font-bold">Assessments</p>
+            <div className="site-header-logo flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white shadow-xs p-1 flex-shrink-0">
+              <img src={shnoorLogo} alt="Shnoor" loading="lazy" className="h-full w-full object-contain" width="40" height="40" decoding="async" />
             </div>
+            <div>
+              <p className="font-extrabold text-theme-text text-xl tracking-tight">SHNOOR</p>
+              <p className="text-[10px] text-theme-muted uppercase tracking-widest font-bold">Assessments</p>
+            </div>
+          </div>
+
+          {/* Back to home */}
+          <div className="mb-5">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-theme-muted hover:text-theme-accent transition-colors group cursor-pointer"
+            >
+              <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+              <span>Back to home</span>
+            </Link>
           </div>
 
           {/* Portal switcher tabs */}
           <PortalTabs active={portal} onChange={handlePortalChange} />
 
           {/* Heading */}
-          <div className="mb-8 text-center sm:text-left">
-            <h1 className="text-3xl font-extrabold text-shnoor-navy mb-2 tracking-tight">Sign In</h1>
-            <p className="text-sm text-gray-500 font-medium">
-              {portal === 'org' ? 'Access your organisation dashboard' : 'Enter your credentials to continue'}
+          <div className="mb-6 text-left">
+            <h1 className="text-3xl font-extrabold text-theme-text mb-1.5 tracking-tight">Sign In</h1>
+            <p className="text-sm text-theme-muted font-normal">
+              {portal === 'org' ? 'Access your organisation dashboard' : 'Enter your credentials'}
             </p>
           </div>
 
           {/* Alerts */}
           {successMessage && (
-            <div className="mb-5 flex items-start gap-3 bg-shnoor-successLight border border-[rgb(var(--theme-border))] text-[rgb(var(--theme-text))] rounded-xl px-4 py-3 text-sm">
-              <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 16 16">
+            <div className="mb-5 flex items-start gap-3 bg-shnoor-successLight border border-shnoor-success/30 text-shnoor-navy rounded-xl px-4 py-3 text-sm">
+              <svg className="w-4 h-4 mt-0.5 flex-shrink-0 text-shnoor-success" fill="currentColor" viewBox="0 0 16 16">
                 <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zm3.97 4.97a.75.75 0 0 0-1.08-.022L6.477 9.417 4.384 7.323a.75.75 0 0 0-1.06 1.06l2.75 2.75a.75.75 0 0 0 1.137-.089l4-5.5a.75.75 0 0 0-.24-1.573z" />
               </svg>
-              {successMessage}
+              <span>{successMessage}</span>
             </div>
           )}
 
           {apiError && (
-            <div className="mb-5 flex items-start gap-3 bg-shnoor-dangerLight border border-shnoor-dangerLight text-shnoor-danger rounded-xl px-4 py-3 text-sm">
+            <div className="mb-5 flex items-start gap-3 bg-shnoor-dangerLight border border-shnoor-danger/30 text-shnoor-danger rounded-xl px-4 py-3 text-sm">
               <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 16 16">
                 <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zm0 12a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm0-9a1 1 0 0 0-1 1v6a1 1 0 0 0 2 0V4a1 1 0 0 0-1-1z" />
               </svg>
-              {apiError}
+              <span>{apiError}</span>
             </div>
           )}
 
@@ -414,7 +428,7 @@ const Login = () => {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-[37px] text-gray-400 hover:text-shnoor-indigo transition-colors p-1 bg-white"
+                className="absolute right-3 top-[37px] text-theme-muted hover:text-theme-text transition-colors p-1 bg-transparent cursor-pointer"
                 tabIndex={-1}
                 disabled={isLoading}
               >
@@ -422,38 +436,42 @@ const Login = () => {
               </button>
               {errors.password && <p className="text-xs text-shnoor-danger mt-1">{errors.password}</p>}
               <div className="text-right mt-2">
-                <Link to="/forgot-password" className="text-[13px] font-semibold text-shnoor-indigo hover:text-indigo-700 transition-colors">
+                <Link to="/forgot-password" className="text-xs font-medium text-theme-accent hover:text-theme-accent2 hover:underline transition-colors">
                   Forgot password?
                 </Link>
               </div>
             </div>
 
-            <Button type="submit" variant="primary" className="w-full !h-[54px] text-base font-bold tracking-wide mt-2 shadow-lg shadow-emerald-200/50 hover:shadow-emerald-300/50 hover:-translate-y-0.5 transition-all duration-300 !bg-shnoor-success hover:!bg-emerald-500 text-white" disabled={isLoading}>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full h-[50px] bg-theme-accent hover:bg-theme-accent2 text-white text-base font-semibold rounded-lg shadow-sm hover:shadow-md transition-all duration-200 mt-2 flex items-center justify-center disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+            >
               {isLoading && <div className="w-5 h-5 border-[3px] border-white/30 border-t-white rounded-full animate-spin mr-2" />}
               {isLoading ? 'Signing In...' : 'Sign In'}
-            </Button>
+            </button>
           </form>
 
           {/* Footer */}
-          <div className="mt-8 pt-6 border-t border-shnoor-lavender">
+          <div className="mt-8 pt-6 border-t border-theme-border/50">
             {portal === 'student' ? (
-              <p className="text-center text-sm text-shnoor-indigoMedium">
+              <p className="text-center text-sm text-theme-muted">
                 New candidate?{' '}
-                <Link to="/register" className="text-shnoor-indigo font-semibold hover:text-shnoor-navy transition-colors">
+                <Link to="/register" className="text-theme-accent font-bold hover:underline transition-colors">
                   Register for examination
                 </Link>
               </p>
             ) : (
               <div className="flex flex-col items-center gap-2">
-                <p className="text-center text-sm text-shnoor-indigoMedium">
+                <p className="text-center text-sm text-theme-muted">
                   Looking to take a test?{' '}
-                  <button type="button" onClick={() => handlePortalChange('student')} className="text-shnoor-indigo font-semibold hover:text-shnoor-navy transition-colors">
+                  <button type="button" onClick={() => handlePortalChange('student')} className="text-theme-accent font-bold hover:underline transition-colors cursor-pointer">
                     Student Login
                   </button>
                 </p>
-                <p className="text-center text-sm text-shnoor-indigoMedium">
+                <p className="text-center text-sm text-theme-muted">
                   New organisation?{' '}
-                  <Link to="/register-organisation" className="text-shnoor-indigo font-semibold hover:text-shnoor-navy transition-colors">
+                  <Link to="/register-organisation" className="text-theme-accent font-bold hover:underline transition-colors">
                     Register your organisation
                   </Link>
                 </p>
