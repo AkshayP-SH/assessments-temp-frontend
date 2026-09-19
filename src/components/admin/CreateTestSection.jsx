@@ -10,7 +10,16 @@ const ENABLE_CODE_EXECUTION = true;
 const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
     const FALLBACK_DEFAULT_JOB_ROLE = 'General Assessment Candidate';
     const FALLBACK_DEFAULT_JOB_DESCRIPTION = 'This assessment evaluates candidate readiness across core technical and problem-solving skills relevant to the role.';
-    const [step, setStep] = useState('init'); // init, manual, bulk, success
+    const [step, setStep] = useState('init'); // init, manual, bulk, success\n
+    const [toastMessage, setToastMessage] = useState('');
+
+    const showToast = (msg) => {
+        setToastMessage(msg);
+        setTimeout(() => {
+            setToastMessage((current) => current === msg ? '' : current);
+        }, 3000);
+    };
+
     const [testTitle, setTestTitle] = useState('');
     const [jobRoles, setJobRoles] = useState([{ job_role: '', job_description: '' }]);
     const [defaultJobConfig, setDefaultJobConfig] = useState({
@@ -210,12 +219,12 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                     // Stay on init step to allow editing test details first
                     setStep('init');
                 } else {
-                    alert(data.message || 'Failed to load test data');
+                    showToast(data.message || 'Failed to load test data');
                     if (onComplete) onComplete();
                 }
             } catch (error) {
                 console.error('Error loading test:', error);
-                alert('Failed to load test data');
+                showToast('Failed to load test data');
                 if (onComplete) onComplete();
             }
         };
@@ -269,11 +278,11 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
 
     const handleStart = (mode) => {
         if (!testTitle.trim()) {
-            alert('Please enter a test title first');
+            showToast('Please enter a test title first');
             return;
         }
         if (nameAvailability.available === false) {
-            alert('This test name is already taken. Please choose a different name.');
+            showToast('This test name is already taken. Please choose a different name.');
             return;
         }
         setStep(mode);
@@ -296,7 +305,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
 
     const handleAddQuestion = () => {
         if (!currentQuestion.text || currentQuestion.options.some(opt => !opt) || currentQuestion.correctOption === null) {
-            alert('Please fill in all fields and select a correct answer');
+            showToast('Please fill in all fields and select a correct answer');
             return;
         }
         setQuestions([...questions, { ...currentQuestion, id: Date.now() }]);
@@ -331,7 +340,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
             });
 
         if (converted.length === 0) {
-            alert('These questions are already in your test list (see panel on the right).');
+            showToast('These questions are already in your test list (see panel on the right).');
             return;
         }
 
@@ -339,7 +348,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
         setBankSelectorKey((k) => k + 1);
 
         if (converted.length < selectedBankQuestions.length) {
-            alert(`Added ${converted.length} question(s) to the list. ${selectedBankQuestions.length - converted.length} duplicate(s) skipped.`);
+            showToast(`Added ${converted.length} question(s) to the list. ${selectedBankQuestions.length - converted.length} duplicate(s) skipped.`);
         }
     };
 
@@ -378,15 +387,15 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
     // DISABLED: Coding question handlers
     const handleSaveCodingQuestion = () => {
         if (!currentCodingQuestion.title || !currentCodingQuestion.description) {
-            alert('Please fill in title and description');
+            showToast('Please fill in title and description');
             return;
         }
         if (currentCodingQuestion.publicTestCases.some(tc => !tc.input || !tc.output)) {
-            alert('Please fill in all public test cases');
+            showToast('Please fill in all public test cases');
             return;
         }
         if (currentCodingQuestion.hiddenTestCases.some(tc => !tc.input || !tc.output)) {
-            alert('Please fill in all hidden test cases');
+            showToast('Please fill in all hidden test cases');
             return;
         }
 
@@ -441,12 +450,12 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
         const newSelections = selectedQuestions.filter((q) => !existingBankIds.has(q.id));
 
         if (newSelections.length === 0) {
-            alert('Selected questions are already added to this test.');
+            showToast('Selected questions are already added to this test.');
             return;
         }
 
         if (newSelections.length < selectedQuestions.length) {
-            alert(`${selectedQuestions.length - newSelections.length} duplicate question(s) were skipped.`);
+            showToast(`${selectedQuestions.length - newSelections.length} duplicate question(s) were skipped.`);
         }
 
         // Fetch full details including test cases for each question
@@ -496,7 +505,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                 setCodingQuestions([...codingQuestions, ...validQuestions]);
             } catch (error) {
                 console.error('Error fetching question details:', error);
-                alert('Failed to load some question details');
+                showToast('Failed to load some question details');
             }
         };
 
@@ -522,7 +531,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
         // DISABLED: Coding questions check
         if (questions.length === 0 && codingQuestions.length === 0) {
         // if (questions.length === 0) {
-            alert('Please add at least one question');
+            showToast('Please add at least one question');
             return;
         }
 
@@ -588,18 +597,18 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                         const codingData = await codingResponse.json();
                         if (!codingResponse.ok || !codingData.success) {
                             console.error('[UPDATE TEST] Failed to save coding questions:', codingData);
-                            alert('Test updated but failed to save coding questions: ' + codingData.message);
+                            showToast('Test updated but failed to save coding questions: ' + codingData.message);
                             setIsUploading(false);
                             return;
                         }
                     }
 
-                    alert('Test updated successfully!');
+                    showToast('Test updated successfully!');
                     // Go back to view mode instead of dashboard
                     setViewMode(true);
                     setStep('init');
                 } else {
-                    alert(data.message || 'Failed to update test');
+                    showToast(data.message || 'Failed to update test');
                 }
             } else {
                 // Create new test
@@ -645,7 +654,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                         const codingData = await codingResponse.json();
                         if (!codingResponse.ok || !codingData.success) {
                             console.error('[CREATE TEST] Failed to save coding questions:', codingData);
-                            alert('Test created but failed to save coding questions: ' + codingData.message);
+                            showToast('Test created but failed to save coding questions: ' + codingData.message);
                             setIsUploading(false);
                             return;
                         }
@@ -656,12 +665,12 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                     if (onSaved) onSaved();
                     setStep('success');
                 } else {
-                    alert(data.message || 'Failed to create test');
+                    showToast(data.message || 'Failed to create test');
                 }
             }
         } catch (error) {
             console.error('Submit error:', error);
-            alert('Failed to save test. Please try again.');
+            showToast('Failed to save test. Please try again.');
         } finally {
             setIsUploading(false);
         }
@@ -741,13 +750,13 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                         const codingData = await codingResponse.json();
                         if (!codingResponse.ok || !codingData.success) {
                             console.error('[BULK UPLOAD EDIT] Failed to save coding questions:', codingData);
-                            alert('Questions uploaded but failed to save coding questions: ' + codingData.message);
+                            showToast('Questions uploaded but failed to save coding questions: ' + codingData.message);
                             setIsUploading(false);
                             return;
                         }
                     }
 
-                    alert(`Questions uploaded successfully! ${data.questionsCount} questions added. Click "Save Changes" to save.`);
+                    showToast(`Questions uploaded successfully! ${data.questionsCount} questions added. Click "Save Changes" to save.`);
 
                     // Reload test data to show new questions (Use native fetch here too to be safe)
                     const testResponse = await fetch(`${cleanBaseUrl}/api/tests/${uploadedTestId}`, {
@@ -767,7 +776,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                     }
                     setStep('init');
                 } else {
-                    alert(data.message || 'Failed to upload questions');
+                    showToast(data.message || 'Failed to upload questions');
                 }
             } else {
                 // Create mode: Create new test
@@ -822,7 +831,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                         const codingData = await codingResponse.json();
                         if (!codingResponse.ok || !codingData.success) {
                             console.error('[BULK UPLOAD] Failed to save coding questions:', codingData);
-                            alert('Test created but failed to save coding questions: ' + codingData.message);
+                            showToast('Test created but failed to save coding questions: ' + codingData.message);
                             setIsUploading(false);
                             return;
                         }
@@ -832,12 +841,12 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                     setUploadedTestName(testTitle);
                     setStep('success');
                 } else {
-                    alert(data.message || 'Failed to upload test');
+                    showToast(data.message || 'Failed to upload test');
                 }
             }
         } catch (error) {
             console.error('Upload error:', error);
-            alert(error.message || 'Failed to upload test. Please try again.');
+            showToast(error.message || 'Failed to upload test. Please try again.');
         } finally {
             setIsUploading(false);
             e.target.value = '';
@@ -860,15 +869,15 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
             const data = await response.json();
 
             if (response.ok && data.success) {
-                alert(`Test "${uploadedTestName}" published successfully! Students can now see it.`);
+                showToast(`Test "${uploadedTestName}" published successfully! Students can now see it.`);
                 resetForm();
                 if (onComplete) onComplete(data.test);
             } else {
-                alert(data.message || 'Failed to publish test');
+                showToast(data.message || 'Failed to publish test');
             }
         } catch (error) {
             console.error('Publish error:', error);
-            alert('Failed to publish test. Please try again.');
+            showToast('Failed to publish test. Please try again.');
         } finally {
             setIsPublishing(false);
         }
@@ -893,7 +902,13 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 relative">
+            {toastMessage && (
+                <div className="fixed top-20 right-4 z-[99999] bg-gray-900 text-white px-6 py-4 rounded-lg shadow-2xl flex items-center gap-3 transition-all duration-300 transform scale-100 opacity-100 border border-gray-700">
+                    <AlertCircle size={24} className="text-red-400 flex-shrink-0" />
+                    <span className="font-medium text-base">{toastMessage}</span>
+                </div>
+            )}
             {/* Step 1: Initialization */}
             {step === 'init' && (
                 <div className="bg-theme-card rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-light p-4 sm:p-8 max-w-3xl w-full mx-auto">
