@@ -124,7 +124,7 @@ const AdminHeader = () => {
       <div className="w-full">
       <header className="w-full bg-shnoor-navy h-[60px] sm:h-[72px] shadow-md relative z-50 rounded-none">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
-          <div className="flex items-center gap-3 sm:gap-4">
+          <div className="flex items-center gap-2.5 sm:gap-4 min-w-0">
             {/* Logo icon */}
             <div className="site-header-logo w-10 h-10 sm:w-12 sm:h-12 rounded-xl overflow-hidden flex items-center justify-center flex-shrink-0 bg-white">
               <img
@@ -192,11 +192,11 @@ const AdminHeader = () => {
           </div>
 
           {/* Mobile Menu Toggle Button */}
-          <div className="sm:hidden flex items-center gap-2">
+          <div className="sm:hidden flex items-center gap-2 flex-shrink-0">
             <ThemeSelector />
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="text-white p-2 hover:bg-white/10 rounded-lg transition-colors relative min-w-[44px] min-h-[44px] flex items-center justify-center touch-manipulation"
+              className="text-white p-2 hover:bg-white/10 rounded-lg transition-colors relative min-w-[44px] min-h-[44px] flex items-center justify-center touch-manipulation flex-shrink-0"
             >
               {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
               {!mobileMenuOpen && unreadCount > 0 && (

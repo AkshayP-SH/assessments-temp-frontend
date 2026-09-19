@@ -534,8 +534,8 @@ const StudentMessages = () => {
             <button
               onClick={() => setShowAnalytics(!showAnalytics)}
               className={`flex items-center gap-2 px-3 py-2 text-sm border rounded-lg transition-colors ${showAnalytics
-                  ? 'bg-shnoor-indigo text-white border-shnoor-indigo'
-                  : 'bg-white border-shnoor-mist hover:bg-shnoor-lavender'
+                ? 'bg-shnoor-indigo text-white border-shnoor-indigo'
+                : 'bg-white border-shnoor-mist hover:bg-shnoor-lavender'
                 }`}
             >
               <BarChart3 size={16} />
@@ -547,8 +547,8 @@ const StudentMessages = () => {
                 setSelectedConversations(new Set());
               }}
               className={`flex items-center gap-2 px-3 py-2 text-sm border rounded-lg transition-colors ${bulkDeleteMode
-                  ? 'bg-red-600 text-white border-red-600'
-                  : 'bg-white border-shnoor-mist hover:bg-shnoor-lavender'
+                ? 'bg-red-600 text-white border-red-600'
+                : 'bg-white border-shnoor-mist hover:bg-shnoor-lavender'
                 }`}
             >
               <Trash2 size={16} />

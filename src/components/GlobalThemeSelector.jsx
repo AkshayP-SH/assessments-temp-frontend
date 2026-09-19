@@ -1,7 +1,7 @@
 import { useLocation } from 'react-router-dom';
 import ThemeSelector from './ThemeSelector';
 
-const HIDDEN_ROUTES = new Set(['/', '/login', '/register', '/forgot-password']);
+const HIDDEN_ROUTES = new Set(['/', '/login', '/register', '/forgot-password', '/register-organisation', '/signup/organisation']);
 
 const GlobalThemeSelector = () => {
   const location = useLocation();
