@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { LogOut, ArrowLeft, Briefcase, Loader2, RefreshCw, CheckCircle, Clock, FileText, AlertTriangle, XCircle, Trophy, PlayCircle, Award, ChevronDown } from 'lucide-react';
 import { apiFetch } from '../config/api';
 import ThemeSelector from '../components/ThemeSelector';
+import shnoorLogo from '../assets/shnoor-logo.png';
 
 const STATUS_CONFIG = {
     submitted: { label: 'Submitted', color: 'blue', icon: FileText },
@@ -191,12 +192,16 @@ export default function MyApplications({ isEmbedded = false }) {
                     <div className="w-full max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="flex justify-between items-center sm:h-16">
                             <div className="flex items-center space-x-3 sm:space-x-4">
-                                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-shnoor-lavender rounded-xl flex items-center justify-center shadow-sm">
-                                    <span className="text-shnoor-indigo font-bold text-lg sm:text-xl">A</span>
+                                <div className="site-header-logo w-10 h-10 sm:w-12 sm:h-12 rounded-xl overflow-hidden shadow-sm flex-shrink-0 bg-white p-1 flex items-center justify-center">
+                                    <img
+                                        src={shnoorLogo}
+                                        alt="Shnoor Logo"
+                                        className="w-full h-full object-contain"
+                                    />
                                 </div>
                                 <div>
-                                    <h1 className="text-white font-bold text-base sm:text-lg leading-tight">Assessment Portal</h1>
-                                    <p className="text-shnoor-light opacity-80 text-[10px] sm:text-xs">My Applications</p>
+                                    <h1 className="text-white font-bold text-base sm:text-lg leading-tight uppercase tracking-wide">SHNOOR Assessments</h1>
+                                    <p className="site-header-subtitle text-shnoor-light opacity-80 text-[10px] sm:text-xs uppercase tracking-widest font-semibold">My Applications</p>
                                 </div>
                             </div>
 

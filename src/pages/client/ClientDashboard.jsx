@@ -197,9 +197,14 @@ const ClientDashboard = () => {
       {/* ── Sidebar ─────────────────────────────────────────────────────────── */}
       <aside className="w-64 bg-white border-r border-shnoor-mist flex flex-col shadow-sm flex-shrink-0">
         {/* Logo */}
-        <div className="px-6 py-5 border-b border-shnoor-mist">
-          <img src={shnoorLogo} alt="Shnoor" className="h-8" />
-          <p className="text-xs text-shnoor-soft mt-1 font-medium">Client Portal</p>
+        <div className="px-6 py-5 border-b border-shnoor-mist flex items-center gap-3">
+          <div className="site-header-logo flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white shadow-xs p-1 flex-shrink-0">
+            <img src={shnoorLogo} alt="Shnoor" className="h-full w-full object-contain" />
+          </div>
+          <div>
+            <p className="font-extrabold text-theme-text text-sm leading-tight tracking-tight uppercase">SHNOOR</p>
+            <p className="text-[10px] text-theme-muted font-semibold tracking-wider uppercase">Client Portal</p>
+          </div>
         </div>
 
         {/* User info */}

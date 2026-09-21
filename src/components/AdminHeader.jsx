@@ -126,7 +126,7 @@ const AdminHeader = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
           <div className="flex items-center gap-2.5 sm:gap-4 min-w-0">
             {/* Logo icon */}
-            <div className="site-header-logo w-10 h-10 sm:w-12 sm:h-12 rounded-xl overflow-hidden flex items-center justify-center flex-shrink-0 bg-white">
+            <div className="site-header-logo w-10 h-10 sm:w-12 sm:h-12 rounded-xl overflow-hidden flex items-center justify-center flex-shrink-0 bg-white p-1 shadow-xs">
               <img
                 src={shnoorLogo}
                 alt="Shnoor Logo"
@@ -134,8 +134,10 @@ const AdminHeader = () => {
               />
             </div>
             <div className="flex-1 min-w-0">
-              <h1 className="text-white font-bold text-base sm:text-lg leading-tight truncate">Admin Dashboard</h1>
-              <p className="site-header-subtitle text-shnoor-light opacity-80 text-[10px] sm:text-xs truncate">MCQ Management System</p>
+              <h1 className="text-white font-bold text-base sm:text-lg leading-tight truncate uppercase tracking-wide">SHNOOR Assessments</h1>
+              <p className="site-header-subtitle text-shnoor-light opacity-80 text-[10px] sm:text-xs truncate uppercase tracking-widest font-semibold">
+                {isClientPortal ? 'Client Portal' : 'Admin Dashboard'}
+              </p>
             </div>
           </div>
 
@@ -211,12 +213,14 @@ const AdminHeader = () => {
           <div className="sm:hidden absolute top-[100%] left-1/2 -translate-x-1/2 w-[calc(100%-12px)] max-w-[420px] bg-shnoor-navy border border-white/10 shadow-xl z-40 overflow-hidden rounded-b-xl">
             <div className="flex items-center justify-between px-3 py-3 border-b border-white/10 bg-shnoor-navy">
               <div className="flex items-center gap-2 min-w-0">
-                <div className="site-header-logo w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0 bg-white">
+                <div className="site-header-logo w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0 bg-white p-0.5 shadow-xs">
                   <img src={shnoorLogo} alt="Shnoor Logo" className="w-full h-full object-contain" />
                 </div>
                 <div className="min-w-0">
-                  <h2 className="text-white font-bold text-base leading-tight truncate">Admin Dashboard</h2>
-                  <p className="text-[10px] text-shnoor-light opacity-80 truncate">MCQ Management System</p>
+                  <h2 className="text-white font-bold text-base leading-tight truncate uppercase tracking-wide">SHNOOR Assessments</h2>
+                  <p className="text-[10px] text-shnoor-light opacity-80 truncate uppercase tracking-widest font-semibold">
+                    {isClientPortal ? 'Client Portal' : 'Admin Dashboard'}
+                  </p>
                 </div>
               </div>
               <button
