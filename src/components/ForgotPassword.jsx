@@ -137,8 +137,8 @@ const ForgotPassword = () => {
         {/* Brand */}
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-12">
-            <div className="site-header-logo flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl bg-white">
-              <img src={shnoorLogo} alt="Shnoor" className="h-11 w-11 object-contain" width="44" height="44" />
+            <div className="site-header-logo flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl bg-white p-1">
+              <img src={shnoorLogo} alt="Shnoor" className="h-full w-full object-contain" width="44" height="44" />
             </div>
             <div>
               <p className="font-extrabold text-white text-lg leading-tight">SHNOOR Assessments</p>
@@ -161,10 +161,12 @@ const ForgotPassword = () => {
         <div className="w-full max-w-[440px]">
           {/* Mobile brand header */}
           <div className="flex items-center gap-3 mb-8 lg:hidden">
-            <img src={shnoorLogo} alt="Shnoor" className="h-9 w-9 object-contain" />
+            <div className="site-header-logo flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white shadow-xs p-1 flex-shrink-0">
+              <img src={shnoorLogo} alt="Shnoor" className="h-full w-full object-contain" width="40" height="40" />
+            </div>
             <div>
-              <p className="font-extrabold text-shnoor-navy text-base">SHNOOR Assessments</p>
-              <p className="text-[10px] text-shnoor-indigoMedium uppercase tracking-widest">Secure Examination Portal</p>
+              <p className="font-extrabold text-theme-text text-base">SHNOOR Assessments</p>
+              <p className="text-[10px] text-theme-muted uppercase tracking-widest">Secure Examination Portal</p>
             </div>
           </div>
 
