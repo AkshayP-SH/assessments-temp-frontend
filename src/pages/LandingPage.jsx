@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { Mail, Phone, MapPin, FileText, ShieldCheck } from 'lucide-react';
 import Button from '../components/Button';
 import Card from '../components/Card';
 import shnoorLogo from '../assets/shnoor-logo.png';
+import linkedinIcon from '../assets/linkedin.png';
+import whatsappIcon from '../assets/whatsapp.png';
 import ThemeSelector from '../components/ThemeSelector';
 import { useSEO } from '../hooks/useSEO';
 import { getApiUrl } from '../config/api';
@@ -141,32 +144,32 @@ const LandingPage = () => {
   };
 
   return (
-    <div className="landing-root font-['Plus_Jakarta_Sans',sans-serif] text-shnoor-navy antialiased">
+    <div className="landing-root font-['Plus_Jakarta_Sans',sans-serif] text-theme-text bg-theme-page antialiased min-h-screen">
 
       {/* ══════════════════════════════════════════════════════════════════════
           1. NAVBAR
           ══════════════════════════════════════════════════════════════════════ */}
       <nav
         ref={navRef}
-        className={`landing-nav bg-white sticky top-0 z-50 transition-shadow duration-300 ${scrolled ? 'shadow-md' : 'shadow-sm'} border-b border-shnoor-mist`}
+        className={`landing-nav bg-theme-card/95 backdrop-blur-md sticky top-0 z-50 transition-shadow duration-300 ${scrolled ? 'shadow-md' : 'shadow-xs'} border-b border-theme-border/60`}
       >
         <div className="max-w-[1280px] mx-auto px-2.5 sm:px-6 lg:px-8 flex items-center justify-between h-[64px] sm:h-[72px]">
           {/* Logo */}
           <div className="flex items-center gap-1.5 sm:gap-3 min-w-0">
-            <div className="landing-brand-logo flex h-8 w-8 sm:h-10 sm:w-10 md:h-11 md:w-11 items-center justify-center overflow-hidden rounded-xl bg-white flex-shrink-0">
-              <img src={shnoorLogo} alt="Shnoor" className="h-8 w-8 sm:h-10 sm:w-10 md:h-11 md:w-11 object-contain" width="44" height="44" loading="eager" fetchPriority="high" />
+            <div className="landing-brand-logo flex h-8 w-8 sm:h-10 sm:w-10 md:h-11 md:w-11 items-center justify-center overflow-hidden rounded-xl bg-white flex-shrink-0 p-1">
+              <img src={shnoorLogo} alt="Shnoor" className="h-full w-full object-contain" width="44" height="44" loading="eager" fetchPriority="high" />
             </div>
             <div className="min-w-0">
-              <p className="font-extrabold text-shnoor-navy text-[11px] sm:text-sm md:text-[15px] leading-tight tracking-tight sm:tracking-wide uppercase truncate sm:whitespace-normal">SHNOOR INTERNATIONAL</p>
-              <p className="text-[8px] sm:text-[10px] text-shnoor-soft font-semibold tracking-wider sm:tracking-widest uppercase truncate sm:whitespace-normal">Assessment Platform</p>
+              <p className="font-extrabold text-theme-text text-[11px] sm:text-sm md:text-[15px] leading-tight tracking-tight sm:tracking-wide uppercase truncate sm:whitespace-normal">SHNOOR INTERNATIONAL</p>
+              <p className="text-[8px] sm:text-[10px] text-theme-muted font-semibold tracking-wider sm:tracking-widest uppercase truncate sm:whitespace-normal">Assessment Platform</p>
             </div>
           </div>
 
           {/* Desktop Nav Links */}
-          <div className="hidden lg:flex items-center gap-1 bg-shnoor-lavender/30 rounded-full px-2 py-1.5">
+          <div className="hidden lg:flex items-center gap-1 bg-theme-panel/70 border border-theme-border/40 rounded-full px-2 py-1.5">
             {NAV_LINKS.map(link => (
               <a key={link.href} href={link.href} onClick={(e) => scrollToSection(e, link.href)}
-                className="px-4 py-2 text-sm font-semibold text-shnoor-soft hover:text-shnoor-navy transition-colors rounded-full hover:bg-white/60">
+                className="px-4 py-2 text-sm font-semibold text-theme-muted hover:text-theme-text transition-colors rounded-full hover:bg-theme-card">
                 {link.label}
               </a>
             ))}
@@ -175,33 +178,33 @@ const LandingPage = () => {
           {/* Right Actions */}
           <div className="flex items-center gap-1.5 sm:gap-3 lg:gap-4 flex-shrink-0">
             <ThemeSelector variant="light" />
-            <Link to="/login" onMouseEnter={prefetchLogin} className="hidden sm:inline-flex text-sm font-semibold text-shnoor-navy hover:text-shnoor-indigo transition-colors px-3 py-2">
+            <Link to="/login" onMouseEnter={prefetchLogin} className="hidden sm:inline-flex text-sm font-semibold text-theme-text hover:text-theme-accent transition-colors px-3 py-2">
               Log In
             </Link>
             <Link to="/register" onMouseEnter={prefetchRegister} className="inline-flex">
-              <button className="bg-shnoor-navy text-white text-[11px] sm:text-sm font-bold px-2.5 py-1.5 sm:px-5 sm:py-2.5 rounded-lg hover:bg-shnoor-indigo transition-colors whitespace-nowrap">
+              <button className="bg-theme-accent hover:bg-theme-accent2 text-white text-[11px] sm:text-sm font-bold px-3 py-2 sm:px-5 sm:py-2.5 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 whitespace-nowrap cursor-pointer">
                 Get Started
               </button>
             </Link>
             {/* Mobile hamburger */}
-            <button className="lg:hidden flex flex-col justify-center items-center gap-1 sm:gap-1.5 p-1.5 sm:p-2 flex-shrink-0 rounded-lg hover:bg-shnoor-lavender/30 transition-colors" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
-              <span className={`block w-5 h-0.5 bg-shnoor-navy transition-transform duration-300 ${mobileMenuOpen ? 'rotate-45 translate-y-1.5 sm:translate-y-2' : ''}`} />
-              <span className={`block w-5 h-0.5 bg-shnoor-navy transition-opacity duration-300 ${mobileMenuOpen ? 'opacity-0' : ''}`} />
-              <span className={`block w-5 h-0.5 bg-shnoor-navy transition-transform duration-300 ${mobileMenuOpen ? '-rotate-45 -translate-y-1.5 sm:-translate-y-2' : ''}`} />
+            <button className="lg:hidden flex flex-col justify-center items-center gap-1 sm:gap-1.5 p-1.5 sm:p-2 flex-shrink-0 rounded-lg hover:bg-theme-panel transition-colors text-theme-text" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
+              <span className={`block w-5 h-0.5 bg-current transition-transform duration-300 ${mobileMenuOpen ? 'rotate-45 translate-y-1.5 sm:translate-y-2' : ''}`} />
+              <span className={`block w-5 h-0.5 bg-current transition-opacity duration-300 ${mobileMenuOpen ? 'opacity-0' : ''}`} />
+              <span className={`block w-5 h-0.5 bg-current transition-transform duration-300 ${mobileMenuOpen ? '-rotate-45 -translate-y-1.5 sm:-translate-y-2' : ''}`} />
             </button>
           </div>
         </div>
 
         {/* Mobile dropdown */}
         {mobileMenuOpen && (
-          <div className="lg:hidden bg-white border-t border-shnoor-mist px-4 pb-4 animate-fadeIn">
+          <div className="lg:hidden bg-theme-card border-t border-theme-border/60 px-4 pb-4 animate-fadeIn">
             {NAV_LINKS.map(link => (
               <a key={link.href} href={link.href} onClick={(e) => scrollToSection(e, link.href)}
-                className="block px-4 py-3 text-sm font-semibold text-shnoor-soft hover:text-shnoor-navy hover:bg-shnoor-lavender/40 rounded-lg transition-colors">
+                className="block px-4 py-3 text-sm font-semibold text-theme-muted hover:text-theme-text hover:bg-theme-panel rounded-lg transition-colors">
                 {link.label}
               </a>
             ))}
-            <Link to="/login" className="block px-4 py-3 text-sm font-semibold text-shnoor-navy sm:hidden">Log In</Link>
+            <Link to="/login" className="block px-4 py-3 text-sm font-semibold text-theme-text sm:hidden">Log In</Link>
           </div>
         )}
       </nav>
@@ -209,36 +212,36 @@ const LandingPage = () => {
       {/* ══════════════════════════════════════════════════════════════════════
           2. HERO — Platform-level intro (org + candidate)
           ══════════════════════════════════════════════════════════════════════ */}
-      <section id="home" className="landing-hero bg-white py-12 sm:py-20 px-4 sm:px-8 overflow-hidden relative">
-        <div className="absolute top-0 right-0 -mr-32 -mt-32 w-[600px] h-[600px] bg-shnoor-indigo/5 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-[400px] h-[400px] bg-purple-300/5 rounded-full blur-3xl pointer-events-none" />
+      <section id="home" className="landing-hero bg-theme-page py-12 sm:py-20 px-4 sm:px-8 overflow-hidden relative">
+        <div className="absolute top-0 right-0 -mr-32 -mt-32 w-[600px] h-[600px] bg-theme-accent/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-[400px] h-[400px] bg-theme-accent2/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="max-w-[1280px] mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center relative z-10">
           {/* Left — Text */}
           <div className="flex flex-col gap-6 items-center lg:items-start text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 bg-shnoor-lavender text-shnoor-indigo text-xs sm:text-sm font-bold px-4 py-2 rounded-full w-fit border border-shnoor-indigo/20">
-              <span className="w-2 h-2 bg-shnoor-indigo rounded-full animate-pulse" />
+            <div className="inline-flex items-center gap-2 bg-theme-panel text-theme-accent text-xs sm:text-sm font-bold px-4 py-2 rounded-full w-fit border border-theme-border shadow-xs">
+              <span className="w-2 h-2 bg-theme-accent rounded-full animate-pulse" />
               NEXT-GEN ASSESSMENT PLATFORM
             </div>
 
-            <h1 className="text-3xl sm:text-4xl lg:text-[44px] font-extrabold leading-[1.15] text-shnoor-navy">
+            <h1 className="text-3xl sm:text-4xl lg:text-[44px] font-extrabold leading-[1.15] text-theme-text tracking-tight">
               Scale your hiring with secure, proctored assessments that candidates trust.
             </h1>
 
-            <p className="text-base sm:text-lg text-shnoor-soft leading-[1.75] max-w-xl">
+            <p className="text-base sm:text-lg text-theme-muted leading-[1.75] max-w-xl font-normal">
               SHNOOR Assessments helps organizations create, manage, and proctor technical exams at scale — while giving candidates a seamless, secure, and fair examination experience.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 mt-2">
               <Link to="/register">
-                <button className="group flex items-center gap-2 bg-shnoor-navy text-white text-sm font-bold px-7 py-3.5 rounded-xl hover:bg-shnoor-indigo transition-all shadow-lg shadow-shnoor-navy/20">
+                <button className="group flex items-center gap-2 bg-theme-accent hover:bg-theme-accent2 text-white text-sm font-bold px-7 py-3.5 rounded-xl shadow-lg shadow-theme-accent/20 transition-all cursor-pointer">
                   Get Started
                   <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                 </button>
               </Link>
               <button
                 onClick={(e) => scrollToSection(e, '#how-it-works')}
-                className="already-registered-btn text-sm font-bold px-7 py-3.5 rounded-xl text-shnoor-navy border-2 border-shnoor-mist hover:border-shnoor-indigo hover:bg-shnoor-lavender/40 transition-all"
+                className="text-sm font-bold px-7 py-3.5 rounded-xl text-theme-text bg-theme-card border-2 border-theme-border hover:border-theme-accent hover:bg-theme-panel transition-all cursor-pointer shadow-xs"
               >
                 Explore Platform
               </button>
@@ -251,9 +254,9 @@ const LandingPage = () => {
                 { val: '8', label: 'Core platform capabilities' },
                 { val: '99.9%', label: 'Reliable exam operations' },
               ].map(s => (
-                <div key={s.val} className="bg-shnoor-lavender/50 rounded-2xl p-4 text-center lg:text-left border border-shnoor-mist/60">
-                  <p className="text-2xl sm:text-3xl font-extrabold text-shnoor-navy">{s.val}</p>
-                  <p className="text-xs text-shnoor-soft mt-1 leading-snug">{s.label}</p>
+                <div key={s.val} className="bg-theme-card border border-theme-border rounded-2xl p-4 text-center lg:text-left shadow-xs hover:border-theme-accent/50 transition-colors">
+                  <p className="text-2xl sm:text-3xl font-extrabold text-theme-text">{s.val}</p>
+                  <p className="text-xs text-theme-muted mt-1 leading-snug font-medium">{s.label}</p>
                 </div>
               ))}
             </div>
@@ -261,43 +264,43 @@ const LandingPage = () => {
 
           {/* Right — Live Platform Overview Card */}
           <div className="flex justify-center lg:justify-end">
-            <div className="w-full max-w-[460px] bg-shnoor-navy rounded-2xl shadow-[0_20px_60px_rgba(14,14,39,0.25)] overflow-hidden">
+            <div className="w-full max-w-[460px] bg-theme-hdr rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.35)] border border-white/10 overflow-hidden">
               {/* Card header */}
               <div className="px-6 pt-6 pb-4">
-                <p className="text-xs font-bold text-shnoor-indigo uppercase tracking-[0.2em] mb-2">LIVE PLATFORM VIEW</p>
+                <p className="text-xs font-bold text-theme-auth-acc uppercase tracking-[0.2em] mb-2">LIVE PLATFORM VIEW</p>
                 <div className="flex items-start justify-between">
                   <h3 className="text-xl font-extrabold text-white leading-snug pr-4">
                     Secure assessments, real-time proctoring, and actionable results
                   </h3>
-                  <div className="flex-shrink-0 bg-shnoor-indigo/30 rounded-xl px-3 py-2 text-center">
-                    <p className="text-[10px] text-shnoor-soft uppercase tracking-wider">Active</p>
-                    <p className="text-[10px] text-shnoor-soft uppercase tracking-wider">exams</p>
+                  <div className="flex-shrink-0 bg-white/10 border border-white/15 rounded-xl px-3 py-2 text-center">
+                    <p className="text-[10px] text-theme-auth-acc uppercase tracking-wider font-bold">Active</p>
+                    <p className="text-[10px] text-theme-auth-acc uppercase tracking-wider font-bold">exams</p>
                     <p className="text-xl font-extrabold text-white">12</p>
                   </div>
                 </div>
               </div>
 
               {/* For Organizations */}
-              <div className="mx-4 mb-3 bg-white rounded-xl p-4">
+              <div className="mx-4 mb-3 bg-white/10 dark:bg-white/5 border border-white/10 rounded-xl p-4">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-9 h-9 bg-shnoor-lavender rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Icon d={ICON_ADMIN} cls="w-5 h-5 text-shnoor-indigo" />
+                  <div className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Icon d={ICON_ADMIN} cls="w-5 h-5 text-theme-auth-acc" />
                   </div>
                   <div>
-                    <p className="font-bold text-sm text-shnoor-navy">Organization Dashboard</p>
-                    <p className="text-xs text-shnoor-soft">Create tests, monitor live exams, view analytics</p>
+                    <p className="font-bold text-sm text-white">Organization Dashboard</p>
+                    <p className="text-xs text-slate-300">Create tests, monitor live exams, view analytics</p>
                   </div>
                 </div>
                 <div className="flex gap-2 flex-wrap">
                   {['Test Builder', 'Live Proctoring', 'Reports'].map(t => (
-                    <span key={t} className="text-[11px] font-semibold text-shnoor-indigo bg-shnoor-lavender px-2.5 py-1 rounded-lg">{t}</span>
+                    <span key={t} className="text-[11px] font-semibold text-theme-auth-acc bg-white/10 border border-white/10 px-2.5 py-1 rounded-lg">{t}</span>
                   ))}
                 </div>
               </div>
 
               {/* For Candidates */}
-              <div className="mx-4 mb-3 bg-white/5 backdrop-blur rounded-xl p-4">
-                <p className="text-[10px] font-bold text-shnoor-soft uppercase tracking-[0.2em] mb-3">CANDIDATE EXPERIENCE</p>
+              <div className="mx-4 mb-3 bg-white/5 backdrop-blur rounded-xl p-4 border border-white/10">
+                <p className="text-[10px] font-bold text-theme-auth-acc uppercase tracking-[0.2em] mb-3">CANDIDATE EXPERIENCE</p>
                 <div className="flex flex-col gap-2.5">
                   {[
                     'Auto-assigned tests based on enrollment',
@@ -305,24 +308,24 @@ const LandingPage = () => {
                     'Instant submission confirmation & results',
                   ].map(item => (
                     <div key={item} className="flex items-center gap-2.5">
-                      <div className="w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
-                        <Icon d={CHECK} cls="w-3 h-3 text-green-400" stroke={3} />
+                      <div className="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center flex-shrink-0">
+                        <Icon d={CHECK} cls="w-3 h-3 text-emerald-400" stroke={3} />
                       </div>
-                      <p className="text-sm text-white/80">{item}</p>
+                      <p className="text-sm text-white/90 font-medium">{item}</p>
                     </div>
                   ))}
                 </div>
               </div>
 
               {/* Security status */}
-              <div className="mx-4 mb-5 bg-white rounded-xl p-4">
+              <div className="mx-4 mb-5 bg-white/10 dark:bg-white/5 border border-white/10 rounded-xl p-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 bg-shnoor-lavender rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Icon d={SHIELD} cls="w-5 h-5 text-shnoor-indigo" />
+                  <div className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Icon d={SHIELD} cls="w-5 h-5 text-theme-auth-acc" />
                   </div>
                   <div>
-                    <p className="font-bold text-sm text-shnoor-navy">Enterprise Security</p>
-                    <p className="text-xs text-shnoor-soft">AI proctoring • Encrypted answers • Tab detection</p>
+                    <p className="font-bold text-sm text-white">Enterprise Security</p>
+                    <p className="text-xs text-slate-300">AI proctoring • Encrypted answers • Tab detection</p>
                   </div>
                 </div>
               </div>
@@ -334,14 +337,14 @@ const LandingPage = () => {
       {/* ══════════════════════════════════════════════════════════════════════
           3. HOW IT WORKS — Platform-level workflow
           ══════════════════════════════════════════════════════════════════════ */}
-      <section id="how-it-works" className="landing-how bg-white py-16 sm:py-24 px-4 sm:px-8 border-t border-shnoor-lavender">
+      <section id="how-it-works" className="landing-how bg-theme-page py-16 sm:py-24 px-4 sm:px-8 border-t border-theme-border/60">
         <div className="max-w-[1280px] mx-auto">
           <div className="text-center mb-12 sm:mb-16">
-            <span className="inline-block text-xs font-extrabold text-shnoor-indigo uppercase tracking-[0.25em] mb-4">HOW IT WORKS</span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-shnoor-navy mb-4 leading-tight">
+            <span className="inline-block text-xs font-extrabold text-theme-accent uppercase tracking-[0.25em] mb-4 bg-theme-panel border border-theme-border px-3.5 py-1.5 rounded-full shadow-xs">HOW IT WORKS</span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-theme-text mb-4 leading-tight tracking-tight">
               A clear assessment workflow for<br className="hidden sm:block" /> organizations and candidates
             </h2>
-            <p className="text-base sm:text-lg text-shnoor-soft max-w-2xl mx-auto leading-relaxed">
+            <p className="text-base sm:text-lg text-theme-muted max-w-2xl mx-auto leading-relaxed font-normal">
               Every part of the platform is designed to help organizations launch exams faster, deliver secure assessment experiences, and measure talent without friction.
             </p>
           </div>
@@ -367,15 +370,15 @@ const LandingPage = () => {
                 desc: 'View real-time leaderboards, detailed performance reports, and AI-flagged violations to make data-driven hiring decisions.',
               },
             ].map(step => (
-              <div key={step.num} className="bg-shnoor-lavender/30 border border-shnoor-mist/60 rounded-2xl p-8 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+              <div key={step.num} className="bg-theme-card border border-theme-border rounded-2xl p-8 hover:shadow-lg hover:border-theme-accent/50 hover:-translate-y-1 transition-all duration-300">
                 <div className="flex items-center justify-between mb-6">
-                  <div className="w-12 h-12 bg-shnoor-lavender rounded-xl flex items-center justify-center">
-                    <Icon d={step.icon} cls="w-6 h-6 text-shnoor-indigo" />
+                  <div className="w-12 h-12 bg-theme-panel border border-theme-border rounded-xl flex items-center justify-center">
+                    <Icon d={step.icon} cls="w-6 h-6 text-theme-accent" />
                   </div>
-                  <span className="text-2xl font-extrabold text-shnoor-mist">{step.num}</span>
+                  <span className="text-2xl font-extrabold text-theme-muted/50">{step.num}</span>
                 </div>
-                <h3 className="text-xl font-extrabold text-shnoor-navy mb-3">{step.title}</h3>
-                <p className="text-shnoor-soft leading-relaxed">{step.desc}</p>
+                <h3 className="text-xl font-extrabold text-theme-text mb-3">{step.title}</h3>
+                <p className="text-theme-muted leading-relaxed text-sm">{step.desc}</p>
               </div>
             ))}
           </div>
@@ -385,29 +388,29 @@ const LandingPage = () => {
       {/* ══════════════════════════════════════════════════════════════════════
           4. PLATFORM FLOW — How it supports both sides
           ══════════════════════════════════════════════════════════════════════ */}
-      <section id="about" className="landing-expect bg-white py-16 sm:py-24 px-4 sm:px-8 border-t border-shnoor-lavender">
+      <section id="about" className="landing-expect bg-theme-page py-16 sm:py-24 px-4 sm:px-8 border-t border-theme-border/60">
         <div className="max-w-[1280px] mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-start">
             {/* Left — Text */}
             <div>
-              <span className="inline-block text-xs font-extrabold text-shnoor-indigo uppercase tracking-[0.25em] mb-4 bg-shnoor-lavender px-3 py-1.5 rounded-full">PLATFORM FLOW</span>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-shnoor-navy mb-4 leading-tight">
+              <span className="inline-block text-xs font-extrabold text-theme-accent uppercase tracking-[0.25em] mb-4 bg-theme-panel border border-theme-border px-3.5 py-1.5 rounded-full shadow-xs">PLATFORM FLOW</span>
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-theme-text mb-4 leading-tight tracking-tight">
                 How SHNOOR supports every stage of recruitment assessment
               </h2>
-              <p className="text-shnoor-soft leading-relaxed mb-8">
+              <p className="text-theme-muted leading-relaxed mb-8 text-base">
                 From exam creation to candidate evaluation, the platform is built to keep recruitment organized, secure, and easy to scale.
               </p>
-              <div className="flex flex-col gap-5">
+              <div className="flex flex-col gap-4">
                 {[
                   'Built for organizations that need both exam integrity and operational visibility.',
                   'Designed to keep the candidate experience simple while giving recruiters full control.',
                   'Consistent workflows for test creation, proctoring, evaluation, and hiring decisions.',
                 ].map((item, i) => (
-                  <div key={i} className="flex items-start gap-3 bg-shnoor-lavender/40 rounded-xl p-4 border border-shnoor-mist/40">
-                    <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <Icon d={CHECK} cls="w-3 h-3 text-green-600" stroke={3} />
+                  <div key={i} className="flex items-start gap-3.5 bg-theme-card border border-theme-border rounded-xl p-4 shadow-xs hover:border-theme-accent/50 transition-colors">
+                    <div className="w-5 h-5 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Icon d={CHECK} cls="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" stroke={3} />
                     </div>
-                    <p className="text-sm text-shnoor-soft leading-relaxed">{item}</p>
+                    <p className="text-sm font-medium text-theme-text leading-relaxed">{item}</p>
                   </div>
                 ))}
               </div>
@@ -432,12 +435,12 @@ const LandingPage = () => {
                   desc: 'Automated grading, performance analytics, proctoring violation reports, and exportable results for hiring decisions.',
                 },
               ].map(card => (
-                <div key={card.title} className="bg-white border border-shnoor-mist rounded-2xl p-6 hover:shadow-lg transition-shadow duration-300 flex flex-col">
-                  <div className="w-12 h-12 bg-shnoor-navy rounded-xl flex items-center justify-center mb-5">
-                    <Icon d={card.icon} cls="w-6 h-6 text-white" />
+                <div key={card.title} className="bg-theme-card border border-theme-border rounded-2xl p-6 hover:shadow-lg hover:border-theme-accent/50 transition-all duration-300 flex flex-col">
+                  <div className="w-12 h-12 bg-theme-panel border border-theme-border rounded-xl flex items-center justify-center mb-5">
+                    <Icon d={card.icon} cls="w-6 h-6 text-theme-accent" />
                   </div>
-                  <h3 className="font-bold text-base text-shnoor-navy mb-2">{card.title}</h3>
-                  <p className="text-sm text-shnoor-soft leading-relaxed">{card.desc}</p>
+                  <h3 className="font-bold text-base text-theme-text mb-2">{card.title}</h3>
+                  <p className="text-sm text-theme-muted leading-relaxed">{card.desc}</p>
                 </div>
               ))}
             </div>
@@ -448,26 +451,26 @@ const LandingPage = () => {
       {/* ══════════════════════════════════════════════════════════════════════
           5. PLATFORM FEATURES (8-grid) — Both org & candidate
           ══════════════════════════════════════════════════════════════════════ */}
-      <section id="features" className="landing-features bg-shnoor-lavender py-16 sm:py-24 px-4 sm:px-8">
+      <section id="features" className="landing-features bg-theme-page py-16 sm:py-24 px-4 sm:px-8 border-t border-theme-border/60">
         <div className="max-w-[1280px] mx-auto">
           <div className="text-center mb-10 sm:mb-14">
-            <span className="inline-block text-xs font-extrabold text-shnoor-indigo uppercase tracking-[0.25em] mb-4">PLATFORM FEATURES</span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-shnoor-navy mb-4 leading-tight">
+            <span className="inline-block text-xs font-extrabold text-theme-accent uppercase tracking-[0.25em] mb-4 bg-theme-panel border border-theme-border px-3.5 py-1.5 rounded-full shadow-xs">PLATFORM FEATURES</span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-theme-text mb-4 leading-tight tracking-tight">
               Eight core capabilities designed for<br className="hidden sm:block" /> enterprise-ready assessments
             </h2>
-            <p className="text-base sm:text-lg text-shnoor-soft max-w-2xl mx-auto leading-relaxed">
+            <p className="text-base sm:text-lg text-theme-muted max-w-2xl mx-auto leading-relaxed font-normal">
               Every feature is built to reduce friction for candidates and give organizations the visibility and control they need to run professional recruitment at scale.
             </p>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {FEATURES.map(f => (
-              <div key={f.title} className="bg-white border border-shnoor-mist/60 rounded-2xl p-6 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col">
-                <div className="w-12 h-12 bg-shnoor-lavender rounded-xl flex items-center justify-center mb-5">
-                  <Icon d={f.icon} cls="w-6 h-6 text-shnoor-indigo" />
+              <div key={f.title} className="bg-theme-card border border-theme-border rounded-2xl p-6 hover:shadow-lg hover:border-theme-accent/50 hover:-translate-y-1 transition-all duration-300 flex flex-col">
+                <div className="w-12 h-12 bg-theme-panel border border-theme-border rounded-xl flex items-center justify-center mb-5">
+                  <Icon d={f.icon} cls="w-6 h-6 text-theme-accent" />
                 </div>
-                <h3 className="font-bold text-base text-shnoor-navy mb-2">{f.title}</h3>
-                <p className="text-sm text-shnoor-soft leading-relaxed">{f.desc}</p>
+                <h3 className="font-bold text-base text-theme-text mb-2">{f.title}</h3>
+                <p className="text-sm text-theme-muted leading-relaxed">{f.desc}</p>
               </div>
             ))}
           </div>
@@ -477,15 +480,15 @@ const LandingPage = () => {
       {/* ══════════════════════════════════════════════════════════════════════
           6. SECURE EXAMINATION ENVIRONMENT
           ══════════════════════════════════════════════════════════════════════ */}
-      <section className="landing-secure bg-shnoor-navy py-16 sm:py-24 px-4 sm:px-8">
+      <section className="landing-secure bg-theme-hdr py-16 sm:py-24 px-4 sm:px-8 border-t border-white/10">
         <div className="max-w-[1280px] mx-auto grid lg:grid-cols-2 gap-12 sm:gap-16 items-center">
           {/* Left */}
           <div className="landing-secure-content text-center lg:text-left">
-            <span className="inline-block text-xs font-extrabold text-shnoor-indigo uppercase tracking-[0.25em] mb-4 bg-shnoor-indigo/20 px-3 py-1.5 rounded-full">PLATFORM SECURITY</span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-white leading-tight mb-4">
+            <span className="inline-block text-xs font-extrabold text-theme-auth-acc uppercase tracking-[0.25em] mb-4 bg-white/10 border border-white/15 px-3.5 py-1.5 rounded-full">PLATFORM SECURITY</span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-white leading-tight mb-4 tracking-tight">
               Secure examination<br className="hidden sm:block" /> environment
             </h2>
-            <p className="text-base sm:text-lg text-shnoor-soft mb-8 sm:mb-10 leading-[1.7]">
+            <p className="text-base sm:text-lg text-emerald-100/90 dark:text-slate-300 mb-8 sm:mb-10 leading-[1.7]">
               Multi-layered security ensures every exam is tamper-proof. Organizations get full control over proctoring policies while candidates experience a fair, transparent process.
             </p>
             <div className="flex flex-col gap-8">
@@ -495,12 +498,12 @@ const LandingPage = () => {
                 { icon: SHIELD, title: 'Encrypted Submissions', desc: 'All responses are encrypted, timestamped, and securely stored. Full audit trail for every exam session.' },
               ].map(f => (
                 <div key={f.title} className="flex gap-5">
-                  <div className="w-12 h-12 rounded-xl bg-shnoor-indigo flex items-center justify-center flex-shrink-0">
-                    <Icon d={f.icon} cls="w-6 h-6 text-white" />
+                  <div className="w-12 h-12 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center flex-shrink-0">
+                    <Icon d={f.icon} cls="w-6 h-6 text-theme-auth-acc" />
                   </div>
                   <div>
                     <h3 className="font-bold text-lg text-white mb-1">{f.title}</h3>
-                    <p className="text-shnoor-soft leading-relaxed">{f.desc}</p>
+                    <p className="text-emerald-100/80 dark:text-slate-300 text-sm leading-relaxed">{f.desc}</p>
                   </div>
                 </div>
               ))}
@@ -509,26 +512,26 @@ const LandingPage = () => {
 
           {/* Right — Security Status Card */}
           <div>
-            <div className="landing-security-card rounded-2xl p-8">
+            <div className="landing-security-card bg-white/5 border border-white/10 rounded-2xl p-8 shadow-2xl backdrop-blur-sm">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="landing-contrast-text font-bold text-xl">Security Status</h3>
-                <span className="bg-shnoor-success text-white text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-widest">ACTIVE</span>
+                <h3 className="text-white font-bold text-xl">Security Status</h3>
+                <span className="bg-emerald-500 text-white text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-widest shadow-xs">ACTIVE</span>
               </div>
               <div className="space-y-0 divide-y divide-white/10">
                 {[
-                  { label: 'Fullscreen Enforcement', val: '✓ Enabled', cls: 'text-shnoor-success' },
-                  { label: 'Camera Monitoring', val: '✓ Required', cls: 'text-shnoor-success' },
-                  { label: 'Tab Switch Limit', val: '3 Warnings', cls: 'text-shnoor-warning' },
-                  { label: 'Auto-Submit', val: 'On Timeout', cls: 'text-[#60a5fa]' },
+                  { label: 'Fullscreen Enforcement', val: '✓ Enabled', cls: 'text-emerald-400' },
+                  { label: 'Camera Monitoring', val: '✓ Required', cls: 'text-emerald-400' },
+                  { label: 'Tab Switch Limit', val: '3 Warnings', cls: 'text-amber-400' },
+                  { label: 'Auto-Submit', val: 'On Timeout', cls: 'text-theme-auth-acc' },
                 ].map(r => (
                   <div key={r.label} className="flex items-center justify-between py-4">
-                    <span className="landing-contrast-muted">{r.label}</span>
+                    <span className="text-emerald-100/90 dark:text-slate-300 text-sm">{r.label}</span>
                     <span className={`text-sm font-bold ${r.cls}`}>{r.val}</span>
                   </div>
                 ))}
               </div>
-              <div className="landing-security-note mt-6 rounded-xl p-4">
-                <p className="landing-contrast-muted text-sm italic leading-relaxed">
+              <div className="mt-6 rounded-xl p-4 bg-white/5 border border-white/10">
+                <p className="text-emerald-100/90 dark:text-slate-300 text-sm italic leading-relaxed">
                   "These measures ensure a fair assessment for candidates and reliable results for organizations."
                 </p>
               </div>
@@ -540,24 +543,24 @@ const LandingPage = () => {
       {/* ══════════════════════════════════════════════════════════════════════
           7. RECOGNITION / NASSCOM
           ══════════════════════════════════════════════════════════════════════ */}
-      <section className="landing-expect bg-white py-16 sm:py-24 px-4 sm:px-8">
+      <section className="landing-expect bg-theme-page py-16 sm:py-24 px-4 sm:px-8 border-t border-theme-border/60">
         <div className="max-w-[1280px] mx-auto">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-stretch">
             {/* Left — Dark Recognition Card */}
-            <div className="bg-shnoor-navy rounded-2xl p-8 sm:p-10 flex flex-col justify-between relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-shnoor-indigo/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
+            <div className="bg-theme-hdr rounded-2xl p-8 sm:p-10 flex flex-col justify-between relative overflow-hidden border border-white/10 shadow-lg">
+              <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-theme-accent/15 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
               <div className="relative z-10">
-                <span className="inline-block text-xs font-extrabold text-shnoor-indigo uppercase tracking-[0.25em] mb-4 bg-shnoor-indigo/20 px-3 py-1.5 rounded-full">RECOGNITION</span>
-                <h2 className="text-2xl sm:text-3xl font-extrabold text-white leading-tight mb-4">
+                <span className="inline-block text-xs font-extrabold text-theme-auth-acc uppercase tracking-[0.25em] mb-4 bg-white/10 border border-white/15 px-3.5 py-1.5 rounded-full">RECOGNITION</span>
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-white leading-tight mb-4 tracking-tight">
                   Trusted direction, serious execution, and a platform built for professional assessment outcomes.
                 </h2>
-                <p className="text-shnoor-soft leading-relaxed mb-8">
+                <p className="text-emerald-100/90 dark:text-slate-300 text-sm sm:text-base leading-relaxed mb-8">
                   Shnoor combines secure proctoring, custom test creation, and modern reporting so organizations can evaluate talent with confidence and candidates can demonstrate their skills fairly.
                 </p>
               </div>
               <div className="flex flex-wrap gap-3 relative z-10">
                 {['AI-Driven Proctoring', 'Custom Test Builder', 'Enterprise Analytics'].map(tag => (
-                  <span key={tag} className="text-xs font-bold text-white bg-white/10 backdrop-blur-sm px-4 py-2.5 rounded-xl border border-white/10">
+                  <span key={tag} className="text-xs font-bold text-white bg-white/10 backdrop-blur-sm px-4 py-2.5 rounded-xl border border-white/15">
                     {tag}
                   </span>
                 ))}
@@ -565,22 +568,24 @@ const LandingPage = () => {
             </div>
 
             {/* Right — NASSCOM Milestone */}
-            <div className="bg-white border border-shnoor-mist rounded-2xl p-8 sm:p-10 flex flex-col justify-center">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-14 h-14 bg-shnoor-lavender rounded-2xl flex items-center justify-center overflow-hidden border border-shnoor-mist flex-shrink-0">
-                  <img src={shnoorLogo} alt="Shnoor" className="h-10 w-10 object-contain" loading="lazy" />
+            <div className="bg-theme-card border border-theme-border rounded-2xl p-8 sm:p-10 flex flex-col justify-between shadow-xs">
+              <div>
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="site-header-logo w-14 h-14 bg-white rounded-2xl flex items-center justify-center overflow-hidden p-2 flex-shrink-0">
+                    <img src={shnoorLogo} alt="Shnoor" className="h-full w-full object-contain" loading="lazy" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold text-theme-accent uppercase tracking-[0.2em]">MILESTONE</p>
+                    <h3 className="text-xl sm:text-2xl font-extrabold text-theme-text">Proudly recognized by NASSCOM</h3>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-[10px] font-bold text-shnoor-soft uppercase tracking-[0.2em]">MILESTONE</p>
-                  <h3 className="text-xl sm:text-2xl font-extrabold text-shnoor-navy">Proudly recognized by NASSCOM</h3>
-                </div>
+                <p className="text-theme-muted leading-relaxed mb-6 text-sm sm:text-base font-normal">
+                  Our proposal has been approved by NASSCOM, reinforcing the strength of our vision, process maturity, and long-term commitment to quality.
+                </p>
               </div>
-              <p className="text-shnoor-soft leading-relaxed mb-6">
-                Our proposal has been approved by NASSCOM, reinforcing the strength of our vision, process maturity, and long-term commitment to quality.
-              </p>
-              <div className="bg-shnoor-lavender/50 rounded-xl p-5 border border-shnoor-mist/50">
-                <p className="text-sm text-shnoor-soft leading-relaxed italic">
-                  This recognition strengthens trust in the Shnoor platform as a serious, professional assessment environment for organizations and candidates alike.
+              <div className="bg-theme-panel/70 rounded-xl p-5 border-l-4 border-l-theme-accent border-y border-r border-theme-border">
+                <p className="text-sm text-theme-text font-medium leading-relaxed italic">
+                  "This recognition strengthens trust in the Shnoor platform as a serious, professional assessment environment for organizations and candidates alike."
                 </p>
               </div>
             </div>
@@ -591,17 +596,17 @@ const LandingPage = () => {
       {/* ══════════════════════════════════════════════════════════════════════
           8. PRICING (For Organizations)
           ══════════════════════════════════════════════════════════════════════ */}
-      <section className="landing-secure bg-shnoor-navy py-16 sm:py-24 px-4 sm:px-8">
+      <section className="landing-secure bg-theme-hdr py-16 sm:py-24 px-4 sm:px-8 border-t border-white/10">
         <div className="max-w-[1280px] mx-auto">
           <div className="text-center mb-12 sm:mb-16">
-            <span className="inline-block text-xs font-extrabold text-shnoor-indigo uppercase tracking-[0.25em] mb-4 bg-shnoor-indigo/20 px-3 py-1.5 rounded-full">FOR ORGANIZATIONS</span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4">Simple, Transparent Pricing</h2>
-            <p className="text-lg text-shnoor-soft">Choose a plan that fits your organisation's hiring volume.</p>
+            <span className="inline-block text-xs font-extrabold text-theme-auth-acc uppercase tracking-[0.25em] mb-4 bg-white/10 border border-white/15 px-3.5 py-1.5 rounded-full">FOR ORGANIZATIONS</span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4 tracking-tight">Simple, Transparent Pricing</h2>
+            <p className="text-lg text-emerald-100/90 dark:text-slate-300 font-normal">Choose a plan that fits your organisation's hiring volume.</p>
           </div>
 
           {plansLoading ? (
             <div className="flex justify-center items-center py-20">
-              <div className="animate-spin rounded-full h-10 w-10 border-4 border-shnoor-indigo border-t-transparent" />
+              <div className="animate-spin rounded-full h-10 w-10 border-4 border-theme-accent border-t-transparent" />
             </div>
           ) : plans.length > 0 ? (
             <div className="grid md:grid-cols-3 gap-8 items-stretch">
@@ -609,28 +614,28 @@ const LandingPage = () => {
                 const isPremium = plan.name.toLowerCase().includes('premium') && !plan.name.toLowerCase().includes('super');
                 const isSuper = plan.name.toLowerCase().includes('super');
                 return (
-                  <div key={plan.id} className={`rounded-2xl p-8 flex flex-col relative transition-transform duration-300 hover:-translate-y-1 ${isPremium ? 'bg-shnoor-indigo scale-100 md:scale-105 shadow-2xl z-10' : 'bg-white'}`}>
+                  <div key={plan.id} className={`rounded-2xl p-8 flex flex-col relative transition-transform duration-300 hover:-translate-y-1 ${isPremium ? 'bg-theme-accent text-white scale-100 md:scale-105 shadow-2xl z-10 border border-white/20' : 'bg-theme-card text-theme-text border border-theme-border shadow-lg'}`}>
                     {isPremium && (
-                      <div className="absolute top-0 right-0 bg-yellow-400 text-yellow-900 text-xs font-bold px-3 py-1 rounded-bl-xl rounded-tr-xl flex items-center gap-1">
+                      <div className="absolute top-0 right-0 bg-yellow-400 text-yellow-950 text-xs font-bold px-3 py-1 rounded-bl-xl rounded-tr-xl flex items-center gap-1 shadow-xs">
                         <Icon d={STAR} cls="w-3 h-3" fill="currentColor" stroke={0} /> Most Popular
                       </div>
                     )}
-                    <h3 className={`text-2xl font-bold mb-2 ${isPremium ? 'text-white' : 'text-shnoor-navy'}`}>{plan.name}</h3>
-                    <p className={`mb-6 ${isPremium ? 'text-white/70' : 'text-shnoor-soft'}`}>{plan.description || 'Choose this plan to boost your hiring'}</p>
-                    <div className={`mb-6 pb-6 ${isPremium ? 'border-b border-white/20' : 'border-b border-shnoor-mist'}`}>
-                      <span className={`text-4xl font-extrabold ${isPremium ? 'text-white' : 'text-shnoor-navy'}`}>₹{plan.price_monthly}</span>
-                      <span className={isPremium ? 'text-white/70' : 'text-shnoor-soft'}>/month</span>
+                    <h3 className={`text-2xl font-extrabold mb-2 ${isPremium ? 'text-white' : 'text-theme-text'}`}>{plan.name}</h3>
+                    <p className={`mb-6 text-sm ${isPremium ? 'text-white/80' : 'text-theme-muted'}`}>{plan.description || 'Choose this plan to boost your hiring'}</p>
+                    <div className={`mb-6 pb-6 ${isPremium ? 'border-b border-white/20' : 'border-b border-theme-border'}`}>
+                      <span className={`text-4xl font-extrabold ${isPremium ? 'text-white' : 'text-theme-text'}`}>₹{plan.price_monthly}</span>
+                      <span className={isPremium ? 'text-white/80' : 'text-theme-muted'}>/month</span>
                     </div>
-                    <ul className="flex flex-col gap-4 mb-8 flex-1">
+                    <ul className="flex flex-col gap-3.5 mb-8 flex-1">
                       {(plan.features || []).map((f, i) => (
-                        <li key={i} className={`flex items-center gap-3 font-medium ${isPremium ? 'text-white' : 'text-shnoor-navy'}`}>
-                          <Icon d={CHECK} cls={`w-5 h-5 flex-shrink-0 ${isPremium ? 'text-yellow-400' : 'text-shnoor-success'}`} />
+                        <li key={i} className={`flex items-center gap-3 text-sm font-medium ${isPremium ? 'text-white' : 'text-theme-text'}`}>
+                          <Icon d={CHECK} cls={`w-5 h-5 flex-shrink-0 ${isPremium ? 'text-yellow-400' : 'text-emerald-500'}`} stroke={3} />
                           {f}
                         </li>
                       ))}
                     </ul>
                     <Link to="/register-organisation">
-                      <button className={`w-full h-[50px] font-bold rounded-xl transition-colors ${isPremium ? 'bg-white text-shnoor-indigo hover:bg-shnoor-lavender' : 'border-2 border-shnoor-mist text-shnoor-navy hover:border-shnoor-indigo hover:text-shnoor-indigo'}`}>
+                      <button className={`w-full h-[50px] font-bold rounded-xl transition-all duration-200 cursor-pointer ${isPremium ? 'bg-white text-theme-accent hover:bg-slate-100 shadow-md' : 'bg-theme-accent hover:bg-theme-accent2 text-white shadow-sm'}`}>
                         {isSuper ? 'Contact Sales' : isPremium ? 'Get Premium' : 'Get Started'}
                       </button>
                     </Link>
@@ -640,7 +645,7 @@ const LandingPage = () => {
             </div>
           ) : (
             <div className="text-center py-12">
-              <p className="text-shnoor-soft">Pricing plans are being updated. Please check back soon.</p>
+              <p className="text-slate-300">Pricing plans are being updated. Please check back soon.</p>
             </div>
           )}
         </div>
@@ -649,25 +654,26 @@ const LandingPage = () => {
       {/* ══════════════════════════════════════════════════════════════════════
           9. CTA
           ══════════════════════════════════════════════════════════════════════ */}
-      <section className="landing-cta bg-shnoor-indigo py-16 sm:py-24 px-4 sm:px-8">
-        <div className="max-w-2xl mx-auto text-center">
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4 sm:mb-5">Ready to get started?</h2>
-          <p className="text-base sm:text-lg text-white/70 mb-8 sm:mb-10 leading-relaxed">
+      <section className="landing-cta bg-theme-hdr py-16 sm:py-24 px-4 sm:px-8 border-t border-white/10 relative overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[640px] h-[280px] bg-theme-accent opacity-15 blur-[120px] pointer-events-none rounded-full" />
+        <div className="max-w-2xl mx-auto text-center relative z-10">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4 sm:mb-5 tracking-tight">Ready to get started?</h2>
+          <p className="text-base sm:text-lg text-slate-200 mb-8 sm:mb-10 leading-relaxed font-normal">
             Whether you're a candidate preparing for a recruitment drive or an organization looking to streamline your hiring assessments — SHNOOR has you covered.
           </p>
           <div className="flex flex-wrap justify-center gap-4 mb-6">
             <Link to="/register">
-              <button className="h-[50px] px-8 rounded-lg font-bold text-white border-2 border-white hover:bg-white/10 transition-all">
+              <button className="h-[50px] px-8 rounded-xl font-bold text-white border-2 border-white/30 hover:border-white hover:bg-white/10 transition-all cursor-pointer">
                 Register as Candidate
               </button>
             </Link>
             <Link to="/register-organisation">
-              <button className="h-[50px] px-8 rounded-lg font-bold bg-white text-shnoor-indigo hover:bg-shnoor-lavender transition-all">
+              <button className="h-[50px] px-8 rounded-xl font-bold bg-theme-accent hover:bg-theme-accent-strong text-white transition-all shadow-md hover:shadow-lg cursor-pointer">
                 Register Organisation
               </button>
             </Link>
           </div>
-          <Link to="/login" className="text-white/60 hover:text-white text-sm font-semibold transition-colors">
+          <Link to="/login" className="text-theme-auth-acc hover:text-white text-sm font-semibold transition-colors">
             Already have an account? Sign In →
           </Link>
         </div>
@@ -676,50 +682,88 @@ const LandingPage = () => {
       {/* ══════════════════════════════════════════════════════════════════════
           10. FOOTER
           ══════════════════════════════════════════════════════════════════════ */}
-      <footer id="contact" className="landing-footer bg-shnoor-navy pt-12 sm:pt-16 pb-6 sm:pb-8 px-4 sm:px-8">
+      <footer id="contact" className="landing-footer bg-shnoor-navy dark:bg-[#070913] pt-12 sm:pt-16 pb-6 sm:pb-8 px-4 sm:px-8 border-t border-white/10">
         <div className="max-w-[1280px] mx-auto">
           <div className="grid md:grid-cols-3 gap-8 sm:gap-12 mb-10 sm:mb-12 text-center md:text-left">
             <div>
               <div className="flex items-center gap-3 mb-4 justify-center md:justify-start">
-                <div className="landing-footer-logo flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-white">
-                  <img src={shnoorLogo} alt="Shnoor" className="h-9 w-9 object-contain" loading="lazy" width="36" height="36" decoding="async" />
+                <div className="landing-footer-logo flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-white p-1 shadow-xs">
+                  <img src={shnoorLogo} alt="Shnoor" className="h-full w-full object-contain" loading="lazy" width="36" height="36" decoding="async" />
                 </div>
                 <span className="font-extrabold text-white text-lg">SHNOOR Assessments</span>
               </div>
-              <p className="text-shnoor-soft mb-6 leading-relaxed text-sm">Secure assessment platform for campus recruitment drives and enterprise hiring.</p>
-              <p className="text-xs font-extrabold text-white uppercase tracking-widest mb-2">Location</p>
-              <p className="text-shnoor-soft text-sm leading-relaxed">10009 Mount Tabor Road,<br />Odessa Missouri, United States.</p>
+              <p className="text-slate-300 mb-6 leading-relaxed text-sm">Secure assessment platform for campus recruitment drives and enterprise hiring.</p>
+              <div className="flex items-center gap-2 mb-2 justify-center md:justify-start">
+                <MapPin className="w-4 h-4 text-theme-auth-acc flex-shrink-0" />
+                <p className="text-xs font-extrabold text-white uppercase tracking-widest">Location</p>
+              </div>
+              <p className="text-slate-300 text-sm leading-relaxed">10009 Mount Tabor Road,<br />Odessa Missouri, United States.</p>
             </div>
             <div>
-              <p className="text-xs font-extrabold text-shnoor-mist uppercase tracking-widest mb-5">Contacts</p>
-              <ul className="flex flex-col gap-3 text-shnoor-soft">
-                <li><a href="mailto:info@shnoor.com" className="landing-footer-link transition-colors">📧 info@shnoor.com (General)</a></li>
-                <li><a href="mailto:proc@shnoor.com" className="landing-footer-link transition-colors">📧 proc@shnoor.com (Sales)</a></li>
-                <li><a href="tel:+919429694298" className="landing-footer-link transition-colors">📞 +91-9429694298</a></li>
-                <li><a href="tel:+919041914601" className="landing-footer-link transition-colors">📞 +91-9041914601</a></li>
+              <p className="text-xs font-extrabold text-theme-auth-acc uppercase tracking-widest mb-5">Contacts</p>
+              <ul className="flex flex-col gap-3.5 text-slate-300 text-sm">
+                <li>
+                  <a href="mailto:info@shnoor.com" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start">
+                    <Mail className="w-4 h-4 text-theme-auth-acc flex-shrink-0" />
+                    <span>info@shnoor.com (General)</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="mailto:proc@shnoor.com" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start">
+                    <Mail className="w-4 h-4 text-theme-auth-acc flex-shrink-0" />
+                    <span>proc@shnoor.com (Sales)</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="tel:+919429694298" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start">
+                    <Phone className="w-4 h-4 text-theme-auth-acc flex-shrink-0" />
+                    <span>+91-9429694298</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="tel:+919041914601" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start">
+                    <Phone className="w-4 h-4 text-theme-auth-acc flex-shrink-0" />
+                    <span>+91-9041914601</span>
+                  </a>
+                </li>
               </ul>
             </div>
             <div>
-              <p className="text-xs font-extrabold text-shnoor-mist uppercase tracking-widest mb-5">Useful Links</p>
-              <ul className="flex flex-col gap-3 text-shnoor-soft">
-                <li><a href="https://www.linkedin.com/company/shnoor-international/" target="_blank" rel="noopener noreferrer" className="landing-footer-link transition-colors">We are Social</a></li>
-                <li><a href="https://api.whatsapp.com/qr/D6I7XIACKIKVD1?autoload=1&app_absent=0" target="_blank" rel="noopener noreferrer" className="landing-footer-link transition-colors">Let's Connect</a></li>
-                <li><a href="/company-profile.pdf" target="_blank" rel="noopener noreferrer" className="landing-footer-link transition-colors">Company Profile</a></li>
+              <p className="text-xs font-extrabold text-theme-auth-acc uppercase tracking-widest mb-5">Useful Links</p>
+              <ul className="flex flex-col gap-3.5 text-slate-300 text-sm">
+                <li>
+                  <a href="https://www.linkedin.com/company/shnoor-international/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start group">
+                    <img src={linkedinIcon} alt="LinkedIn" className="w-4 h-4 rounded-xs object-contain flex-shrink-0 group-hover:scale-110 transition-transform" />
+                    <span>We are Social</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="https://api.whatsapp.com/qr/D6I7XIACKIKVD1?autoload=1&app_absent=0" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start group">
+                    <img src={whatsappIcon} alt="WhatsApp" className="w-4 h-4 rounded-xs object-contain flex-shrink-0 group-hover:scale-110 transition-transform" />
+                    <span>Let's Connect</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="/company-profile.pdf" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start group">
+                    <FileText className="w-4 h-4 text-theme-auth-acc flex-shrink-0 group-hover:scale-110 transition-transform" />
+                    <span>Company Profile</span>
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
           <div className="border-t border-white/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="flex flex-col sm:flex-row items-center gap-2 text-sm text-shnoor-soft">
+            <div className="flex flex-col sm:flex-row items-center gap-2 text-sm text-slate-400">
               <p>© Copyrights 2025. All Rights Reserved. SHNOOR INTERNATIONAL LLC</p>
               <div className="hidden sm:flex items-center gap-2">
                 <span className="text-white/20">•</span>
-                <Link to="/privacy-policy" className="landing-footer-link transition-colors">Privacy Policy</Link>
+                <Link to="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link>
                 <span className="text-white/20">•</span>
-                <Link to="/terms-and-conditions" className="landing-footer-link transition-colors">Terms &amp; Conditions</Link>
+                <Link to="/terms-and-conditions" className="hover:text-white transition-colors">Terms &amp; Conditions</Link>
               </div>
             </div>
-            <div className="landing-contrast-muted flex items-center gap-2 text-sm font-semibold">
-              <Icon d={SHIELD} cls="w-4 h-4" />
+            <div className="text-slate-300 flex items-center gap-2 text-sm font-semibold">
+              <ShieldCheck className="w-4 h-4 text-emerald-400" />
               Secure Environment
             </div>
           </div>

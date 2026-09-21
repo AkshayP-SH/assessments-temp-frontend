@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { apiFetch } from '../config/api';
 import Button from './Button';
 import InputField from './InputField';
@@ -752,7 +753,7 @@ const Register = () => {
               const isDone = i < step;
               const isActive = i === step;
               return (
-                <div key={i} className={`flex items-start gap-4 transition-all duration-300 ${isActive ? 'opacity-100' : isDone ? 'opacity-75' : 'opacity-30'}`}>
+                <div key={i} className={`flex items-start gap-4 transition-all duration-300 ${isActive ? 'opacity-100' : isDone ? 'opacity-90' : 'opacity-60'}`}>
                   <div className={`auth-step-badge w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300 ${isDone ? 'is-complete' : isActive ? 'is-active' : 'is-pending'}`}>
                     {isDone ? (
                       <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
@@ -786,9 +787,29 @@ const Register = () => {
       {/* ── RIGHT PANEL ───────────────────────────────────── */}
       <div className="auth-right-panel flex-1 bg-white flex items-center justify-center px-6 py-10 overflow-auto">
         <div className="w-full max-w-[500px]">
+          {/* Back navigation */}
+          <div className="mb-5">
+            <button
+              type="button"
+              onClick={() => {
+                if (step > 0) {
+                  setStep(s => s - 1);
+                } else {
+                  navigate('/');
+                }
+              }}
+              className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-shnoor-soft hover:text-shnoor-indigo transition-colors group cursor-pointer"
+            >
+              <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+              <span>{step > 0 ? 'Back to previous step' : 'Back to home'}</span>
+            </button>
+          </div>
+
           {/* Mobile brand */}
           <div className="flex items-center gap-3 mb-6 lg:hidden">
-            <img src={shnoorLogo} alt="Shnoor" className="h-9 w-9 object-contain" width="36" height="36" loading="lazy" decoding="async" />
+            <div className="site-header-logo flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-white shadow-xs p-1 flex-shrink-0">
+              <img src={shnoorLogo} alt="Shnoor" className="h-full w-full object-contain" width="36" height="36" loading="lazy" decoding="async" />
+            </div>
             <div>
               <p className="font-extrabold text-shnoor-navy text-base">SHNOOR Assessments</p>
               <p className="text-[10px] text-shnoor-soft uppercase tracking-widest">Secure Examination Portal</p>
