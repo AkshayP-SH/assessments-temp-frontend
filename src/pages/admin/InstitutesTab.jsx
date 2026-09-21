@@ -357,7 +357,7 @@ const InstitutesTab = ({
                           </button>
                           <button
                             onClick={() => handleDeleteInstitute(institute.id, institute.display_name)}
-                            className="py-2 px-3 text-shnoor-danger hover:bg-shnoor-dangerLight rounded-lg transition-colors text-sm font-medium"
+                            className="py-2 px-3 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white rounded-lg text-sm font-medium transition-colors"
                             title="Delete Institute"
                           >
                             <Trash2 size={16} className="inline mr-1" />

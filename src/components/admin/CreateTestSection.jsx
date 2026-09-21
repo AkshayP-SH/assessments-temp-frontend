@@ -17,10 +17,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
     const [toastMessage, setToastMessage] = useState('');
 
     const showToast = (msg) => {
-        setToastMessage(msg);
-        setTimeout(() => {
-            setToastMessage((current) => current === msg ? '' : current);
-        }, 3000);
+        alert(msg);
     };
 
     const [testTitle, setTestTitle] = useState('');

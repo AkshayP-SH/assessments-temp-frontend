@@ -3,6 +3,8 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 import * as Sentry from "@sentry/react";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 if (import.meta.env.VITE_SENTRY_DSN) {
   Sentry.init({
@@ -22,8 +24,28 @@ if (typeof global === 'undefined') {
   window.global = window;
 }
 
+// Override default window.alert with smart coloring
+window.alert = (message) => {
+  const options = {
+    autoClose: 3000,
+    position: "top-right",
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    theme: "colored", // Use colored theme for attractive solid colors
+  };
+
+  if (message && message.toLowerCase().includes('success')) {
+    toast.success(message, options);
+  } else {
+    toast.error(message, options);
+  }
+};
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <App />
+    <ToastContainer />
   </StrictMode>,
 )

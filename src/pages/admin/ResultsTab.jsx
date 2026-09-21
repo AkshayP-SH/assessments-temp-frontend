@@ -259,7 +259,7 @@ const ResultsTab = ({
 
               return (
                 <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-6">
-                  <div className="flex overflow-x-auto hide-scrollbar space-x-2 pb-2 xl:pb-0 min-w-max w-full">
+                  <div className="flex overflow-x-auto hide-scrollbar space-x-2 pb-2 xl:pb-0 w-max xl:w-full !max-w-none">
                     <button
                       onClick={() => setStatusFilter('all')}
                       className={`px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base whitespace-nowrap font-medium transition-all flex items-center space-x-2 shrink-0 ${statusFilter === 'all'
