@@ -27,6 +27,7 @@ export const useProctoringWithAI = (onCameraLost, onAIViolation, onMessageReceiv
   const frameIntervalRef = useRef(null);
   const studentDataRef = useRef(null);
   const cameraCheckIntervalRef = useRef(null);
+  const streamRef = useRef(null);
   const audioContextRef = useRef(null);
   const analyserRef = useRef(null);
   const audioProcessorRef = useRef(null);
@@ -293,6 +294,14 @@ export const useProctoringWithAI = (onCameraLost, onAIViolation, onMessageReceiv
   // Request camera and microphone permissions
   const requestPermissions = async () => {
     try {
+      // Clean up any existing stream before requesting new ones (handles React StrictMode double-mounts)
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => {
+          try { track.stop(); } catch (e) {}
+        });
+        streamRef.current = null;
+      }
+      
       // Request video and audio permissions
       const videoStream = await navigator.mediaDevices.getUserMedia({
         video: {
@@ -308,6 +317,7 @@ export const useProctoringWithAI = (onCameraLost, onAIViolation, onMessageReceiv
       });
       
       setStream(videoStream);
+      streamRef.current = videoStream;
       setPermissionGranted(true);
       
       // Check if microphone is available - MANDATORY
@@ -685,13 +695,21 @@ export const useProctoringWithAI = (onCameraLost, onAIViolation, onMessageReceiv
       blurDetectionIntervalRef.current = null;
     }
 
-    // Stop video stream
+    // Stop all media tracks using the reliable streamRef
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => {
+        track.stop();
+      });
+      streamRef.current = null;
+    }
+    
+    // Fallback: stop video stream from videoRef just in case
     if (videoRef.current && videoRef.current.srcObject) {
       const tracks = videoRef.current.srcObject.getTracks();
       tracks.forEach(track => track.stop());
     }
 
-    // Stop audio stream
+    // Stop audio stream if we have it separately
     if (audioStream) {
       const audioTracks = audioStream.getTracks();
       audioTracks.forEach(track => track.stop());

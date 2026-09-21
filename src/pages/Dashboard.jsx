@@ -37,7 +37,6 @@ const Dashboard = () => {
 
   const [availableTests, setAvailableTests] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [testsWithProgress, setTestsWithProgress] = useState(new Set());
   const [selectedTest, setSelectedTest] = useState(null);
   const [showJobModal, setShowJobModal] = useState(false);
@@ -142,11 +141,11 @@ const Dashboard = () => {
           );
           setTestsWithProgress(testsWithProgressSet);
         } else {
-          setError('Failed to load tests');
+          alert('Failed to load tests');
         }
       } catch (err) {
         console.error('Error loading tests:', err);
-        setError('Connection error. Please try again later.');
+        alert('Connection error. Please try again later.');
       } finally {
         setLoading(false);
       }
@@ -484,13 +483,9 @@ const Dashboard = () => {
               </div>
             )}
 
-            {error && (
-              <div className="bg-shnoor-dangerLight border border-shnoor-dangerLight text-shnoor-danger px-4 py-3 rounded-lg mb-6 shadow-sm">
-                {error}
-              </div>
-            )}
 
-            {!loading && !error && availableTests.length === 0 && (
+
+            {!loading && availableTests.length === 0 && (
               <div className="text-center py-12 bg-white rounded-xl border border-shnoor-mist shadow-[0_8px_30px_rgba(14,14,39,0.06)]">
                 <BookOpen className="mx-auto h-12 w-12 text-shnoor-mist mb-4" />
                 <h3 className="text-lg font-bold text-shnoor-navy">No Tests Available</h3>
@@ -498,7 +493,7 @@ const Dashboard = () => {
               </div>
             )}
 
-            {!loading && !error && availableTests.length > 0 && (
+            {!loading && availableTests.length > 0 && (
               <>
                 <ExamSearchFilter
                   onSearchChange={setSearchTerm}
