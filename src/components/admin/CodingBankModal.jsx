@@ -51,6 +51,37 @@ const CodingBankModal = ({ question, onClose, onSave, categories, tags }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Manual validation
+    if (!formData.title.trim()) {
+      return alert('Please enter a question title');
+    }
+    if (!formData.description.trim()) {
+      return alert('Please enter a problem description');
+    }
+    if (!formData.time_limit) {
+      return alert('Please enter a time limit');
+    }
+    if (!formData.memory_limit) {
+      return alert('Please enter a memory limit');
+    }
+    if (!formData.marks) {
+      return alert('Please enter the marks for this question');
+    }
+
+    // Check if test cases exist
+    if (formData.testCases.length === 0) {
+      return alert('Please add at least one test case');
+    }
+
+    // Check for empty test cases
+    for (let i = 0; i < formData.testCases.length; i++) {
+      const tc = formData.testCases[i];
+      if (!tc.input.trim() || !tc.output.trim()) {
+        return alert(`Please fill in input and output for Test Case ${i + 1}`);
+      }
+    }
+
     setSaving(true);
 
     try {
@@ -147,7 +178,6 @@ const CodingBankModal = ({ question, onClose, onSave, categories, tags }) => {
               type="text"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              required
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="e.g., Two Sum"
             />
@@ -161,7 +191,6 @@ const CodingBankModal = ({ question, onClose, onSave, categories, tags }) => {
             <textarea
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              required
               rows={5}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Describe the problem..."
@@ -179,7 +208,6 @@ const CodingBankModal = ({ question, onClose, onSave, categories, tags }) => {
                 step="0.1"
                 value={formData.time_limit}
                 onChange={(e) => setFormData({ ...formData, time_limit: parseFloat(e.target.value) })}
-                required
                 min="0.1"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
@@ -193,7 +221,6 @@ const CodingBankModal = ({ question, onClose, onSave, categories, tags }) => {
                 type="number"
                 value={formData.memory_limit}
                 onChange={(e) => setFormData({ ...formData, memory_limit: parseInt(e.target.value) })}
-                required
                 min="1"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
@@ -207,7 +234,6 @@ const CodingBankModal = ({ question, onClose, onSave, categories, tags }) => {
                 type="number"
                 value={formData.marks}
                 onChange={(e) => setFormData({ ...formData, marks: parseInt(e.target.value) })}
-                required
                 min="1"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />

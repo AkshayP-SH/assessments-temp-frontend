@@ -23,7 +23,6 @@ const ProfileTab = () => {
     });
     const [isLoading, setIsLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
-    const [message, setMessage] = useState({ type: '', text: '' });
 
     useEffect(() => {
         fetchProfile();
@@ -69,7 +68,7 @@ const ProfileTab = () => {
             }
         } catch (error) {
             console.error('Error fetching profile:', error);
-            setMessage({ type: 'error', text: 'Failed to load profile data' });
+            alert('Failed to load profile data');
         } finally {
             setIsLoading(false);
         }
@@ -99,12 +98,16 @@ const ProfileTab = () => {
     };
 
     const handleUpdateProfile = async () => {
+        if (!profileData.full_name || !profileData.email || !profileData.phone || !profileData.address) {
+            alert('Please fill in all required fields.');
+            return;
+        }
+
         setIsSaving(true);
-        setMessage({ type: '', text: '' });
         try {
             const storedUser = getStoredAdminUser();
             if (storedUser?.role === 'client_admin') {
-                setMessage({ type: 'error', text: 'Profile updates for client admins are managed by your organization contact.' });
+                alert('Profile updates for client admins are managed by your organization contact.');
                 return;
             }
 
@@ -124,34 +127,30 @@ const ProfileTab = () => {
             });
             const data = await response.json();
             if (data.success) {
-                setMessage({ type: 'success', text: 'Profile updated successfully!' });
+                alert('Profile updated successfully!');
             } else {
-                setMessage({ type: 'error', text: data.message || 'Failed to update profile' });
+                alert(data.message || 'Failed to update profile');
             }
         } catch (error) {
             console.error('Error updating profile:', error);
-            setMessage({ type: 'error', text: 'Error updating profile' });
+            alert('Error updating profile');
         } finally {
             setIsSaving(false);
-            setTimeout(() => setMessage({ type: '', text: '' }), 5000);
         }
     };
 
     const handleChangePassword = async () => {
         if (passwordData.newPassword !== passwordData.confirmPassword) {
-            setMessage({ type: 'error', text: 'New passwords do not match' });
-            setTimeout(() => setMessage({ type: '', text: '' }), 5000);
+            alert('New passwords do not match');
             return;
         }
 
         if (passwordData.newPassword.length < 6) {
-            setMessage({ type: 'error', text: 'New password must be at least 6 characters long' });
-            setTimeout(() => setMessage({ type: '', text: '' }), 5000);
+            alert('New password must be at least 6 characters long');
             return;
         }
 
         setIsSaving(true);
-        setMessage({ type: '', text: '' });
         try {
             const storedUser = getStoredAdminUser();
             const isClientAdmin = storedUser?.role === 'client_admin';
@@ -180,21 +179,20 @@ const ProfileTab = () => {
             });
             const data = await response.json();
             if (data.success) {
-                setMessage({ type: 'success', text: 'Password changed successfully!' });
+                alert('Password changed successfully!');
                 setPasswordData({
                     currentPassword: '',
                     newPassword: '',
                     confirmPassword: ''
                 });
             } else {
-                setMessage({ type: 'error', text: data.message || 'Failed to change password' });
+                alert(data.message || 'Failed to change password');
             }
         } catch (error) {
             console.error('Error changing password:', error);
-            setMessage({ type: 'error', text: 'Error changing password' });
+            alert('Error changing password');
         } finally {
             setIsSaving(false);
-            setTimeout(() => setMessage({ type: '', text: '' }), 5000);
         }
     };
 
@@ -208,12 +206,6 @@ const ProfileTab = () => {
                 <h2 className="text-2xl font-bold text-shnoor-navy">Profile Settings</h2>
                 <p className="text-shnoor-soft mt-1">Manage your account details and security settings.</p>
             </div>
-
-            {message.text && (
-                <div className={`p-4 rounded-lg mb-6 ${message.type === 'error' ? 'bg-shnoor-dangerLight text-shnoor-danger border border-shnoor-dangerLight' : 'bg-shnoor-successLight text-shnoor-success border border-shnoor-successLight'}`}>
-                    {message.text}
-                </div>
-            )}
 
             <div className="grid grid-cols-1 gap-6">
                 <Card className="p-6 border border-shnoor-light shadow-sm">

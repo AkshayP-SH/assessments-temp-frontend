@@ -2127,7 +2127,7 @@ const AdminDashboard = () => {
           {/* Tab Navigation */}
           {!showCreateTest && !selectedExamId && (
             <div className="mb-4 sm:mb-8 overflow-x-auto pb-4 sm:pb-0 hide-scrollbar">
-              <div className="admin-tab-shell bg-white rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-mist p-2 flex sm:inline-flex space-x-2 min-w-max">
+              <div className="admin-tab-shell bg-white rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-mist p-2 flex sm:inline-flex space-x-2 w-max !max-w-none">
                 {[
                   { id: 'exams', label: 'Manage Exams', icon: FileSpreadsheet },
                   { id: 'institutes', label: 'Manage Institutes', icon: Building2 },
