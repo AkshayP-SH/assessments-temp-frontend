@@ -584,7 +584,9 @@ body { background-color: rgb(var(--theme-page)); color: rgb(var(--theme-text)); 
 .theme-selector-menu { border: 1px solid rgb(var(--theme-border)); background-color: rgb(var(--theme-card)); }
 .theme-selector-option { color: rgb(var(--theme-text-muted)); }
 .theme-selector-option:hover { background-color: rgb(var(--theme-panel)); color: rgb(var(--theme-text)); }
-.theme-selector-option.is-active { background-color: rgb(var(--theme-accent)); color: white; }
+.theme-selector-option.is-active { background-color: #9A9AC9; color: white; }
+html[data-theme='dark'] .theme-selector-option.is-active { background-color: rgb(var(--theme-accent)); color: white; }
+html[data-theme='green'] .theme-selector-option.is-active { background-color: rgb(var(--theme-accent)); color: white; }
 /* Landing security block */
 .landing-security-card { background-color: rgb(var(--theme-contrast-card)); border: 1px solid rgb(var(--theme-border)); }
 .landing-security-note { background-color: rgb(var(--theme-contrast-note)); }
@@ -609,11 +611,11 @@ body { background-color: rgb(var(--theme-page)); color: rgb(var(--theme-text)); 
 html[data-theme='dark'] .admin-status-pill.is-closed { background-color: transparent; border-color: rgb(239 68 68 / 0.45); }
 
 /* ── Theme Overrides (hard-coded Tailwind utilities in non-migrated pages) ── */
-:is(html[data-theme='dark'],html[data-theme='green']) body :is(.bg-white,.bg-\[\#ffffff\],.bg-\[\#F8F8FB\],.bg-\[\#F8FAFC\],.bg-gray-50,.bg-gray-50\/50,.bg-gray-100) { background-color: rgb(var(--theme-card)) !important; }
+:is(html[data-theme='dark'],html[data-theme='green']) body :is(.bg-white,.bg-\[\#ffffff\],.bg-\[\#F8F8FB\],.bg-\[\#F8FAFC\],.bg-gray-50,.bg-gray-50\/50,.bg-gray-100,.bg-gray-200) { background-color: rgb(var(--theme-card)) !important; }
 :is(html[data-theme='dark'],html[data-theme='green']) body :is(.bg-shnoor-lavender,.bg-shnoor-lavender\/30) { background-color: rgb(var(--theme-panel)) !important; }
 :is(html[data-theme='dark'],html[data-theme='green']) body .bg-shnoor-navy { background-color: rgb(var(--theme-header)) !important; border-bottom-color: rgb(var(--theme-header-border)) !important; }
 :is(html[data-theme='dark'],html[data-theme='green']) body :is(.bg-shnoor-indigo,button.bg-shnoor-indigo,.\!bg-shnoor-indigo) { background-color: rgb(var(--theme-accent)) !important; color: #fff !important; }
-:is(html[data-theme='dark'],html[data-theme='green']) body :is(.text-shnoor-navy,.text-gray-900,.text-gray-800,.text-gray-700) { color: rgb(var(--theme-text)) !important; }
+:is(html[data-theme='dark'],html[data-theme='green']) body :is(.text-shnoor-navy,.text-shnoor-navyLight,.text-gray-900,.text-gray-800,.text-gray-700) { color: rgb(var(--theme-text)) !important; }
 :is(html[data-theme='dark'],html[data-theme='green']) body :is(.text-shnoor-soft,.text-shnoor-indigoMedium,.text-shnoor-light,.text-shnoor-mist,.text-gray-600,.text-gray-500,.text-gray-400) { color: rgb(var(--theme-text-muted)) !important; }
 :is(html[data-theme='dark'],html[data-theme='green']) body .text-shnoor-indigo { color: rgb(var(--theme-accent)) !important; }
 :is(html[data-theme='dark'],html[data-theme='green']) body :is(.border-shnoor-mist,.border-shnoor-light,.border-gray-200,.border-gray-300) { border-color: rgb(var(--theme-border)) !important; }
@@ -649,7 +651,7 @@ html[data-theme='green'] body :is(.landing-footer,.landing-secure) .text-shnoor-
 :is(html[data-theme='dark'],html[data-theme='green']) :is(.bg-shnoor-light,.bg-shnoor-mist,.bg-shnoor-mist\/20,.bg-shnoor-mist\/50,.bg-shnoor-light\/50,.bg-gray-50\/50,.bg-shnoor-indigo\/5,.bg-shnoor-indigo\/10,.bg-shnoor-indigo\/20) { background-color: rgb(var(--theme-panel)) !important; }
 :is(html[data-theme='dark'],html[data-theme='green']) :is(.bg-shnoor-successLight,.bg-green-100,.bg-green-50) { background-color: rgb(var(--theme-success-surface)) !important; }
 :is(html[data-theme='dark'],html[data-theme='green']) :is(.bg-shnoor-warningLight,.bg-shnoor-dangerLight,.bg-red-50,.bg-red-100,.bg-yellow-50,.bg-yellow-100) { background-color: rgb(var(--theme-warning-surface)) !important; }
-:is(html[data-theme='dark'],html[data-theme='green']) body :is(.hover\:bg-white:hover,.hover\:bg-gray-50:hover,.hover\:bg-shnoor-lavender:hover) { background-color: rgb(var(--theme-panel)) !important; }
+:is(html[data-theme='dark'],html[data-theme='green']) body :is(.hover\:bg-white:hover,.hover\:bg-gray-50:hover,.hover\:bg-gray-100:hover,.hover\:bg-gray-200:hover,.hover\:bg-shnoor-lavender:hover) { background-color: rgb(var(--theme-panel)) !important; }
 :is(html[data-theme='dark'],html[data-theme='green']) body :is(.hover\:text-shnoor-navy:hover,.hover\:text-gray-900:hover) { color: rgb(var(--theme-text)) !important; }
 html[data-theme='dark'] select,html[data-theme='dark'] option { color-scheme: dark; background-color: rgb(var(--theme-card)) !important; color: rgb(var(--theme-text)) !important; }
 :is(html[data-theme='dark'],html[data-theme='green']) :is(.theme-shell-card,.interviews-frame,.admin-reports-card) { background-color: rgb(var(--theme-card)) !important; border-color: rgb(var(--theme-border)) !important; }

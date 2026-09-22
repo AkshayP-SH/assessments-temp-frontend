@@ -347,34 +347,32 @@ const LiveProctoring = () => {
   return (
     <div className="min-h-screen bg-[#E0E0EF]">
       {/* Header */}
-      <header className="bg-shnoor-navy text-white shadow-md">
+      <header className="bg-transparent pt-6 pb-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-3 sm:py-0 sm:h-16 space-y-3 sm:space-y-0">
-            <div className="flex items-center space-x-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-3 sm:space-y-0">
+            <div className="flex items-center gap-4">
               <button
                 onClick={() => navigate('/admin/dashboard')}
-                className="flex items-center text-shnoor-soft hover:text-white transition-colors"
+                className="flex items-center gap-2 h-10 px-4 border border-[#D1D1E6] bg-transparent text-[#9A9AC9] rounded-xl text-sm font-semibold hover:bg-white hover:border-gray-300 transition-colors flex-shrink-0"
               >
-                <ArrowLeft size={20} className="mr-2" />
+                <ArrowLeft size={16} />
                 Back
               </button>
-              <div className="h-8 w-px bg-white/20"></div>
               <div>
-                <h1 className="font-bold text-lg text-white">Live Proctoring</h1>
-                <p className="text-xs text-shnoor-light opacity-80">Monitor students in real-time</p>
+                <h1 className="text-2xl font-bold text-gray-900">Live Proctoring</h1>
+                <p className="text-sm text-[#9A9AC9] mt-0.5">Monitor students in real-time</p>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg ${isConnected ? 'bg-shnoor-success' : 'bg-shnoor-danger'
-                }`}>
+            <div className="flex items-center gap-3">
+              <div className={`flex items-center gap-2 h-10 px-4 rounded-xl shadow-sm ${isConnected ? 'bg-[#dcfce7] text-[#166534]' : 'bg-[#fee2e2] text-[#991b1b]'}`}>
                 {isConnected ? <Wifi size={16} /> : <WifiOff size={16} />}
-                <span className="text-sm font-medium">
+                <span className="text-sm font-bold">
                   {isConnected ? 'Connected' : 'Disconnected'}
                 </span>
               </div>
-              <div className="flex items-center space-x-2 px-3 py-1.5 bg-white/10 rounded-lg">
+              <div className="flex items-center gap-2 h-10 px-4 bg-white text-[#403f75] rounded-xl shadow-sm border border-[#D1D1E6]">
                 <Users size={16} />
-                <span className="text-sm font-medium">{activeSessions.length} Active</span>
+                <span className="text-sm font-bold">{activeSessions.length} Active</span>
               </div>
             </div>
           </div>
@@ -384,10 +382,10 @@ const LiveProctoring = () => {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {activeSessions.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-light p-12 text-center">
-            <Camera size={64} className="mx-auto text-shnoor-light mb-4" />
-            <h2 className="text-xl font-bold text-shnoor-navy mb-2">No Active Sessions</h2>
-            <p className="text-shnoor-indigoMedium">
+          <div className="bg-white rounded-2xl shadow-sm p-16 text-center mt-2">
+            <Camera size={64} className="mx-auto text-[#9A9AC9] mb-6 opacity-60" />
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">No Active Sessions</h2>
+            <p className="text-[#9A9AC9] text-base font-medium">
               Students taking exams with proctoring enabled will appear here
             </p>
           </div>

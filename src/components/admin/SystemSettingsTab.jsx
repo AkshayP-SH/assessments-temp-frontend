@@ -93,13 +93,13 @@ const SystemSettingsTab = () => {
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0 mb-6">
                 <div>
-                    <h2 className="text-2xl font-bold text-shnoor-navy">System Settings</h2>
-                    <p className="text-shnoor-soft mt-1">Configure global application behaviors and maintenance modes.</p>
+                    <h2 className="text-2xl font-bold text-gray-900">System Settings</h2>
+                    <p className="text-sm text-[#9A9AC9] mt-0.5">Configure global application behaviors and maintenance modes.</p>
                 </div>
                 <Button
                     onClick={handleSave}
                     disabled={isSaving}
-                    className="flex items-center space-x-2 bg-shnoor-indigo hover:bg-shnoor-navy text-white px-6 py-2.5 rounded-lg shadow-md transition-all w-full sm:w-auto justify-center sm:justify-start"
+                    className="flex items-center space-x-2 bg-[#403f75] hover:bg-[#2d2d53] text-white h-12 px-6 rounded-xl font-bold shadow-sm transition-all w-full sm:w-auto justify-center"
                 >
                     <Save size={18} />
                     <span>{isSaving ? 'Saving...' : 'Save Changes'}</span>
@@ -113,18 +113,18 @@ const SystemSettingsTab = () => {
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card className="p-6 border border-shnoor-light shadow-sm">
-                    <div className="flex items-center mb-4 space-x-2 text-shnoor-indigo">
+                <Card className="p-6 bg-white rounded-2xl shadow-sm border-0">
+                    <div className="flex items-center mb-4 space-x-2 text-[#403f75]">
                         <Clock size={24} />
-                        <h3 className="text-lg font-bold">Disaster Recovery</h3>
+                        <h3 className="text-lg font-bold text-gray-900">Disaster Recovery</h3>
                     </div>
-                    <p className="text-sm text-shnoor-soft mb-6">
+                    <p className="text-sm text-[#9A9AC9] mb-6">
                         Configure how the frontend behaves when the backend server goes down unexpectedly.
                     </p>
 
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-shnoor-navy mb-1">
+                            <label className="block text-sm font-bold text-gray-900 mb-1.5">
                                 Auto-Retry Timer (Minutes)
                             </label>
                             <input
@@ -134,21 +134,21 @@ const SystemSettingsTab = () => {
                                 max="60"
                                 value={settings.retry_timer_minutes}
                                 onChange={handleChange}
-                                className="w-full px-4 py-2 border border-shnoor-mist rounded-lg focus:ring-2 focus:ring-shnoor-indigo focus:border-shnoor-indigo outline-none transition-all"
+                                className="w-full h-12 px-4 rounded-xl border border-[#D1D1E6] bg-white text-sm text-gray-900 placeholder-[#9A9AC9] focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors"
                             />
-                            <p className="text-xs text-shnoor-navy mt-2">
+                            <p className="text-xs text-[#9A9AC9] mt-2">
                                 When the server goes down, students will see a fallback screen that counts down this many minutes before automatically polling the server again.
                             </p>
                         </div>
                     </div>
                 </Card>
 
-                <Card className="p-6 border border-shnoor-light shadow-sm">
-                    <div className="flex items-center mb-4 space-x-2 text-shnoor-warning">
+                <Card className="p-6 bg-white rounded-2xl shadow-sm border-0">
+                    <div className="flex items-center mb-4 space-x-2 text-amber-500">
                         <AlertTriangle size={24} />
-                        <h3 className="text-lg font-bold">Maintenance Mode</h3>
+                        <h3 className="text-lg font-bold text-gray-900">Maintenance Mode</h3>
                     </div>
-                    <p className="text-sm text-shnoor-soft mb-6">
+                    <p className="text-sm text-[#9A9AC9] mb-6">
                         Manually restrict student access to the platform during scheduled updates. Admins bypass this restriction.
                     </p>
 
@@ -162,17 +162,17 @@ const SystemSettingsTab = () => {
                                     onChange={handleChange}
                                     className="sr-only"
                                 />
-                                <div className={`block w-14 h-8 rounded-full transition-colors ${settings.maintenance_mode ? 'bg-shnoor-warning' : 'bg-shnoor-lavender'}`}></div>
+                                <div className={`block w-14 h-8 rounded-full transition-colors ${settings.maintenance_mode ? 'bg-amber-500' : 'bg-[#E5E5F3]'}`}></div>
                                 <div className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform ${settings.maintenance_mode ? 'transform translate-x-6' : ''}`}></div>
                             </div>
-                            <div className="ml-3 font-medium text-shnoor-navy">
+                            <div className="ml-3 font-bold text-gray-900">
                                 Enable Maintenance Mode
                             </div>
                         </label>
 
                         {settings.maintenance_mode && (
                             <div className="animate-fadeIn">
-                                <label className="block text-sm font-medium text-shnoor-navy mb-1">
+                                <label className="block text-sm font-bold text-gray-900 mb-1.5">
                                     Maintenance Message
                                 </label>
                                 <textarea
@@ -180,10 +180,10 @@ const SystemSettingsTab = () => {
                                     value={settings.maintenance_message}
                                     onChange={handleChange}
                                     rows="3"
-                                    className="w-full px-4 py-2 border border-shnoor-mist rounded-lg focus:ring-2 focus:ring-shnoor-warning focus:border-shnoor-warning outline-none transition-all resize-none"
+                                    className="w-full px-4 py-3 rounded-xl border border-[#D1D1E6] bg-white text-sm text-gray-900 placeholder-[#9A9AC9] focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors resize-none"
                                     placeholder="Enter the message students will see..."
                                 ></textarea>
-                                <p className="text-xs text-shnoor-navy mt-2">
+                                <p className="text-xs text-[#9A9AC9] mt-2">
                                     This message is displayed prominently on the maintenance screen.
                                 </p>
                             </div>
@@ -191,18 +191,18 @@ const SystemSettingsTab = () => {
                     </div>
                 </Card>
 
-                <Card className="p-6 border border-shnoor-light shadow-sm">
-                    <div className="flex items-center mb-4 space-x-2 text-shnoor-indigo">
+                <Card className="p-6 bg-white rounded-2xl shadow-sm border-0 md:col-span-2">
+                    <div className="flex items-center mb-4 space-x-2 text-[#403f75]">
                         <Save size={24} />
-                        <h3 className="text-lg font-bold">Assessment Defaults</h3>
+                        <h3 className="text-lg font-bold text-gray-900">Assessment Defaults</h3>
                     </div>
-                    <p className="text-sm text-shnoor-soft mb-6">
+                    <p className="text-sm text-[#9A9AC9] mb-6">
                         Configure fallback values used when admins create or edit tests without entering Job Role or Job Description.
                     </p>
 
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-shnoor-navy mb-1">
+                            <label className="block text-sm font-bold text-gray-900 mb-1.5">
                                 Default Job Role
                             </label>
                             <input
@@ -210,13 +210,13 @@ const SystemSettingsTab = () => {
                                 name="default_test_job_role"
                                 value={settings.default_test_job_role || ''}
                                 onChange={handleChange}
-                                className="w-full px-4 py-2 border border-shnoor-mist rounded-lg focus:ring-2 focus:ring-shnoor-indigo focus:border-shnoor-indigo outline-none transition-all"
+                                className="w-full h-12 px-4 rounded-xl border border-[#D1D1E6] bg-white text-sm text-gray-900 placeholder-[#9A9AC9] focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors"
                                 placeholder="e.g., General Assessment Candidate"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-shnoor-navy mb-1">
+                            <label className="block text-sm font-bold text-gray-900 mb-1.5">
                                 Default Job Description
                             </label>
                             <textarea
@@ -224,7 +224,7 @@ const SystemSettingsTab = () => {
                                 value={settings.default_test_job_description || ''}
                                 onChange={handleChange}
                                 rows="4"
-                                className="w-full px-4 py-2 border border-shnoor-mist rounded-lg focus:ring-2 focus:ring-shnoor-indigo focus:border-shnoor-indigo outline-none transition-all resize-none"
+                                className="w-full px-4 py-3 rounded-xl border border-[#D1D1E6] bg-white text-sm text-gray-900 placeholder-[#9A9AC9] focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors resize-none"
                                 placeholder="Default description shown when test-specific description is not provided"
                             ></textarea>
                         </div>

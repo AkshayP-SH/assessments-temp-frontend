@@ -510,67 +510,106 @@ const StudentMessages = () => {
 
   return (
     <AdminLayout title="Student Support">
-      <div className="mb-6">
+      <div className="mb-6 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-bold text-shnoor-navyLight">Student Support</h1>
+          {unreadCount > 0 && (
+            <span className="px-2 py-0.5 bg-red-100 text-red-600 rounded-full text-xs font-medium">
+              {unreadCount} unread
+            </span>
+          )}
+        </div>
         <button
           onClick={() => navigate('/admin/dashboard')}
-          className="flex items-center gap-2 text-shnoor-soft hover:text-shnoor-indigo transition-colors mb-4"
+          className="flex items-center gap-2 text-[#9A9AC9] hover:text-shnoor-navyLight transition-colors text-sm font-medium"
         >
-          <ArrowLeft size={18} />
+          <ArrowLeft size={16} />
           Back to Dashboard
         </button>
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-shnoor-navy">Student Support</h1>
-            <p className="text-shnoor-soft text-sm mt-1">
-              Manage student support messages and inquiries
-              {unreadCount > 0 && (
-                <span className="ml-2 px-2 py-0.5 bg-red-100 text-red-600 rounded-full text-xs font-medium">
-                  {unreadCount} unread
-                </span>
-              )}
-            </p>
+      </div>
+
+      {/* Filters and Actions */}
+      <div className="bg-white rounded-xl border border-shnoor-mist p-3 mb-6 flex flex-wrap items-center justify-between gap-4">
+        {/* Left: Filters */}
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Filter size={16} className="text-[#9A9AC9]" />
+            <span className="text-sm font-medium text-shnoor-navyLight">Filter:</span>
           </div>
-          <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto mt-2 sm:mt-0">
-            <button
-              onClick={() => setShowAnalytics(!showAnalytics)}
-              className={`flex items-center gap-2 px-3 py-2 text-sm border rounded-lg transition-colors ${showAnalytics
-                ? 'bg-shnoor-indigo text-white border-shnoor-indigo'
-                : 'bg-white border-shnoor-mist hover:bg-shnoor-lavender'
-                }`}
-            >
-              <BarChart3 size={16} />
-              Analytics
-            </button>
-            <button
-              onClick={() => {
-                setBulkDeleteMode(!bulkDeleteMode);
-                setSelectedConversations(new Set());
-              }}
-              className={`flex items-center gap-2 px-3 py-2 text-sm border rounded-lg transition-colors ${bulkDeleteMode
-                ? 'bg-red-600 text-white border-red-600'
-                : 'bg-white border-shnoor-mist hover:bg-shnoor-lavender'
-                }`}
-            >
-              <Trash2 size={16} />
-              {bulkDeleteMode ? 'Cancel' : 'Bulk Delete'}
-            </button>
-            <button
-              onClick={fetchMessages}
-              className="flex items-center gap-2 px-3 py-2 text-sm bg-white border border-shnoor-mist rounded-lg hover:bg-shnoor-lavender transition-colors"
-            >
-              <RefreshCw size={16} />
-              Refresh
-            </button>
-            {unreadCount > 0 && (
+          <div className="flex gap-2">
+            {[{ key: 'all', label: 'All Messages' }, { key: 'unread', label: 'Unread' }].map(({ key, label }) => (
               <button
-                onClick={markAllAsRead}
-                className="flex items-center gap-2 px-3 py-2 text-sm bg-shnoor-indigo text-white rounded-lg hover:bg-shnoor-navy transition-colors"
+                key={key}
+                onClick={() => { setFilter(key); setPagination(prev => ({ ...prev, page: 1 })); }}
+                className={`px-3 py-1.5 text-sm rounded-lg transition-colors flex items-center gap-1.5 ${
+                  filter === key 
+                    ? 'bg-[#9A9AC9] text-shnoor-navyLight font-medium' 
+                    : 'bg-[#D1D1E6] text-shnoor-navyLight hover:bg-[#B7B7D9]'
+                }`}
               >
-                <CheckCheck size={16} />
-                Mark All Read
+                {label}
+                {key === 'unread' && unreadCount > 0 && (
+                  <span className={`px-1.5 py-0.5 rounded-full text-xs font-semibold ${
+                    filter === 'unread' ? 'bg-white text-shnoor-navyLight' : 'bg-red-500 text-white'
+                  }`}>{unreadCount}</span>
+                )}
               </button>
-            )}
+            ))}
           </div>
+          <div className="flex items-center gap-2 border border-[#D1D1E6] rounded-lg px-3 py-1.5 bg-white ml-2">
+            <Building size={14} className="text-[#9A9AC9]" />
+            <select
+              value={selectedCollege}
+              onChange={(e) => { setSelectedCollege(e.target.value); setPagination(prev => ({ ...prev, page: 1 })); }}
+              className="text-sm text-shnoor-navyLight focus:outline-none bg-transparent min-w-[150px]"
+            >
+              <option value="">All Colleges</option>
+              {colleges.map(college => <option key={college} value={college}>{college}</option>)}
+            </select>
+          </div>
+        </div>
+
+        {/* Right: Actions */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowAnalytics(!showAnalytics)}
+            className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-colors ${showAnalytics
+              ? 'bg-[#9A9AC9] text-shnoor-navyLight font-medium'
+              : 'bg-[#D1D1E6] text-shnoor-navyLight hover:bg-[#B7B7D9]'
+              }`}
+          >
+            <BarChart3 size={14} />
+            Analytics
+          </button>
+          <button
+            onClick={() => {
+              setBulkDeleteMode(!bulkDeleteMode);
+              setSelectedConversations(new Set());
+            }}
+            className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-colors ${bulkDeleteMode
+              ? 'bg-red-600 text-white font-medium'
+              : 'bg-[#D1D1E6] text-shnoor-navyLight hover:bg-[#B7B7D9]'
+              }`}
+          >
+            <Trash2 size={14} />
+            {bulkDeleteMode ? 'Cancel' : 'Bulk Delete'}
+          </button>
+          <button
+            onClick={fetchMessages}
+            className="flex items-center gap-2 px-3 py-1.5 text-sm bg-[#D1D1E6] text-shnoor-navyLight rounded-lg hover:bg-[#B7B7D9] transition-colors"
+          >
+            <RefreshCw size={14} />
+            Refresh
+          </button>
+          {unreadCount > 0 && (
+            <button
+              onClick={markAllAsRead}
+              className="flex items-center gap-2 px-3 py-1.5 text-sm bg-[#9A9AC9] text-shnoor-navyLight rounded-lg hover:bg-shnoor-navyLight hover:text-white transition-colors"
+            >
+              <CheckCheck size={14} />
+              Mark All Read
+            </button>
+          )}
         </div>
       </div>
 
@@ -598,66 +637,65 @@ const StudentMessages = () => {
             <div className="space-y-6">
               {/* Overview Stats */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="bg-blue-50 rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <MessageCircle size={20} className="text-blue-600" />
-                    <p className="text-sm text-blue-600 font-medium">Closed Conversations</p>
+                <div className="bg-[#f0f7ff] rounded-xl p-5 border-0">
+                  <div className="flex items-center gap-2 mb-3">
+                    <MessageCircle size={18} className="text-blue-500" />
+                    <p className="text-sm text-blue-500 font-medium">Closed Conversations</p>
                   </div>
-                  <p className="text-2xl font-bold text-blue-900">{analytics.overview.totalClosedConversations}</p>
+                  <p className="text-2xl font-bold text-[#1e3a8a]">{analytics.overview.totalClosedConversations}</p>
                 </div>
-                <div className="bg-green-50 rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <CheckCircle size={20} className="text-green-600" />
-                    <p className="text-sm text-green-600 font-medium">Feedback Received</p>
+                <div className="bg-[#effdf4] rounded-xl p-5 border-0">
+                  <div className="flex items-center gap-2 mb-3">
+                    <CheckCircle size={18} className="text-green-500" />
+                    <p className="text-sm text-green-500 font-medium">Feedback Received</p>
                   </div>
-                  <p className="text-2xl font-bold text-green-900">{analytics.overview.conversationsWithFeedback}</p>
-                  <p className="text-xs text-green-600 mt-1">{analytics.overview.feedbackResponseRate}% response rate</p>
+                  <p className="text-2xl font-bold text-[#14532d]">{analytics.overview.conversationsWithFeedback}</p>
+                  <p className="text-xs text-green-500 mt-1 font-medium">{analytics.overview.feedbackResponseRate}% response rate</p>
                 </div>
-                <div className="bg-yellow-50 rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Star size={20} className="text-yellow-600" />
-                    <p className="text-sm text-yellow-600 font-medium">Average Rating</p>
+                <div className="bg-[#fefce8] rounded-xl p-5 border-0">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Star size={18} className="text-yellow-500" />
+                    <p className="text-sm text-yellow-500 font-medium">Average Rating</p>
                   </div>
-                  <p className="text-2xl font-bold text-yellow-900">{analytics.overview.averageRating.toFixed(1)} / 5.0</p>
+                  <p className="text-2xl font-bold text-[#713f12]">{analytics.overview.averageRating.toFixed(1)} / 5.0</p>
                 </div>
-                <div className="bg-purple-50 rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <ThumbsUp size={20} className="text-purple-600" />
-                    <p className="text-sm text-purple-600 font-medium">Helpful</p>
+                <div className="bg-[#faf5ff] rounded-xl p-5 border-0">
+                  <div className="flex items-center gap-2 mb-3">
+                    <ThumbsUp size={18} className="text-purple-500" />
+                    <p className="text-sm text-purple-500 font-medium">Helpful</p>
                   </div>
-                  <p className="text-2xl font-bold text-purple-900">{analytics.overview.helpfulCount}</p>
-                  <p className="text-xs text-purple-600 mt-1">{analytics.overview.notHelpfulCount} not helpful</p>
+                  <p className="text-2xl font-bold text-[#581c87]">{analytics.overview.helpfulCount}</p>
+                  <p className="text-xs text-purple-500 mt-1 font-medium">{analytics.overview.notHelpfulCount} not helpful</p>
                 </div>
               </div>
 
               {/* Rating Distribution */}
-              <div className="bg-gray-50 rounded-lg p-4">
-                <h3 className="font-semibold text-shnoor-navy mb-4">Rating Distribution</h3>
-                <div className="space-y-2">
+              <div className="mt-8">
+                <h3 className="font-semibold text-gray-800 mb-4 text-sm">Rating Distribution</h3>
+                <div className="space-y-3">
                   {[
-                    { stars: 5, count: analytics.ratingDistribution.fiveStar, color: 'bg-green-500' },
-                    { stars: 4, count: analytics.ratingDistribution.fourStar, color: 'bg-lime-500' },
-                    { stars: 3, count: analytics.ratingDistribution.threeStar, color: 'bg-yellow-500' },
-                    { stars: 2, count: analytics.ratingDistribution.twoStar, color: 'bg-orange-500' },
-                    { stars: 1, count: analytics.ratingDistribution.oneStar, color: 'bg-red-500' }
-                  ].map(({ stars, count, color }) => {
+                    { stars: 5, count: analytics.ratingDistribution.fiveStar, color: 'bg-[#22c55e]', defaultWidth: 100 },
+                    { stars: 4, count: analytics.ratingDistribution.fourStar, color: 'bg-[#84cc16]', defaultWidth: 80 },
+                    { stars: 3, count: analytics.ratingDistribution.threeStar, color: 'bg-[#eab308]', defaultWidth: 60 },
+                    { stars: 2, count: analytics.ratingDistribution.twoStar, color: 'bg-[#f97316]', defaultWidth: 40 },
+                    { stars: 1, count: analytics.ratingDistribution.oneStar, color: 'bg-[#ef4444]', defaultWidth: 10 }
+                  ].map(({ stars, count, color, defaultWidth }) => {
                     const total = Object.values(analytics.ratingDistribution).reduce((a, b) => a + b, 0);
-                    const percentage = total > 0 ? (count / total) * 100 : 0;
+                    const actualPercentage = total > 0 ? (count / total) * 100 : 0;
+                    const barWidth = total > 0 ? actualPercentage : defaultWidth;
                     return (
-                      <div key={stars} className="flex items-center gap-3">
-                        <div className="flex items-center gap-1 w-16">
-                          <Star size={14} className="text-yellow-500 fill-yellow-500" />
-                          <span className="text-sm font-medium">{stars}</span>
+                      <div key={stars} className="flex items-center gap-4">
+                        <div className="flex items-center gap-1.5 w-10">
+                          <Star size={14} className="text-yellow-400 fill-yellow-400" />
+                          <span className="text-sm font-medium text-gray-700">{stars}</span>
                         </div>
-                        <div className="flex-1 bg-gray-200 rounded-full h-6 overflow-hidden">
+                        <div className="flex-1 bg-gray-200 rounded-full h-4 overflow-hidden">
                           <div
-                            className={`${color} h-full flex items-center justify-end px-2 transition-all`}
-                            style={{ width: `${percentage}%` }}
-                          >
-                            {count > 0 && <span className="text-xs font-medium text-white">{count}</span>}
-                          </div>
+                            className={`${color} h-full transition-all`}
+                            style={{ width: `${barWidth}%` }}
+                          />
                         </div>
-                        <span className="text-sm text-gray-600 w-12 text-right">{percentage.toFixed(0)}%</span>
+                        <span className="text-sm text-gray-500 w-8 text-right">{actualPercentage.toFixed(0)}%</span>
                       </div>
                     );
                   })}
@@ -744,50 +782,13 @@ const StudentMessages = () => {
         </div>
       )}
 
-      {/* Filters */}
-      <div className="bg-white rounded-xl border border-shnoor-mist p-4 mb-6">
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Filter size={16} className="text-shnoor-soft" />
-            <span className="text-sm font-medium text-shnoor-navy">Filter:</span>
-          </div>
-          <div className="flex gap-2">
-            {[{ key: 'all', label: 'All Messages' }, { key: 'unread', label: 'Unread' }].map(({ key, label }) => (
-              <button
-                key={key}
-                onClick={() => { setFilter(key); setPagination(prev => ({ ...prev, page: 1 })); }}
-                className={`px-3 py-1.5 text-sm rounded-lg transition-colors flex items-center gap-1.5 ${filter === key ? 'bg-shnoor-indigo text-white' : 'bg-shnoor-lavender text-shnoor-navy hover:bg-shnoor-indigo/10'
-                  }`}
-              >
-                {label}
-                {key === 'unread' && unreadCount > 0 && (
-                  <span className={`px-1.5 py-0.5 rounded-full text-xs font-semibold ${filter === 'unread' ? 'bg-white text-shnoor-indigo' : 'bg-red-500 text-white'
-                    }`}>{unreadCount}</span>
-                )}
-              </button>
-            ))}
-          </div>
-          <div className="flex items-center gap-2">
-            <Building size={16} className="text-shnoor-soft" />
-            <select
-              value={selectedCollege}
-              onChange={(e) => { setSelectedCollege(e.target.value); setPagination(prev => ({ ...prev, page: 1 })); }}
-              className="px-3 py-1.5 text-sm border border-shnoor-mist rounded-lg focus:border-shnoor-indigo outline-none min-w-[200px]"
-            >
-              <option value="">All Colleges</option>
-              {colleges.map(college => <option key={college} value={college}>{college}</option>)}
-            </select>
-          </div>
-        </div>
-      </div>
-
       {/* Messages List */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Messages sidebar */}
-        <div className="lg:col-span-1 bg-white rounded-xl border border-shnoor-mist overflow-hidden">
-          <div className="p-4 border-b border-shnoor-mist bg-shnoor-lavender">
+        <div className="lg:col-span-1 bg-white rounded-xl border border-shnoor-mist overflow-hidden flex flex-col" style={{ height: '700px' }}>
+          <div className="p-4 bg-[#9A9AC9]">
             <div className="flex items-center justify-between">
-              <h2 className="font-semibold text-shnoor-navy">Messages ({pagination.total})</h2>
+              <h2 className="font-semibold text-shnoor-navyLight">Messages ({pagination.total})</h2>
               {bulkDeleteMode && (
                 <div className="flex items-center gap-2">
                   <button
@@ -808,21 +809,21 @@ const StudentMessages = () => {
               )}
             </div>
           </div>
-          <div className="divide-y divide-shnoor-mist max-h-[600px] overflow-y-auto">
+          <div className="flex-1 flex flex-col divide-y divide-shnoor-mist overflow-y-auto">
             {loading ? (
-              <div className="p-8 text-center">
+              <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
                 <div className="w-8 h-8 border-2 border-shnoor-indigo/30 border-t-shnoor-indigo rounded-full animate-spin mx-auto mb-2"></div>
                 <p className="text-sm text-shnoor-soft">Loading messages...</p>
               </div>
             ) : error ? (
-              <div className="p-8 text-center">
+              <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
                 <AlertCircle size={32} className="text-red-400 mx-auto mb-2" />
                 <p className="text-sm text-red-600">{error}</p>
               </div>
             ) : messages.length === 0 ? (
-              <div className="p-8 text-center">
-                <Mail size={32} className="text-shnoor-soft mx-auto mb-2" />
-                <p className="text-sm text-shnoor-soft">No messages found</p>
+              <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+                <Mail size={40} strokeWidth={1.5} className="text-[#B7B7D9] mx-auto mb-3" />
+                <p className="text-[#9A9AC9] font-medium">No messages found</p>
               </div>
             ) : (
               messages.map(msg => (
@@ -882,7 +883,7 @@ const StudentMessages = () => {
             )}
           </div>
           {pagination.pages > 1 && (
-            <div className="p-4 border-t border-shnoor-mist flex items-center justify-center gap-2">
+            <div className="p-4 border-t border-shnoor-mist flex items-center justify-center gap-2 flex-shrink-0">
               <button
                 onClick={() => setPagination(prev => ({ ...prev, page: Math.max(1, prev.page - 1) }))}
                 disabled={pagination.page === 1}
@@ -1088,12 +1089,10 @@ const StudentMessages = () => {
               </div>
             </>
           ) : (
-            <div className="flex items-center justify-center h-full text-shnoor-soft">
-              <div className="text-center">
-                <MessageCircle size={48} className="mx-auto mb-4 opacity-30" />
-                <p className="text-lg">Select a message to view conversation</p>
-                <p className="text-sm mt-1">Click on a message to view details and reply</p>
-              </div>
+            <div className="flex-1 flex flex-col items-center justify-center text-center">
+              <MessageCircle size={64} strokeWidth={1.5} className="text-[#D1D1E6] mx-auto mb-4" />
+              <p className="text-[#9A9AC9] text-lg font-medium">Select a message to view conversation</p>
+              <p className="text-[#B7B7D9] text-sm mt-1">Click on a message to view details and reply</p>
             </div>
           )}
         </div>

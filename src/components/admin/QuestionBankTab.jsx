@@ -156,18 +156,18 @@ const QuestionBankTab = () => {
   return (
     <div>
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-shnoor-navy mb-2">Question Bank</h2>
-        <p className="text-shnoor-soft">Manage reusable questions for your tests</p>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Question Bank</h2>
+        <p className="text-sm text-[#9A9AC9]">Manage reusable questions for your tests</p>
       </div>
 
-      <div className="border-b border-shnoor-light mb-6">
-        <nav className="flex -mb-px">
+      <div className="border-b border-gray-100 mb-6">
+        <nav className="flex -mb-px space-x-2">
           <button
             onClick={() => setActiveTab('mcq')}
-            className={`flex items-center px-6 py-3 text-sm font-medium border-b-2 ${
+            className={`flex items-center px-6 py-3 text-sm font-bold border-b-2 transition-colors ${
               activeTab === 'mcq'
-                ? 'border-shnoor-indigo text-shnoor-indigo'
-                : 'border-transparent text-shnoor-soft hover:text-shnoor-navy hover:border-shnoor-mist'
+                ? 'border-[#403f75] text-[#403f75]'
+                : 'border-transparent text-[#9A9AC9] hover:text-gray-900 hover:border-gray-200'
             }`}
           >
             <BookOpen className="w-4 h-4 mr-2" />
@@ -175,10 +175,10 @@ const QuestionBankTab = () => {
           </button>
           <button
             onClick={() => setActiveTab('coding')}
-            className={`flex items-center px-6 py-3 text-sm font-medium border-b-2 ${
+            className={`flex items-center px-6 py-3 text-sm font-bold border-b-2 transition-colors ${
               activeTab === 'coding'
-                ? 'border-shnoor-indigo text-shnoor-indigo'
-                : 'border-transparent text-shnoor-soft hover:text-shnoor-navy hover:border-shnoor-mist'
+                ? 'border-[#403f75] text-[#403f75]'
+                : 'border-transparent text-[#9A9AC9] hover:text-gray-900 hover:border-gray-200'
             }`}
           >
             <Code className="w-4 h-4 mr-2" />
@@ -190,20 +190,20 @@ const QuestionBankTab = () => {
       <div className="mb-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-shnoor-soft w-5 h-5" />
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#9A9AC9] w-5 h-5" />
             <input
               type="text"
               placeholder="Search questions..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-shnoor-light rounded-lg focus:ring-2 focus:ring-shnoor-indigo focus:border-transparent"
+              className="w-full h-12 pl-12 pr-4 rounded-xl border border-[#D1D1E6] bg-white text-sm text-gray-900 placeholder-[#9A9AC9] focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors"
             />
           </div>
 
           <select
             value={selectedDifficulty}
             onChange={(e) => setSelectedDifficulty(e.target.value)}
-            className="px-4 py-2 border border-shnoor-light rounded-lg focus:ring-2 focus:ring-shnoor-indigo focus:border-transparent"
+            className="w-full h-12 px-4 rounded-xl border border-[#D1D1E6] bg-white text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors"
           >
             <option value="">All Difficulties</option>
             <option value="easy">Easy</option>
@@ -214,7 +214,7 @@ const QuestionBankTab = () => {
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="px-4 py-2 border border-shnoor-light rounded-lg focus:ring-2 focus:ring-shnoor-indigo focus:border-transparent"
+            className="w-full h-12 px-4 rounded-xl border border-[#D1D1E6] bg-white text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors"
           >
             <option value="">All Categories</option>
             {categories.map(cat => (
@@ -232,10 +232,10 @@ const QuestionBankTab = () => {
                 setShowCodingModal(true);
               }
             }}
-            className="flex items-center justify-center px-4 py-2 bg-shnoor-indigo text-white rounded-lg hover:bg-shnoor-navy transition-colors"
+            className="flex items-center justify-center space-x-2 bg-[#403f75] hover:bg-[#2d2d53] text-white h-12 px-6 rounded-xl font-bold shadow-sm transition-all"
           >
-            <Plus className="w-5 h-5 mr-2" />
-            Add Question
+            <Plus className="w-5 h-5" />
+            <span>Add Question</span>
           </button>
         </div>
       </div>
@@ -310,9 +310,10 @@ const QuestionBankTab = () => {
 const MCQQuestionsList = ({ questions, onEdit, onDelete, getDifficultyColor }) => {
   if (questions.length === 0) {
     return (
-      <div className="text-center py-12 text-shnoor-soft">
-        <BookOpen className="w-16 h-16 mx-auto mb-4 text-shnoor-mist" />
-        <p>No MCQ questions found. Add your first question!</p>
+      <div className="bg-white rounded-2xl shadow-sm p-16 text-center mt-2">
+        <BookOpen className="w-16 h-16 mx-auto mb-6 text-[#9A9AC9] opacity-60" />
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">No MCQ Questions Found</h2>
+        <p className="text-[#9A9AC9] text-base font-medium">Add your first question to get started!</p>
       </div>
     );
   }
@@ -320,10 +321,10 @@ const MCQQuestionsList = ({ questions, onEdit, onDelete, getDifficultyColor }) =
   return (
     <div className="space-y-4">
       {questions.map((q) => (
-        <div key={q.id} className="border border-shnoor-light rounded-lg p-4 hover:shadow-md transition-shadow bg-white">
+        <div key={q.id} className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md transition-shadow">
           <div className="flex justify-between items-start mb-3">
             <div className="flex-1">
-              <p className="text-shnoor-navy font-medium mb-2">{q.question_text}</p>
+              <p className="text-gray-900 font-bold text-lg mb-3">{q.question_text}</p>
               <div className="flex flex-wrap gap-2">
                 <span className={`px-2 py-1 rounded text-xs font-medium ${getDifficultyColor(q.difficulty)}`}>
                   {q.difficulty}
@@ -358,30 +359,30 @@ const MCQQuestionsList = ({ questions, onEdit, onDelete, getDifficultyColor }) =
               </button>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            <div className="flex items-center">
-              <span className="font-medium mr-2">A:</span>
-              <span className="text-shnoor-soft">{q.option_a}</span>
+          <div className="grid grid-cols-2 gap-3 text-sm mt-4 p-4 bg-gray-50 rounded-xl">
+            <div className="flex items-start">
+              <span className="font-bold mr-2 text-gray-900">A:</span>
+              <span className="text-[#9A9AC9]">{q.option_a}</span>
             </div>
-            <div className="flex items-center">
-              <span className="font-medium mr-2">B:</span>
-              <span className="text-shnoor-soft">{q.option_b}</span>
+            <div className="flex items-start">
+              <span className="font-bold mr-2 text-gray-900">B:</span>
+              <span className="text-[#9A9AC9]">{q.option_b}</span>
             </div>
             {q.option_c && (
-              <div className="flex items-center">
-                <span className="font-medium mr-2">C:</span>
-                <span className="text-shnoor-soft">{q.option_c}</span>
+              <div className="flex items-start">
+                <span className="font-bold mr-2 text-gray-900">C:</span>
+                <span className="text-[#9A9AC9]">{q.option_c}</span>
               </div>
             )}
             {q.option_d && (
-              <div className="flex items-center">
-                <span className="font-medium mr-2">D:</span>
-                <span className="text-shnoor-soft">{q.option_d}</span>
+              <div className="flex items-start">
+                <span className="font-bold mr-2 text-gray-900">D:</span>
+                <span className="text-[#9A9AC9]">{q.option_d}</span>
               </div>
             )}
           </div>
-          <div className="mt-2 text-sm">
-            <span className="font-medium text-green-600">Correct Answer: {q.correct_option}</span>
+          <div className="mt-4 text-sm font-bold bg-[#dcfce7] text-[#166534] px-4 py-2 rounded-xl inline-block">
+            Correct Answer: {q.correct_option}
           </div>
         </div>
       ))}
@@ -393,9 +394,10 @@ const MCQQuestionsList = ({ questions, onEdit, onDelete, getDifficultyColor }) =
 const CodingQuestionsList = ({ questions, onEdit, onDelete, getDifficultyColor }) => {
   if (questions.length === 0) {
     return (
-      <div className="text-center py-12 text-shnoor-soft">
-        <Code className="w-16 h-16 mx-auto mb-4 text-shnoor-mist" />
-        <p>No coding questions found. Add your first question!</p>
+      <div className="bg-white rounded-2xl shadow-sm p-16 text-center mt-2">
+        <Code className="w-16 h-16 mx-auto mb-6 text-[#9A9AC9] opacity-60" />
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">No Coding Questions Found</h2>
+        <p className="text-[#9A9AC9] text-base font-medium">Add your first coding question to get started!</p>
       </div>
     );
   }
@@ -403,11 +405,11 @@ const CodingQuestionsList = ({ questions, onEdit, onDelete, getDifficultyColor }
   return (
     <div className="space-y-4">
       {questions.map((q) => (
-        <div key={q.id} className="border border-shnoor-light rounded-lg p-4 hover:shadow-md transition-shadow bg-white">
+        <div key={q.id} className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md transition-shadow">
           <div className="flex justify-between items-start mb-3">
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-shnoor-navy mb-2">{q.title}</h3>
-              <p className="text-shnoor-soft text-sm mb-3 line-clamp-2">{q.description}</p>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">{q.title}</h3>
+              <p className="text-[#9A9AC9] text-sm mb-4 line-clamp-2">{q.description}</p>
               <div className="flex flex-wrap gap-2">
                 <span className={`px-2 py-1 rounded text-xs font-medium ${getDifficultyColor(q.difficulty)}`}>
                   {q.difficulty}
@@ -431,23 +433,23 @@ const CodingQuestionsList = ({ questions, onEdit, onDelete, getDifficultyColor }
             <div className="flex gap-2 ml-4">
               <button
                 onClick={() => onEdit(q)}
-                className="p-2 text-shnoor-indigo hover:bg-shnoor-lavender rounded-lg transition-colors"
+                className="p-2 text-[#9A9AC9] hover:bg-gray-100 rounded-lg transition-colors"
                 title="Edit"
               >
                 <Edit className="w-5 h-5" />
               </button>
               <button
                 onClick={() => onDelete(q.id)}
-                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                className="p-2 text-red-400 hover:bg-red-50 rounded-lg transition-colors"
                 title="Delete"
               >
                 <Trash2 className="w-5 h-5" />
               </button>
             </div>
           </div>
-          <div className="flex gap-4 text-sm text-shnoor-soft">
+          <div className="flex gap-4 text-sm font-bold text-[#9A9AC9] mt-4 p-4 bg-gray-50 rounded-xl">
             <span>Time Limit: {q.time_limit}s</span>
-            <span>Memory: {q.memory_limit}MB</span>
+            <span>Memory Limit: {q.memory_limit}MB</span>
           </div>
         </div>
       ))}

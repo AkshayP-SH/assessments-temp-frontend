@@ -203,23 +203,23 @@ const ProfileTab = () => {
     return (
         <div className="space-y-6">
             <div className="mb-6">
-                <h2 className="text-2xl font-bold text-shnoor-navy">Profile Settings</h2>
-                <p className="text-shnoor-soft mt-1">Manage your account details and security settings.</p>
+                <h2 className="text-2xl font-bold text-gray-900">Profile Settings</h2>
+                <p className="text-sm text-[#9A9AC9] mt-0.5">Manage your account details and security settings.</p>
             </div>
 
             <div className="grid grid-cols-1 gap-6">
-                <Card className="p-6 border border-shnoor-light shadow-sm">
-                    <div className="flex items-center mb-4 space-x-2 text-shnoor-indigo">
+                <Card className="p-6 bg-white rounded-2xl shadow-sm border-0">
+                    <div className="flex items-center mb-4 space-x-2 text-[#403f75]">
                         <User size={24} />
-                        <h3 className="text-lg font-bold">Profile Information</h3>
+                        <h3 className="text-lg font-bold text-gray-900">Profile Information</h3>
                     </div>
-                    <p className="text-sm text-shnoor-soft mb-6">
+                    <p className="text-sm text-[#9A9AC9] mb-6">
                         Update your basic account information.
                     </p>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-shnoor-navy mb-1">
+                            <label className="block text-sm font-bold text-gray-900 mb-1.5">
                                 Full Name
                             </label>
                             <input
@@ -227,13 +227,13 @@ const ProfileTab = () => {
                                 name="full_name"
                                 value={profileData.full_name}
                                 onChange={handleProfileChange}
-                                className="w-full px-4 py-2 border border-shnoor-mist rounded-lg focus:ring-2 focus:ring-shnoor-indigo focus:border-shnoor-indigo outline-none transition-all"
+                                className="w-full h-12 px-4 rounded-xl border border-[#D1D1E6] bg-white text-sm text-gray-900 placeholder-[#9A9AC9] focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors"
                                 placeholder="Enter your full name"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-shnoor-navy mb-1">
+                            <label className="block text-sm font-bold text-gray-900 mb-1.5">
                                 Email Address
                             </label>
                             <input
@@ -241,13 +241,13 @@ const ProfileTab = () => {
                                 name="email"
                                 value={profileData.email}
                                 onChange={handleProfileChange}
-                                className="w-full px-4 py-2 border border-shnoor-mist rounded-lg focus:ring-2 focus:ring-shnoor-indigo focus:border-shnoor-indigo outline-none transition-all"
+                                className="w-full h-12 px-4 rounded-xl border border-[#D1D1E6] bg-white text-sm text-gray-900 placeholder-[#9A9AC9] focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors"
                                 placeholder="Enter your email address"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-shnoor-navy mb-1">
+                            <label className="block text-sm font-bold text-gray-900 mb-1.5">
                                 Phone Number
                             </label>
                             <input
@@ -255,13 +255,13 @@ const ProfileTab = () => {
                                 name="phone"
                                 value={profileData.phone}
                                 onChange={handleProfileChange}
-                                className="w-full px-4 py-2 border border-shnoor-mist rounded-lg focus:ring-2 focus:ring-shnoor-indigo focus:border-shnoor-indigo outline-none transition-all"
+                                className="w-full h-12 px-4 rounded-xl border border-[#D1D1E6] bg-white text-sm text-gray-900 placeholder-[#9A9AC9] focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors"
                                 placeholder="Enter your phone number"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-shnoor-navy mb-1">
+                            <label className="block text-sm font-bold text-gray-900 mb-1.5">
                                 Address
                             </label>
                             <input
@@ -269,7 +269,7 @@ const ProfileTab = () => {
                                 name="address"
                                 value={profileData.address}
                                 onChange={handleProfileChange}
-                                className="w-full px-4 py-2 border border-shnoor-mist rounded-lg focus:ring-2 focus:ring-shnoor-indigo focus:border-shnoor-indigo outline-none transition-all"
+                                className="w-full h-12 px-4 rounded-xl border border-[#D1D1E6] bg-white text-sm text-gray-900 placeholder-[#9A9AC9] focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors"
                                 placeholder="Enter your address"
                             />
                         </div>
@@ -279,7 +279,7 @@ const ProfileTab = () => {
                         <Button
                             onClick={handleUpdateProfile}
                             disabled={isSaving}
-                            className="w-full md:w-auto flex items-center justify-center space-x-2 bg-shnoor-indigo hover:bg-shnoor-navy text-white px-6 py-2.5 rounded-lg shadow-md transition-all"
+                            className="w-full md:w-auto flex items-center justify-center space-x-2 bg-[#403f75] hover:bg-[#2d2d53] text-white h-12 px-6 rounded-xl font-bold shadow-sm transition-all"
                         >
                             <Save size={18} />
                             <span>{isSaving ? 'Updating...' : 'Update Profile'}</span>
@@ -287,18 +287,18 @@ const ProfileTab = () => {
                     </div>
                 </Card>
 
-                <Card className="p-6 border border-shnoor-light shadow-sm">
-                    <div className="flex items-center mb-4 space-x-2 text-shnoor-warning">
+                <Card className="p-6 bg-white rounded-2xl shadow-sm border-0">
+                    <div className="flex items-center mb-4 space-x-2 text-amber-500">
                         <Lock size={24} />
-                        <h3 className="text-lg font-bold">Change Password</h3>
+                        <h3 className="text-lg font-bold text-gray-900">Change Password</h3>
                     </div>
-                    <p className="text-sm text-shnoor-soft mb-6">
+                    <p className="text-sm text-[#9A9AC9] mb-6">
                         Update your password to keep your account secure.
                     </p>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-shnoor-navy mb-1">
+                            <label className="block text-sm font-bold text-gray-900 mb-1.5">
                                 Current Password
                             </label>
                             <div className="relative">
@@ -307,13 +307,13 @@ const ProfileTab = () => {
                                     name="currentPassword"
                                     value={passwordData.currentPassword}
                                     onChange={handlePasswordChange}
-                                    className="w-full px-4 py-2 pr-12 border border-shnoor-mist rounded-lg focus:ring-2 focus:ring-shnoor-warning focus:border-shnoor-warning outline-none transition-all"
+                                    className="w-full h-12 px-4 pr-12 rounded-xl border border-[#D1D1E6] bg-white text-sm text-gray-900 placeholder-[#9A9AC9] focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors"
                                     placeholder="Enter current password"
                                 />
                                 <button
                                     type="button"
                                     onClick={() => togglePasswordVisibility('current')}
-                                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-shnoor-soft hover:text-shnoor-navy"
+                                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-[#9A9AC9] hover:text-gray-900 transition-colors"
                                 >
                                     {showPasswords.current ? <EyeOff size={18} /> : <Eye size={18} />}
                                 </button>
@@ -321,7 +321,7 @@ const ProfileTab = () => {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-shnoor-navy mb-1">
+                            <label className="block text-sm font-bold text-gray-900 mb-1.5">
                                 New Password
                             </label>
                             <div className="relative">
@@ -330,13 +330,13 @@ const ProfileTab = () => {
                                     name="newPassword"
                                     value={passwordData.newPassword}
                                     onChange={handlePasswordChange}
-                                    className="w-full px-4 py-2 pr-12 border border-shnoor-mist rounded-lg focus:ring-2 focus:ring-shnoor-warning focus:border-shnoor-warning outline-none transition-all"
+                                    className="w-full h-12 px-4 pr-12 rounded-xl border border-[#D1D1E6] bg-white text-sm text-gray-900 placeholder-[#9A9AC9] focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors"
                                     placeholder="Enter new password"
                                 />
                                 <button
                                     type="button"
                                     onClick={() => togglePasswordVisibility('new')}
-                                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-shnoor-soft hover:text-shnoor-navy"
+                                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-[#9A9AC9] hover:text-gray-900 transition-colors"
                                 >
                                     {showPasswords.new ? <EyeOff size={18} /> : <Eye size={18} />}
                                 </button>
@@ -344,7 +344,7 @@ const ProfileTab = () => {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-shnoor-navy mb-1">
+                            <label className="block text-sm font-bold text-gray-900 mb-1.5">
                                 Confirm New Password
                             </label>
                             <div className="relative">
@@ -353,13 +353,13 @@ const ProfileTab = () => {
                                     name="confirmPassword"
                                     value={passwordData.confirmPassword}
                                     onChange={handlePasswordChange}
-                                    className="w-full px-4 py-2 pr-12 border border-shnoor-mist rounded-lg focus:ring-2 focus:ring-shnoor-warning focus:border-shnoor-warning outline-none transition-all"
+                                    className="w-full h-12 px-4 pr-12 rounded-xl border border-[#D1D1E6] bg-white text-sm text-gray-900 placeholder-[#9A9AC9] focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors"
                                     placeholder="Confirm new password"
                                 />
                                 <button
                                     type="button"
                                     onClick={() => togglePasswordVisibility('confirm')}
-                                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-shnoor-soft hover:text-shnoor-navy"
+                                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-[#9A9AC9] hover:text-gray-900 transition-colors"
                                 >
                                     {showPasswords.confirm ? <EyeOff size={18} /> : <Eye size={18} />}
                                 </button>
@@ -370,11 +370,11 @@ const ProfileTab = () => {
                     <div className="mt-6">
                         <Button
                             onClick={handleChangePassword}
-                            disabled={isSaving || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
-                            className="w-full md:w-auto flex items-center justify-center space-x-2 bg-shnoor-warning hover:bg-shnoor-warningDark text-white px-6 py-2.5 rounded-lg shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={isSaving || !passwordData.currentPassword || !passwordData.newPassword || passwordData.newPassword !== passwordData.confirmPassword}
+                            className="w-full md:w-auto flex items-center justify-center space-x-2 bg-[#403f75] hover:bg-[#2d2d53] text-white h-12 px-6 rounded-xl font-bold shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <Lock size={18} />
-                            <span>{isSaving ? 'Changing...' : 'Change Password'}</span>
+                            <span>{isSaving ? 'Updating...' : 'Update Password'}</span>
                         </Button>
                     </div>
                 </Card>

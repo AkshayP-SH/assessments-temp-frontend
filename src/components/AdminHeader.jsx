@@ -122,11 +122,11 @@ const AdminHeader = () => {
   return (
     <>
       <div className="w-full">
-      <header className="w-full bg-shnoor-navy h-[60px] sm:h-[72px] shadow-md relative z-50 rounded-none">
+      <header className="w-full bg-white h-[60px] sm:h-[72px] shadow-sm relative z-50 rounded-none border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
           <div className="flex items-center gap-2.5 sm:gap-4 min-w-0">
             {/* Logo icon */}
-            <div className="site-header-logo w-10 h-10 sm:w-12 sm:h-12 rounded-xl overflow-hidden flex items-center justify-center flex-shrink-0 bg-white">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl overflow-hidden flex items-center justify-center flex-shrink-0 bg-white p-1 border border-[#D1D1E6]">
               <img
                 src={shnoorLogo}
                 alt="Shnoor Logo"
@@ -134,17 +134,20 @@ const AdminHeader = () => {
               />
             </div>
             <div className="flex-1 min-w-0">
-              <h1 className="text-white font-bold text-base sm:text-lg leading-tight truncate">Admin Dashboard</h1>
-              <p className="site-header-subtitle text-shnoor-light opacity-80 text-[10px] sm:text-xs truncate">MCQ Management System</p>
+              <h1 className="text-[#403f75] font-bold text-base sm:text-lg leading-tight truncate">Shnoor Assessment</h1>
+              <p className="text-[#403f75] text-[10px] sm:text-xs truncate">Admin Dashboard</p>
             </div>
           </div>
 
           {/* Right Side: Desktop Navigation */}
-          <div className="hidden sm:flex items-center gap-4">
-            <ThemeSelector />
-            <Button
-              variant="primary"
-              className="admin-header-action !h-10 !px-5 text-sm hover:shadow-[0_0_15px_rgba(107,107,229,0.4)] hover:-translate-y-0.5 transition-all border-0 relative"
+          <div className="hidden sm:flex items-center gap-3">
+            <div className="flex items-center justify-center">
+              <ThemeSelector className="!bg-white !border !border-[#D1D1E6] !text-[#403f75] !rounded-xl hover:!bg-gray-50" />
+            </div>
+            <button
+              className={`h-10 px-4 text-sm font-bold transition-all border border-[#D1D1E6] bg-white text-[#403f75] rounded-xl flex items-center justify-center hover:bg-gray-50 relative ${
+                location.pathname.includes('student-messages') ? 'bg-gray-50' : ''
+              }`}
               onClick={() => navigate(`${basePath}/student-messages`)}
             >
               <MessageSquare size={16} className="mr-2" />
@@ -154,53 +157,68 @@ const AdminHeader = () => {
                   {unreadCount > 99 ? '99+' : unreadCount}
                 </span>
               )}
-            </Button>
+            </button>
             {!isClientAdmin && (
-              <Button
-                variant="primary"
-                className="admin-header-action !h-10 !px-5 text-sm hover:shadow-[0_0_15px_rgba(107,107,229,0.4)] hover:-translate-y-0.5 transition-all border-0"
+              <button
+                className={`h-10 px-4 text-sm font-bold transition-all border border-[#D1D1E6] bg-white text-[#403f75] rounded-xl flex items-center justify-center hover:bg-gray-50 relative ${
+                  location.pathname.includes('clients') ? 'bg-gray-50' : ''
+                }`}
                 onClick={() => navigate('/admin/clients')}
               >
                 <Building2 size={16} className="mr-2" />
                 <span>Clients</span>
-              </Button>
+              </button>
             )}
-            <Button
-              variant="primary"
-              className="admin-header-action !h-10 !px-5 text-sm hover:shadow-[0_0_15px_rgba(107,107,229,0.4)] hover:-translate-y-0.5 transition-all border-0"
+            <button
+              className={`h-10 px-4 text-sm font-bold transition-all border border-[#D1D1E6] bg-white text-[#403f75] rounded-xl flex items-center justify-center hover:bg-gray-50 relative ${
+                location.pathname.includes('live-proctoring') ? 'bg-gray-50' : ''
+              }`}
               onClick={() => navigate(`${basePath}/live-proctoring`)}
             >
               <Video size={16} className="mr-2" />
               <span>Live Proctoring</span>
-            </Button>
-            <Button
-              variant="primary"
-              className="admin-header-action !h-10 !px-5 text-sm hover:shadow-[0_0_15px_rgba(107,107,229,0.4)] hover:-translate-y-0.5 transition-all border-0"
+            </button>
+            <button
+              className={`h-10 px-4 text-sm font-bold transition-all border border-[#D1D1E6] bg-white text-[#403f75] rounded-xl flex items-center justify-center hover:bg-gray-50 relative ${
+                location.pathname.includes('settings') ? 'bg-gray-50' : ''
+              }`}
               onClick={() => navigate(`${basePath}/settings`)}
             >
               <Settings size={16} className="mr-2" />
               <span>Settings</span>
-            </Button>
-            <Button
-              variant="primary"
-              className="admin-header-action !h-10 !px-5 text-sm hover:shadow-[0_0_15px_rgba(107,107,229,0.4)] hover:-translate-y-0.5 transition-all border-0"
+            </button>
+            <button
+              className="h-10 px-6 text-sm font-bold transition-all border-0 relative rounded-xl flex items-center justify-center text-white bg-[#403f75] hover:bg-[#2d2d53] shadow-sm ml-2"
               onClick={handleLogout}
             >
               <LogOut size={16} className="mr-2" />
               <span>Logout</span>
-            </Button>
+            </button>
+
+            <div className="h-8 w-px bg-gray-200 mx-2"></div>
+
+            <div className="flex flex-col items-end min-w-[80px]">
+              <span className="text-sm font-bold text-[#403f75] leading-tight">
+                {currentUser?.username || currentUser?.name || 'Admin User'}
+              </span>
+              <span className="text-[10px] text-[#9A9AC9] leading-tight">
+                {isClientAdmin ? 'Client Admin' : 'Super Admin'}
+              </span>
+            </div>
           </div>
 
           {/* Mobile Menu Toggle Button */}
           <div className="sm:hidden flex items-center gap-2 flex-shrink-0">
-            <ThemeSelector />
+            <div className="flex items-center justify-center">
+              <ThemeSelector className="!bg-[#9A9AC9] !border-none !text-shnoor-navyLight !rounded-lg hover:opacity-90" />
+            </div>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="text-white p-2 hover:bg-white/10 rounded-lg transition-colors relative min-w-[44px] min-h-[44px] flex items-center justify-center touch-manipulation flex-shrink-0"
+              className="text-gray-900 p-2 hover:bg-gray-100 rounded-lg transition-colors relative min-w-[44px] min-h-[44px] flex items-center justify-center touch-manipulation flex-shrink-0"
             >
               {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
               {!mobileMenuOpen && unreadCount > 0 && (
-                <span className="absolute top-1 right-1 w-3 h-3 bg-red-500 rounded-full border border-shnoor-navy"></span>
+                <span className="absolute top-1 right-1 w-3 h-3 bg-red-500 rounded-full border border-white"></span>
               )}
             </button>
           </div>
