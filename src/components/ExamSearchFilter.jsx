@@ -222,117 +222,119 @@ const ExamSearchFilter = memo(({
   ];
 
   return (
-    <div className="bg-white rounded-xl border border-shnoor-mist p-3 mb-4 shadow-[0_8px_30px_rgba(14,14,39,0.06)] relative">
-      {/* Main Controls Row */}
-      <div className="flex flex-col sm:flex-row gap-2">
-        {/* Search Bar */}
-        <div className="flex-1 relative group min-w-0">
-          <div className="absolute left-3 top-3.5 text-shnoor-navy group-focus-within:text-shnoor-indigo transition-colors z-10 w-5 h-5 pointer-events-none">
-            <Search size={18} />
+    <>
+      <div className="admin-search-filter-bar">
+        {/* Main Controls Row */}
+        <div className="admin-search-filter-row">
+          {/* Search Bar */}
+          <div className="admin-search-input-wrapper">
+            <Search size={18} className="admin-search-icon" />
+            <input
+              type="text"
+              placeholder="Search exams..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+              className="admin-search-input"
+            />
           </div>
-          <InputField
-            type="text"
-            placeholder="Search exams..."
-            value={searchTerm}
-            onChange={handleSearchChange}
-            style={{ paddingLeft: '2.5rem' }}
-          />
-        </div>
 
-        {/* Controls */}
-        <div className="flex items-center gap-2 w-full sm:w-auto min-w-0">
-          {/* Custom Sort Dropdown */}
-          <CustomDropdown
-            value={sortBy}
-            onChange={handleSortChange}
-            options={sortOptions}
-            placeholder="Sort"
-            minWidth="flex-1 sm:flex-none min-w-0 sm:min-w-[150px]"
-          />
+          {/* Controls */}
+          <div className="admin-filter-controls">
+            {/* Custom Sort Dropdown */}
+            <CustomDropdown
+              value={sortBy}
+              onChange={handleSortChange}
+              options={sortOptions}
+              placeholder="Sort"
+              buttonClassName="admin-dropdown-btn"
+            />
 
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className={`flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm rounded-lg font-bold transition-all whitespace-nowrap shadow-sm flex-shrink-0 min-h-[38px] ${showFilters
-              ? 'bg-shnoor-indigo text-white shadow-md'
-              : 'bg-white text-shnoor-navy hover:bg-shnoor-lavender border border-shnoor-mist hover:border-shnoor-indigo'
-              }`}
-          >
-            <Filter size={16} />
-            <span className="hidden sm:inline">Filter</span>
-            {activeFilterBadges.length > 0 && !showFilters && (
-              <span className="ml-1 px-1.5 py-0.5 bg-shnoor-lavender text-shnoor-indigo text-xs rounded-full font-bold">
-                {activeFilterBadges.length}
-              </span>
-            )}
-          </button>
-
-          {hasActiveFilters && (
             <button
-              onClick={clearFilters}
-              className="flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm rounded-lg font-medium bg-white text-shnoor-danger hover:bg-shnoor-dangerLight transition-all border border-shnoor-dangerLight shadow-sm flex-shrink-0 min-h-[38px]"
-              title="Clear all filters"
+              type="button"
+              onClick={() => setShowFilters(!showFilters)}
+              className={`admin-filter-btn ${showFilters ? 'admin-filter-btn-active' : ''}`}
             >
-              <X size={16} />
-              <span className="hidden sm:inline">Clear</span>
+              <Filter size={16} />
+              <span>Filter</span>
+              {activeFilterBadges.length > 0 && !showFilters && (
+                <span className="ml-1 px-1.5 py-0.5 bg-shnoor-lavender text-shnoor-indigo text-xs rounded-full font-bold">
+                  {activeFilterBadges.length}
+                </span>
+              )}
             </button>
-          )}
+
+            {hasActiveFilters && (
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg font-medium bg-white text-shnoor-danger hover:bg-shnoor-dangerLight transition-all border border-shnoor-dangerLight shadow-sm flex-shrink-0"
+                title="Clear all filters"
+              >
+                <X size={15} />
+                <span>Clear</span>
+              </button>
+            )}
+          </div>
         </div>
+
+        {activeFilterBadges.length > 0 && !showFilters && (
+          <div className="flex flex-wrap gap-2 mt-2 pt-2 border-t border-shnoor-mist">
+            {activeFilterBadges.map((badge) => (
+              <span
+                key={badge.key}
+                className="inline-flex items-center gap-1 px-2 py-1 bg-shnoor-lavender text-shnoor-indigo text-xs rounded-md font-bold"
+              >
+                {badge.label}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {showFilters && (
+          <div className="flex flex-wrap gap-2 pt-3 mt-3 border-t border-shnoor-mist animate-in slide-in-from-top-2 duration-200">
+            {showPublishedFilter && (
+              <CustomDropdown
+                value={filters.published}
+                onChange={(val) => handleFilterChange('published', val)}
+                options={publishedOptions}
+                placeholder="Status"
+                buttonClassName="admin-dropdown-btn"
+              />
+            )}
+
+            {showAttemptedFilter && (
+              <CustomDropdown
+                value={filters.attempted}
+                onChange={(val) => handleFilterChange('attempted', val)}
+                options={attemptedOptions}
+                placeholder="Attempts"
+                buttonClassName="admin-dropdown-btn"
+              />
+            )}
+
+            {/* Date Filter */}
+            <CustomDropdown
+              value={filters.dateRange}
+              onChange={(val) => handleFilterChange('dateRange', val)}
+              options={dateRangeOptions}
+              placeholder="Date Range"
+              buttonClassName="admin-dropdown-btn"
+            />
+          </div>
+        )}
       </div>
 
-      {activeFilterBadges.length > 0 && !showFilters && (
-        <div className="flex flex-wrap gap-2 mt-2 pt-2 border-t border-shnoor-mist">
-          {activeFilterBadges.map((badge) => (
-            <span
-              key={badge.key}
-              className="inline-flex items-center gap-1 px-2 py-1 bg-shnoor-lavender text-shnoor-indigo text-xs rounded-md font-bold"
-            >
-              {badge.label}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {showFilters && (
-        <div className="flex flex-wrap gap-2 pt-3 mt-3 border-t border-shnoor-mist animate-in slide-in-from-top-2 duration-200">
-          {showPublishedFilter && (
-            <CustomDropdown
-              value={filters.published}
-              onChange={(val) => handleFilterChange('published', val)}
-              options={publishedOptions}
-              placeholder="Status"
-              minWidth="w-full sm:w-auto flex-1 sm:flex-none min-w-0 sm:min-w-[130px]"
-            />
-          )}
-
-          {showAttemptedFilter && (
-            <CustomDropdown
-              value={filters.attempted}
-              onChange={(val) => handleFilterChange('attempted', val)}
-              options={attemptedOptions}
-              placeholder="Attempts"
-              minWidth="w-full sm:w-auto flex-1 sm:flex-none min-w-0 sm:min-w-[140px]"
-            />
-          )}
-
-          {/* Date Filter */}
-          <CustomDropdown
-            value={filters.dateRange}
-            onChange={(val) => handleFilterChange('dateRange', val)}
-            options={dateRangeOptions}
-            placeholder="Date Range"
-            minWidth="w-full sm:w-auto flex-1 sm:flex-none min-w-0 sm:min-w-[130px]"
-          />
-        </div>
-      )}
-
       {resultCount !== undefined && (
-        <div className="mt-2 pt-2 border-t border-shnoor-mist">
-          <p className="text-xs text-shnoor-indigoMedium font-bold">
-            Showing <span className="text-shnoor-indigo font-bold">{resultCount}</span> {resultCount === 1 ? 'exam' : 'exams'}
-          </p>
+        <div className="admin-exams-count-row">
+          <span className="admin-exams-count-text">
+            Showing {resultCount} {resultCount === 1 ? 'exam' : 'exams'}
+          </span>
+          <span className="admin-exams-sort-text">
+            Sorted by {sortOptions.find(opt => opt.value === sortBy)?.label?.toLowerCase() || 'latest created'}
+          </span>
         </div>
       )}
-    </div>
+    </>
   );
 });
 
