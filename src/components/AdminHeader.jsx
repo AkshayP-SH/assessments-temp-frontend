@@ -145,8 +145,8 @@ const AdminHeader = () => {
               <ThemeSelector className="!bg-white !border !border-[#D1D1E6] !text-[#403f75] !rounded-xl hover:!bg-gray-50" />
             </div>
             <button
-              className={`h-10 px-4 text-sm font-bold transition-all border border-[#D1D1E6] bg-white text-[#403f75] rounded-xl flex items-center justify-center hover:bg-gray-50 relative ${
-                location.pathname.includes('student-messages') ? 'bg-gray-50' : ''
+              className={`h-10 px-4 text-sm font-bold transition-all border border-[#D1D1E6] bg-white text-[#403f75] rounded-xl flex items-center justify-center hover:bg-blue-50 relative ${
+                location.pathname.includes('student-messages') ? 'bg-blue-50' : ''
               }`}
               onClick={() => navigate(`${basePath}/student-messages`)}
             >
@@ -160,8 +160,8 @@ const AdminHeader = () => {
             </button>
             {!isClientAdmin && (
               <button
-                className={`h-10 px-4 text-sm font-bold transition-all border border-[#D1D1E6] bg-white text-[#403f75] rounded-xl flex items-center justify-center hover:bg-gray-50 relative ${
-                  location.pathname.includes('clients') ? 'bg-gray-50' : ''
+                className={`h-10 px-4 text-sm font-bold transition-all border border-[#D1D1E6] bg-white text-[#403f75] rounded-xl flex items-center justify-center hover:bg-blue-50 relative ${
+                  location.pathname.includes('clients') ? 'bg-blue-50' : ''
                 }`}
                 onClick={() => navigate('/admin/clients')}
               >
@@ -170,8 +170,8 @@ const AdminHeader = () => {
               </button>
             )}
             <button
-              className={`h-10 px-4 text-sm font-bold transition-all border border-[#D1D1E6] bg-white text-[#403f75] rounded-xl flex items-center justify-center hover:bg-gray-50 relative ${
-                location.pathname.includes('live-proctoring') ? 'bg-gray-50' : ''
+              className={`h-10 px-4 text-sm font-bold transition-all border border-[#D1D1E6] bg-white text-[#403f75] rounded-xl flex items-center justify-center hover:bg-blue-50 relative ${
+                location.pathname.includes('live-proctoring') ? 'bg-blue-50' : ''
               }`}
               onClick={() => navigate(`${basePath}/live-proctoring`)}
             >
@@ -179,8 +179,8 @@ const AdminHeader = () => {
               <span>Live Proctoring</span>
             </button>
             <button
-              className={`h-10 px-4 text-sm font-bold transition-all border border-[#D1D1E6] bg-white text-[#403f75] rounded-xl flex items-center justify-center hover:bg-gray-50 relative ${
-                location.pathname.includes('settings') ? 'bg-gray-50' : ''
+              className={`h-10 px-4 text-sm font-bold transition-all border border-[#D1D1E6] bg-white text-[#403f75] rounded-xl flex items-center justify-center hover:bg-blue-50 relative ${
+                location.pathname.includes('settings') ? 'bg-blue-50' : ''
               }`}
               onClick={() => navigate(`${basePath}/settings`)}
             >
