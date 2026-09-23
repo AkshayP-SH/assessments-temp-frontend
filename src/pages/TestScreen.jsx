@@ -446,6 +446,7 @@ int main() {
             setVisited(new Set(data.savedProgress.visitedQuestions || [0]));
             setWarningCount(data.savedProgress.warningCount || 0);
 
+            // Set time remaining from saved progress (in seconds)
             if (data.savedProgress.timeRemaining) {
               setInitialTimeRemaining(data.savedProgress.timeRemaining);
             } else {
