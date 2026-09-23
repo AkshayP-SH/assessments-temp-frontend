@@ -88,6 +88,8 @@ int main() {
   const [showTabWarning, setShowTabWarning] = useState(false);
   const [initialTimeRemaining, setInitialTimeRemaining] = useState(3600); // Default 60 minutes in seconds
   const [hasStarted, setHasStarted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const timeoutSubmissionRef = useRef(false);
   const [testDetails, setTestDetails] = useState(null);
   const [currentAIViolation, setCurrentAIViolation] = useState(null);
   const [aiViolationCount, setAiViolationCount] = useState(0);
@@ -219,6 +221,9 @@ int main() {
 
   // Submit test function - defined early so it can be used by other callbacks
   const submitTest = useCallback(async (reason = 'manual') => {
+    if (isSubmitting || (reason === 'timeout' && timeoutSubmissionRef.current)) return;
+    if (reason === 'timeout') timeoutSubmissionRef.current = true;
+    setIsSubmitting(true);
     stopTimer();
 
     // IMPORTANT: Stop proctoring immediately when test ends
@@ -247,23 +252,37 @@ int main() {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      // Submit to backend - include studentId so backend can skip token validation
-      const response = await apiFetch('api/student/submit-exam', {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify({
-          testId: testId,
-          studentId: studentId, // Send student ID for progress-based auth
-          applicationId: applicationId ? parseInt(applicationId, 10) : null,
-          answers: answers,
-          submissionReason: reason,
-          warningCount: warningCount,
-          timeRemaining: timeLeft
-        })
+      const payload = JSON.stringify({
+        testId: testId,
+        applicationId: applicationId ? parseInt(applicationId, 10) : null,
+        answers: answers,
+        submissionReason: reason === 'time_up' ? 'timeout' : reason,
+        warningCount: warningCount,
+        timeRemaining: timeLeft
       });
 
+      let response;
+      let data;
+      const maxSubmitAttempts = reason === 'timeout' ? 5 : 1;
+      for (let attempt = 1; attempt <= maxSubmitAttempts; attempt++) {
+        try {
+          response = await apiFetch('api/student/submit-exam', {
+            method: 'POST',
+            headers: headers,
+            body: payload
+          });
+          data = await response.json();
+        } catch (requestError) {
+          if (attempt === maxSubmitAttempts) throw requestError;
+          await new Promise(resolve => setTimeout(resolve, attempt * 2000));
+          continue;
+        }
+
+        if (response.ok || response.status < 500 || attempt === maxSubmitAttempts) break;
+        await new Promise(resolve => setTimeout(resolve, attempt * 2000));
+      }
+
       console.log('Response status:', response.status);
-      const data = await response.json();
       console.log('Response data:', data);
 
       if (data.success) {
@@ -286,18 +305,25 @@ int main() {
           }
         });
       } else {
+        setIsSubmitting(false);
+        if (reason === 'timeout' && data.alreadyTaken) {
+          alert('This exam was already submitted. Returning to results.');
+          navigate('/dashboard', { replace: true });
+          return;
+        }
         alert('Failed to submit exam: ' + data.message);
       }
     } catch (error) {
+      setIsSubmitting(false);
       console.error('Error submitting exam:', error);
       alert('Error submitting exam. Please try again.');
     }
-  }, [answers, warningCount, timeLeft, stopTimer, navigate, stopProctoring]);
+  }, [answers, warningCount, timeLeft, stopTimer, navigate, stopProctoring, isSubmitting]);
 
   // Update handleTimeUp to use submitTest
   useEffect(() => {
     if (timeLeft === 0 && hasStarted) {
-      submitTest('time_up');
+      submitTest('timeout');
     }
   }, [timeLeft, submitTest, hasStarted]);
 
@@ -579,7 +605,7 @@ int main() {
             setWarningCount(data.savedProgress.warningCount || 0);
 
             // Set time remaining from saved progress (in seconds)
-            if (data.savedProgress && data.savedProgress.timeRemaining) {
+            if (data.savedProgress.timeRemaining !== null && data.savedProgress.timeRemaining !== undefined) {
               setInitialTimeRemaining(data.savedProgress.timeRemaining);
             } else {
               setInitialTimeRemaining(duration * 60); // Convert minutes to seconds

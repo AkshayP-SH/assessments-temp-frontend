@@ -109,11 +109,7 @@ const Dashboard = () => {
           // Check for saved progress for each test
           const progressChecks = await Promise.all(
             data.tests.map(async (test) => {
-              // Skip progress check if test is not available, already taken, or no attempts left
-              if (!test.isAvailable || test.alreadyTaken || !test.hasAttemptsLeft) {
-                return { testId: test.id, hasProgress: false };
-              }
-
+              // A saved attempt may be resumed after the start slot closes.
               try {
                 const progressResponse = await apiFetch(`api/student/test/${test.id}`, {
                   headers: {
@@ -164,9 +160,27 @@ const Dashboard = () => {
         const res = await apiFetch('api/student/tests', { headers: { 'Authorization': `Bearer ${token}` } });
         if (res.ok) {
           const data = await res.json();
-          if (data.success) setAvailableTests(prev =>
-            JSON.stringify(data.tests) === JSON.stringify(prev) ? prev : data.tests
-          );
+          if (data.success) {
+            setAvailableTests(prev =>
+              JSON.stringify(data.tests) === JSON.stringify(prev) ? prev : data.tests
+            );
+
+            const progressChecks = await Promise.all(data.tests.map(async test => {
+              try {
+                const progressResponse = await apiFetch(`api/student/test/${test.id}`, {
+                  headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (progressResponse.ok) {
+                  const progressData = await progressResponse.json();
+                  return progressData.savedProgress !== null ? test.id : null;
+                }
+              } catch (error) {
+                console.error(`Error refreshing progress for test ${test.id}:`, error);
+              }
+              return null;
+            }));
+            setTestsWithProgress(new Set(progressChecks.filter(Boolean)));
+          }
         }
       } catch { /* silent */ }
     };
@@ -532,7 +546,7 @@ const Dashboard = () => {
                       if (test.isMockTest) {
                         cardBgColor = 'bg-shnoor-successLight';
                         cardBorderColor = 'border-shnoor-success';
-                      } else if (test.testStatus === 'expired' || test.alreadyTaken) {
+                      } else if ((test.testStatus === 'expired' && !testsWithProgress.has(test.id)) || (test.alreadyTaken && !testsWithProgress.has(test.id))) {
                         cardBgColor = 'bg-shnoor-lavender';
                         cardBorderColor = 'border-shnoor-mist';
                         cardOpacity = 'opacity-75';
@@ -544,7 +558,7 @@ const Dashboard = () => {
                       return (
                         <div
                           key={test.id}
-                          className={`${cardBgColor} border-2 ${cardBorderColor} rounded-xl p-6 ${cardOpacity} ${test.isAvailable && !test.alreadyTaken ? 'hover:shadow-[0_8px_30px_rgba(14,14,39,0.08)] hover:border-shnoor-indigo' : ''} transition-all duration-200`}
+                          className={`${cardBgColor} border-2 ${cardBorderColor} rounded-xl p-6 ${cardOpacity} ${(test.isAvailable || testsWithProgress.has(test.id)) && !test.alreadyTaken ? 'hover:shadow-[0_8px_30px_rgba(14,14,39,0.08)] hover:border-shnoor-indigo' : ''} transition-all duration-200`}
                         >
                           <div className="flex justify-between items-start mb-4 gap-3">
                             <div className="flex-1">
@@ -569,7 +583,7 @@ const Dashboard = () => {
                               {test.isMockTest && (
                                 <p className="text-xs text-shnoor-success mt-1">Practice test to get familiar with the platform</p>
                               )}
-                              {test.alreadyTaken && (
+                              {test.alreadyTaken && !testsWithProgress.has(test.id) && (
                                 <span className="inline-block mt-2 px-3 py-1 bg-shnoor-dangerLight text-shnoor-danger rounded-full text-xs font-semibold">
                                   All Attempts Used ({test.attemptsTaken}/{test.maxAttempts})
                                 </span>
@@ -579,18 +593,18 @@ const Dashboard = () => {
                                   🕐 Upcoming
                                 </span>
                               )}
-                              {test.testStatus === 'expired' && !test.alreadyTaken && (
+                              {test.testStatus === 'expired' && !test.alreadyTaken && !testsWithProgress.has(test.id) && (
                                 <span className="inline-block mt-2 px-3 py-1 bg-shnoor-lavender text-shnoor-navy rounded-full text-xs font-semibold">
                                   ⏰ Deadline Passed
                                 </span>
                               )}
-                              {test.isAvailable && !test.alreadyTaken && testsWithProgress.has(test.id) && (
+                              {testsWithProgress.has(test.id) && (
                                 <span className="inline-block mt-2 px-3 py-1 bg-shnoor-successLight text-shnoor-success rounded-full text-xs font-semibold">
                                   ⏸ In Progress
                                 </span>
                               )}
                             </div>
-                            <BookOpen className={`flex-shrink-0 mt-1 ${test.alreadyTaken || !test.isAvailable ? 'text-shnoor-mist' : test.testStatus === 'upcoming' ? 'text-shnoor-warning' : 'text-shnoor-indigo'}`} size={24} />
+                            <BookOpen className={`flex-shrink-0 mt-1 ${(test.alreadyTaken && !testsWithProgress.has(test.id)) || (!test.isAvailable && !testsWithProgress.has(test.id)) ? 'text-shnoor-mist' : test.testStatus === 'upcoming' ? 'text-shnoor-warning' : 'text-shnoor-indigo'}`} size={24} />
                           </div>
 
                           <div className="space-y-2 mb-6">
@@ -629,25 +643,25 @@ const Dashboard = () => {
                               <span>View Job Description</span>
                             </button>
 
-                            <button
-                              onClick={() => test.isAvailable && !test.alreadyTaken && handleTakeTest(test.id)}
-                              disabled={!test.isAvailable || test.alreadyTaken}
-                              className={`w-full py-3 px-4 font-semibold rounded-lg transition-colors shadow-sm min-h-[44px] touch-manipulation ${test.alreadyTaken
+                              <button
+                              onClick={() => (test.isAvailable || testsWithProgress.has(test.id)) && (!test.alreadyTaken || testsWithProgress.has(test.id)) && handleTakeTest(test.id)}
+                              disabled={(!test.isAvailable && !testsWithProgress.has(test.id)) || (test.alreadyTaken && !testsWithProgress.has(test.id))}
+                              className={`w-full py-3 px-4 font-semibold rounded-lg transition-colors shadow-sm min-h-[44px] touch-manipulation ${(test.alreadyTaken && !testsWithProgress.has(test.id))
                                 ? 'bg-shnoor-mist/50 text-shnoor-navy cursor-not-allowed border border-shnoor-mist'
-                                : test.testStatus === 'upcoming'
+                                : test.testStatus === 'upcoming' && !testsWithProgress.has(test.id)
                                   ? 'bg-shnoor-warning text-white cursor-not-allowed'
-                                  : test.testStatus === 'expired'
+                                  : test.testStatus === 'expired' && !testsWithProgress.has(test.id)
                                     ? 'bg-shnoor-mist/50 text-shnoor-navy cursor-not-allowed border border-shnoor-mist'
                                     : testsWithProgress.has(test.id)
                                       ? 'bg-shnoor-success hover:bg-shnoor-success text-white'
                                       : 'bg-shnoor-indigo hover:bg-[#4d4d9c] text-white'
                                 }`}
                             >
-                              {test.alreadyTaken
+                              {(test.alreadyTaken && !testsWithProgress.has(test.id))
                                 ? `Completed (${test.attemptsTaken}/${test.maxAttempts} attempts used)`
-                                : test.testStatus === 'upcoming'
+                                : test.testStatus === 'upcoming' && !testsWithProgress.has(test.id)
                                   ? `🕐 Available from ${new Date(test.startDateTime).toLocaleString()}`
-                                  : test.testStatus === 'expired'
+                                  : test.testStatus === 'expired' && !testsWithProgress.has(test.id)
                                     ? `⏰ Expired on ${new Date(test.endDateTime).toLocaleString()}`
                                     : testsWithProgress.has(test.id)
                                       ? '▶ Resume Test'
