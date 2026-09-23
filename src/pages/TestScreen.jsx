@@ -579,7 +579,7 @@ int main() {
             setWarningCount(data.savedProgress.warningCount || 0);
 
             // Set time remaining from saved progress (in seconds)
-            if (data.savedProgress.timeRemaining) {
+            if (data.savedProgress && data.savedProgress.timeRemaining) {
               setInitialTimeRemaining(data.savedProgress.timeRemaining);
             } else {
               setInitialTimeRemaining(duration * 60); // Convert minutes to seconds
