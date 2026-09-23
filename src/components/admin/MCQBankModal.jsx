@@ -102,7 +102,7 @@ const MCQBankModal = ({ question, onClose, onSave, categories, tags }) => {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto flex-1">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto flex-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           <div>
             <label className="block text-sm font-bold text-gray-900 mb-1.5">
               Question Text <span className="text-red-500">*</span>

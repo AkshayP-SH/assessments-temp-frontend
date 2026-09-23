@@ -2016,16 +2016,16 @@ const AdminDashboard = () => {
   };
 
   return (
-    <Suspense fallback={<div className="flex h-screen items-center justify-center bg-[#E5E5F3]"><Loader2 className="animate-spin h-12 w-12 text-[#403f75]" /></div>}>
-      <div className="admin-dashboard-root min-h-screen bg-[#E5E5F3]">
+    <Suspense fallback={<div className="flex h-screen items-center justify-center bg-[#E5E5F3] dark:bg-[#11111d]"><Loader2 className="animate-spin h-12 w-12 text-[#403f75] dark:text-[#9A9AC9]" /></div>}>
+      <div className="admin-dashboard-root min-h-screen bg-[#E5E5F3] dark:bg-[#11111d]">
         {/* Header */}
         <AdminHeader />
 
         {/* Super Admin — Client Scope Selector */}
         {isSuperAdmin && (
-          <div className="bg-white border-b border-shnoor-mist shadow-sm">
+          <div className="bg-white dark:bg-[#25254A] border-b border-shnoor-mist dark:border-[#383863] shadow-sm">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center gap-3">
-              <div className="flex items-center gap-2 text-xs font-semibold text-shnoor-indigoMedium uppercase tracking-wide flex-shrink-0">
+              <div className="flex items-center gap-2 text-xs font-semibold text-shnoor-indigoMedium dark:text-[#9A9AC9] uppercase tracking-wide flex-shrink-0">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
                 Viewing as:
               </div>
@@ -2036,7 +2036,7 @@ const AdminDashboard = () => {
                   setTests([]);
                   setAllInstitutes([]);
                 }}
-                className="h-8 pl-3 pr-8 rounded-lg border border-shnoor-mist bg-white text-sm text-shnoor-navy focus:outline-none focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo transition-colors"
+                className="h-8 pl-3 pr-8 rounded-lg border border-shnoor-mist dark:border-[#383863] bg-white dark:bg-[#25254A] text-sm text-shnoor-navy dark:text-white focus:outline-none focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo transition-colors"
               >
                 <option value="">All Clients (Platform View)</option>
                 {clientsList.map(c => (
@@ -2094,7 +2094,7 @@ const AdminDashboard = () => {
         {/* Tab Navigation */}
         {!showCreateTest && !selectedExamId && (
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 mb-4 sm:mb-8 overflow-x-auto hide-scrollbar">
-            <div className="bg-white rounded-[24px] shadow-sm p-2 flex sm:inline-flex space-x-2 w-max !max-w-none">
+            <div className="bg-white dark:bg-[#25254A] rounded-[24px] shadow-sm p-2 flex sm:inline-flex space-x-2 w-max !max-w-none">
               {[
                 { id: 'exams', label: 'Manage Exams', icon: FileSpreadsheet },
                 { id: 'institutes', label: 'Manage Institutes', icon: Building2 },
@@ -2111,7 +2111,7 @@ const AdminDashboard = () => {
                   className={`flex items-center space-x-2 px-5 py-2.5 font-bold transition-all shrink-0 text-sm sm:text-base rounded-xl ${
                     activeTab === tab.id 
                       ? 'bg-[#403f75] text-white shadow-sm' 
-                      : 'text-[#9A9AC9] hover:text-gray-900 hover:bg-gray-50'
+                      : 'text-[#9A9AC9] hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-[#383863]'
                   }`}
                 >
                   <tab.icon size={18} />

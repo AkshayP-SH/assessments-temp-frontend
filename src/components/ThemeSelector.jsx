@@ -80,12 +80,12 @@ const ThemeSelector = ({ className = '', variant = 'dark' }) => {
   const ActiveIcon = theme === 'dark' ? Moon : theme === 'green' ? Leaf : Sun;
 
   return (
-    <div ref={rootRef} className={`relative ${className}`}>
+    <div ref={rootRef} className="relative">
       <button
         ref={triggerRef}
         type="button"
         onClick={() => setIsOpen((open) => !open)}
-        className={`theme-selector-trigger theme-selector-trigger--${variant} flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg sm:rounded-xl transition-all ${className}`}
+        className={`theme-selector-trigger theme-selector-trigger--${variant} flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg sm:rounded-xl outline-none focus:outline-none transition-all ${className}`}
         aria-label="Change theme"
         aria-haspopup="menu"
         aria-expanded={isOpen}
@@ -114,7 +114,7 @@ const ThemeSelector = ({ className = '', variant = 'dark' }) => {
                 }}
                 aria-label={label}
                 title={label}
-                className={`theme-selector-option flex h-10 w-10 items-center justify-center rounded-xl transition-colors ${isActive ? 'is-active' : ''}`}
+                className={`theme-selector-option flex h-10 w-10 items-center justify-center rounded-xl outline-none focus:outline-none transition-colors ${isActive ? 'is-active' : ''}`}
               >
                 <themeOption.icon size={17} />
               </button>

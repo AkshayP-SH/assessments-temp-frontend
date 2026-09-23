@@ -534,7 +534,7 @@ const StudentMessages = () => {
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-2">
             <Filter size={16} className="text-[#9A9AC9]" />
-            <span className="text-sm font-medium text-shnoor-navyLight">Filter:</span>
+            <span className="text-sm font-medium text-shnoor-navyLight dark:text-gray-900">Filter:</span>
           </div>
           <div className="flex gap-2">
             {[{ key: 'all', label: 'All Messages' }, { key: 'unread', label: 'Unread' }].map(({ key, label }) => (
@@ -543,8 +543,8 @@ const StudentMessages = () => {
                 onClick={() => { setFilter(key); setPagination(prev => ({ ...prev, page: 1 })); }}
                 className={`px-3 py-1.5 text-sm rounded-lg transition-colors flex items-center gap-1.5 ${
                   filter === key 
-                    ? 'bg-[#9A9AC9] text-shnoor-navyLight font-medium' 
-                    : 'bg-[#D1D1E6] text-shnoor-navyLight hover:bg-[#B7B7D9]'
+                    ? 'bg-[#9A9AC9] text-gray-900 dark:text-gray-900 font-medium' 
+                    : 'bg-[#D1D1E6] text-gray-900 dark:text-gray-900 hover:bg-[#B7B7D9]'
                 }`}
               >
                 {label}
@@ -574,8 +574,8 @@ const StudentMessages = () => {
           <button
             onClick={() => setShowAnalytics(!showAnalytics)}
             className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-colors ${showAnalytics
-              ? 'bg-[#9A9AC9] text-shnoor-navyLight font-medium'
-              : 'bg-[#D1D1E6] text-shnoor-navyLight hover:bg-[#B7B7D9]'
+              ? 'bg-[#9A9AC9] dark:bg-[#403f75] text-shnoor-navyLight dark:text-white font-medium'
+              : 'bg-[#D1D1E6] dark:bg-gray-800 text-shnoor-navyLight dark:text-gray-300 hover:bg-[#B7B7D9] dark:hover:bg-gray-700'
               }`}
           >
             <BarChart3 size={14} />
@@ -588,7 +588,7 @@ const StudentMessages = () => {
             }}
             className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-colors ${bulkDeleteMode
               ? 'bg-red-600 text-white font-medium'
-              : 'bg-[#D1D1E6] text-shnoor-navyLight hover:bg-[#B7B7D9]'
+              : 'bg-[#D1D1E6] dark:bg-gray-800 text-shnoor-navyLight dark:text-gray-300 hover:bg-[#B7B7D9] dark:hover:bg-gray-700'
               }`}
           >
             <Trash2 size={14} />
@@ -596,7 +596,7 @@ const StudentMessages = () => {
           </button>
           <button
             onClick={fetchMessages}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm bg-[#D1D1E6] text-shnoor-navyLight rounded-lg hover:bg-[#B7B7D9] transition-colors"
+            className="flex items-center gap-2 px-3 py-1.5 text-sm bg-[#D1D1E6] dark:bg-gray-800 text-shnoor-navyLight dark:text-gray-300 rounded-lg hover:bg-[#B7B7D9] dark:hover:bg-gray-700 transition-colors"
           >
             <RefreshCw size={14} />
             Refresh
@@ -788,7 +788,7 @@ const StudentMessages = () => {
         <div className="lg:col-span-1 bg-white rounded-xl border border-shnoor-mist overflow-hidden flex flex-col" style={{ height: '700px' }}>
           <div className="p-4 bg-[#9A9AC9]">
             <div className="flex items-center justify-between">
-              <h2 className="font-semibold text-shnoor-navyLight">Messages ({pagination.total})</h2>
+              <h2 className="font-semibold text-gray-900 dark:text-gray-900">Messages ({pagination.total})</h2>
               {bulkDeleteMode && (
                 <div className="flex items-center gap-2">
                   <button
@@ -829,10 +829,10 @@ const StudentMessages = () => {
               messages.map(msg => (
                 <div
                   key={msg.id}
-                  className={`p-4 cursor-pointer hover:bg-shnoor-lavender/50 transition-colors ${selectedMessage?.id === msg.id ? 'bg-shnoor-lavender' : ''
-                    } ${msg.unread_count > 0 ? 'bg-shnoor-indigo/5' : ''}`}
+                  className={`p-4 cursor-pointer hover:bg-shnoor-lavender/50 dark:hover:bg-[#2a2a4a] transition-colors ${selectedMessage?.id === msg.id ? 'bg-shnoor-lavender dark:bg-[#403f75]' : ''
+                    } ${msg.unread_count > 0 ? 'bg-shnoor-indigo/5 dark:bg-shnoor-indigo/20' : ''}`}
                 >
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-start gap-3 min-w-0">
                     {bulkDeleteMode && msg.student_id && (
                       <input
                         type="checkbox"
@@ -841,30 +841,30 @@ const StudentMessages = () => {
                           e.stopPropagation();
                           toggleConversationSelection(msg.student_id);
                         }}
-                        className="mt-1 w-4 h-4 text-shnoor-indigo rounded focus:ring-shnoor-indigo"
+                        className="mt-1 w-4 h-4 text-shnoor-indigo rounded focus:ring-shnoor-indigo shrink-0"
                       />
                     )}
                     <div
                       onClick={() => !bulkDeleteMode && handleSelectMessage(msg)}
-                      className="flex items-start gap-3 flex-1"
+                      className="flex items-start gap-3 flex-1 min-w-0"
                     >
-                      <div className="relative">
-                        <div className={`p-2 rounded-lg ${msg.unread_count > 0 ? 'bg-shnoor-indigo/10' : 'bg-shnoor-mist'}`}>
-                          {msg.unread_count > 0 ? <Mail size={16} className="text-shnoor-indigo" /> : <MailOpen size={16} className="text-shnoor-soft" />}
+                      <div className="relative shrink-0">
+                        <div className={`p-2 rounded-lg ${msg.unread_count > 0 ? 'bg-shnoor-indigo/10 dark:bg-shnoor-indigo/30' : 'bg-shnoor-mist dark:bg-gray-700'}`}>
+                          {msg.unread_count > 0 ? <Mail size={16} className="text-shnoor-indigo dark:text-indigo-400" /> : <MailOpen size={16} className="text-shnoor-soft dark:text-gray-400" />}
                         </div>
                         {msg.unread_count > 0 && (
-                          <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white" />
+                          <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-800" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1">
-                          <p className={`text-sm truncate ${msg.unread_count > 0 ? 'font-semibold text-shnoor-navy' : 'text-shnoor-navy'}`}>{msg.name}</p>
-                          <span className="text-xs text-shnoor-soft flex-shrink-0 ml-2">{formatDate(msg.created_at)}</span>
+                          <p className={`text-sm truncate ${msg.unread_count > 0 ? 'font-semibold text-shnoor-navy dark:text-white' : 'text-shnoor-navy dark:text-gray-200'}`}>{msg.name}</p>
+                          <span className="text-xs text-shnoor-soft dark:text-gray-400 shrink-0 ml-2">{formatDate(msg.created_at)}</span>
                         </div>
                         {msg.college && (
-                          <p className="text-xs text-shnoor-indigo mb-1 flex items-center gap-1"><Building size={10} />{msg.college}</p>
+                          <p className="text-xs text-shnoor-indigo dark:text-indigo-300 mb-1 flex items-start gap-1"><Building size={10} className="shrink-0 mt-0.5" /><span className="break-words">{msg.college}</span></p>
                         )}
-                        <p className="text-sm text-shnoor-soft truncate">{msg.message}</p>
+                        <p className="text-sm text-shnoor-soft dark:text-gray-300 break-words">{msg.message}</p>
                         {parseInt(msg.unread_count) > 0 && (
                           <div className="flex items-center gap-1 mt-1">
                             <span className="px-1.5 py-0.5 bg-green-100 text-green-700 rounded-full text-xs font-medium">

@@ -124,20 +124,20 @@ const AdminHeader = () => {
       <div className="w-full">
       <header className="w-full bg-white h-[60px] sm:h-[72px] shadow-sm relative z-50 rounded-none border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
-          <div className="flex items-center gap-2.5 sm:gap-4 min-w-0">
-            {/* Logo icon */}
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl overflow-hidden flex items-center justify-center flex-shrink-0 bg-white p-1 border border-[#D1D1E6]">
-              <img
-                src={shnoorLogo}
-                alt="Shnoor Logo"
-                className="w-full h-full object-contain"
-              />
+            <div className="flex items-center gap-2.5 sm:gap-4 min-w-0">
+              {/* Logo icon */}
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl overflow-hidden flex items-center justify-center flex-shrink-0 bg-white !bg-white border border-[#D1D1E6] dark:border-transparent">
+                <img
+                  src={shnoorLogo}
+                  alt="Shnoor Logo"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h1 className="text-[#403f75] dark:text-white font-bold text-base sm:text-lg leading-tight truncate">Shnoor Assessment</h1>
+                <p className="text-[#403f75] dark:text-[#9A9AC9] text-[10px] sm:text-xs truncate">Admin Dashboard</p>
+              </div>
             </div>
-            <div className="flex-1 min-w-0">
-              <h1 className="text-[#403f75] font-bold text-base sm:text-lg leading-tight truncate">Shnoor Assessment</h1>
-              <p className="text-[#403f75] text-[10px] sm:text-xs truncate">Admin Dashboard</p>
-            </div>
-          </div>
 
           {/* Right Side: Desktop Navigation */}
           <div className="hidden sm:flex items-center gap-3">
@@ -145,8 +145,8 @@ const AdminHeader = () => {
               <ThemeSelector className="!bg-white !border !border-[#D1D1E6] !text-[#403f75] !rounded-xl hover:!bg-gray-50" />
             </div>
             <button
-              className={`h-10 px-4 text-sm font-bold transition-all border border-[#D1D1E6] bg-white text-[#403f75] rounded-xl flex items-center justify-center hover:bg-blue-50 relative ${
-                location.pathname.includes('student-messages') ? 'bg-blue-50' : ''
+              className={`h-10 px-4 text-sm font-bold transition-all border border-[#D1D1E6] dark:border-[#383863] bg-white dark:bg-transparent text-[#403f75] dark:text-[#9A9AC9] rounded-xl flex items-center justify-center hover:bg-blue-50 dark:hover:bg-[#383863] dark:hover:text-white relative ${
+                location.pathname.includes('student-messages') ? 'bg-blue-50 dark:bg-[#403f75] dark:text-white' : ''
               }`}
               onClick={() => navigate(`${basePath}/student-messages`)}
             >
@@ -160,8 +160,8 @@ const AdminHeader = () => {
             </button>
             {!isClientAdmin && (
               <button
-                className={`h-10 px-4 text-sm font-bold transition-all border border-[#D1D1E6] bg-white text-[#403f75] rounded-xl flex items-center justify-center hover:bg-blue-50 relative ${
-                  location.pathname.includes('clients') ? 'bg-blue-50' : ''
+                className={`h-10 px-4 text-sm font-bold transition-all border border-[#D1D1E6] dark:border-[#383863] bg-white dark:bg-transparent text-[#403f75] dark:text-[#9A9AC9] rounded-xl flex items-center justify-center hover:bg-blue-50 dark:hover:bg-[#383863] dark:hover:text-white relative ${
+                  location.pathname.includes('clients') ? 'bg-blue-50 dark:bg-[#403f75] dark:text-white' : ''
                 }`}
                 onClick={() => navigate('/admin/clients')}
               >
@@ -170,8 +170,8 @@ const AdminHeader = () => {
               </button>
             )}
             <button
-              className={`h-10 px-4 text-sm font-bold transition-all border border-[#D1D1E6] bg-white text-[#403f75] rounded-xl flex items-center justify-center hover:bg-blue-50 relative ${
-                location.pathname.includes('live-proctoring') ? 'bg-blue-50' : ''
+              className={`h-10 px-4 text-sm font-bold transition-all border border-[#D1D1E6] dark:border-[#383863] bg-white dark:bg-transparent text-[#403f75] dark:text-[#9A9AC9] rounded-xl flex items-center justify-center hover:bg-blue-50 dark:hover:bg-[#383863] dark:hover:text-white relative ${
+                location.pathname.includes('live-proctoring') ? 'bg-blue-50 dark:bg-[#403f75] dark:text-white' : ''
               }`}
               onClick={() => navigate(`${basePath}/live-proctoring`)}
             >
@@ -179,8 +179,8 @@ const AdminHeader = () => {
               <span>Live Proctoring</span>
             </button>
             <button
-              className={`h-10 px-4 text-sm font-bold transition-all border border-[#D1D1E6] bg-white text-[#403f75] rounded-xl flex items-center justify-center hover:bg-blue-50 relative ${
-                location.pathname.includes('settings') ? 'bg-blue-50' : ''
+              className={`h-10 px-4 text-sm font-bold transition-all border border-[#D1D1E6] dark:border-[#383863] bg-white dark:bg-transparent text-[#403f75] dark:text-[#9A9AC9] rounded-xl flex items-center justify-center hover:bg-blue-50 dark:hover:bg-[#383863] dark:hover:text-white relative ${
+                location.pathname.includes('settings') ? 'bg-blue-50 dark:bg-[#403f75] dark:text-white' : ''
               }`}
               onClick={() => navigate(`${basePath}/settings`)}
             >
@@ -194,17 +194,6 @@ const AdminHeader = () => {
               <LogOut size={16} className="mr-2" />
               <span>Logout</span>
             </button>
-
-            <div className="h-8 w-px bg-gray-200 mx-2"></div>
-
-            <div className="flex flex-col items-end min-w-[80px]">
-              <span className="text-sm font-bold text-[#403f75] leading-tight">
-                {currentUser?.username || currentUser?.name || 'Admin User'}
-              </span>
-              <span className="text-[10px] text-[#9A9AC9] leading-tight">
-                {isClientAdmin ? 'Client Admin' : 'Super Admin'}
-              </span>
-            </div>
           </div>
 
           {/* Mobile Menu Toggle Button */}
