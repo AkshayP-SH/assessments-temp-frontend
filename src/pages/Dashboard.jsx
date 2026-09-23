@@ -387,7 +387,7 @@ const Dashboard = () => {
         <div className="w-full max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center border-white/10 sm:border-transparent sm:h-16">
             <div className="flex items-center space-x-3 sm:space-x-4">
-              <div className="site-header-logo w-10 h-10 sm:w-12 sm:h-12 rounded-xl overflow-hidden shadow-sm flex-shrink-0 bg-white">
+              <div className="site-header-logo w-10 h-10 sm:w-12 sm:h-12 rounded-xl overflow-hidden shadow-sm flex-shrink-0 bg-white p-1 flex items-center justify-center">
                 <img
                   src={shnoorLogo}
                   alt="Shnoor Logo"
@@ -395,8 +395,8 @@ const Dashboard = () => {
                 />
               </div>
               <div>
-                <h1 className="text-white font-bold text-base sm:text-lg leading-tight">Assessment Portal</h1>
-                <p className="text-white/75 text-[10px] sm:text-xs">Student Dashboard</p>
+                <h1 className="text-white font-bold text-base sm:text-lg leading-tight uppercase tracking-wide">SHNOOR Assessments</h1>
+                <p className="site-header-subtitle text-white/75 text-[10px] sm:text-xs uppercase tracking-widest font-semibold">Student Dashboard</p>
               </div>
             </div>
 

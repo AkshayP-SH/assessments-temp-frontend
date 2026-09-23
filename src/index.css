@@ -611,8 +611,8 @@ html[data-theme='green'] .theme-selector-option.is-active { background-color: rg
 html[data-theme='dark'] .admin-status-pill.is-closed { background-color: transparent; border-color: rgb(239 68 68 / 0.45); }
 
 /* ── Theme Overrides (hard-coded Tailwind utilities in non-migrated pages) ── */
-:is(html[data-theme='dark'],html[data-theme='green']) body :is(.bg-white,.bg-\[\#ffffff\],.bg-\[\#F8F8FB\],.bg-\[\#F8FAFC\],.bg-gray-50,.bg-gray-50\/50,.bg-gray-100,.bg-gray-200) { background-color: rgb(var(--theme-card)) !important; }
-:is(html[data-theme='dark'],html[data-theme='green']) body :is(.bg-shnoor-lavender,.bg-shnoor-lavender\/30) { background-color: rgb(var(--theme-panel)) !important; }
+:is(html[data-theme='dark'],html[data-theme='green']) body :is(.bg-white,.bg-\[\#ffffff\],.bg-\[\#F8F8FB\],.bg-\[\#F8FAFC\],.bg-gray-50,.bg-gray-50\/50,.bg-gray-100,.bg-gray-200):not(.site-header-logo):not(.landing-brand-logo):not(.landing-footer-logo):not(.brand-logo-badge):not(.site-logo) { background-color: rgb(var(--theme-card)) !important; }
+:is(html[data-theme='dark'],html[data-theme='green']) body :is(.bg-shnoor-lavender,.bg-shnoor-lavender\/30):not(.site-header-logo):not(.landing-brand-logo):not(.landing-footer-logo):not(.brand-logo-badge):not(.site-logo) { background-color: rgb(var(--theme-panel)) !important; }
 :is(html[data-theme='dark'],html[data-theme='green']) body .bg-shnoor-navy { background-color: rgb(var(--theme-header)) !important; border-bottom-color: rgb(var(--theme-header-border)) !important; }
 :is(html[data-theme='dark'],html[data-theme='green']) body :is(.bg-shnoor-indigo,button.bg-shnoor-indigo,.\!bg-shnoor-indigo) { background-color: rgb(var(--theme-accent)) !important; color: #fff !important; }
 :is(html[data-theme='dark'],html[data-theme='green']) body :is(.text-shnoor-navy,.text-shnoor-navyLight,.text-gray-900,.text-gray-800,.text-gray-700) { color: rgb(var(--theme-text)) !important; }
@@ -621,8 +621,24 @@ html[data-theme='dark'] .admin-status-pill.is-closed { background-color: transpa
 :is(html[data-theme='dark'],html[data-theme='green']) body :is(.border-shnoor-mist,.border-shnoor-light,.border-gray-200,.border-gray-300) { border-color: rgb(var(--theme-border)) !important; }
 :is(html[data-theme='dark'],html[data-theme='green']) body :is(input,textarea,select) { background-color: rgb(var(--theme-card)) !important; color: rgb(var(--theme-text)) !important; border-color: rgb(var(--theme-border)) !important; }
 :is(html[data-theme='dark'],html[data-theme='green']) body :is(input,textarea)::placeholder { color: rgb(var(--theme-text-muted) / 0.8) !important; }
-:is(html[data-theme='dark'],html[data-theme='green']) :is(.site-header-logo,.landing-brand-logo,.landing-footer-logo) { background-color: rgb(var(--theme-logo-bg)) !important; border: none !important; border-radius: 0.75rem; box-shadow: none !important; padding: 0.25rem; }
-:is(.site-header-logo,.landing-brand-logo,.landing-footer-logo) { border: none !important; }
+
+/* Always keep logo container white across ALL themes and pages */
+:is(.site-header-logo,.landing-brand-logo,.landing-footer-logo,.brand-logo-badge,.site-logo),
+:is(html[data-theme='dark'],html[data-theme='green'],html,body) :is(.site-header-logo,.landing-brand-logo,.landing-footer-logo,.brand-logo-badge,.site-logo),
+:is(html[data-theme='dark'],html[data-theme='green']) body :is(.site-header-logo,.landing-brand-logo,.landing-footer-logo,.brand-logo-badge,.site-logo),
+body :is(.site-header-logo,.landing-brand-logo,.landing-footer-logo,.brand-logo-badge,.site-logo) {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  border: none !important;
+  border-radius: 0.75rem !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+}
+:is(.site-header-logo,.landing-brand-logo,.landing-footer-logo,.brand-logo-badge,.site-logo) img {
+  background-color: transparent !important;
+  background: transparent !important;
+  filter: none !important;
+  object-fit: contain !important;
+}
 
 :is(html[data-theme='dark'],html[data-theme='green']) .site-header-subtitle { color: rgb(var(--theme-auth-accent)) !important; opacity: 1 !important; }
 html[data-theme='green'] :is(.bg-shnoor-navy,.landing-footer,.landing-secure) :is(.site-header-subtitle,.text-shnoor-soft,.text-shnoor-light,.text-shnoor-mist,.landing-footer-link,.landing-contrast-muted) { color: rgb(var(--theme-contrast-muted)) !important; }
@@ -643,8 +659,7 @@ html[data-theme='dark'] .bg-shnoor-lavender { background-color: rgb(58 58 95) !i
 :is(html[data-theme='dark'],html[data-theme='green']) .landing-root .text-shnoor-navy { color: rgb(var(--theme-landing-text)) !important; }
 :is(html[data-theme='dark'],html[data-theme='green']) .landing-root :is(.text-shnoor-soft,.text-shnoor-indigoMedium,.text-\[\#4b5563\],.text-\[\#9ca3af\],.text-\[\#d1d5db\]) { color: rgb(var(--theme-landing-muted)) !important; }
 html[data-theme='green'] body :is(.landing-footer,.landing-secure) .text-shnoor-soft { color: rgb(var(--theme-contrast-muted)) !important; }
-:is(html[data-theme='dark'],html[data-theme='green']) .landing-root :is(.bg-white,.bg-shnoor-lavender):not(.site-header-logo):not(.landing-brand-logo):not(.landing-footer-logo):not(.brand-logo-badge) { background-color: rgb(var(--theme-card)) !important; }
-:is(html[data-theme='dark'],html[data-theme='green'],html,body) :is(.site-header-logo,.landing-brand-logo,.landing-footer-logo,.brand-logo-badge) { background-color: #ffffff !important; border-radius: 0.75rem !important; }
+:is(html[data-theme='dark'],html[data-theme='green']) .landing-root :is(.bg-white,.bg-shnoor-lavender):not(.site-header-logo):not(.landing-brand-logo):not(.landing-footer-logo):not(.brand-logo-badge):not(.site-logo) { background-color: rgb(var(--theme-card)) !important; }
 :is(html[data-theme='dark'],html[data-theme='green']) .landing-root :is(.bg-shnoor-indigo,button.bg-shnoor-indigo) { background-color: rgb(var(--theme-accent)) !important; border-color: rgb(var(--theme-accent)) !important; color: #fff !important; }
 :is(html[data-theme='dark'],html[data-theme='green']) .landing-root :is(.border-shnoor-mist,.border-shnoor-light,.border-shnoor-lavender) { border-color: rgb(var(--theme-border)) !important; }
 :is(html[data-theme='dark'],html[data-theme='green']) .landing-root .shadow-\[0_20px_60px_rgba\(68\,68\,142\,0\.15\)\] { box-shadow: 0 20px 60px rgb(var(--theme-accent) / 0.18) !important; }

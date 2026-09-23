@@ -293,7 +293,7 @@ const Login = () => {
 
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-12">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-sm p-1.5 flex-shrink-0">
+            <div className="site-header-logo flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-sm p-1.5 flex-shrink-0">
               <img src={shnoorLogo} alt="Shnoor" className="h-full w-full object-contain" width="40" height="40" loading="eager" fetchPriority="high" />
             </div>
             <div>

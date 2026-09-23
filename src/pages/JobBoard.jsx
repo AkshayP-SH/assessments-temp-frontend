@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { LogOut, Briefcase, Building2, Clock, ArrowLeft, Loader2, RefreshCw, Search, CheckCircle2, CheckCircle, X } from 'lucide-react';
 import { apiFetch } from '../config/api';
 import ThemeSelector from '../components/ThemeSelector';
+import shnoorLogo from '../assets/shnoor-logo.png';
 import { useSEO } from '../hooks/useSEO';
 import { useDebounce } from '../hooks/useDebounce';
 
@@ -230,13 +231,17 @@ export default function JobBoard({ isEmbedded = false }) {
                 <header className="bg-shnoor-navy shadow-sm h-[72px] flex items-center sticky top-0 z-10 w-full">
                     <div className="w-full max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="flex justify-between items-center h-16">
-                            <div className="flex items-center space-x-4">
-                                <div className="w-12 h-12 bg-shnoor-lavender rounded-xl flex items-center justify-center shadow-sm">
-                                    <span className="text-shnoor-indigo font-bold text-xl">A</span>
+                            <div className="flex items-center space-x-3 sm:space-x-4">
+                                <div className="site-header-logo w-10 h-10 sm:w-12 sm:h-12 rounded-xl overflow-hidden shadow-sm flex-shrink-0 bg-white p-1 flex items-center justify-center">
+                                    <img
+                                        src={shnoorLogo}
+                                        alt="Shnoor Logo"
+                                        className="w-full h-full object-contain"
+                                    />
                                 </div>
                                 <div>
-                                    <h1 className="text-white font-bold text-lg leading-tight">Assessment Portal</h1>
-                                    <p className="text-shnoor-light opacity-80 text-xs">Job Board</p>
+                                    <h1 className="text-white font-bold text-base sm:text-lg leading-tight uppercase tracking-wide">SHNOOR Assessments</h1>
+                                    <p className="site-header-subtitle text-shnoor-light opacity-80 text-[10px] sm:text-xs uppercase tracking-widest font-semibold">Job Board</p>
                                 </div>
                             </div>
 
