@@ -2165,17 +2165,18 @@ const AdminDashboard = () => {
 
           {/* Create Test Modal/Section */}
           {showCreateTest ? (
-            <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-light p-8 mb-6">
-              <div className="flex items-center justify-between mb-8">
+            <div className="space-y-4 mb-6">
+              <div className="flex items-center justify-between">
                 <button
                   onClick={() => {
                     setShowCreateTest(false);
                     setEditingTest(null);
                   }}
-                  className="flex items-center text-shnoor-indigoMedium hover:text-shnoor-indigo transition-colors group"
+                  className="btn-secondary"
                   title={editingTest ? 'Cancel Editing' : 'Back to Exams'}
                 >
-                  <ArrowLeft size={22} className="group-hover:-translate-x-1 transition-transform" />
+                  <ArrowLeft size={16} />
+                  <span>Back to Exams</span>
                 </button>
               </div>
               <CreateTestSection
@@ -2325,7 +2326,7 @@ const AdminDashboard = () => {
               {/* Job Openings Tab */}
               {activeTab === 'job-openings' && (
                 <div className="animate-fade-in">
-                  <AdminJobOpenings />
+                  <AdminJobOpenings clientId={viewAsClientId || null} />
                 </div>
               )}
 

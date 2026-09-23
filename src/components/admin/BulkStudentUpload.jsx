@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Download } from 'lucide-react';
 import Button from '../Button';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -94,30 +95,37 @@ Robert Johnson,robert.johnson@example.com,5551234567,Harvard University`;
     };
 
     return (
-        <div className="bg-theme-card rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] p-8 border border-shnoor-light">
-            <h2 className="text-2xl font-bold mb-4 text-shnoor-navy">Bulk Student Upload</h2>
+        <div className="space-y-6">
+            {/* Section Header */}
+            <div className="section-header">
+                <div className="section-header-left">
+                    <h2 className="section-title">Bulk Upload</h2>
+                    <p className="section-subtitle">Upload spreadsheets to import and enroll students in batches</p>
+                </div>
 
-            {/* Instructions */}
-            <div className="bg-shnoor-lavender border-l-4 border-shnoor-indigo p-4 mb-6 rounded-r-lg">
-                <h3 className="font-semibold text-shnoor-navy mb-2">Instructions:</h3>
-                <ul className="text-sm text-shnoor-indigoMedium space-y-1 list-disc list-inside">
-                    <li>Upload a CSV or Excel file with student details</li>
-                    <li>Required columns: <strong>fullname, email, institute</strong></li>
-                    <li>Optional column: <strong>contact</strong></li>
-                    <li>Password format: <strong>firstname@2026</strong> (automatically generated)</li>
-                    <li>Students will receive an email with their credentials</li>
-                </ul>
-            </div>
-
-            {/* Sample CSV Download */}
-            <div className="mb-6">
-                <Button
+                <button
+                    type="button"
                     onClick={downloadSampleCSV}
-                    className="text-white hover:bg-shnoor-navy underline text-sm font-medium"
+                    className="btn-secondary"
                 >
-                    📥 Download Sample CSV Template
-                </Button>
+                    <Download size={15} />
+                    <span>Download Sample CSV</span>
+                </button>
             </div>
+
+            {/* Main Card */}
+            <div className="surface-card">
+                {/* Instructions */}
+                <div className="bg-shnoor-lavender border-l-4 border-shnoor-indigo p-4 mb-6 rounded-r-lg">
+                    <h3 className="font-semibold text-shnoor-navy mb-2">Instructions:</h3>
+                    <ul className="text-sm text-shnoor-indigoMedium space-y-1 list-disc list-inside">
+                        <li>Upload a CSV or Excel file with student details</li>
+                        <li>Required columns: <strong>fullname, email, institute</strong></li>
+                        <li>Optional column: <strong>contact</strong></li>
+                        <li>Password format: <strong>firstname@2026</strong> (automatically generated)</li>
+                        <li>Students will receive an email with their credentials</li>
+                    </ul>
+                </div>
 
             {/* File Upload Section */}
             <div className="mb-8 p-6 bg-theme-card border border-shnoor-light rounded-xl shadow-sm">
@@ -257,6 +265,7 @@ Robert Johnson,robert.johnson@example.com,5551234567,Harvard University`;
                     )}
                 </div>
             )}
+            </div>
         </div>
     );
 }
