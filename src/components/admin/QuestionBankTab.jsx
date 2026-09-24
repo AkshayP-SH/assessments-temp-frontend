@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { BookOpen, Code, Plus, Search, Edit, Trash2 } from 'lucide-react';
 import { apiFetch } from '../../config/api';
 import MCQBankModal from './MCQBankModal';
@@ -10,6 +10,7 @@ const QuestionBankTab = () => {
   const [codingQuestions, setCodingQuestions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [selectedDifficulty, setSelectedDifficulty] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [showMCQModal, setShowMCQModal] = useState(false);
@@ -19,14 +20,24 @@ const QuestionBankTab = () => {
   const [tags, setTags] = useState([]);
 
   useEffect(() => {
+    const timerId = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500);
+    return () => clearTimeout(timerId);
+  }, [searchTerm]);
+
+  useEffect(() => {
     fetchCategories();
     fetchTags();
+  }, []);
+
+  useEffect(() => {
     if (activeTab === 'mcq') {
       fetchMCQQuestions();
     } else {
       fetchCodingQuestions();
     }
-  }, [activeTab, selectedDifficulty, selectedCategory, searchTerm]);
+  }, [activeTab, selectedDifficulty, selectedCategory, debouncedSearchTerm]);
 
   const fetchCategories = async () => {
     try {
@@ -65,7 +76,7 @@ const QuestionBankTab = () => {
       const params = new URLSearchParams();
       if (selectedDifficulty) params.append('difficulty', selectedDifficulty);
       if (selectedCategory) params.append('category', selectedCategory);
-      if (searchTerm) params.append('search', searchTerm);
+      if (debouncedSearchTerm) params.append('search', debouncedSearchTerm);
 
       const response = await apiFetch(`api/question-bank/mcq?${params.toString()}`, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -88,7 +99,7 @@ const QuestionBankTab = () => {
       const params = new URLSearchParams();
       if (selectedDifficulty) params.append('difficulty', selectedDifficulty);
       if (selectedCategory) params.append('category', selectedCategory);
-      if (searchTerm) params.append('search', searchTerm);
+      if (debouncedSearchTerm) params.append('search', debouncedSearchTerm);
 
       const response = await apiFetch(`api/question-bank/coding?${params.toString()}`, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -104,7 +115,7 @@ const QuestionBankTab = () => {
     }
   };
 
-  const handleDeleteMCQ = async (id) => {
+  const handleDeleteMCQ = useCallback(async (id) => {
     if (!confirm('Are you sure you want to delete this question?')) return;
 
     try {
@@ -122,9 +133,9 @@ const QuestionBankTab = () => {
       console.error('Error deleting question:', error);
       alert('Failed to delete question');
     }
-  };
+  }, []);
 
-  const handleDeleteCoding = async (id) => {
+  const handleDeleteCoding = useCallback(async (id) => {
     if (!confirm('Are you sure you want to delete this question?')) return;
 
     try {
@@ -142,16 +153,16 @@ const QuestionBankTab = () => {
       console.error('Error deleting question:', error);
       alert('Failed to delete question');
     }
-  };
+  }, []);
 
-  const getDifficultyColor = (difficulty) => {
+  const getDifficultyColor = useCallback((difficulty) => {
     switch (difficulty?.toLowerCase()) {
       case 'easy': return 'bg-green-100 text-green-800';
       case 'medium': return 'bg-yellow-100 text-yellow-800';
       case 'hard': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
-  };
+  }, []);
 
   return (
     <div>
@@ -248,20 +259,20 @@ const QuestionBankTab = () => {
         ) : activeTab === 'mcq' ? (
           <MCQQuestionsList
             questions={mcqQuestions}
-            onEdit={(q) => {
+            onEdit={useCallback((q) => {
               setEditingQuestion(q);
               setShowMCQModal(true);
-            }}
+            }, [])}
             onDelete={handleDeleteMCQ}
             getDifficultyColor={getDifficultyColor}
           />
         ) : (
           <CodingQuestionsList
             questions={codingQuestions}
-            onEdit={(q) => {
+            onEdit={useCallback((q) => {
               setEditingQuestion(q);
               setShowCodingModal(true);
-            }}
+            }, [])}
             onDelete={handleDeleteCoding}
             getDifficultyColor={getDifficultyColor}
           />
@@ -307,7 +318,7 @@ const QuestionBankTab = () => {
 };
 
 // MCQ Questions List Component
-const MCQQuestionsList = ({ questions, onEdit, onDelete, getDifficultyColor }) => {
+const MCQQuestionsList = memo(({ questions, onEdit, onDelete, getDifficultyColor }) => {
   if (questions.length === 0) {
     return (
       <div className="bg-white rounded-2xl shadow-sm p-16 text-center mt-2">
@@ -388,10 +399,10 @@ const MCQQuestionsList = ({ questions, onEdit, onDelete, getDifficultyColor }) =
       ))}
     </div>
   );
-};
+});
 
 // Coding Questions List Component
-const CodingQuestionsList = ({ questions, onEdit, onDelete, getDifficultyColor }) => {
+const CodingQuestionsList = memo(({ questions, onEdit, onDelete, getDifficultyColor }) => {
   if (questions.length === 0) {
     return (
       <div className="bg-white rounded-2xl shadow-sm p-16 text-center mt-2">
@@ -455,6 +466,6 @@ const CodingQuestionsList = ({ questions, onEdit, onDelete, getDifficultyColor }
       ))}
     </div>
   );
-};
+});
 
 export default QuestionBankTab;

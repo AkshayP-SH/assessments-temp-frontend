@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   ArrowLeft, FileSpreadsheet, Download, CheckSquare, ChevronDown,
   CheckCircle, XCircle, X, Users, MessageSquare, Filter, Video,
   ChevronLeft, ChevronRight, Loader2, TrendingUp, BarChart3, Star
 } from 'lucide-react';
 
-const ResultsTab = ({
+const ResultsTab = React.memo(({
   selectedExamDetails,
   selectedExamStudents,
   onBack,
@@ -29,6 +29,18 @@ const ResultsTab = ({
   feedbackData,
   feedbackStats,
 }) => {
+  const filteredStudents = useMemo(() => {
+    return selectedExamStudents.filter(s => {
+      if (statusFilter === 'all') return true;
+      const percentage = (Number(s.score) / Number(s.total) * 100);
+      const passingPercentage = getPassingPercentage ? getPassingPercentage(s) : (s.passingPercentage || selectedExamDetails?.passingPercentage || 50);
+      const isPassed = percentage >= passingPercentage;
+      if (statusFilter === 'pass') return isPassed;
+      if (statusFilter === 'fail') return !isPassed;
+      return true;
+    });
+  }, [selectedExamStudents, statusFilter, getPassingPercentage, selectedExamDetails]);
+
   return (
     <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-light overflow-hidden">
       <div className="p-8">
@@ -249,13 +261,7 @@ const ResultsTab = ({
                 (Number(s.score) / Number(s.total) * 100) >= (s.passingPercentage || selectedExamDetails?.passingPercentage || 50)
               ).length;
               const failedCount = selectedExamStudents.length - passedCount;
-              const filteredCount = selectedExamStudents.filter(s => {
-                if (statusFilter === 'all') return true;
-                const percentage = (Number(s.score) / Number(s.total) * 100);
-                const passingPercentage = s.passingPercentage || selectedExamDetails?.passingPercentage || 50;
-                const isPassed = percentage >= passingPercentage;
-                return statusFilter === 'pass' ? isPassed : !isPassed;
-              }).length;
+              const filteredCount = filteredStudents.length;
 
               return (
                 <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-6">
@@ -341,27 +347,9 @@ const ResultsTab = ({
                       <input
                         type="checkbox"
                         checked={(() => {
-                          const filteredStudents = selectedExamStudents.filter(s => {
-                            if (statusFilter === 'all') return true;
-                            const percentage = (Number(s.score) / Number(s.total) * 100);
-                            const passingPercentage = getPassingPercentage(s);
-                            const isPassed = percentage >= passingPercentage;
-                            if (statusFilter === 'pass') return isPassed;
-                            if (statusFilter === 'fail') return !isPassed;
-                            return true;
-                          });
                           return filteredStudents.length > 0 && filteredStudents.every(s => selectedCandidates.includes(s.student_id || s.id));
                         })()}
                         onChange={(e) => {
-                          const filteredStudents = selectedExamStudents.filter(s => {
-                            if (statusFilter === 'all') return true;
-                            const percentage = (Number(s.score) / Number(s.total) * 100);
-                            const passingPercentage = getPassingPercentage(s);
-                            const isPassed = percentage >= passingPercentage;
-                            if (statusFilter === 'pass') return isPassed;
-                            if (statusFilter === 'fail') return !isPassed;
-                            return true;
-                          });
                           if (e.target.checked) {
                             const filteredIds = filteredStudents.map(s => s.student_id || s.id);
                             setSelectedCandidates(prev => [...new Set([...prev, ...filteredIds])]);
@@ -394,16 +382,6 @@ const ResultsTab = ({
                 </thead>
                 <tbody className="bg-white divide-y divide-[#E5E7EB]">
                   {(() => {
-                    const filteredStudents = selectedExamStudents.filter(s => {
-                      if (statusFilter === 'all') return true;
-                      const percentage = (Number(s.score) / Number(s.total) * 100);
-                      const passingPercentage = getPassingPercentage(s);
-                      const isPassed = percentage >= passingPercentage;
-                      if (statusFilter === 'pass') return isPassed;
-                      if (statusFilter === 'fail') return !isPassed;
-                      return true;
-                    });
-
                     const startIndex = (resultsCurrentPage - 1) * resultsRowsPerPage;
                     const paginatedStudents = filteredStudents.slice(startIndex, startIndex + resultsRowsPerPage);
 
@@ -509,15 +487,6 @@ const ResultsTab = ({
 
             {/* Pagination */}
             {(() => {
-              const filteredStudents = selectedExamStudents.filter(s => {
-                if (statusFilter === 'all') return true;
-                const percentage = (Number(s.score) / Number(s.total) * 100);
-                const passingPercentage = getPassingPercentage(s);
-                const isPassed = percentage >= passingPercentage;
-                if (statusFilter === 'pass') return isPassed;
-                if (statusFilter === 'fail') return !isPassed;
-                return true;
-              });
               if (filteredStudents.length === 0) return null;
 
               const totalPages = Math.ceil(filteredStudents.length / resultsRowsPerPage);
@@ -700,6 +669,6 @@ const ResultsTab = ({
       </div>
     </div>
   );
-};
+});
 
 export default ResultsTab;

@@ -113,6 +113,11 @@ int main() {
     handleTimeUp
   );
 
+  const timeLeftRef = useRef(initialTimeRemaining);
+  useEffect(() => {
+    timeLeftRef.current = timeLeft;
+  }, [timeLeft]);
+
   const handleCameraLost = useCallback((reason) => {
     alert(`⚠️ ${reason}\n\nYour exam has been terminated.`);
     stopTimer();
@@ -322,7 +327,7 @@ int main() {
         currentQuestion: currentQuestion,
         markedForReview: Array.from(markedForReview),
         visitedQuestions: Array.from(visited),
-        timeRemaining: timeLeft,
+        timeRemaining: timeLeftRef.current,
         warningCount: warningCount
       };
 
@@ -363,7 +368,7 @@ int main() {
       console.error('Error saving progress:', err);
       return false;
     }
-  }, [answers, currentQuestion, markedForReview, visited, timeLeft, warningCount, questions.length]);
+  }, [answers, currentQuestion, markedForReview, visited, warningCount, questions.length]);
 
   useEffect(() => {
     if (!hasStarted || totalQuestions === 0) return;
@@ -547,31 +552,31 @@ int main() {
     };
   }, [navigate, stopProctoring]);
 
-  const handleAnswerSelect = (optionIndex) => {
+  const handleAnswerSelect = useCallback((optionIndex) => {
     setAnswers(prev => ({
       ...prev,
       [currentQuestion]: optionIndex
     }));
-  };
+  }, [currentQuestion]);
 
-  const handleNavigate = (index) => {
+  const handleNavigate = useCallback((index) => {
     setCurrentQuestion(index);
     setVisited(prev => new Set([...prev, index]));
-  };
+  }, []);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (currentQuestion < totalQuestions - 1) {
       handleNavigate(currentQuestion + 1);
     }
-  };
+  }, [currentQuestion, totalQuestions, handleNavigate]);
 
-  const handlePrevious = () => {
+  const handlePrevious = useCallback(() => {
     if (currentQuestion > 0) {
       handleNavigate(currentQuestion - 1);
     }
-  };
+  }, [currentQuestion, handleNavigate]);
 
-  const toggleMarkForReview = () => {
+  const toggleMarkForReview = useCallback(() => {
     setMarkedForReview(prev => {
       const newSet = new Set(prev);
       if (newSet.has(currentQuestion)) {
@@ -581,7 +586,7 @@ int main() {
       }
       return newSet;
     });
-  };
+  }, [currentQuestion]);
 
   // Horizontal resize handler (left panel width)
   const handleHorizontalMouseDown = (e) => {
@@ -655,7 +660,7 @@ int main() {
     };
   }, [isResizingVertical]);
 
-  const getQuestionStatus = (index) => {
+  const getQuestionStatus = useCallback((index) => {
     const isAnswered = answers[index] !== undefined;
     const isMarked = markedForReview.has(index);
 
@@ -663,7 +668,7 @@ int main() {
     if (isAnswered) return 'answered';
     if (visited.has(index)) return 'visited';
     return 'not-visited';
-  };
+  }, [answers, markedForReview, visited]);
 
   if (loading) {
     return (

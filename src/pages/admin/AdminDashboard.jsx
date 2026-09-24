@@ -436,10 +436,8 @@ const AdminDashboard = () => {
             day: 'numeric'
           })
         }));
-        setTests(transformedTests);
 
-        // Fetch results for each test
-        fetchAllResults(transformedTests);
+        setTests(transformedTests);
       }
     } catch (error) {
       console.error('Error fetching tests:', error);
@@ -448,10 +446,16 @@ const AdminDashboard = () => {
     }
   };
 
-  const fetchAllResults = async (testsList) => {
+  useEffect(() => {
+    if (selectedExamId && !studentsData[selectedExamId]) {
+      fetchResultsForTest(selectedExamId);
+    }
+  }, [selectedExamId, studentsData]);
+
+  const fetchResultsForTest = async (testId) => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await apiFetch('api/export/all-results', {
+      const response = await apiFetch(`api/export/all-results?testId=${testId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -459,79 +463,34 @@ const AdminDashboard = () => {
 
       const data = await response.json();
       if (response.ok && data.success) {
-        // Group results by test
-        const groupedResults = {};
-        const testStats = {};
+        const testResults = data.results.map(result => ({
+          id: result.roll_number,
+          student_id: result.student_id,
+          name: result.student_name,
+          email: result.student_email,
+          institute_name: result.institute_name || 'Not Specified',
+          score: result.marks_obtained,
+          total: result.total_marks,
+          passingPercentage: result.passing_percentage || selectedExamDetails?.passingPercentage || 50,
+          date: new Date(result.submitted_at).toLocaleDateString('en-IN', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+          }),
+          noFace: result.no_face_count || 0,
+          multipleFaces: result.multiple_faces_count || 0,
+          phoneDetected: result.phone_detected_count || 0,
+          loudNoise: result.loud_noise_count || 0,
+          voiceDetected: result.voice_detected_count || 0,
+          totalViolations: result.total_violations || 0,
+          highSeverityCount: result.high_severity_count || 0,
+          flagged: (result.high_severity_count || 0) >= 3
+        }));
 
-        data.results.forEach(result => {
-          let matchingTest;
-          if (result.test_id) {
-            matchingTest = testsList.find(t => t.id === result.test_id);
-          }
-
-          if (!matchingTest) {
-            matchingTest = testsList.find(t =>
-              result.exam_name.toLowerCase().includes(t.name.toLowerCase()) ||
-              t.name.toLowerCase().includes(result.exam_name.toLowerCase())
-            );
-          }
-
-          if (matchingTest) {
-            const testId = matchingTest.id;
-
-            if (!groupedResults[testId]) {
-              groupedResults[testId] = [];
-              testStats[testId] = { totalScore: 0, count: 0, passed: 0 };
-            }
-
-            const isPassed = result.percentage >= (result.passing_percentage || selectedExamDetails?.passingPercentage || 50);
-
-            groupedResults[testId].push({
-              id: result.roll_number,
-              student_id: result.student_id,
-              name: result.student_name,
-              email: result.student_email,
-              institute_name: result.institute_name || 'Not Specified',
-              score: result.marks_obtained,
-              total: result.total_marks,
-              passingPercentage: result.passing_percentage || selectedExamDetails?.passingPercentage || 50,
-              date: new Date(result.submitted_at).toLocaleDateString('en-IN', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-              }),
-              noFace: result.no_face_count || 0,
-              multipleFaces: result.multiple_faces_count || 0,
-              phoneDetected: result.phone_detected_count || 0,
-              loudNoise: result.loud_noise_count || 0,
-              voiceDetected: result.voice_detected_count || 0,
-              totalViolations: result.total_violations || 0,
-              highSeverityCount: result.high_severity_count || 0,
-              flagged: (result.high_severity_count || 0) >= 3
-            });
-
-            testStats[testId].totalScore += result.percentage;
-            testStats[testId].count += 1;
-            if (isPassed) {
-              testStats[testId].passed += 1;
-            }
-          }
-        });
-
-        setStudentsData(groupedResults);
-
-        // Update tests with avg scores and detailed pass rate from results
-        setTests(prevTests => prevTests.map(test => ({
-          ...test,
-          attempts: testStats[test.id]?.count > 0 ? testStats[test.id].count : test.attempts,
-          avgScore: testStats[test.id]?.count
-            ? Math.round(testStats[test.id].totalScore / testStats[test.id].count)
-            : 0,
-          passedCount: testStats[test.id]?.count > 0 ? testStats[test.id].passed : test.passedCount,
-          passRate: testStats[test.id]?.count > 0
-            ? Math.round((testStats[test.id].passed / testStats[test.id].count) * 100)
-            : test.passRate
-        })));
+        setStudentsData(prev => ({
+          ...prev,
+          [testId]: testResults
+        }));
       }
     } catch (error) {
       console.error('Error fetching results:', error);

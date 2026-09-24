@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
 
-const QuestionPaletteSidebar = ({
+const QuestionPaletteSidebar = memo(({
   questions = [],
   codingQuestions = [],
   currentQuestion = 0,
@@ -102,7 +102,7 @@ const QuestionPaletteSidebar = ({
           <div className="p-3 space-y-2 flex-shrink-0">
             <div className="text-xs font-bold text-shnoor-indigoMedium uppercase mb-1">Summary</div>
             <div className="flex items-center space-x-2 text-xs">
-              <div className="w-3 h-3 bg-shnoor-success rounded"></div>
+               <div className="w-3 h-3 bg-shnoor-success rounded"></div>
               <span className="text-shnoor-navy">
                 Answered ({Object.keys(answers).filter(k => !markedForReview.has(parseInt(k))).length})
               </span>
@@ -233,6 +233,6 @@ const QuestionPaletteSidebar = ({
       )}
     </aside>
   );
-};
+});
 
 export default QuestionPaletteSidebar;

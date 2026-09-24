@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { memo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Flag, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 
-const McqQuestionView = ({
+const McqQuestionView = memo(({
   currentQ,
   currentQuestion,
   totalQuestions = 1,
@@ -173,6 +173,6 @@ const McqQuestionView = ({
       </div>
     </main>
   );
-};
+});
 
 export default McqQuestionView;
