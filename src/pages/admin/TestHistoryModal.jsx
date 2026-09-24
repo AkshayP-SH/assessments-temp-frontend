@@ -7,50 +7,50 @@ const TestHistoryModal = ({
   onClose,
 }) => {
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] max-w-2xl w-full">
-        <div className="bg-gradient-to-r from-shnoor-indigo to-shnoor-navy px-6 py-4 flex justify-between items-center">
+    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100">
+        <div className="bg-[#44448E] text-white px-6 py-4 flex justify-between items-center">
           <div>
-            <h3 className="text-xl font-bold text-white">Test History</h3>
-            <p className="text-shnoor-lavender text-sm mt-1">{testHistory?.testName}</p>
+            <h3 className="text-lg font-bold text-white tracking-tight">Test History</h3>
+            <p className="text-indigo-200 text-xs mt-0.5 font-medium">{testHistory?.testName}</p>
           </div>
           <button
             onClick={onClose}
-            className="text-white hover:bg-white/20 rounded-full p-2 transition-colors"
+            className="text-white/80 hover:text-white hover:bg-white/10 rounded-lg p-1.5 transition-colors"
           >
-            <X size={24} />
+            <X size={20} />
           </button>
         </div>
 
         <div className="p-6">
           {isLoadingHistory ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="animate-spin text-shnoor-indigo" size={32} />
-              <span className="ml-3 text-shnoor-indigoMedium">Loading history...</span>
+              <Loader2 className="animate-spin text-[#44448E]" size={28} />
+              <span className="ml-3 text-slate-500 text-sm font-medium">Loading history...</span>
             </div>
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-4">
               {/* Created Info */}
-              <div className="p-4 bg-shnoor-successLight rounded-xl border border-shnoor-successLight">
-                <div className="flex items-center space-x-3 mb-3">
-                  <div className="w-10 h-10 bg-shnoor-successLight rounded-full flex items-center justify-center">
-                    <Plus className="text-shnoor-success" size={20} />
+              <div className="p-4 bg-emerald-50/50 rounded-xl border border-emerald-100/80">
+                <div className="flex items-center space-x-3 mb-2.5">
+                  <div className="w-8 h-8 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center">
+                    <Plus className="text-emerald-600" size={16} />
                   </div>
                   <div>
-                    <h4 className="font-bold text-shnoor-navy">Created</h4>
-                    <p className="text-sm text-shnoor-indigoMedium">Test was created</p>
+                    <h4 className="font-semibold text-slate-800 text-sm">Created</h4>
+                    <p className="text-xs text-slate-500">Test was created</p>
                   </div>
                 </div>
-                <div className="ml-13 space-y-2">
-                  <div className="flex items-center space-x-2 text-sm">
-                    <Users size={16} className="text-shnoor-indigoMedium" />
-                    <span className="text-shnoor-indigoMedium">By:</span>
-                    <span className="font-bold text-shnoor-navy">{testHistory?.createdBy}</span>
+                <div className="ml-11 space-y-1.5">
+                  <div className="flex items-center space-x-2 text-xs">
+                    <Users size={14} className="text-slate-400" />
+                    <span className="text-slate-500">By:</span>
+                    <span className="font-semibold text-slate-800">{testHistory?.createdBy}</span>
                   </div>
-                  <div className="flex items-center space-x-2 text-sm">
-                    <Calendar size={16} className="text-shnoor-indigoMedium" />
-                    <span className="text-shnoor-indigoMedium">On:</span>
-                    <span className="font-bold text-shnoor-navy">
+                  <div className="flex items-center space-x-2 text-xs">
+                    <Calendar size={14} className="text-slate-400" />
+                    <span className="text-slate-500">On:</span>
+                    <span className="font-semibold text-slate-800">
                       {testHistory?.createdAt && new Date(testHistory.createdAt).toLocaleString('en-US', {
                         year: 'numeric',
                         month: 'short',
@@ -64,26 +64,26 @@ const TestHistoryModal = ({
               </div>
 
               {/* Updated Info */}
-              <div className="p-4 bg-shnoor-lavender rounded-xl border border-shnoor-light">
-                <div className="flex items-center space-x-3 mb-3">
-                  <div className="w-10 h-10 bg-shnoor-lavender rounded-full flex items-center justify-center">
-                    <Pencil className="text-shnoor-indigo" size={20} />
+              <div className="p-4 bg-indigo-50/40 rounded-xl border border-indigo-100/70">
+                <div className="flex items-center space-x-3 mb-2.5">
+                  <div className="w-8 h-8 bg-indigo-100/80 text-[#44448E] rounded-lg flex items-center justify-center">
+                    <Pencil className="text-[#44448E]" size={15} />
                   </div>
                   <div>
-                    <h4 className="font-bold text-shnoor-navy">Last Updated</h4>
-                    <p className="text-sm text-shnoor-indigoMedium">Most recent modification</p>
+                    <h4 className="font-semibold text-slate-800 text-sm">Last Updated</h4>
+                    <p className="text-xs text-slate-500">Most recent modification</p>
                   </div>
                 </div>
-                <div className="ml-13 space-y-2">
-                  <div className="flex items-center space-x-2 text-sm">
-                    <Users size={16} className="text-shnoor-indigoMedium" />
-                    <span className="text-shnoor-indigoMedium">By:</span>
-                    <span className="font-bold text-shnoor-navy">{testHistory?.updatedBy}</span>
+                <div className="ml-11 space-y-1.5">
+                  <div className="flex items-center space-x-2 text-xs">
+                    <Users size={14} className="text-slate-400" />
+                    <span className="text-slate-500">By:</span>
+                    <span className="font-semibold text-slate-800">{testHistory?.updatedBy}</span>
                   </div>
-                  <div className="flex items-center space-x-2 text-sm">
-                    <Calendar size={16} className="text-shnoor-indigoMedium" />
-                    <span className="text-shnoor-indigoMedium">On:</span>
-                    <span className="font-bold text-shnoor-navy">
+                  <div className="flex items-center space-x-2 text-xs">
+                    <Calendar size={14} className="text-slate-400" />
+                    <span className="text-slate-500">On:</span>
+                    <span className="font-semibold text-slate-800">
                       {testHistory?.updatedAt && new Date(testHistory.updatedAt).toLocaleString('en-US', {
                         year: 'numeric',
                         month: 'short',
@@ -99,10 +99,10 @@ const TestHistoryModal = ({
           )}
         </div>
 
-        <div className="p-6 border-t border-shnoor-light flex justify-end">
+        <div className="px-6 py-3.5 bg-slate-50/70 border-t border-slate-100 flex justify-end">
           <button
             onClick={onClose}
-            className="px-6 py-3 bg-shnoor-light hover:bg-shnoor-lavender text-shnoor-navy rounded-xl font-medium transition-colors"
+            className="px-5 py-2 border border-slate-200 text-slate-700 hover:bg-slate-100 rounded-xl font-medium text-sm transition-all duration-200"
           >
             Close
           </button>

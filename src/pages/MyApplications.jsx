@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { LogOut, ArrowLeft, Briefcase, Loader2, RefreshCw, CheckCircle, Clock, FileText, AlertTriangle, XCircle, Trophy, PlayCircle, Award, ChevronDown } from 'lucide-react';
 import { apiFetch } from '../config/api';
 import ThemeSelector from '../components/ThemeSelector';
+import { clearStorageKeepTheme } from '../utils/theme';
 import shnoorLogo from '../assets/shnoor-logo.png';
 
 const STATUS_CONFIG = {
@@ -108,7 +109,7 @@ export default function MyApplications({ isEmbedded = false }) {
             });
 
             if (res.status === 401) {
-                localStorage.clear();
+                clearStorageKeepTheme();
                 navigate('/login');
                 return;
             }
@@ -167,7 +168,7 @@ export default function MyApplications({ isEmbedded = false }) {
     }, []);
 
     const handleLogout = () => {
-        localStorage.clear();
+        clearStorageKeepTheme();
         navigate('/login');
     };
 

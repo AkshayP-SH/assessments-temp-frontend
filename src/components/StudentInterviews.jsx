@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Video, Calendar, Clock, AlertCircle } from 'lucide-react';
 import { io } from 'socket.io-client';
 import { apiFetch } from '../config/api';
+import { clearStorageKeepTheme } from '../utils/theme';
 
 const StudentInterviews = () => {
   const navigate = useNavigate();
@@ -106,7 +107,7 @@ const StudentInterviews = () => {
       });
 
       if (response.status === 401) {
-        localStorage.clear();
+        clearStorageKeepTheme();
         navigate('/login');
         return;
       }

@@ -5,7 +5,7 @@ import { applyTheme, getSavedTheme } from '../utils/theme';
 const THEMES = [
   { id: 'default', label: 'Light', icon: Sun },
   { id: 'dark', label: 'Dark', icon: Moon },
-  { id: 'green', label: 'Green', icon: Leaf },
+  { id: 'green', label: 'Leaf', icon: Leaf },
 ];
 
 const ThemeSelector = ({ className = '', variant = 'dark' }) => {
@@ -17,10 +17,11 @@ const ThemeSelector = ({ className = '', variant = 'dark' }) => {
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
 
   useEffect(() => {
-    applyTheme(theme);
-  }, [theme]);
+    const handleThemeChange = (event) => {
+      const nextTheme = event.detail?.theme || getSavedTheme();
+      setTheme(nextTheme);
+    };
 
-  useEffect(() => {
     const handleStorage = (event) => {
       if (event.key === 'app-theme' || event.key === 'shnoor-theme') {
         setTheme(getSavedTheme());
@@ -33,10 +34,12 @@ const ThemeSelector = ({ className = '', variant = 'dark' }) => {
       }
     };
 
+    window.addEventListener('themechange', handleThemeChange);
     window.addEventListener('storage', handleStorage);
     document.addEventListener('mousedown', handleOutsideClick);
 
     return () => {
+      window.removeEventListener('themechange', handleThemeChange);
       window.removeEventListener('storage', handleStorage);
       document.removeEventListener('mousedown', handleOutsideClick);
     };
@@ -110,6 +113,7 @@ const ThemeSelector = ({ className = '', variant = 'dark' }) => {
                 type="button"
                 onClick={() => {
                   setTheme(id);
+                  applyTheme(id);
                   setIsOpen(false);
                 }}
                 aria-label={label}
