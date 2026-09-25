@@ -5,8 +5,15 @@ import Button from './Button';
 import InputField from './InputField';
 import ThemeSelector from './ThemeSelector';
 import shnoorLogo from '../assets/shnoor-logo.png';
+import { useSEO } from '../hooks/useSEO';
 
 const ForgotPassword = () => {
+  useSEO({
+    title: 'Forgot Password - SHNOOR Assessments',
+    description: 'Reset your password for SHNOOR Assessments securely.',
+    canonical: 'https://assessments.shnoor.com/forgot-password',
+  });
+
   const navigate = useNavigate();
   const [step, setStep] = useState(1); // 1 = Email, 2 = OTP, 3 = New Password
   
