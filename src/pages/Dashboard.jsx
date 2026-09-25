@@ -7,6 +7,7 @@ import JobBoard from './JobBoard';
 import MyApplications from './MyApplications';
 import StudentSupportChatbot from '../components/chatbot/StudentSupportChatbot';
 import ThemeSelector from '../components/ThemeSelector';
+import { clearStorageKeepTheme } from '../utils/theme';
 import { apiFetch } from '../config/api';
 import shnoorLogo from '../assets/shnoor-logo.png';
 import { useSEO } from '../hooks/useSEO';
@@ -84,7 +85,7 @@ const Dashboard = () => {
         // Handle 401 - Token expired or invalid
         if (response.status === 401) {
           console.log('Authentication token expired or invalid');
-          localStorage.clear();
+          clearStorageKeepTheme();
           navigate('/login');
           return;
         }
@@ -178,7 +179,7 @@ const Dashboard = () => {
   }, [activeTab]);
 
   const handleLogout = () => {
-    localStorage.clear();
+    clearStorageKeepTheme();
     navigate('/login');
   };
 

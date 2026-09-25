@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { LogOut, Briefcase, Building2, Clock, ArrowLeft, Loader2, RefreshCw, Search, CheckCircle2, CheckCircle, X } from 'lucide-react';
 import { apiFetch } from '../config/api';
 import ThemeSelector from '../components/ThemeSelector';
+import { clearStorageKeepTheme } from '../utils/theme';
 import shnoorLogo from '../assets/shnoor-logo.png';
 import { useSEO } from '../hooks/useSEO';
 import { useDebounce } from '../hooks/useDebounce';
@@ -98,7 +99,7 @@ export default function JobBoard({ isEmbedded = false }) {
                     const enrolledData = await enrolledRes.json();
 
                     if (enrolledRes.status === 401) {
-                        localStorage.clear();
+                        clearStorageKeepTheme();
                         navigate('/login');
                         return;
                     }
@@ -146,7 +147,7 @@ export default function JobBoard({ isEmbedded = false }) {
     }, []);
 
     const handleLogout = () => {
-        localStorage.clear();
+        clearStorageKeepTheme();
         navigate('/login');
     };
 

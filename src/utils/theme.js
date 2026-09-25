@@ -1,16 +1,18 @@
-export const VALID_THEMES = ['default', 'dark', 'green'];
+export const VALID_THEMES = ['default', 'dark', 'green', 'leaf'];
 
 export const getSavedTheme = () => {
   if (typeof window === 'undefined') return 'default';
 
   const storedTheme = localStorage.getItem('app-theme') || localStorage.getItem('shnoor-theme') || 'default';
-  return VALID_THEMES.includes(storedTheme) ? storedTheme : 'default';
+  const resolved = storedTheme === 'leaf' ? 'green' : storedTheme;
+  return VALID_THEMES.includes(resolved) ? resolved : 'default';
 };
 
 export const applyTheme = (requestedTheme) => {
   if (typeof document === 'undefined') return 'default';
 
-  const theme = VALID_THEMES.includes(requestedTheme) ? requestedTheme : 'default';
+  const normalized = requestedTheme === 'leaf' ? 'green' : requestedTheme;
+  const theme = VALID_THEMES.includes(normalized) ? normalized : 'default';
 
   if (theme === 'default') {
     document.documentElement.removeAttribute('data-theme');
@@ -26,3 +28,12 @@ export const applyTheme = (requestedTheme) => {
 
   return theme;
 };
+
+export const clearStorageKeepTheme = () => {
+  if (typeof window === 'undefined') return;
+  const appTheme = localStorage.getItem('app-theme');
+  const shnoorTheme = localStorage.getItem('shnoor-theme');
+  localStorage.clear();
+  if (appTheme) localStorage.setItem('app-theme', appTheme);
+  if (shnoorTheme) localStorage.setItem('shnoor-theme', shnoorTheme);
+};

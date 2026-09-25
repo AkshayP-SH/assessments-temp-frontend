@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Star, Send, X } from 'lucide-react';
+import { clearStorageKeepTheme } from '../utils/theme';
 
 const Feedback = () => {
   const navigate = useNavigate();
@@ -13,13 +14,13 @@ const Feedback = () => {
     // console.log('Feedback:', { rating, feedback, studentId: localStorage.getItem('studentId') });
     setSubmitted(true);
     setTimeout(() => {
-      localStorage.clear();
+      clearStorageKeepTheme();
       navigate('/login');
     }, 2000);
   };
 
   const handleClose = () => {
-    localStorage.clear();
+    clearStorageKeepTheme();
     navigate('/login');
   };
 
