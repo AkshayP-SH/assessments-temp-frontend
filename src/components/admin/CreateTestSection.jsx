@@ -3,6 +3,7 @@ import { Upload, FileText, Plus, Save, Trash2, ArrowLeft, CheckCircle, AlertCirc
 import { apiFetch } from '../../config/api';
 import CodingQuestionSelector from './CodingQuestionSelector';
 import MCQBankSelector from './MCQBankSelector';
+import toast from 'react-hot-toast';
 
 // DISABLED: Code execution feature
 const ENABLE_CODE_EXECUTION = true;
@@ -668,12 +669,12 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                     if (onSaved) onSaved();
                     setStep('success');
                 } else {
-                    alert(data.message || 'Failed to create test');
+                    toast.error(data.message || 'Failed to create test');
                 }
             }
         } catch (error) {
             console.error('Submit error:', error);
-            alert('Failed to save test. Please try again.');
+            toast.error('Failed to save test. Please try again.');
         } finally {
             setIsUploading(false);
         }

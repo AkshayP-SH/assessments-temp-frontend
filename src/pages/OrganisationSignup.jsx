@@ -5,6 +5,7 @@ import InputField from '../components/InputField';
 import ThemeSelector from '../components/ThemeSelector';
 import shnoorLogo from '../assets/shnoor-logo.png';
 import { useSEO } from '../hooks/useSEO';
+import { isBusinessEmail } from '../utils/emailValidation';
 
 /* ─── Icon helpers ──────────────────────────────────────────────────────────── */
 const EyeOpen = () => (
@@ -42,17 +43,31 @@ const OrganisationSignup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [emailError, setEmailError] = useState('');
   const [success, setSuccess] = useState(false);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
     setError('');
+
+    if (name === 'email') {
+      if (value && !isBusinessEmail(value)) {
+        setEmailError("Please use your organization's work email address.");
+      } else {
+        setEmailError('');
+      }
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.orgName || !formData.email || !formData.password) {
       setError('Please fill in required fields (Name, Email, Password).');
+      return;
+    }
+
+    if (emailError) {
       return;
     }
     
@@ -197,15 +212,18 @@ const OrganisationSignup = () => {
                   onChange={handleChange}
                   required
                 />
-                <InputField
-                  label="Work Email Address *"
-                  name="email"
-                  type="email"
-                  placeholder="admin@organisation.com"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                />
+                <div className="flex flex-col">
+                  <InputField
+                    label="Work Email Address *"
+                    name="email"
+                    type="email"
+                    placeholder="admin@organisation.com"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                  />
+                  {emailError && <p className="text-xs text-shnoor-danger mt-0 -translate-y-2">{emailError}</p>}
+                </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

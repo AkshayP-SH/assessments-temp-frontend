@@ -6,6 +6,7 @@ import { useSupportSocket } from '../hooks/useSupportSocket';
 import { API_URL } from '../config/api';
 import shnoorLogo from '../assets/shnoor-logo.png';
 import ThemeSelector from './ThemeSelector';
+import toast from 'react-hot-toast';
 
 const AdminHeader = ({ title = "Dashboard", userName = "Admin" }) => {
   const navigate = useNavigate();
@@ -24,8 +25,19 @@ const AdminHeader = ({ title = "Dashboard", userName = "Admin" }) => {
 
   const [toastNotification, setToastNotification] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [clientPlanId, setClientPlanId] = useState(null);
   const shownNotificationsRef = useRef(new Set());
   const socketCountReceivedRef = useRef(false);
+
+  useEffect(() => {
+    if (!isClientAdmin) return;
+    const token = localStorage.getItem('adminToken') || localStorage.getItem('clientToken');
+    if (!token) return;
+    fetch(`${API_URL}/api/client/auth/me`, { headers: { 'Authorization': `Bearer ${token}` } })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d?.success && d.admin) setClientPlanId(d.admin.plan_id); })
+      .catch(() => { });
+  }, [isClientAdmin]);
 
   // Use support socket for real-time notifications with browser notifications enabled
   const {
@@ -121,7 +133,7 @@ const AdminHeader = ({ title = "Dashboard", userName = "Admin" }) => {
 
   return (
     <>
-      <header className="w-full bg-shnoor-navy h-[60px] sm:h-[72px] shadow-md relative z-50">
+      <header className="w-full bg-shnoor-navy h-[60px] sm:h-[72px] shadow-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
           <div className="flex items-center gap-3 sm:gap-4">
             {/* Logo icon */}
@@ -144,7 +156,13 @@ const AdminHeader = ({ title = "Dashboard", userName = "Admin" }) => {
             <Button
               variant="primary"
               className="admin-header-action !h-10 !px-5 text-sm hover:shadow-[0_0_15px_rgba(107,107,229,0.4)] hover:-translate-y-0.5 transition-all border-0 relative"
-              onClick={() => navigate(`${basePath}/student-messages`)}
+              onClick={() => {
+                if (clientPlanId === 'trial') {
+                  toast.error('This feature is not available in the 7-day free trial plan. Please upgrade your plan to access it.', { duration: 4000 });
+                  return;
+                }
+                navigate(`${basePath}/student-messages`);
+              }}
             >
               <MessageSquare size={16} className="mr-2" />
               <span>Messages</span>
@@ -167,7 +185,13 @@ const AdminHeader = ({ title = "Dashboard", userName = "Admin" }) => {
             <Button
               variant="primary"
               className="admin-header-action !h-10 !px-5 text-sm hover:shadow-[0_0_15px_rgba(107,107,229,0.4)] hover:-translate-y-0.5 transition-all border-0"
-              onClick={() => navigate(`${basePath}/live-proctoring`)}
+              onClick={() => {
+                if (clientPlanId === 'trial') {
+                  toast.error('This feature is not available in the 7-day free trial plan. Please upgrade your plan to access it.', { duration: 4000 });
+                  return;
+                }
+                navigate(`${basePath}/live-proctoring`);
+              }}
             >
               <Video size={16} className="mr-2" />
               <span>Live Proctoring</span>
@@ -212,6 +236,10 @@ const AdminHeader = ({ title = "Dashboard", userName = "Admin" }) => {
               variant="primary"
               className="admin-header-action w-full justify-start !h-12 !px-4 text-sm border-0 relative"
               onClick={() => {
+                if (clientPlanId === 'trial') {
+                  toast.error('This feature is not available in the 7-day free trial plan. Please upgrade your plan to access it.', { duration: 4000 });
+                  return;
+                }
                 navigate(`${basePath}/student-messages`);
                 setMobileMenuOpen(false);
               }}
@@ -241,6 +269,10 @@ const AdminHeader = ({ title = "Dashboard", userName = "Admin" }) => {
               variant="primary"
               className="admin-header-action w-full justify-start !h-12 !px-4 text-sm border-0"
               onClick={() => {
+                if (clientPlanId === 'trial') {
+                  alert('This feature is not available in the 7-day free trial plan. Please upgrade your plan to access it.');
+                  return;
+                }
                 navigate(`${basePath}/live-proctoring`);
                 setMobileMenuOpen(false);
               }}

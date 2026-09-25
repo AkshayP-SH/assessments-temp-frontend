@@ -16,6 +16,7 @@ import InputField from '../../components/InputField';
 import Button from '../../components/Button';
 import { useSEO } from '../../hooks/useSEO';
 import { lazy, Suspense } from 'react';
+import toast from 'react-hot-toast';
 import Pagination from '../../components/Pagination';
 
 // Lazy load large sections and modals to reduce the initial bundle size
@@ -189,6 +190,8 @@ const AdminDashboard = () => {
   const [clientsList, setClientsList] = useState([]);
   const [viewAsClientId, setViewAsClientId] = useState(''); // '' = all clients (super admin default)
   const [quota, setQuota] = useState(null); // plan quota for client admin
+  const [clientPlanId, setClientPlanId] = useState(null);
+
   const isSuperAdmin = (() => {
     try {
       const u = JSON.parse(localStorage.getItem('adminUser') || '{}');
@@ -227,6 +230,17 @@ const AdminDashboard = () => {
     apiFetch('api/client/auth/me/quota', { headers: { 'Authorization': `Bearer ${token}` } })
       .then(r => r.ok ? r.json() : null)
       .then(d => { if (d?.success) setQuota(d.quota); })
+      .catch(() => { });
+  }, [isSuperAdmin]);
+
+  // Fetch plan_id for client admins to restrict trial features
+  useEffect(() => {
+    if (isSuperAdmin) return;
+    const token = localStorage.getItem('adminToken');
+    if (!token) return;
+    apiFetch('api/client/auth/me', { headers: { 'Authorization': `Bearer ${token}` } })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d?.success && d.admin) setClientPlanId(d.admin.plan_id); })
       .catch(() => { });
   }, [isSuperAdmin]);
 
@@ -1377,7 +1391,7 @@ const AdminDashboard = () => {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        alert(data.message || 'Institute added successfully');
+        toast.success(data.message || 'Institute added successfully');
         setNewInstituteName('');
         setAllInstitutes(prevInstitutes => [
           {
@@ -1388,11 +1402,11 @@ const AdminDashboard = () => {
           ...prevInstitutes.filter(institute => institute.id !== data.institute.id)
         ]);
       } else {
-        alert(data.message || 'Failed to add institute');
+        toast.error(data.message || 'Failed to add institute');
       }
     } catch (error) {
       console.error('Error adding institute:', error);
-      alert('Failed to add institute');
+      toast.error('Failed to add institute');
     } finally {
       setIsAddingInstitute(false);
     }
@@ -1851,7 +1865,7 @@ const AdminDashboard = () => {
 
       if (response.ok && data.success) {
         // Show success message with test assignment info
-        alert(data.message || 'Student added successfully');
+        toast.success(data.message || 'Student added successfully');
         setShowAddStudentForm(false);
         setNewStudentData({
           full_name: '',
@@ -1862,11 +1876,11 @@ const AdminDashboard = () => {
         handleManageStudents(selectedInstituteForStudents);
         fetchAllInstitutes(); // Refresh to update student counts
       } else {
-        alert(data.message || 'Failed to add student');
+        toast.error(data.message || 'Failed to add student');
       }
     } catch (error) {
       console.error('Error adding student:', error);
-      alert('Failed to add student');
+      toast.error('Failed to add student');
     } finally {
       setIsAddingStudent(false);
     }
@@ -2371,30 +2385,28 @@ const AdminDashboard = () => {
 
           {/* Subscription Expiry Banner */}
           {!isSuperAdmin && daysRemaining !== null && daysRemaining <= 7 && (
-            <div className={`mb-6 p-4 rounded-xl shadow-sm border flex items-center justify-between animate-fade-in ${
-              daysRemaining <= 1 
-                ? 'bg-red-50 border-red-200 text-red-800' 
-                : 'bg-yellow-50 border-yellow-200 text-yellow-800'
-            }`}>
+            <div className={`mb-6 p-4 rounded-xl shadow-sm border flex items-center justify-between animate-fade-in ${daysRemaining <= 1
+              ? 'bg-red-50 border-red-200 text-red-800'
+              : 'bg-yellow-50 border-yellow-200 text-yellow-800'
+              }`}>
               <div className="flex items-center">
                 <AlertCircle size={20} className={`mr-3 ${daysRemaining <= 1 ? 'text-red-500' : 'text-yellow-600'}`} />
                 <div>
                   <h4 className="font-bold">Subscription Alert</h4>
                   <p className="text-sm mt-0.5">
-                    {daysRemaining <= 0 
+                    {daysRemaining <= 0
                       ? 'Your subscription has expired. Please renew to avoid losing access.'
                       : `Your subscription will expire in ${daysRemaining} day${daysRemaining === 1 ? '' : 's'}. Renew now to avoid interruption.`
                     }
                   </p>
                 </div>
               </div>
-              <button 
+              <button
                 onClick={() => navigate('/client/subscription-plans')}
-                className={`px-4 py-2 rounded-lg text-sm font-bold shadow-sm transition-colors ${
-                  daysRemaining <= 1 
-                    ? 'bg-red-600 hover:bg-red-700 text-white' 
-                    : 'bg-yellow-500 hover:bg-yellow-600 text-white'
-                }`}
+                className={`px-4 py-2 rounded-lg text-sm font-bold shadow-sm transition-colors ${daysRemaining <= 1
+                  ? 'bg-red-600 hover:bg-red-700 text-white'
+                  : 'bg-yellow-500 hover:bg-yellow-600 text-white'
+                  }`}
               >
                 Renew Now
               </button>
@@ -2417,7 +2429,14 @@ const AdminDashboard = () => {
                 ].map((tab) => (
                   <button
                     key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
+                    onClick={() => {
+                      const restrictedTabs = ['reports', 'bulk-upload', 'violations', 'interviews', 'job-openings'];
+                      if (clientPlanId === 'trial' && restrictedTabs.includes(tab.id)) {
+                        toast.error('This feature is not available in the 7-day free trial plan. Please upgrade your plan to access it.', { duration: 4000 });
+                        return;
+                      }
+                      setActiveTab(tab.id);
+                    }}
                     className={`admin-tab-button flex items-center space-x-2 px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-medium transition-all shrink-0 text-sm sm:text-base ${activeTab === tab.id ? 'is-active' : ''}`}
                   >
                     <tab.icon size={20} />
@@ -2983,11 +3002,11 @@ const AdminDashboard = () => {
                         return true;
                       });
                       if (filteredStudents.length === 0) return null;
-                      
+
                       const totalPages = Math.ceil(filteredStudents.length / resultsRowsPerPage);
                       const startIndex = (resultsCurrentPage - 1) * resultsRowsPerPage;
                       const endIndex = Math.min(startIndex + resultsRowsPerPage, filteredStudents.length);
-                      
+
                       return (
                         <div className="flex items-center justify-end px-4 py-3 bg-white border border-shnoor-light mt-4 rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)]">
                           <div className="flex items-center space-x-6 text-sm text-shnoor-indigoMedium">
@@ -3006,11 +3025,11 @@ const AdminDashboard = () => {
                                 ))}
                               </select>
                             </div>
-                            
+
                             <span>
                               {startIndex + 1} - {endIndex} of {filteredStudents.length}
                             </span>
-                            
+
                             <div className="flex items-center space-x-2">
                               <button
                                 onClick={() => setResultsCurrentPage(prev => Math.max(prev - 1, 1))}
@@ -3504,7 +3523,7 @@ const AdminDashboard = () => {
                             </div>
 
                             {filteredTests.length > 0 && (
-                              <Pagination 
+                              <Pagination
                                 currentPage={examCurrentPage}
                                 totalPages={examTotalPages}
                                 onPageChange={setExamCurrentPage}
@@ -3866,7 +3885,7 @@ const AdminDashboard = () => {
                       )}
 
                       {allInstitutes.length > 0 && (
-                        <Pagination 
+                        <Pagination
                           currentPage={instituteCurrentPage}
                           totalPages={instituteTotalPages}
                           onPageChange={setInstituteCurrentPage}

@@ -10,14 +10,14 @@ const UpgradeRequiredModal = ({ isOpen, onClose, quotaInfo }) => {
   const { resource, limit, used, tier } = quotaInfo;
 
   // Format resource name nicely
-  const resourceName = resource === 'institutes' ? 'Institutes' : 
-                       resource === 'tests' ? 'Tests' : 
-                       resource === 'students' ? 'Students' : 
-                       resource;
+  const resourceName = resource === 'institutes' ? 'Institutes' :
+    resource === 'tests' ? 'Tests' :
+      resource === 'students' ? 'Students' :
+        resource;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-shnoor-navy/60 backdrop-blur-sm">
-      <div 
+      <div
         className="bg-white rounded-2xl w-full max-w-md shadow-[0_20px_60px_rgba(14,14,39,0.15)] border-t-4 border-t-shnoor-danger animate-in fade-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
@@ -32,7 +32,7 @@ const UpgradeRequiredModal = ({ isOpen, onClose, quotaInfo }) => {
                 <p className="text-sm font-medium text-shnoor-danger">Plan limit reached</p>
               </div>
             </div>
-            <button 
+            <button
               onClick={onClose}
               className="p-2 text-shnoor-soft hover:bg-shnoor-lavender hover:text-shnoor-navy rounded-lg transition-colors"
             >
