@@ -443,10 +443,8 @@ const AdminDashboard = () => {
             day: 'numeric'
           })
         }));
-        setTests(transformedTests);
 
-        // Fetch results for each test
-        fetchAllResults(transformedTests);
+        setTests(transformedTests);
       }
     } catch (error) {
       console.error('Error fetching tests:', error);
@@ -455,10 +453,16 @@ const AdminDashboard = () => {
     }
   };
 
-  const fetchAllResults = async (testsList) => {
+  useEffect(() => {
+    if (selectedExamId && !studentsData[selectedExamId]) {
+      fetchResultsForTest(selectedExamId);
+    }
+  }, [selectedExamId, studentsData]);
+
+  const fetchResultsForTest = async (testId) => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await apiFetch(`api/export/all-results${clientParam}`, {
+      const response = await apiFetch(`api/export/all-results?testId=${testId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -466,79 +470,34 @@ const AdminDashboard = () => {
 
       const data = await response.json();
       if (response.ok && data.success) {
-        // Group results by test
-        const groupedResults = {};
-        const testStats = {};
+        const testResults = data.results.map(result => ({
+          id: result.roll_number,
+          student_id: result.student_id,
+          name: result.student_name,
+          email: result.student_email,
+          institute_name: result.institute_name || 'Not Specified',
+          score: result.marks_obtained,
+          total: result.total_marks,
+          passingPercentage: result.passing_percentage || selectedExamDetails?.passingPercentage || 50,
+          date: new Date(result.submitted_at).toLocaleDateString('en-IN', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+          }),
+          noFace: result.no_face_count || 0,
+          multipleFaces: result.multiple_faces_count || 0,
+          phoneDetected: result.phone_detected_count || 0,
+          loudNoise: result.loud_noise_count || 0,
+          voiceDetected: result.voice_detected_count || 0,
+          totalViolations: result.total_violations || 0,
+          highSeverityCount: result.high_severity_count || 0,
+          flagged: (result.high_severity_count || 0) >= 3
+        }));
 
-        data.results.forEach(result => {
-          let matchingTest;
-          if (result.test_id) {
-            matchingTest = testsList.find(t => t.id === result.test_id);
-          }
-
-          if (!matchingTest) {
-            matchingTest = testsList.find(t =>
-              result.exam_name.toLowerCase().includes(t.name.toLowerCase()) ||
-              t.name.toLowerCase().includes(result.exam_name.toLowerCase())
-            );
-          }
-
-          if (matchingTest) {
-            const testId = matchingTest.id;
-
-            if (!groupedResults[testId]) {
-              groupedResults[testId] = [];
-              testStats[testId] = { totalScore: 0, count: 0, passed: 0 };
-            }
-
-            const isPassed = result.percentage >= (result.passing_percentage || selectedExamDetails?.passingPercentage || 50);
-
-            groupedResults[testId].push({
-              id: result.roll_number,
-              student_id: result.student_id,
-              name: result.student_name,
-              email: result.student_email,
-              institute_name: result.institute_name || 'Not Specified',
-              score: result.marks_obtained,
-              total: result.total_marks,
-              passingPercentage: result.passing_percentage || selectedExamDetails?.passingPercentage || 50,
-              date: new Date(result.submitted_at).toLocaleDateString('en-IN', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-              }),
-              noFace: result.no_face_count || 0,
-              multipleFaces: result.multiple_faces_count || 0,
-              phoneDetected: result.phone_detected_count || 0,
-              loudNoise: result.loud_noise_count || 0,
-              voiceDetected: result.voice_detected_count || 0,
-              totalViolations: result.total_violations || 0,
-              highSeverityCount: result.high_severity_count || 0,
-              flagged: (result.high_severity_count || 0) >= 3
-            });
-
-            testStats[testId].totalScore += result.percentage;
-            testStats[testId].count += 1;
-            if (isPassed) {
-              testStats[testId].passed += 1;
-            }
-          }
-        });
-
-        setStudentsData(groupedResults);
-
-        // Update tests with avg scores and detailed pass rate from results
-        setTests(prevTests => prevTests.map(test => ({
-          ...test,
-          attempts: testStats[test.id]?.count > 0 ? testStats[test.id].count : test.attempts,
-          avgScore: testStats[test.id]?.count
-            ? Math.round(testStats[test.id].totalScore / testStats[test.id].count)
-            : 0,
-          passedCount: testStats[test.id]?.count > 0 ? testStats[test.id].passed : test.passedCount,
-          passRate: testStats[test.id]?.count > 0
-            ? Math.round((testStats[test.id].passed / testStats[test.id].count) * 100)
-            : test.passRate
-        })));
+        setStudentsData(prev => ({
+          ...prev,
+          [testId]: testResults
+        }));
       }
     } catch (error) {
       console.error('Error fetching results:', error);
@@ -2023,17 +1982,17 @@ const AdminDashboard = () => {
   };
 
   return (
-    <Suspense fallback={<div className="flex h-screen items-center justify-center bg-[#F8F7FF]"><Loader2 className="animate-spin h-12 w-12 text-shnoor-indigo" /></div>}>
-      <div className="admin-dashboard-root">
+    <Suspense fallback={<div className="flex h-screen items-center justify-center bg-[#E5E5F3] dark:bg-[#11111d]"><Loader2 className="animate-spin h-12 w-12 text-[#403f75] dark:text-[#9A9AC9]" /></div>}>
+      <div className="admin-dashboard-root min-h-screen bg-[#E5E5F3] dark:bg-[#11111d]">
         {/* Header */}
         <AdminHeader />
 
         {/* Super Admin — Client Scope Selector */}
         {isSuperAdmin && (
-          <div className="bg-white border-b border-shnoor-mist shadow-sm">
+          <div className="bg-white dark:bg-[#25254A] border-b border-shnoor-mist dark:border-[#383863] shadow-sm">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center gap-3">
-              <div className="flex items-center gap-2 text-xs font-semibold text-shnoor-indigoMedium uppercase tracking-wide flex-shrink-0">
-                <Building2 size={14} />
+              <div className="flex items-center gap-2 text-xs font-semibold text-shnoor-indigoMedium dark:text-[#9A9AC9] uppercase tracking-wide flex-shrink-0">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
                 Viewing as:
               </div>
               <select
@@ -2043,7 +2002,7 @@ const AdminDashboard = () => {
                   setTests([]);
                   setAllInstitutes([]);
                 }}
-                className="h-8 pl-3 pr-8 rounded-lg border border-shnoor-mist bg-white text-sm text-shnoor-navy focus:outline-none focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo transition-colors"
+                className="h-8 pl-3 pr-8 rounded-lg border border-shnoor-mist dark:border-[#383863] bg-white dark:bg-[#25254A] text-sm text-shnoor-navy dark:text-white focus:outline-none focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo transition-colors"
               >
                 <option value="">All Clients (Platform View)</option>
                 {clientsList.map(c => (
@@ -2098,7 +2057,39 @@ const AdminDashboard = () => {
           </div>
         )}
 
+        {/* Tab Navigation */}
+        {!showCreateTest && !selectedExamId && (
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 mb-4 sm:mb-8 overflow-x-auto hide-scrollbar">
+            <div className="bg-white dark:bg-[#25254A] rounded-[24px] shadow-sm p-2 flex sm:inline-flex space-x-2 w-max !max-w-none">
+              {[
+                { id: 'exams', label: 'Manage Exams', icon: FileSpreadsheet },
+                { id: 'institutes', label: 'Manage Institutes', icon: Building2 },
+                { id: 'reports', label: 'Reports', icon: FileSpreadsheet },
+                { id: 'bulk-upload', label: 'Bulk Upload', icon: Users },
+                { id: 'violations', label: 'Violations', icon: AlertCircle },
+                { id: 'interviews', label: 'Interviews', icon: Video },
+                { id: 'job-openings', label: 'Job Openings', icon: Briefcase },
+                ...(isSuperAdmin ? [{ id: 'subscription-plans', label: 'Subscription Plans', icon: FileSpreadsheet }] : [])
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center space-x-2 px-5 py-2.5 font-bold transition-all shrink-0 text-sm sm:text-base rounded-xl ${
+                    activeTab === tab.id 
+                      ? 'bg-[#403f75] text-white shadow-sm' 
+                      : 'text-[#9A9AC9] hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-[#383863]'
+                  }`}
+                >
+                  <tab.icon size={18} />
+                  <span>{tab.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Main Content */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
         <div className="admin-dashboard-content">
 
           {/* Welcome Banner */}
@@ -2545,6 +2536,7 @@ const AdminDashboard = () => {
             />
           )}
         </div>
+      </div>
       </div>
     </Suspense>
   );

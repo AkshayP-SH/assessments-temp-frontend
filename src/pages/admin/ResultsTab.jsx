@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   ArrowLeft, FileSpreadsheet, Download, CheckSquare, ChevronDown,
   CheckCircle, XCircle, X, Users, MessageSquare, Filter, Video,
   ChevronLeft, ChevronRight, Loader2, TrendingUp, BarChart3, Star
 } from 'lucide-react';
 
-const ResultsTab = ({
+const ResultsTab = React.memo(({
   selectedExamDetails,
   selectedExamStudents,
   onBack,
@@ -29,6 +29,18 @@ const ResultsTab = ({
   feedbackData,
   feedbackStats,
 }) => {
+  const filteredStudents = useMemo(() => {
+    return selectedExamStudents.filter(s => {
+      if (statusFilter === 'all') return true;
+      const percentage = (Number(s.score) / Number(s.total) * 100);
+      const passingPercentage = getPassingPercentage ? getPassingPercentage(s) : (s.passingPercentage || selectedExamDetails?.passingPercentage || 50);
+      const isPassed = percentage >= passingPercentage;
+      if (statusFilter === 'pass') return isPassed;
+      if (statusFilter === 'fail') return !isPassed;
+      return true;
+    });
+  }, [selectedExamStudents, statusFilter, getPassingPercentage, selectedExamDetails]);
+
   return (
     <div className="space-y-6">
       {/* Top Back Navigation Bar */}
@@ -259,13 +271,7 @@ const ResultsTab = ({
                 (Number(s.score) / Number(s.total) * 100) >= (s.passingPercentage || selectedExamDetails?.passingPercentage || 50)
               ).length;
               const failedCount = selectedExamStudents.length - passedCount;
-              const filteredCount = selectedExamStudents.filter(s => {
-                if (statusFilter === 'all') return true;
-                const percentage = (Number(s.score) / Number(s.total) * 100);
-                const passingPercentage = s.passingPercentage || selectedExamDetails?.passingPercentage || 50;
-                const isPassed = percentage >= passingPercentage;
-                return statusFilter === 'pass' ? isPassed : !isPassed;
-              }).length;
+              const filteredCount = filteredStudents.length;
 
               return (
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -339,80 +345,51 @@ const ResultsTab = ({
               );
             })()}
 
-            <div className="surface-card !p-0 overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm whitespace-nowrap">
-                  <thead className="bg-[#44448E] text-white">
-                    <tr>
-                      <th className="px-4 py-3.5 text-center text-xs font-bold uppercase tracking-wider">
-                        <input
-                          type="checkbox"
-                          checked={(() => {
-                            const filteredStudents = selectedExamStudents.filter(s => {
-                              if (statusFilter === 'all') return true;
-                              const percentage = (Number(s.score) / Number(s.total) * 100);
-                              const passingPercentage = getPassingPercentage(s);
-                              const isPassed = percentage >= passingPercentage;
-                              if (statusFilter === 'pass') return isPassed;
-                              if (statusFilter === 'fail') return !isPassed;
-                              return true;
-                            });
-                            return filteredStudents.length > 0 && filteredStudents.every(s => selectedCandidates.includes(s.student_id || s.id));
-                          })()}
-                          onChange={(e) => {
-                            const filteredStudents = selectedExamStudents.filter(s => {
-                              if (statusFilter === 'all') return true;
-                              const percentage = (Number(s.score) / Number(s.total) * 100);
-                              const passingPercentage = getPassingPercentage(s);
-                              const isPassed = percentage >= passingPercentage;
-                              if (statusFilter === 'pass') return isPassed;
-                              if (statusFilter === 'fail') return !isPassed;
-                              return true;
-                            });
-                            if (e.target.checked) {
-                              const filteredIds = filteredStudents.map(s => s.student_id || s.id);
-                              setSelectedCandidates(prev => [...new Set([...prev, ...filteredIds])]);
-                            } else {
-                              const filteredIds = filteredStudents.map(s => s.student_id || s.id);
-                              setSelectedCandidates(prev => prev.filter(id => !filteredIds.includes(id)));
-                            }
-                          }}
-                          className="w-4 h-4 rounded cursor-pointer accent-[#44448E]"
-                          title="Select All Visible"
-                        />
-                      </th>
+            <div className="overflow-x-auto rounded-xl border border-shnoor-light shadow-[0_8px_30px_rgba(14,14,39,0.06)]">
+              <table className="w-full">
+                <thead className="bg-shnoor-indigo text-white">
+                  <tr>
+                    <th className="px-4 py-4 text-center text-xs font-bold uppercase tracking-wider">
+                      <input
+                        type="checkbox"
+                        checked={(() => {
+                          return filteredStudents.length > 0 && filteredStudents.every(s => selectedCandidates.includes(s.student_id || s.id));
+                        })()}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            const filteredIds = filteredStudents.map(s => s.student_id || s.id);
+                            setSelectedCandidates(prev => [...new Set([...prev, ...filteredIds])]);
+                          } else {
+                            const filteredIds = filteredStudents.map(s => s.student_id || s.id);
+                            setSelectedCandidates(prev => prev.filter(id => !filteredIds.includes(id)));
+                          }
+                        }}
+                        className="w-4 h-4 cursor-pointer"
+                        title="Select All Visible"
+                      />
+                    </th>
 
-                      <th className="px-5 py-3.5 text-xs font-bold uppercase tracking-wider">Student ID</th>
-                      <th className="px-5 py-3.5 text-xs font-bold uppercase tracking-wider">Student Name</th>
-                      <th className="px-5 py-3.5 text-xs font-bold uppercase tracking-wider">Email</th>
-                      <th className="px-5 py-3.5 text-xs font-bold uppercase tracking-wider">Date Attempted</th>
-                      <th className="px-5 py-3.5 text-xs font-bold uppercase tracking-wider">Score</th>
-                      <th className="px-5 py-3.5 text-xs font-bold uppercase tracking-wider">Status</th>
-                      <th className="px-5 py-3.5 text-xs font-bold uppercase tracking-wider">Shortlisted</th>
-                      <th className="px-4 py-3.5 text-center text-xs font-bold uppercase tracking-wider">No Face</th>
-                      <th className="px-4 py-3.5 text-center text-xs font-bold uppercase tracking-wider">Multi Faces</th>
-                      <th className="px-4 py-3.5 text-center text-xs font-bold uppercase tracking-wider">Phone</th>
-                      <th className="px-4 py-3.5 text-center text-xs font-bold uppercase tracking-wider">Noise</th>
-                      <th className="px-4 py-3.5 text-center text-xs font-bold uppercase tracking-wider">Voice</th>
-                      <th className="px-4 py-3.5 text-center text-xs font-bold uppercase tracking-wider">Total</th>
-                      <th className="px-4 py-3.5 text-center text-xs font-bold uppercase tracking-wider">Flagged</th>
-                      <th className="px-4 py-3.5 text-center text-xs font-bold uppercase tracking-wider">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 bg-white">
-                    {(() => {
-                      const filteredStudents = selectedExamStudents.filter(s => {
-                        if (statusFilter === 'all') return true;
-                        const percentage = (Number(s.score) / Number(s.total) * 100);
-                        const passingPercentage = getPassingPercentage(s);
-                        const isPassed = percentage >= passingPercentage;
-                        if (statusFilter === 'pass') return isPassed;
-                        if (statusFilter === 'fail') return !isPassed;
-                        return true;
-                      });
-
-                      const startIndex = (resultsCurrentPage - 1) * resultsRowsPerPage;
-                      const paginatedStudents = filteredStudents.slice(startIndex, startIndex + resultsRowsPerPage);
+                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Student ID</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Student Name</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Email</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Date Attempted</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Score</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Shortlisted</th>
+                    <th className="px-4 py-4 text-center text-xs font-bold uppercase tracking-wider">No Face</th>
+                    <th className="px-4 py-4 text-center text-xs font-bold uppercase tracking-wider">Multi Faces</th>
+                    <th className="px-4 py-4 text-center text-xs font-bold uppercase tracking-wider">Phone</th>
+                    <th className="px-4 py-4 text-center text-xs font-bold uppercase tracking-wider">Noise</th>
+                    <th className="px-4 py-4 text-center text-xs font-bold uppercase tracking-wider">Voice</th>
+                    <th className="px-4 py-4 text-center text-xs font-bold uppercase tracking-wider">Total</th>
+                    <th className="px-4 py-4 text-center text-xs font-bold uppercase tracking-wider">Flagged</th>
+                    <th className="px-4 py-4 text-center text-xs font-bold uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-[#E5E7EB]">
+                  {(() => {
+                    const startIndex = (resultsCurrentPage - 1) * resultsRowsPerPage;
+                    const paginatedStudents = filteredStudents.slice(startIndex, startIndex + resultsRowsPerPage);
 
                       return paginatedStudents.length > 0 ? (
                         paginatedStudents.map((student, idx) => {
@@ -514,8 +491,8 @@ const ResultsTab = ({
                 </table>
               </div>
 
-              {/* Pagination */}
-              {(() => {
+            {/* Pagination */}
+            {(() => {
                 const filteredStudents = selectedExamStudents.filter(s => {
                   if (statusFilter === 'all') return true;
                   const percentage = (Number(s.score) / Number(s.total) * 100);
@@ -578,7 +555,6 @@ const ResultsTab = ({
                   </div>
                 );
               })()}
-            </div>
           </>
         )
       )}
@@ -722,6 +698,6 @@ const ResultsTab = ({
       )}
     </div>
   );
-};
+});
 
 export default ResultsTab;
