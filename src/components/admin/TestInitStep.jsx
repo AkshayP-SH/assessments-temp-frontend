@@ -39,17 +39,20 @@ const TestInitStep = ({
   isUploading
 }) => {
   return (
-    <div className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-light p-8 max-w-3xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-shnoor-navy">
-          {isEditMode ? (viewMode ? 'View Assessment' : 'Edit Assessment') : 'Create New Assessment'}
-        </h2>
+    <div className="surface-card max-w-3xl mx-auto">
+      <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
+        <div>
+          <h2 className="section-title text-xl">
+            {isEditMode ? (viewMode ? 'View Assessment' : 'Edit Assessment') : 'Create New Assessment'}
+          </h2>
+          <p className="section-subtitle">Configure assessment details, job roles, duration, and questions</p>
+        </div>
         {viewMode && (
           <button
             onClick={() => setViewMode(false)}
-            className="px-4 py-2 bg-shnoor-indigo text-white rounded-lg hover:bg-shnoor-indigo transition-colors font-medium flex items-center space-x-2"
+            className="btn-secondary"
           >
-            <Pencil size={18} />
+            <Pencil size={15} />
             <span>Edit</span>
           </button>
         )}
@@ -58,45 +61,45 @@ const TestInitStep = ({
       <div className="space-y-6">
         {/* Test Title */}
         <div>
-          <label className="block text-sm font-bold text-shnoor-navy mb-2">Test Title *</label>
+          <label className="form-label">Test Title <span className="required">*</span></label>
           <div className="relative">
             <input
               type="text"
               value={testTitle}
               onChange={(e) => setTestTitle(e.target.value)}
               disabled={viewMode}
-              className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-4 focus:border-shnoor-indigo focus:ring-shnoor-indigo/20 transition-all font-medium text-shnoor-navy shadow-sm pr-10 ${
+              className={`form-input pr-10 ${
                 viewMode
-                  ? 'bg-shnoor-light opacity-50 cursor-not-allowed border-shnoor-light'
+                  ? 'opacity-50 cursor-not-allowed bg-slate-50'
                   : nameAvailability.available === false
-                  ? 'border-shnoor-danger bg-shnoor-dangerLight'
+                  ? 'border-red-400 bg-red-50/20'
                   : nameAvailability.available === true
-                  ? 'border-shnoor-success bg-white'
-                  : 'border-shnoor-light bg-white'
+                  ? 'border-emerald-400'
+                  : ''
               }`}
               placeholder="e.g., Java Fundamentals - Batch A"
               required
             />
             {nameAvailability.checking && (
               <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                <Loader2 className="w-5 h-5 text-shnoor-navy animate-spin" />
+                <Loader2 className="w-4 h-4 text-slate-400 animate-spin" />
               </div>
             )}
             {!nameAvailability.checking && nameAvailability.available === true && (
               <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                <CheckCircle className="w-5 h-5 text-shnoor-success" />
+                <CheckCircle className="w-4 h-4 text-emerald-500" />
               </div>
             )}
             {!nameAvailability.checking && nameAvailability.available === false && (
               <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                <AlertCircle className="w-5 h-5 text-shnoor-danger" />
+                <AlertCircle className="w-4 h-4 text-red-500" />
               </div>
             )}
           </div>
           {nameAvailability.message && (
             <p
-              className={`mt-2 text-sm ${
-                nameAvailability.available ? 'text-shnoor-success' : 'text-shnoor-danger'
+              className={`mt-1.5 text-xs font-medium ${
+                nameAvailability.available ? 'text-emerald-600' : 'text-red-500'
               }`}
             >
               {nameAvailability.message}
@@ -105,40 +108,42 @@ const TestInitStep = ({
         </div>
 
         {/* Job Roles Section */}
-        <div className="space-y-4">
+        <div className="space-y-3 pt-2">
           <div className="flex items-center justify-between">
-            <label className="block text-sm font-bold text-shnoor-navy">Job Roles & Descriptions</label>
+            <label className="form-label mb-0">Job Roles &amp; Descriptions</label>
             {!viewMode && (
               <button
                 type="button"
                 onClick={handleAddJobRole}
-                className="flex items-center space-x-1 px-3 py-1.5 bg-white text-shnoor-indigo hover:text-shnoor-navy rounded-lg hover:bg-shnoor-light/30 border border-shnoor-light transition-colors text-sm font-medium"
+                className="btn-secondary !py-1 !px-2.5 text-xs"
               >
-                <Plus size={16} />
+                <Plus size={14} />
                 <span>Add Role</span>
               </button>
             )}
           </div>
 
           {jobRoles.map((role, index) => (
-            <div key={index} className="p-5 border border-shnoor-light rounded-xl space-y-3 bg-white shadow-sm">
+            <div key={index} className="subsurface-card space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-bold text-shnoor-navy">
-                  Role {index + 1}{' '}
+                <div className="flex items-center space-x-2">
+                  <span className="text-xs font-bold text-slate-800">
+                    Role {index + 1}
+                  </span>
                   {index === 0 && (
-                    <span className="text-shnoor-indigo ml-2 px-2 py-1 bg-shnoor-lavender rounded-md text-xs">
-                      (Default)
+                    <span className="px-2 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-200/50 rounded-md text-[11px] font-semibold">
+                      Default
                     </span>
                   )}
-                </span>
+                </div>
                 {!viewMode && jobRoles.length > 1 && (
                   <button
                     type="button"
                     onClick={() => handleRemoveJobRole(index)}
-                    className="text-shnoor-danger hover:text-shnoor-danger p-1"
+                    className="text-slate-400 hover:text-red-600 p-1 rounded transition-colors"
                     title="Remove this role"
                   >
-                    <Trash2 size={16} />
+                    <Trash2 size={15} />
                   </button>
                 )}
               </div>
@@ -149,9 +154,7 @@ const TestInitStep = ({
                   value={role.job_role}
                   onChange={(e) => handleJobRoleChange(index, 'job_role', e.target.value)}
                   disabled={viewMode}
-                  className={`w-full px-4 py-3 border-2 border-shnoor-light rounded-xl focus:ring-4 focus:ring-shnoor-indigo/20 focus:border-shnoor-indigo transition-all font-medium text-shnoor-navy ${
-                    viewMode ? 'bg-shnoor-light opacity-50 cursor-not-allowed' : 'bg-white'
-                  }`}
+                  className="form-input"
                   placeholder="e.g., Senior Software Engineer, Junior Developer"
                 />
               </div>
@@ -162,59 +165,51 @@ const TestInitStep = ({
                   onChange={(e) => handleJobRoleChange(index, 'job_description', e.target.value)}
                   rows={4}
                   disabled={viewMode}
-                  className={`w-full px-4 py-3 border border-shnoor-mist rounded-lg focus:ring-2 focus:ring-shnoor-navyLight focus:border-transparent resize-y ${
-                    viewMode ? 'bg-shnoor-lavender cursor-not-allowed' : ''
-                  }`}
+                  className="form-textarea resize-y"
                   placeholder="Enter job description, requirements, responsibilities..."
                 />
               </div>
             </div>
           ))}
-          <p className="text-xs text-shnoor-navy">
+          <p className="text-xs text-slate-500">
             Students will be able to select a role and view its description before taking the test
           </p>
         </div>
 
         {/* Duration, Max Attempts, Passing % */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
           <div>
-            <label className="block text-sm font-medium text-shnoor-navy mb-2">Duration (minutes) *</label>
+            <label className="form-label">Duration (minutes) <span className="required">*</span></label>
             <input
               type="number"
               value={duration}
               onChange={(e) => setDuration(parseInt(e.target.value) || 60)}
               min="1"
               disabled={viewMode}
-              className={`w-full px-4 py-3 border border-shnoor-mist rounded-lg focus:ring-2 focus:ring-shnoor-navyLight focus:border-transparent ${
-                viewMode ? 'bg-shnoor-lavender cursor-not-allowed' : ''
-              }`}
+              className="form-input"
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-shnoor-navy mb-2">Max Attempts *</label>
+            <label className="form-label">Max Attempts <span className="required">*</span></label>
             <input
               type="number"
               value={maxAttempts}
               onChange={(e) => setMaxAttempts(parseInt(e.target.value) || 1)}
               min="1"
               disabled={viewMode}
-              className={`w-full px-4 py-3 border border-shnoor-mist rounded-lg focus:ring-2 focus:ring-shnoor-navyLight focus:border-transparent ${
-                viewMode ? 'bg-shnoor-lavender cursor-not-allowed' : ''
-              }`}
+              className="form-input"
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-shnoor-navy mb-2">Passing % *</label>
+            <label className="form-label">Passing % <span className="required">*</span></label>
             <input
               type="number"
               value={passingPercentage}
               onChange={(e) => setPassingPercentage(parseInt(e.target.value) || 50)}
               disabled={viewMode}
-              className={`w-full px-4 py-3 border border-shnoor-mist rounded-lg focus:ring-2 focus:ring-shnoor-navyLight focus:border-transparent ${
-                viewMode ? 'bg-shnoor-lavender cursor-not-allowed' : ''
-              }`}
+              className="form-input"
               min="0"
               max="100"
               required
@@ -225,27 +220,23 @@ const TestInitStep = ({
         {/* Start and End DateTime */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-shnoor-navy mb-2">Start Date & Time (Optional)</label>
+            <label className="form-label">Start Date &amp; Time (Optional)</label>
             <input
               type="datetime-local"
               value={startDateTime}
               onChange={(e) => setStartDateTime(e.target.value)}
               disabled={viewMode}
-              className={`w-full px-4 py-3 border border-shnoor-mist rounded-lg focus:ring-2 focus:ring-shnoor-navyLight focus:border-transparent ${
-                viewMode ? 'bg-shnoor-lavender cursor-not-allowed' : ''
-              }`}
+              className="form-input"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-shnoor-navy mb-2">End Date & Time (Optional)</label>
+            <label className="form-label">End Date &amp; Time (Optional)</label>
             <input
               type="datetime-local"
               value={endDateTime}
               onChange={(e) => setEndDateTime(e.target.value)}
               disabled={viewMode}
-              className={`w-full px-4 py-3 border border-shnoor-mist rounded-lg focus:ring-2 focus:ring-shnoor-navyLight focus:border-transparent ${
-                viewMode ? 'bg-shnoor-lavender cursor-not-allowed' : ''
-              }`}
+              className="form-input"
             />
           </div>
         </div>

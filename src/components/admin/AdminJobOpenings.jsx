@@ -23,7 +23,7 @@ const fmtDate = (iso) =>
     iso ? new Date(iso).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : '—';
 
 // ── Component ────────────────────────────────────────────────────────────────
-export default function AdminJobOpenings() {
+export default function AdminJobOpenings({ clientId }) {
     const navigate = useNavigate();
     const [jobs, setJobs] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -150,10 +150,14 @@ export default function AdminJobOpenings() {
         e.preventDefault();
         setSaving(true);
         try {
+            const payload = {
+                ...form,
+                ...(clientId ? { client_id: clientId } : {})
+            };
             const res = await apiFetch('/api/job-openings', {
                 method: 'POST',
                 headers: adminHeaders(),
-                body: JSON.stringify(form)
+                body: JSON.stringify(payload)
             });
             const data = await res.json();
             if (data.success) {
@@ -231,113 +235,142 @@ export default function AdminJobOpenings() {
                 </div>
             )}
 
-            {/* Header card */}
-            <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-mist p-4 sm:p-8">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <div>
-                        <h2 className="text-xl sm:text-2xl font-bold text-shnoor-navy flex items-center">
-                            <Briefcase className="mr-3 text-shnoor-indigo shrink-0" size={28} />
-                            Job Openings &amp; Off-Campus Hiring
-                        </h2>
-                        <p className="text-sm text-shnoor-indigoMedium mt-1">
-                            Post new opportunities — students are notified automatically by email.
-                        </p>
-                    </div>
-                    <button
-                        onClick={() => { setShowForm(!showForm); setForm(EMPTY_FORM); }}
-                        className="w-full sm:w-auto flex items-center justify-center space-x-2 px-5 py-3 bg-shnoor-indigo hover:bg-shnoor-navy text-white rounded-xl font-semibold transition-all shadow-[0_8px_30px_rgba(14,14,39,0.1)] hover:shadow-[0_8px_30px_rgba(14,14,39,0.18)] transform hover:-translate-y-0.5"
-                    >
-                        {showForm ? <X size={20} /> : <Plus size={20} />}
-                        <span>{showForm ? 'Cancel' : 'Post New Job'}</span>
-                    </button>
+            {/* Section Header */}
+            <div className="section-header">
+                <div className="section-header-left">
+                    <h2 className="section-title">Job Openings &amp; Off-Campus Hiring</h2>
+                    <p className="section-subtitle">
+                        Post new opportunities — students are notified automatically by email.
+                    </p>
                 </div>
+                <button
+                    type="button"
+                    onClick={() => { setShowForm(!showForm); setForm(EMPTY_FORM); }}
+                    className="admin-create-test-btn"
+                >
+                    {showForm ? <X size={16} /> : <Plus size={16} />}
+                    <span>{showForm ? 'Cancel' : 'Post New Job'}</span>
+                </button>
             </div>
 
             {/* Create form */}
             {showForm && (
-                <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-mist p-8">
-                    <h3 className="text-xl font-bold text-shnoor-navy mb-6">New Job Opening</h3>
+                <div className="surface-card mb-6">
+                    <div className="flex items-center justify-between pb-4 mb-6 border-b border-slate-100">
+                        <div>
+                            <h3 className="section-title">New Job Opening</h3>
+                            <p className="section-subtitle">Fill in the opportunity details to notify students</p>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => { setShowForm(false); setForm(EMPTY_FORM); }}
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                            title="Close form"
+                        >
+                            <X size={18} />
+                        </button>
+                    </div>
+
                     <form onSubmit={handleCreate} className="space-y-5">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div>
-                                <label className="block text-sm font-semibold text-shnoor-navy mb-1.5">Company Name *</label>
+                                <label className="form-label">
+                                    Company Name <span className="required">*</span>
+                                </label>
                                 <input
                                     type="text"
                                     required
                                     value={form.company_name}
                                     onChange={e => setForm({ ...form, company_name: e.target.value })}
                                     placeholder="e.g. Google, Infosys, TCS"
-                                    className="w-full border border-shnoor-mist rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-shnoor-indigo"
+                                    className="form-input"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-shnoor-navy mb-1.5">Job Role *</label>
+                                <label className="form-label">
+                                    Job Role <span className="required">*</span>
+                                </label>
                                 <input
                                     type="text"
                                     required
                                     value={form.job_role}
                                     onChange={e => setForm({ ...form, job_role: e.target.value })}
                                     placeholder="e.g. Software Engineer, Data Analyst"
-                                    className="w-full border border-shnoor-mist rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-shnoor-indigo"
+                                    className="form-input"
                                 />
                             </div>
                         </div>
 
                         <div>
-                            <label className="block text-sm font-semibold text-shnoor-navy mb-1.5">Job Description *</label>
+                            <label className="form-label">
+                                Job Description <span className="required">*</span>
+                            </label>
                             <textarea
                                 required
                                 rows={4}
                                 value={form.job_description}
                                 onChange={e => setForm({ ...form, job_description: e.target.value })}
                                 placeholder="Describe the role, responsibilities, skills required…"
-                                className="w-full border border-shnoor-mist rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-shnoor-indigo resize-none"
+                                className="form-textarea resize-none"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-semibold text-shnoor-navy mb-1.5">Eligibility Criteria *</label>
+                            <label className="form-label">
+                                Eligibility Criteria <span className="required">*</span>
+                            </label>
                             <textarea
                                 required
                                 rows={3}
                                 value={form.eligibility_criteria}
                                 onChange={e => setForm({ ...form, eligibility_criteria: e.target.value })}
                                 placeholder="e.g. B.Tech CSE/IT, CGPA ≥ 7.0, No active backlogs…"
-                                className="w-full border border-shnoor-mist rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-shnoor-indigo resize-none"
+                                className="form-textarea resize-none"
                             />
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div>
-                                <label className="block text-sm font-semibold text-shnoor-navy mb-1.5">Registration Deadline *</label>
+                                <label className="form-label">
+                                    Registration Deadline <span className="required">*</span>
+                                </label>
                                 <input
                                     type="datetime-local"
                                     required
                                     value={form.registration_deadline}
                                     onChange={e => setForm({ ...form, registration_deadline: e.target.value })}
-                                    className="w-full border border-shnoor-mist rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-shnoor-indigo"
+                                    className="form-input"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-shnoor-navy mb-1.5">Application Link *</label>
+                                <label className="form-label">
+                                    Application Link <span className="required">*</span>
+                                </label>
                                 <input
                                     type="url"
                                     required
                                     value={form.application_link}
                                     onChange={e => setForm({ ...form, application_link: e.target.value })}
                                     placeholder="https://company.com/careers/apply"
-                                    className="w-full border border-shnoor-mist rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-shnoor-indigo"
+                                    className="form-input"
                                 />
                             </div>
                         </div>
 
-                        <div className="flex justify-end pt-2">
+                        <div className="flex items-center justify-end space-x-3 pt-3 border-t border-slate-100">
+                            <button
+                                type="button"
+                                onClick={() => { setShowForm(false); setForm(EMPTY_FORM); }}
+                                className="btn-secondary"
+                            >
+                                Cancel
+                            </button>
                             <button
                                 type="submit"
                                 disabled={saving}
-                                className="flex items-center space-x-2 px-8 py-3 bg-shnoor-indigo hover:bg-shnoor-navy text-white rounded-xl font-semibold transition-all disabled:opacity-60"
+                                className="admin-create-test-btn"
                             >
-                                {saving ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />}
+                                {saving ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
                                 <span>{saving ? 'Saving…' : 'Save as Draft'}</span>
                             </button>
                         </div>
@@ -346,9 +379,9 @@ export default function AdminJobOpenings() {
             )}
 
             {/* Jobs list */}
-            <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-mist overflow-hidden">
-                <div className="px-8 py-5 border-b border-shnoor-mist">
-                    <p className="text-sm font-semibold text-shnoor-navy">
+            <div className="surface-card !p-0 overflow-hidden">
+                <div className="card-header-bar">
+                    <p className="card-header-title">
                         {jobs.length} Job Posting{jobs.length !== 1 ? 's' : ''}
                     </p>
                 </div>
@@ -359,10 +392,24 @@ export default function AdminJobOpenings() {
                         <span>Loading job openings…</span>
                     </div>
                 ) : jobs.length === 0 ? (
-                    <div className="text-center py-16 text-shnoor-indigoMedium">
-                        <Briefcase size={40} className="mx-auto mb-3 opacity-40" />
-                        <p className="font-medium">No job postings yet.</p>
-                        <p className="text-sm mt-1 opacity-70">Click "Post New Job" to add the first one.</p>
+                    <div className="empty-state">
+                        <div className="empty-state-icon">
+                            <Briefcase size={32} />
+                        </div>
+                        <h4 className="empty-state-title">No job postings yet.</h4>
+                        <p className="empty-state-subtitle">
+                            Click &ldquo;Post New Job&rdquo; to add the first one.
+                        </p>
+                        {!showForm && (
+                            <button
+                                type="button"
+                                onClick={() => { setShowForm(true); setForm(EMPTY_FORM); }}
+                                className="btn-secondary mt-1"
+                            >
+                                <Plus size={14} />
+                                <span>Post New Job</span>
+                            </button>
+                        )}
                     </div>
                 ) : (
                     <div className="divide-y divide-shnoor-mist">
