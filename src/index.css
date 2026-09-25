@@ -1875,48 +1875,16 @@ body {
 }
 
 /* Theme selector */
-.theme-selector-trigger {
-  border: 1px solid rgb(var(--theme-border));
-  background-color: rgb(var(--theme-card));
-  color: rgb(var(--theme-accent));
-  box-shadow: 0 10px 24px rgb(15 23 42 / 0.12);
-  transition: background-color 0.2s, border-color 0.2s, color 0.2s, transform 0.2s;
-}
-
-.theme-selector-trigger:hover {
-  background-color: rgb(var(--theme-panel));
-  transform: translateY(-1px);
-}
-
-.theme-selector-trigger--dark {
-  border-color: rgb(var(--theme-border) / 0.4);
-  background-color: rgb(var(--theme-header) / 0.75);
-  color: rgb(var(--theme-contrast-text));
-}
-
-.theme-selector-trigger--dark:hover {
-  background-color: rgb(var(--theme-header-border) / 0.22);
-}
-
-.theme-selector-menu {
-  border: 1px solid rgb(var(--theme-border));
-  background-color: rgb(var(--theme-card));
-}
-
-.theme-selector-option {
-  color: rgb(var(--theme-text-muted));
-}
-
-.theme-selector-option:hover {
-  background-color: rgb(var(--theme-panel));
-  color: rgb(var(--theme-text));
-}
-
-.theme-selector-option.is-active {
-  background-color: rgb(var(--theme-accent));
-  color: white;
-}
-
+.theme-selector-trigger { border: 1px solid rgb(var(--theme-border)); background-color: rgb(var(--theme-card)); color: rgb(var(--theme-accent)); box-shadow: 0 10px 24px rgb(15 23 42 / 0.12); transition: background-color 0.2s, border-color 0.2s, color 0.2s, transform 0.2s; }
+.theme-selector-trigger:hover { background-color: rgb(var(--theme-panel)); transform: translateY(-1px); }
+.theme-selector-trigger--dark { border-color: rgb(var(--theme-border) / 0.4); background-color: rgb(var(--theme-header) / 0.75); color: rgb(var(--theme-contrast-text)); }
+.theme-selector-trigger--dark:hover { background-color: rgb(var(--theme-header-border) / 0.22); }
+.theme-selector-menu { border: 1px solid rgb(var(--theme-border)); background-color: rgb(var(--theme-card)); }
+.theme-selector-option { color: rgb(var(--theme-text-muted)); }
+.theme-selector-option:hover { background-color: rgb(var(--theme-panel)); color: rgb(var(--theme-text)); }
+.theme-selector-option.is-active { background-color: #9A9AC9; color: white; }
+html[data-theme='dark'] .theme-selector-option.is-active { background-color: rgb(var(--theme-accent)); color: white; }
+html[data-theme='green'] .theme-selector-option.is-active { background-color: rgb(var(--theme-accent)); color: white; }
 /* Landing security block */
 .landing-security-card {
   background-color: rgb(var(--theme-contrast-card));

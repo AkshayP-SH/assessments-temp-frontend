@@ -337,7 +337,7 @@ const StudentManageModal = ({
                       onChange={(e) => setSelectionRange({ ...selectionRange, end: e.target.value })}
                     />
                     <button
-                      onClick={handleSelectRange}
+                      onClick={() => handleSelectRange(filteredStudents)}
                       className="ml-1 px-2.5 py-0.5 bg-[#44448E] hover:bg-[#383878] text-white text-[11px] font-semibold rounded transition-colors shadow-2xs"
                     >
                       Select

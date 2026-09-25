@@ -1,5 +1,6 @@
 import React from 'react';
 import { AlertCircle, Download, Loader2, CheckCircle } from 'lucide-react';
+import Select from 'react-select';
 
 const ViolationsTab = ({
   tests = [],
@@ -39,18 +40,87 @@ const ViolationsTab = ({
           <label className="block text-sm font-bold text-shnoor-navy mb-2">
             Select Test to View Violations
           </label>
-          <select
-            value={selectedTestForViolations}
-            onChange={(e) => setSelectedTestForViolations(e.target.value)}
-            className="w-full px-4 py-3 border border-shnoor-light rounded-xl focus:ring-4 focus:ring-shnoor-lavender focus:border-shnoor-indigo bg-white text-shnoor-navy font-medium transition-all"
-          >
-            <option value="">-- Select a test --</option>
-            {tests.map((test) => (
-              <option key={test.id} value={test.id}>
-                {test.name} ({test.attempts} attempts)
-              </option>
-            ))}
-          </select>
+          <Select
+            options={tests.map((test) => ({
+              value: test.id,
+              label: `${test.name} (${test.attempts} attempts)`
+            }))}
+            value={selectedTestForViolations ? {
+              value: selectedTestForViolations,
+              label: tests.find(t => t.id === selectedTestForViolations)
+                ? `${tests.find(t => t.id === selectedTestForViolations).name} (${tests.find(t => t.id === selectedTestForViolations).attempts} attempts)`
+                : 'Select a test...'
+            } : null}
+            onChange={(selectedOption) => setSelectedTestForViolations(selectedOption ? selectedOption.value : '')}
+            placeholder="Select a test..."
+            isSearchable={true}
+            isClearable={true}
+            className="basic-single"
+            classNamePrefix="select"
+            styles={{
+                control: (base) => ({
+                    ...base,
+                    padding: '4px',
+                    borderRadius: '1rem',
+                    backgroundColor: 'rgb(var(--theme-card))',
+                    borderColor: 'rgb(var(--theme-shell-stroke))',
+                    boxShadow: 'none',
+                    '&:hover': {
+                        borderColor: 'rgb(var(--theme-accent))'
+                    }
+                }),
+                singleValue: (base) => ({
+                    ...base,
+                    color: 'rgb(var(--theme-text))'
+                }),
+                input: (base) => ({
+                    ...base,
+                    color: 'rgb(var(--theme-text))'
+                }),
+                placeholder: (base) => ({
+                    ...base,
+                    color: 'rgb(var(--theme-text-muted))'
+                }),
+                menu: (base) => ({
+                    ...base,
+                    maxHeight: '300px',
+                    backgroundColor: 'rgb(var(--theme-card))',
+                    border: '1px solid rgb(var(--theme-border))',
+                    zIndex: 9999,
+                }),
+                menuList: (base) => ({
+                    ...base,
+                    maxHeight: '300px',
+                    overflowY: 'auto',
+                    '::-webkit-scrollbar': {
+                        width: '8px',
+                    },
+                    '::-webkit-scrollbar-track': {
+                        background: 'rgb(var(--theme-panel))',
+                        borderRadius: '10px',
+                    },
+                    '::-webkit-scrollbar-thumb': {
+                        background: 'rgb(var(--theme-border))',
+                        borderRadius: '10px',
+                    },
+                    '::-webkit-scrollbar-thumb:hover': {
+                        background: 'rgb(var(--theme-accent))',
+                    },
+                }),
+                option: (base, state) => ({
+                    ...base,
+                    backgroundColor: state.isSelected
+                        ? 'rgb(var(--theme-accent))'
+                        : state.isFocused
+                            ? 'rgb(var(--theme-panel))'
+                            : 'rgb(var(--theme-card))',
+                    color: state.isSelected ? 'white' : 'rgb(var(--theme-text))',
+                    cursor: 'pointer',
+                    padding: '10px 12px',
+                }),
+            }}
+            menuPortalTarget={document.body}
+          />
         </div>
 
         {selectedTestForViolations && (

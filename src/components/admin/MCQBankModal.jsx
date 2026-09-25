@@ -87,97 +87,102 @@ const MCQBankModal = ({ question, onClose, onSave, categories, tags }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-gray-900">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+        <div className="bg-white border-b border-gray-100 px-6 py-4 flex justify-between items-center shrink-0">
+          <h2 className="text-xl font-bold text-gray-900">
             {question ? 'Edit MCQ Question' : 'Add MCQ Question'}
           </h2>
           <button
+            type="button"
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-[#9A9AC9] hover:text-gray-900 transition-colors p-1"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto flex-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Question Text *
+            <label className="block text-sm font-bold text-gray-900 mb-1.5">
+              Question Text <span className="text-red-500">*</span>
             </label>
             <textarea
               value={formData.question_text}
               onChange={(e) => setFormData({ ...formData, question_text: e.target.value })}
               required
-              rows={3}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              rows={2}
+              className="w-full px-4 py-2 rounded-xl border border-[#D1D1E6] bg-white text-sm text-gray-900 placeholder-[#9A9AC9] focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors resize-none"
               placeholder="Enter your question..."
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Option A *
+              <label className="block text-sm font-bold text-gray-900 mb-1.5">
+                Option A <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 value={formData.option_a}
                 onChange={(e) => setFormData({ ...formData, option_a: e.target.value })}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Option A"
+                className="w-full h-10 px-4 rounded-xl border border-[#D1D1E6] bg-white text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Option B *
+              <label className="block text-sm font-bold text-gray-900 mb-1.5">
+                Option B <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 value={formData.option_b}
                 onChange={(e) => setFormData({ ...formData, option_b: e.target.value })}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Option B"
+                className="w-full h-10 px-4 rounded-xl border border-[#D1D1E6] bg-white text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-bold text-gray-900 mb-1.5">
                 Option C
               </label>
               <input
                 type="text"
                 value={formData.option_c}
                 onChange={(e) => setFormData({ ...formData, option_c: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Option C"
+                className="w-full h-10 px-4 rounded-xl border border-[#D1D1E6] bg-white text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-bold text-gray-900 mb-1.5">
                 Option D
               </label>
               <input
                 type="text"
                 value={formData.option_d}
                 onChange={(e) => setFormData({ ...formData, option_d: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Option D"
+                className="w-full h-10 px-4 rounded-xl border border-[#D1D1E6] bg-white text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div className="flex flex-col justify-end">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Correct Option *
+              <label className="block text-sm font-bold text-gray-900 mb-1.5">
+                Correct Option <span className="text-red-500">*</span>
               </label>
               <select
                 value={formData.correct_option}
                 onChange={(e) => setFormData({ ...formData, correct_option: e.target.value })}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full h-10 px-4 rounded-xl border border-[#D1D1E6] bg-white text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors"
               >
                 <option value="A">A</option>
                 <option value="B">B</option>
@@ -187,8 +192,8 @@ const MCQBankModal = ({ question, onClose, onSave, categories, tags }) => {
             </div>
 
             <div className="flex flex-col justify-end">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Marks *
+              <label className="block text-sm font-bold text-gray-900 mb-1.5">
+                Marks <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
@@ -196,19 +201,19 @@ const MCQBankModal = ({ question, onClose, onSave, categories, tags }) => {
                 onChange={(e) => setFormData({ ...formData, marks: parseInt(e.target.value) })}
                 required
                 min="1"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full h-10 px-4 rounded-xl border border-[#D1D1E6] bg-white text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors"
               />
             </div>
 
             <div className="flex flex-col justify-end">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Difficulty *
+              <label className="block text-sm font-bold text-gray-900 mb-1.5">
+                Difficulty <span className="text-red-500">*</span>
               </label>
               <select
                 value={formData.difficulty}
                 onChange={(e) => setFormData({ ...formData, difficulty: e.target.value })}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full h-10 px-4 rounded-xl border border-[#D1D1E6] bg-white text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors"
               >
                 <option value="easy">Easy</option>
                 <option value="medium">Medium</option>
@@ -217,85 +222,84 @@ const MCQBankModal = ({ question, onClose, onSave, categories, tags }) => {
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Category
-            </label>
-            <input
-              type="text"
-              value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              list="categories"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="e.g., programming, aptitude, reasoning"
-            />
-            <datalist id="categories">
-              {categories.map(cat => (
-                <option key={cat} value={cat} />
-              ))}
-            </datalist>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Tags
-            </label>
-            <div className="flex gap-2 mb-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-bold text-gray-900 mb-1.5">
+                Category
+              </label>
               <input
                 type="text"
-                value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-                list="tags"
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Add tags..."
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                list="categories"
+                className="w-full h-10 px-4 rounded-xl border border-[#D1D1E6] bg-white text-sm text-gray-900 placeholder-[#9A9AC9] focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors"
+                placeholder="e.g., programming, aptitude"
               />
-              <button
-                type="button"
-                onClick={addTag}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
-              >
-                Add
-              </button>
+              <datalist id="categories">
+                {categories.map(cat => (
+                  <option key={cat} value={cat} />
+                ))}
+              </datalist>
             </div>
-            <datalist id="tags">
-              {tags.map(tag => (
-                <option key={tag} value={tag} />
-              ))}
-            </datalist>
-            <div className="flex flex-wrap gap-2">
-              {formData.tags.map((tag, idx) => (
-                <span
-                  key={idx}
-                  className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm flex items-center gap-2"
+
+            <div>
+              <label className="block text-sm font-bold text-gray-900 mb-1.5">
+                Tags
+              </label>
+              <div className="flex gap-2 mb-2">
+                <input
+                  type="text"
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+                  list="tags"
+                  className="flex-1 h-10 px-4 rounded-xl border border-[#D1D1E6] bg-white text-sm text-gray-900 placeholder-[#9A9AC9] focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors"
+                  placeholder="Type tag and press enter"
+                />
+                <button
+                  type="button"
+                  onClick={addTag}
+                  className="px-4 h-10 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors"
                 >
-                  {tag}
-                  <button
-                    type="button"
-                    onClick={() => removeTag(tag)}
-                    className="text-purple-600 hover:text-purple-800"
-                  >
-                    ×
-                  </button>
-                </span>
-              ))}
+                  Add
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {formData.tags.map((tag, idx) => (
+                  <span key={idx} className="inline-flex items-center px-2 py-1 rounded bg-purple-100 text-purple-800 text-xs font-bold">
+                    {tag}
+                    <button
+                      type="button"
+                      onClick={() => removeTag(tag)}
+                      className="ml-1 text-purple-600 hover:text-purple-900 focus:outline-none"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+              <datalist id="tags">
+                {tags.map(tag => (
+                  <option key={tag} value={tag} />
+                ))}
+              </datalist>
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+          <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              className="px-6 h-12 border border-[#D1D1E6] rounded-xl text-[#9A9AC9] font-bold hover:bg-gray-50 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 h-12 bg-[#403f75] hover:bg-[#2d2d53] text-white rounded-xl font-bold shadow-sm transition-colors disabled:opacity-50"
             >
-              {saving ? 'Saving...' : (question ? 'Update Question' : 'Create Question')}
+              {saving ? 'Saving...' : 'Save Question'}
             </button>
           </div>
         </form>

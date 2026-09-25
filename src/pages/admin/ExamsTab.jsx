@@ -26,9 +26,9 @@ const ExamsTab = ({
   setOpenMenuId,
   handlePreviewQuestions,
   handleViewTestHistory,
+  handleViewJob,
   handleOpenCloneModal,
   handleViewTestDetails,
-  setEditingTest,
   setShowCreateTest,
   handleTogglePublish,
   handleDeleteTest,
@@ -136,8 +136,8 @@ const ExamsTab = ({
               <div className="admin-exams-grid">
                 {paginatedTests.map((test) => {
                   const attempts = test.attempts || 0;
-                  const passedCount = test.passed_count ?? test.passed ?? 0;
-                  const passRate = attempts > 0 ? Math.round((passedCount / attempts) * 100) : 0;
+                  const passedCount = test.passedCount ?? test.passed_count ?? test.passed ?? 0;
+                  const passRate = test.passRate ?? (attempts > 0 ? Math.round((passedCount / attempts) * 100) : 0);
                   const initialLetter = test.name ? test.name.trim().charAt(0).toLowerCase() : 'f';
                   const formattedDate = test.date || (test.created_at ? new Date(test.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Sep 18, 2026');
 
@@ -190,6 +190,17 @@ const ExamsTab = ({
                                 >
                                   <Eye size={14} className="text-gray-400" />
                                   <span>View Details</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setOpenMenuId(null);
+                                    handleViewJob(test);
+                                  }}
+                                  className="w-full text-left px-3.5 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2 cursor-pointer"
+                                >
+                                  <FileText size={14} className="text-gray-400" />
+                                  <span>Job Role</span>
                                 </button>
                                 <button
                                   type="button"
