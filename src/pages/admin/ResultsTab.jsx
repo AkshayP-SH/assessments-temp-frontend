@@ -493,9 +493,6 @@ const ResultsTab = React.memo(({
 
             {/* Pagination */}
             {(() => {
-              if (filteredStudents.length === 0) return null;
-              {/* Pagination */}
-              {(() => {
                 const filteredStudents = selectedExamStudents.filter(s => {
                   if (statusFilter === 'all') return true;
                   const percentage = (Number(s.score) / Number(s.total) * 100);
@@ -558,7 +555,6 @@ const ResultsTab = React.memo(({
                   </div>
                 );
               })()}
-            </div>
           </>
         )
       )}

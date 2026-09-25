@@ -139,6 +139,7 @@ const AdminHeader = () => {
                 {isClientPortal ? 'Client Portal' : 'Admin Dashboard'}
               </p>
             </div>
+          </div>
 
           {/* Right Side: Desktop Navigation */}
           <div className="hidden sm:flex items-center gap-3">
@@ -199,47 +200,6 @@ const AdminHeader = () => {
 
           {/* Mobile Menu Toggle Button */}
           <div className="sm:hidden flex items-center gap-2 flex-shrink-0">
-            <div className="flex items-center justify-center">
-              <ThemeSelector className="!bg-[#9A9AC9] !border-none !text-shnoor-navyLight !rounded-lg hover:opacity-90" />
-            </div>
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="text-gray-900 p-2 hover:bg-gray-100 rounded-lg transition-colors relative min-w-[44px] min-h-[44px] flex items-center justify-center touch-manipulation flex-shrink-0"
-            >
-              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-              {!mobileMenuOpen && unreadCount > 0 && (
-                <span className="absolute top-1 right-1 w-3 h-3 bg-red-500 rounded-full border border-white"></span>
-              )}
-
-              <button
-                type="button"
-                onClick={() => navigate(`${basePath}/live-proctoring`)}
-                className="admin-header-btn"
-              >
-                <Video size={16} />
-                <span>Live Proctoring</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => navigate(`${basePath}/settings`)}
-                className="admin-header-btn"
-              >
-                <Settings size={16} />
-                <span>Settings</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="admin-header-logout"
-              >
-                <LogOut size={16} />
-                <span>Logout</span>
-              </button>
-            </div>
-
-            {/* Mobile Menu Toggle Button */}
             <div className="admin-header-mobile-toggle">
               <ThemeSelector variant="light" />
               <button
@@ -327,6 +287,7 @@ const AdminHeader = () => {
               </button>
             </div>
           )}
+        </div>
         </header>
       </div>
 
