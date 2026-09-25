@@ -21,87 +21,95 @@ const AssignedTestsModal = ({
   onClose,
 }) => {
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-        <div className="bg-gradient-to-r from-shnoor-indigo to-shnoor-navy px-6 py-4 flex justify-between items-center flex-shrink-0">
+    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col border border-slate-100">
+        <div className="bg-[#44448E] px-6 py-4 flex justify-between items-center flex-shrink-0">
           <div>
-            <h3 className="text-xl font-bold text-white">{selectedInstituteForTests.display_name}</h3>
-            <p className="text-shnoor-lavender text-sm mt-1">Assigned Tests</p>
+            <h3 className="text-lg font-bold text-white tracking-tight">{selectedInstituteForTests.display_name}</h3>
+            <p className="text-indigo-200 text-xs mt-0.5 font-medium">Assigned Tests</p>
           </div>
           <button
             onClick={onClose}
-            className="text-white hover:bg-white/20 rounded-full p-2 transition-colors"
+            className="text-white/80 hover:text-white hover:bg-white/10 rounded-lg p-1.5 transition-colors"
           >
-            <X size={24} />
+            <X size={20} />
           </button>
         </div>
 
         <div className="p-6 space-y-6 overflow-y-auto flex-1">
           {/* Assign New Test */}
-          <div className="p-4 bg-shnoor-lavender rounded-xl border border-shnoor-light">
-            <label className="block text-sm font-bold text-shnoor-navy mb-3">
-              Assign New Test to Institute
-            </label>
-            <div className="relative space-y-3">
-              {/* Custom Dropdown Button */}
-              <button
-                type="button"
-                onClick={() => setIsInstituteTestDropdownOpen(!isInstituteTestDropdownOpen)}
-                className="w-full px-4 py-3 border border-shnoor-light rounded-xl bg-white text-shnoor-navy font-medium transition-all flex items-center justify-between hover:border-shnoor-indigo focus:ring-4 focus:ring-shnoor-lavender focus:border-shnoor-indigo"
-              >
-                <span className={selectedTestsForInstitute.length === 0 ? 'text-shnoor-indigoMedium' : 'text-shnoor-navy'}>
-                  {selectedTestsForInstitute.length === 0
-                    ? '-- Select a test --'
-                    : `${selectedTestsForInstitute.length} test${selectedTestsForInstitute.length !== 1 ? 's' : ''} selected`
-                  }
-                </span>
-                <ChevronDown size={20} className={`transition-transform ${isInstituteTestDropdownOpen ? 'rotate-180' : ''}`} />
-              </button>
-
-              {/* Dropdown Menu with Checkboxes */}
-              {isInstituteTestDropdownOpen && (
-                <div className="absolute z-50 w-full mt-2 bg-white border border-shnoor-light rounded-xl shadow-lg max-h-64 overflow-y-auto">
-                  {tests.filter(test => test.status === 'published').length === 0 ? (
-                    <div className="p-4 text-center text-shnoor-indigoMedium text-sm flex items-center justify-center">
-                      <AlertCircle size={16} className="mr-1" />
-                      No published tests available. Please publish a test first.
-                    </div>
-                  ) : (
-                    <div className="py-2">
-                      {tests.filter(test => test.status === 'published').map((test) => (
-                        <label
-                          key={test.id}
-                          className="flex items-center space-x-3 px-4 py-3 hover:bg-shnoor-lavender cursor-pointer transition-colors"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={selectedTestsForInstitute.includes(test.id)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setSelectedTestsForInstitute([...selectedTestsForInstitute, test.id]);
-                              } else {
-                                setSelectedTestsForInstitute(selectedTestsForInstitute.filter(id => id !== test.id));
-                              }
-                            }}
-                            className="w-4 h-4 text-shnoor-indigo border-shnoor-mist rounded focus:ring-2 focus:ring-shnoor-indigo"
-                          />
-                          <span className="text-sm font-medium text-shnoor-navy flex-1">
-                            {test.name} <span className="text-shnoor-indigoMedium">({test.questions} questions)</span>
-                          </span>
-                        </label>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Selected tests count */}
+          <div className="bg-slate-50 border border-slate-200/90 rounded-2xl p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                Assign New Test to Institute
+              </label>
               {selectedTestsForInstitute.length > 0 && (
-                <p className="text-xs text-shnoor-indigo mt-2 font-medium">
-                  {selectedTestsForInstitute.length} test{selectedTestsForInstitute.length !== 1 ? 's' : ''} selected
-                </p>
+                <span className="text-xs font-semibold text-[#44448E] bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-full">
+                  {selectedTestsForInstitute.length} selected
+                </span>
               )}
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+              {/* Custom Dropdown Button */}
+              <div className="relative flex-1">
+                <button
+                  type="button"
+                  onClick={() => setIsInstituteTestDropdownOpen(!isInstituteTestDropdownOpen)}
+                  className="w-full px-4 py-2.5 border border-slate-200 rounded-xl bg-white text-slate-800 text-sm font-medium transition-all flex items-center justify-between hover:border-[#44448E] focus:outline-none focus:ring-2 focus:ring-[#44448E]/15 focus:border-[#44448E] shadow-2xs"
+                >
+                  <span className={selectedTestsForInstitute.length === 0 ? 'text-slate-400 font-normal' : 'text-slate-800 font-medium'}>
+                    {selectedTestsForInstitute.length === 0
+                      ? 'Choose tests to assign...'
+                      : `${selectedTestsForInstitute.length} test${selectedTestsForInstitute.length !== 1 ? 's' : ''} chosen`
+                    }
+                  </span>
+                  <ChevronDown size={18} className={`text-slate-500 transition-transform duration-200 ${isInstituteTestDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {/* Dropdown Menu with Checkboxes */}
+                {isInstituteTestDropdownOpen && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-40"
+                      onClick={() => setIsInstituteTestDropdownOpen(false)}
+                    />
+                    <div className="absolute z-50 w-full mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl max-h-60 overflow-y-auto py-1 divide-y divide-slate-50">
+                      {tests.filter(test => test.status === 'published').length === 0 ? (
+                        <div className="p-4 text-center text-slate-500 text-xs flex items-center justify-center gap-1.5">
+                          <AlertCircle size={15} className="text-amber-500" />
+                          <span>No published tests available. Please publish a test first.</span>
+                        </div>
+                      ) : (
+                        tests.filter(test => test.status === 'published').map((test) => (
+                          <label
+                            key={test.id}
+                            className="flex items-center gap-3 px-4 py-2.5 hover:bg-indigo-50/40 cursor-pointer transition-colors"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={selectedTestsForInstitute.includes(test.id)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedTestsForInstitute([...selectedTestsForInstitute, test.id]);
+                                } else {
+                                  setSelectedTestsForInstitute(selectedTestsForInstitute.filter(id => id !== test.id));
+                                }
+                              }}
+                              className="w-4 h-4 rounded text-[#44448E] accent-[#44448E] cursor-pointer"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <span className="text-sm font-medium text-slate-800 block truncate">{test.name}</span>
+                              <span className="text-xs text-slate-400">{test.questions} questions</span>
+                            </div>
+                          </label>
+                        ))
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
 
               <button
                 onClick={() => {
@@ -109,10 +117,11 @@ const AssignedTestsModal = ({
                   setIsInstituteTestDropdownOpen(false);
                 }}
                 disabled={selectedTestsForInstitute.length === 0 || isAssigningTestToInstitute}
-                className={`w-full px-6 py-3 rounded-xl font-bold transition-all flex items-center justify-center space-x-2 ${selectedTestsForInstitute.length > 0 && !isAssigningTestToInstitute
-                  ? 'bg-shnoor-indigo hover:bg-shnoor-navy text-white shadow-lg hover:-translate-y-0.5'
-                  : 'bg-shnoor-light text-shnoor-soft cursor-not-allowed'
-                  }`}
+                className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 shrink-0 ${
+                  selectedTestsForInstitute.length > 0 && !isAssigningTestToInstitute
+                    ? 'bg-[#44448E] hover:bg-[#383878] text-white shadow-xs hover:shadow active:scale-[0.99]'
+                    : 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200/80'
+                }`}
               >
                 {isAssigningTestToInstitute && (
                   <Loader2 className="animate-spin" size={16} />
@@ -121,8 +130,8 @@ const AssignedTestsModal = ({
                   {isAssigningTestToInstitute
                     ? 'Assigning...'
                     : selectedTestsForInstitute.length > 0
-                      ? `Assign ${selectedTestsForInstitute.length} Test${selectedTestsForInstitute.length !== 1 ? 's' : ''}`
-                      : 'Select Tests to Assign'
+                      ? `Assign (${selectedTestsForInstitute.length})`
+                      : 'Assign Test'
                   }
                 </span>
               </button>
@@ -132,99 +141,118 @@ const AssignedTestsModal = ({
           {/* Assigned Tests List */}
           <div>
             <div className="flex justify-between items-center mb-3">
-              <h4 className="text-sm font-bold text-shnoor-navy">Currently Assigned Tests</h4>
+              <div className="flex items-center gap-2">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">Currently Assigned Tests</h4>
+                {assignedTests.length > 0 && (
+                  <span className="text-xs font-semibold px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full">
+                    {assignedTests.length}
+                  </span>
+                )}
+              </div>
               {selectedTestsForUnassign.length > 0 && (
                 <button
                   onClick={handleBulkUnassignTests}
                   disabled={isUnassigningTests}
-                  className="px-4 py-2 bg-shnoor-indigo hover:bg-shnoor-navy text-white rounded-lg font-medium transition-all shadow-lg hover:-translate-y-0.5 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isUnassigningTests ? (
                     <>
-                      <Loader2 className="animate-spin" size={16} />
+                      <Loader2 className="animate-spin" size={13} />
                       <span>Unassigning...</span>
                     </>
                   ) : (
                     <>
-                      <Trash2 size={16} />
+                      <Trash2 size={13} />
                       <span>Unassign {selectedTestsForUnassign.length} Selected</span>
                     </>
                   )}
                 </button>
               )}
             </div>
+
             {isLoadingAssignedTests ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="animate-spin text-shnoor-indigo" size={32} />
-                <span className="ml-3 text-shnoor-indigoMedium">Loading...</span>
+              <div className="flex items-center justify-center py-10 bg-slate-50 border border-slate-200/80 rounded-2xl">
+                <Loader2 className="animate-spin text-[#44448E]" size={24} />
+                <span className="ml-2.5 text-xs font-medium text-slate-500">Loading assigned tests...</span>
               </div>
             ) : assignedTests.length === 0 ? (
-              <div className="text-center py-8 bg-shnoor-lavender rounded-xl border border-shnoor-light">
-                <FileSpreadsheet className="mx-auto mb-2 text-shnoor-mist" size={48} />
-                <p className="text-shnoor-indigoMedium">No tests assigned yet</p>
+              <div className="text-center py-10 bg-slate-50 border border-slate-200/80 rounded-2xl">
+                <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mx-auto mb-2">
+                  <FileSpreadsheet size={20} />
+                </div>
+                <p className="text-sm font-semibold text-slate-700">No tests assigned yet</p>
+                <p className="text-xs text-slate-500 mt-0.5">Use the selector above to assign tests to this institute.</p>
               </div>
             ) : (
-              <>
-                {/* Select All Checkbox */}
-                <div className="flex items-center space-x-3 mb-3 p-3 bg-white rounded-lg">
-                  <input
-                    type="checkbox"
-                    checked={selectedTestsForUnassign.length === assignedTests.length && assignedTests.length > 0}
-                    onChange={toggleAllTestsForUnassign}
-                    className="w-5 h-5 text-shnoor-indigo border-shnoor-mist rounded focus:ring-2 focus:ring-shnoor-lavender"
-                  />
-                  <span className="text-sm font-bold text-shnoor-indigo">
-                    {selectedTestsForUnassign.length > 0 ? `${selectedTestsForUnassign.length} selected` : 'Select All'}
-                  </span>
+              <div className="border border-slate-200/90 rounded-2xl overflow-hidden bg-white shadow-2xs">
+                {/* Select All Checkbox Header */}
+                <div className="flex items-center justify-between px-4 py-2.5 bg-slate-50/80 border-b border-slate-200/80">
+                  <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={selectedTestsForUnassign.length === assignedTests.length && assignedTests.length > 0}
+                      onChange={toggleAllTestsForUnassign}
+                      className="w-4 h-4 text-[#44448E] accent-[#44448E] rounded cursor-pointer"
+                    />
+                    <span className="text-xs font-semibold text-slate-700">
+                      {selectedTestsForUnassign.length > 0 ? `${selectedTestsForUnassign.length} of ${assignedTests.length} selected` : 'Select All Tests'}
+                    </span>
+                  </label>
                 </div>
 
-                <div className="space-y-2 max-h-96 overflow-y-auto">
+                <div className="divide-y divide-slate-100 max-h-80 overflow-y-auto">
                   {assignedTests.map((test) => (
                     <div
                       key={test.id}
-                      className={`flex items-center justify-between p-4 border rounded-xl hover:shadow-md transition-all ${selectedTestsForUnassign.includes(test.id)
-                        ? 'bg-shnoor-lavender border-shnoor-indigo'
-                        : 'bg-white border-shnoor-light'
-                        }`}
+                      className={`flex items-center justify-between px-4 py-3 transition-colors ${
+                        selectedTestsForUnassign.includes(test.id)
+                          ? 'bg-indigo-50/40'
+                          : 'hover:bg-slate-50/70'
+                      }`}
                     >
-                      <div className="flex items-center space-x-3 flex-1">
+                      <div className="flex items-center gap-3.5 flex-1 min-w-0">
                         <input
                           type="checkbox"
                           checked={selectedTestsForUnassign.includes(test.id)}
                           onChange={() => toggleTestForUnassign(test.id)}
-                          className="w-5 h-5 text-shnoor-indigo border-shnoor-mist rounded focus:ring-2 focus:ring-shnoor-lavender"
+                          className="w-4 h-4 text-[#44448E] accent-[#44448E] rounded cursor-pointer shrink-0"
                         />
-                        <div className="flex-1">
-                          <h5 className="font-bold text-shnoor-navy">{test.title}</h5>
-                          <p className="text-sm text-shnoor-indigoMedium">
-                            {test.question_count} questions • {test.duration_minutes} mins
+                        <div className="flex-1 min-w-0">
+                          <h5 className="font-semibold text-sm text-slate-800 truncate">{test.title}</h5>
+                          <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5">
+                            <span>{test.question_count} questions</span>
+                            <span className="text-slate-300">•</span>
+                            <span>{test.duration_minutes} mins</span>
                             {test.is_institute_level && (
-                              <span className="ml-2 px-2 py-0.5 bg-shnoor-lavender text-shnoor-indigo rounded text-xs font-medium">
-                                Institute Level
-                              </span>
+                              <>
+                                <span className="text-slate-300">•</span>
+                                <span className="inline-flex items-center px-2 py-0.5 bg-indigo-50 text-[#44448E] border border-indigo-100/80 rounded-full text-[10px] font-semibold">
+                                  Institute Level
+                                </span>
+                              </>
                             )}
-                          </p>
+                          </div>
                         </div>
                       </div>
                       <button
                         onClick={() => handleUnassignTest(test.id, test.title)}
-                        className="p-2 text-shnoor-indigo hover:bg-shnoor-lavender rounded-lg transition-colors"
+                        className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors ml-2 shrink-0"
                         title="Unassign Test"
                       >
-                        <Trash2 size={18} />
+                        <Trash2 size={16} />
                       </button>
                     </div>
                   ))}
                 </div>
-              </>
+              </div>
             )}
           </div>
         </div>
 
-        <div className="p-6 border-t border-shnoor-light flex justify-end">
+        <div className="px-6 py-4 border-t border-slate-100 flex justify-end bg-slate-50/50">
           <button
             onClick={onClose}
-            className="px-6 py-3 bg-shnoor-light hover:bg-shnoor-mist text-shnoor-navy rounded-xl font-medium transition-colors"
+            className="btn-secondary"
           >
             Close
           </button>

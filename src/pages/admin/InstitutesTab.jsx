@@ -37,42 +37,42 @@ const InstitutesTab = ({
 }) => {
   return (
     <div className="space-y-6">
-      <div className="admin-surface-card bg-white rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-light p-4 sm:p-8">
-        <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-start justify-between">
-          <div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-shnoor-navy mb-2 flex items-center">
-              <Building2 className="mr-2 sm:mr-3 text-shnoor-indigo h-6 w-6 sm:h-8 sm:w-8" />
-              Manage Institutes
-            </h2>
-            <p className="text-sm sm:text-base text-shnoor-indigoMedium ml-8 sm:ml-11">Add, view, and manage institutes and their students</p>
-          </div>
-
-          {/* Search Institutes */}
-          <div className="mt-4 sm:mt-0 relative w-full sm:w-64">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-shnoor-indigoMedium" size={18} />
-            <input
-              type="text"
-              placeholder="Search institutes..."
-              value={instituteSearchTerm}
-              onChange={(e) => setInstituteSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-shnoor-light rounded-xl focus:ring-2 focus:ring-shnoor-lavender focus:border-shnoor-indigo bg-white text-shnoor-navy transition-all shadow-[0_4px_15px_rgba(14,14,39,0.04)]"
-            />
-          </div>
+      <div className="section-header">
+        <div>
+          <h2 className="section-title">
+            Manage Institutes
+          </h2>
+          <p className="section-subtitle">Manage your institutes and their students</p>
         </div>
 
+        {/* Search Institutes */}
+        <div className="search-wrap">
+          <Search className="search-icon" size={16} />
+          <input
+            type="text"
+            placeholder="Search institutes..."
+            value={instituteSearchTerm}
+            onChange={(e) => setInstituteSearchTerm(e.target.value)}
+            className="search-input"
+          />
+        </div>
+      </div>
+
+      <div className="surface-card">
+
         {/* Add Institute Form */}
-        <div className="admin-subsurface-card mb-6 sm:mb-8 p-4 sm:p-6 bg-white rounded-2xl border border-shnoor-light shadow-[0_8px_30px_rgba(14,14,39,0.06)]">
-          <label className="text-sm font-bold text-shnoor-navy mb-3 flex items-center">
-            <Plus size={18} className="mr-2 text-shnoor-indigo" />
+        <div className="subsurface-card">
+          <label className="form-label">
+            <Plus size={16} className="mr-1.5 text-shnoor-indigo" />
             Add New Institute
           </label>
-          <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
+          <div className="form-row">
             <input
               type="text"
               value={newInstituteName}
               onChange={(e) => setNewInstituteName(e.target.value)}
               placeholder="Enter institute name"
-              className="flex-1 px-5 py-4 border border-shnoor-light rounded-xl focus:ring-4 focus:ring-shnoor-mist focus:border-shnoor-indigo bg-white text-shnoor-navy font-medium shadow-[0_8px_30px_rgba(14,14,39,0.06)]"
+              className="form-input"
               onKeyPress={(e) => {
                 if (e.key === 'Enter') {
                   handleAddInstitute();
@@ -80,18 +80,19 @@ const InstitutesTab = ({
               }}
             />
             <button
+              type="button"
               onClick={handleAddInstitute}
               disabled={isAddingInstitute || !newInstituteName.trim()}
-              className={`w-full sm:w-auto px-6 py-4 rounded-xl font-bold transition-all flex items-center justify-center space-x-2 shadow-[0_8px_30px_rgba(14,14,39,0.06)] ${!isAddingInstitute && newInstituteName.trim()
-                ? 'bg-shnoor-indigo hover:bg-shnoor-navy text-white hover:shadow-[0_8px_30px_rgba(14,14,39,0.06)] transform hover:-translate-y-0.5'
-                : 'bg-shnoor-light text-shnoor-soft cursor-not-allowed'
-                }`}
+              className="add-btn"
             >
-              {isAddingInstitute && (
-                <Loader2 className="animate-spin" size={20} />
+              {isAddingInstitute ? (
+                <>
+                  <Loader2 className="animate-spin mr-1.5" size={16} />
+                  <span>Adding...</span>
+                </>
+              ) : (
+                <span>+ Add</span>
               )}
-              <Plus size={20} />
-              <span>{isAddingInstitute ? 'Adding...' : 'Add'}</span>
             </button>
           </div>
         </div>
@@ -333,14 +334,14 @@ const InstitutesTab = ({
                         <div className="grid grid-cols-2 gap-2 mt-4">
                           <button
                             onClick={() => handleViewAssignedTests(institute)}
-                            className="py-2 px-3 bg-shnoor-lavender text-shnoor-indigo hover:bg-shnoor-indigo hover:text-white rounded-lg text-sm font-medium transition-colors"
+                            className="card-btn card-btn-indigo"
                           >
                             <FileSpreadsheet size={16} className="inline mr-1" />
                             Tests
                           </button>
                           <button
                             onClick={() => handleManageStudents(institute)}
-                            className="py-2 px-3 bg-shnoor-successLight text-shnoor-success hover:bg-shnoor-success hover:text-white rounded-lg text-sm font-medium transition-colors"
+                            className="card-btn card-btn-green"
                           >
                             <Users size={16} className="inline mr-1" />
                             Students
@@ -350,14 +351,14 @@ const InstitutesTab = ({
                               setSelectedInstituteForRegistration(institute);
                               setShowRegistrationControlModal(true);
                             }}
-                            className="py-2 px-3 bg-shnoor-lavender text-shnoor-indigo hover:bg-shnoor-indigo hover:text-white rounded-lg text-sm font-medium transition-colors"
+                            className="card-btn card-btn-indigo"
                           >
                             <Calendar size={16} className="inline mr-1" />
                             Registration
                           </button>
                           <button
                             onClick={() => handleDeleteInstitute(institute.id, institute.display_name)}
-                            className="py-2 px-3 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white rounded-lg text-sm font-medium transition-colors"
+                            className="card-btn card-btn-danger"
                             title="Delete Institute"
                           >
                             <Trash2 size={16} className="inline mr-1" />

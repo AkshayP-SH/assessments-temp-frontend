@@ -1,7 +1,8 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import {
-  FileSpreadsheet, Plus, Trash2, CheckCircle, XCircle,
-  MoreVertical, Eye, AlertCircle, Copy, Users, ChevronLeft, ChevronRight
+  FileSpreadsheet, Plus, Trash2, CheckCircle2, CheckCircle,
+  MoreVertical, Eye, Copy, Users, ChevronLeft, ChevronRight,
+  FileText, BookOpen
 } from 'lucide-react';
 
 const ExamSearchFilter = lazy(() => import('../../components/ExamSearchFilter'));
@@ -25,9 +26,9 @@ const ExamsTab = ({
   setOpenMenuId,
   handlePreviewQuestions,
   handleViewTestHistory,
+  handleViewJob,
   handleOpenCloneModal,
   handleViewTestDetails,
-  setEditingTest,
   setShowCreateTest,
   handleTogglePublish,
   handleDeleteTest,
@@ -35,73 +36,80 @@ const ExamsTab = ({
   examCurrentPage,
   setExamCurrentPage,
   examTotalPages,
+  examItemsPerPage = 9,
 }) => {
+  useEffect(() => {
+    const handleWindowClick = () => {
+      if (openMenuId) setOpenMenuId(null);
+    };
+    window.addEventListener('click', handleWindowClick);
+    return () => window.removeEventListener('click', handleWindowClick);
+  }, [openMenuId, setOpenMenuId]);
+
   return (
-    <div className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-light overflow-hidden">
-      <div className="p-4 sm:p-6">
-        <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 space-y-4 sm:space-y-0">
-          <div className="flex items-start sm:items-center space-x-3">
-            <div>
-              <h2 className="text-2xl font-bold text-shnoor-navy flex items-center">
-                <FileSpreadsheet className="mr-2 text-shnoor-indigo sm:size-7" size={24} />
-                Exams
-              </h2>
-              <p className="text-xs sm:text-sm text-shnoor-indigoMedium mt-1">Manage all your exams and view results</p>
-            </div>
-          </div>
-          <button
-            onClick={() => setShowCreateTest(true)}
-            className="w-full sm:w-auto flex items-center justify-center space-x-2 px-4 py-2 bg-shnoor-indigo hover:bg-shnoor-navy text-white rounded-lg transition-colors shadow-[0_8px_30px_rgba(14,14,39,0.06)] font-semibold"
-          >
-            <Plus size={20} />
-            <span>Create Test</span>
-          </button>
+    <div className="admin-exams-section">
+      <div className="admin-exams-header">
+        <div className="admin-exams-header-left">
+          <h2 className="admin-exams-title">
+            Exams
+          </h2>
+          <p className="admin-exams-subtitle">Manage all your exams and view results</p>
         </div>
+        <button
+          type="button"
+          onClick={() => setShowCreateTest(true)}
+          className="admin-create-test-btn"
+        >
+          <Plus size={18} />
+          <span>Create Test</span>
+        </button>
+      </div>
 
-        {loading ? (
-          <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-shnoor-indigo"></div>
-            <span className="ml-3 text-shnoor-indigoMedium">Loading...</span>
-          </div>
-        ) : tests.length === 0 ? (
-          <div className="text-center py-12 text-shnoor-indigoMedium">
-            <FileSpreadsheet className="mx-auto mb-3 text-shnoor-mist" size={48} />
-            <p className="font-medium">No exams found</p>
-            <p className="text-sm mt-1">Click "Create Test" to add your first exam</p>
-          </div>
-        ) : (
-          <>
-            <Suspense fallback={<div className="h-12 bg-shnoor-lavender rounded-xl animate-pulse mb-4" />}>
-              <ExamSearchFilter
-                initialSearchTerm={searchTerm}
-                initialFilters={filters}
-                initialSortBy={sortBy}
-                onSearchChange={setSearchTerm}
-                onFilterChange={setFilters}
-                onSortChange={setSortBy}
-                showPublishedFilter={true}
-                showAttemptedFilter={true}
-                resultCount={filteredTests.length}
-                sortOptions={[
-                  { value: 'latest', label: 'Latest Created' },
-                  { value: 'oldest', label: 'Oldest Created' },
-                  { value: 'most-attempted', label: 'Most Attempted' },
-                  { value: 'duration-asc', label: 'Shortest Duration' },
-                  { value: 'duration-desc', label: 'Longest Duration' }
-                ]}
-              />
-            </Suspense>
+      {loading ? (
+        <div className="flex justify-center items-center py-12 bg-white rounded-2xl border border-[#E2E8F0] shadow-sm">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-shnoor-indigo"></div>
+          <span className="ml-3 text-shnoor-indigoMedium font-medium">Loading exams...</span>
+        </div>
+      ) : tests.length === 0 ? (
+        <div className="text-center py-12 bg-white rounded-2xl border border-[#E2E8F0] shadow-sm text-shnoor-indigoMedium">
+          <FileSpreadsheet className="mx-auto mb-3 text-shnoor-mist" size={48} />
+          <p className="font-bold text-lg text-shnoor-navy">No exams found</p>
+          <p className="text-sm mt-1">Click "Create Test" to add your first exam</p>
+        </div>
+      ) : (
+        <>
+          <Suspense fallback={<div className="h-12 bg-white rounded-xl animate-pulse mb-4" />}>
+            <ExamSearchFilter
+              initialSearchTerm={searchTerm}
+              initialFilters={filters}
+              initialSortBy={sortBy}
+              onSearchChange={setSearchTerm}
+              onFilterChange={setFilters}
+              onSortChange={setSortBy}
+              showPublishedFilter={true}
+              showAttemptedFilter={true}
+              resultCount={filteredTests.length}
+              sortOptions={[
+                { value: 'latest', label: 'Latest Created' },
+                { value: 'oldest', label: 'Oldest Created' },
+                { value: 'most-attempted', label: 'Most Attempted' },
+                { value: 'duration-asc', label: 'Shortest Duration' },
+                { value: 'duration-desc', label: 'Longest Duration' }
+              ]}
+            />
+          </Suspense>
 
-            {filteredTests.length === 0 ? (
-              <div className="text-center py-12 text-shnoor-indigoMedium">
-                <FileSpreadsheet className="mx-auto mb-3 text-shnoor-mist" size={48} />
-                <p className="font-medium">No exams match your filters</p>
-                <p className="text-sm mt-1">Try adjusting your search or filters</p>
-              </div>
-            ) : (
-              <>
-                {/* Bulk Actions Bar */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 p-4 bg-white rounded-xl border border-shnoor-light space-y-3 sm:space-y-0">
+          {filteredTests.length === 0 ? (
+            <div className="text-center py-12 bg-white rounded-2xl border border-[#E2E8F0] shadow-sm text-shnoor-indigoMedium">
+              <FileSpreadsheet className="mx-auto mb-3 text-shnoor-mist" size={48} />
+              <p className="font-medium">No exams match your filters</p>
+              <p className="text-sm mt-1">Try adjusting your search or filters</p>
+            </div>
+          ) : (
+            <>
+              {/* Optional Bulk Actions Bar if items selected */}
+              {selectedTests.length > 0 && (
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 p-4 bg-white rounded-xl border border-shnoor-light space-y-3 sm:space-y-0 shadow-sm">
                   <label className="flex items-center space-x-3 cursor-pointer">
                     <input
                       type="checkbox"
@@ -110,289 +118,257 @@ const ExamsTab = ({
                       className="w-5 h-5 text-shnoor-indigo border-shnoor-mist rounded focus:ring-2 focus:ring-shnoor-indigo"
                     />
                     <span className="text-sm font-bold text-shnoor-indigo">
-                      {selectedTests.length > 0 ? `${selectedTests.length} selected` : 'Select All'}
+                      {selectedTests.length} selected
                     </span>
                   </label>
-                  {selectedTests.length > 0 && (
-                    <button
-                      onClick={handleBulkDeleteTests}
-                      className="w-full sm:w-auto px-4 py-2 bg-shnoor-danger hover:bg-shnoor-danger text-white rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
-                    >
-                      <Trash2 size={16} />
-                      <span>Delete {selectedTests.length} Test{selectedTests.length !== 1 ? 's' : ''}</span>
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    onClick={handleBulkDeleteTests}
+                    className="w-full sm:w-auto px-4 py-2 bg-shnoor-danger hover:bg-shnoor-danger text-white rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
+                  >
+                    <Trash2 size={16} />
+                    <span>Delete {selectedTests.length} Test{selectedTests.length !== 1 ? 's' : ''}</span>
+                  </button>
                 </div>
+              )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {paginatedTests.map((test) => (
+              {/* Exam Cards Grid */}
+              <div className="admin-exams-grid">
+                {paginatedTests.map((test) => {
+                  const attempts = test.attempts || 0;
+                  const passedCount = test.passedCount ?? test.passed_count ?? test.passed ?? 0;
+                  const passRate = test.passRate ?? (attempts > 0 ? Math.round((passedCount / attempts) * 100) : 0);
+                  const initialLetter = test.name ? test.name.trim().charAt(0).toLowerCase() : 'f';
+                  const formattedDate = test.date || (test.created_at ? new Date(test.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Sep 18, 2026');
+
+                  return (
                     <div
                       key={test.id}
-                      className="bg-white border border-shnoor-light rounded-xl p-6 hover:shadow-[0_8px_30px_rgba(14,14,39,0.06)] hover:border-shnoor-indigo transition-all group relative min-h-[400px] flex flex-col"
+                      className="admin-exam-card"
                     >
-                      {/* Checkbox for selection */}
-                      <div className="absolute top-4 left-4 z-10">
-                        <label onClick={(e) => e.stopPropagation()}>
-                          <input
-                            type="checkbox"
-                            checked={selectedTests.includes(test.id)}
-                            onChange={() => toggleTestSelection(test.id)}
-                            className="w-5 h-5 text-shnoor-indigo border-shnoor-mist rounded focus:ring-2 focus:ring-shnoor-indigo cursor-pointer"
-                          />
-                        </label>
-                      </div>
+                      {/* Top Bar: Checkbox & Badges */}
+                      <div className="admin-exam-card-top">
+                        <input
+                          type="checkbox"
+                          checked={selectedTests.includes(test.id)}
+                          onChange={() => toggleTestSelection(test.id)}
+                          className="admin-exam-checkbox"
+                          title="Select exam"
+                        />
 
-                      {/* Status Badge and 3-Dot Menu */}
-                      <div className="absolute top-4 right-4 flex items-center space-x-2 z-10">
-                        {test.status === 'published' ? (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-shnoor-successLight text-shnoor-success">
-                            <CheckCircle size={12} className="mr-1" />
-                            Published
+                        <div className="flex items-center gap-2">
+                          <span className={test.status === 'published' ? 'admin-exam-status-published' : 'admin-exam-status-draft'}>
+                            <CheckCircle2 size={13} />
+                            <span>{test.status === 'published' ? 'Published' : test.status === 'archived' ? 'Archived' : 'Draft'}</span>
                           </span>
-                        ) : test.status === 'archived' ? (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-shnoor-dangerLight text-shnoor-danger">
-                            <XCircle size={12} className="mr-1" />
-                            Archived
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-shnoor-lavender opacity-80 text-shnoor-navy">
-                            Draft
-                          </span>
-                        )}
 
-                        {/* 3-Dot Menu */}
-                        <div className="relative">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setOpenMenuId(openMenuId === test.id ? null : test.id);
-                            }}
-                            className="p-1.5 bg-shnoor-lavender opacity-80 hover:bg-shnoor-light text-shnoor-indigoMedium hover:text-shnoor-navy rounded-lg transition-colors"
-                            title="More options"
-                          >
-                            <MoreVertical size={14} />
-                          </button>
+                          <div className="relative">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setOpenMenuId(openMenuId === test.id ? null : test.id);
+                              }}
+                              className="admin-exam-more-btn"
+                              title="More options"
+                            >
+                              <MoreVertical size={16} />
+                            </button>
 
-                          {/* Dropdown Menu */}
-                          {openMenuId === test.id && (
-                            <div className="absolute right-0 mt-2 w-48 bg-white border border-shnoor-light rounded-lg shadow-[0_8px_30px_rgba(14,14,39,0.06)] z-50">
-                              {test.status === 'draft' ? (
-                                <>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handlePreviewQuestions(test);
-                                    }}
-                                    className="w-full px-4 py-2.5 text-left text-sm text-shnoor-indigo hover:bg-shnoor-lavender flex items-center space-x-2 transition-colors"
-                                  >
-                                    <Eye size={14} />
-                                    <span>Preview Questions</span>
-                                  </button>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleViewTestHistory(test);
-                                    }}
-                                    className="w-full px-4 py-2.5 text-left text-sm text-shnoor-indigo hover:bg-shnoor-lavender flex items-center space-x-2 transition-colors border-t border-shnoor-light"
-                                  >
-                                    <AlertCircle size={14} />
-                                    <span>Test History</span>
-                                  </button>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleOpenCloneModal(test);
-                                    }}
-                                    className="w-full px-4 py-2.5 text-left text-sm text-shnoor-indigo hover:bg-shnoor-lavender flex items-center space-x-2 transition-colors border-t border-shnoor-light"
-                                  >
-                                    <Copy size={14} />
-                                    <span>Clone Test</span>
-                                  </button>
-                                </>
-                              ) : (
-                                <>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleViewTestDetails(test);
-                                    }}
-                                    className="w-full px-4 py-2.5 text-left text-sm text-shnoor-indigo hover:bg-shnoor-lavender flex items-center space-x-2 transition-colors"
-                                  >
-                                    <Eye size={14} />
-                                    <span>View Details</span>
-                                  </button>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handlePreviewQuestions(test);
-                                    }}
-                                    className="w-full px-4 py-2.5 text-left text-sm text-shnoor-indigo hover:bg-shnoor-lavender flex items-center space-x-2 transition-colors border-t border-shnoor-light"
-                                  >
-                                    <FileSpreadsheet size={14} />
-                                    <span>Preview Questions</span>
-                                  </button>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleViewTestHistory(test);
-                                    }}
-                                    className="w-full px-4 py-2.5 text-left text-sm text-shnoor-indigo hover:bg-shnoor-lavender flex items-center space-x-2 transition-colors border-t border-shnoor-light"
-                                  >
-                                    <AlertCircle size={14} />
-                                    <span>Test History</span>
-                                  </button>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleOpenCloneModal(test);
-                                    }}
-                                    className="w-full px-4 py-2.5 text-left text-sm text-shnoor-indigo hover:bg-shnoor-lavender flex items-center space-x-2 transition-colors border-t border-shnoor-light"
-                                  >
-                                    <Copy size={14} />
-                                    <span>Clone Test</span>
-                                  </button>
-                                </>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Header with Icon */}
-                      <div className="mt-10 mb-4">
-                        <div className="h-12 w-12 bg-shnoor-lavender rounded-lg flex items-center justify-center text-shnoor-indigo font-bold text-xl group-hover:bg-shnoor-indigo group-hover:text-white transition-colors">
-                          {test.name.charAt(0)}
-                        </div>
-                      </div>
-
-                      {/* Exam Title */}
-                      <h3 className="font-bold text-shnoor-navy text-base md:text-lg mb-3 line-clamp-2 group-hover:text-shnoor-indigo transition-colors pr-2">
-                        {test.name}
-                      </h3>
-
-                      {/* Exam Details */}
-                      <div className="space-y-2 mb-4">
-                        <div className="flex items-center text-sm text-shnoor-indigoMedium flex-wrap">
-                          <FileSpreadsheet size={16} className="mr-2 flex-shrink-0" />
-                          <span className="break-words">{test.questions} Questions • {test.duration} mins</span>
-                        </div>
-                        <div className="flex items-center text-xs text-shnoor-indigoMedium">
-                          <span>Created: {test.date}</span>
-                        </div>
-                      </div>
-
-                      {/* Stats */}
-                      <div className="grid grid-cols-2 gap-3 pt-4 border-t border-shnoor-light mb-4">
-                        <div className="text-center p-2">
-                          <div className="flex items-center justify-center mb-1">
-                            <Users size={16} className="text-shnoor-indigoMedium mr-1 flex-shrink-0" />
-                            <span className="text-lg font-bold text-shnoor-navy">{test.attempts}</span>
+                            {openMenuId === test.id && (
+                              <div
+                                className="absolute right-0 mt-1 w-44 bg-white rounded-xl shadow-xl border border-gray-100 py-1.5 z-30 animate-in fade-in zoom-in-95 duration-100"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setOpenMenuId(null);
+                                    handleViewTestDetails(test);
+                                  }}
+                                  className="w-full text-left px-3.5 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2 cursor-pointer"
+                                >
+                                  <Eye size={14} className="text-gray-400" />
+                                  <span>View Details</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setOpenMenuId(null);
+                                    handleViewJob(test);
+                                  }}
+                                  className="w-full text-left px-3.5 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2 cursor-pointer"
+                                >
+                                  <FileText size={14} className="text-gray-400" />
+                                  <span>Job Role</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setOpenMenuId(null);
+                                    handlePreviewQuestions(test);
+                                  }}
+                                  className="w-full text-left px-3.5 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2 cursor-pointer"
+                                >
+                                  <FileText size={14} className="text-gray-400" />
+                                  <span>Preview Questions</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setOpenMenuId(null);
+                                    handleOpenCloneModal(test);
+                                  }}
+                                  className="w-full text-left px-3.5 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2 cursor-pointer"
+                                >
+                                  <Copy size={14} className="text-gray-400" />
+                                  <span>Clone Test</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setOpenMenuId(null);
+                                    handleViewTestHistory(test);
+                                  }}
+                                  className="w-full text-left px-3.5 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2 cursor-pointer"
+                                >
+                                  <BookOpen size={14} className="text-gray-400" />
+                                  <span>Test History</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setOpenMenuId(null);
+                                    handleTogglePublish(test.id, test.status);
+                                  }}
+                                  className="w-full text-left px-3.5 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2 cursor-pointer"
+                                >
+                                  <CheckCircle size={14} className="text-gray-400" />
+                                  <span>{test.status === 'published' ? 'Unpublish' : 'Publish'}</span>
+                                </button>
+                              </div>
+                            )}
                           </div>
-                          <p className="text-xs text-shnoor-indigoMedium">Attempted</p>
-                        </div>
-                        <div className="text-center p-2">
-                          <div className="flex items-center justify-center mb-1">
-                            <CheckCircle size={16} className="text-shnoor-success mr-1 flex-shrink-0" />
-                            <span className="text-lg font-bold text-shnoor-success">{test.passedCount || 0}</span>
-                          </div>
-                          <p className="text-xs text-shnoor-indigoMedium">Passed ({test.passRate || 0}%)</p>
                         </div>
                       </div>
 
-                      {/* Action Buttons */}
-                      <div className="flex items-center space-x-2 pt-4 border-t border-shnoor-light mt-auto">
-                        {test.status === 'draft' ? (
-                          <>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setEditingTest(test);
-                                setShowCreateTest(true);
-                              }}
-                              className="flex-1 py-2.5 px-3 bg-shnoor-lavender text-shnoor-indigo hover:bg-shnoor-navy hover:text-white rounded-lg text-sm font-medium transition-colors min-h-[44px] flex items-center justify-center"
-                              title="View Test"
-                            >
-                              <Eye size={18} className="mr-1 flex-shrink-0" />
-                              <span className="truncate">View</span>
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleTogglePublish(test.id, test.status);
-                              }}
-                              className="flex-1 py-2.5 px-3 bg-shnoor-successLight text-shnoor-success hover:bg-shnoor-success hover:text-white rounded-lg text-sm font-medium transition-colors min-h-[44px] flex items-center justify-center"
-                              title="Publish Test"
-                            >
-                              <CheckCircle size={18} className="mr-1 flex-shrink-0" />
-                              <span className="truncate">Publish</span>
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteTest(test.id);
-                              }}
-                              className="p-2.5 text-shnoor-danger hover:bg-shnoor-dangerLight rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
-                              title="Delete Test"
-                            >
-                              <Trash2 size={18} />
-                            </button>
-                          </>
-                        ) : (
-                          <>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedExamId(test.id);
-                              }}
-                              className="flex-1 py-2.5 px-3 bg-shnoor-lavender text-shnoor-indigo hover:bg-shnoor-indigo hover:text-white rounded-lg text-sm font-medium transition-colors min-h-[44px] flex items-center justify-center"
-                              title="View Results"
-                            >
-                              <Eye size={18} className="mr-1 flex-shrink-0" />
-                              <span className="truncate">View</span>
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteTest(test.id);
-                              }}
-                              className="p-2.5 text-shnoor-danger hover:bg-shnoor-dangerLight rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
-                              title="Delete Test"
-                            >
-                              <Trash2 size={18} />
-                            </button>
-                          </>
-                        )}
+                      {/* Icon Avatar Initial Badge */}
+                      <div className="admin-exam-avatar">
+                        {initialLetter}
+                      </div>
+
+                      {/* Exam Title & Details */}
+                      <div>
+                        <h3 className="admin-exam-card-title truncate" title={test.name}>
+                          {test.name}
+                        </h3>
+                        <div className="admin-exam-card-subtitle">
+                          <FileText size={14} className="text-[#8F8FC4] flex-shrink-0" />
+                          <span>{test.questions || test.total_questions || 0} Questions • {test.duration || 60} mins</span>
+                        </div>
+                        <p className="admin-exam-card-date">
+                          Created: {formattedDate}
+                        </p>
+                      </div>
+
+                      {/* Top Divider */}
+                      <div className="admin-exam-divider" />
+
+                      {/* Stats Section: Attempted & Passed */}
+                      <div className="admin-exam-stats-grid">
+                        <div>
+                          <div className="admin-exam-stat-value">
+                            <Users size={16} />
+                            <span>{attempts}</span>
+                          </div>
+                          <span className="admin-exam-stat-label">Attempted</span>
+                        </div>
+                        <div>
+                          <div className="admin-exam-stat-value admin-exam-stat-value-passed">
+                            <CheckCircle2 size={16} />
+                            <span>{passedCount}</span>
+                          </div>
+                          <span className="admin-exam-stat-label">Passed ({passRate}%)</span>
+                        </div>
+                      </div>
+
+                      {/* Bottom Divider */}
+                      <div className="admin-exam-divider" />
+
+                      {/* Footer Actions: View Button & Trash Icon */}
+                      <div className="admin-exam-card-footer">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedExamId(test.id);
+                          }}
+                          className="admin-exam-view-btn"
+                        >
+                          <Eye size={16} />
+                          <span>View</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteTest(test.id);
+                          }}
+                          className="admin-exam-delete-btn"
+                          title="Delete Exam"
+                        >
+                          <Trash2 size={18} />
+                        </button>
                       </div>
                     </div>
-                  ))}
-                </div>
+                  );
+                })}
+              </div>
 
-                {examTotalPages > 1 && (
-                  <div className="flex justify-center items-center space-x-4 mt-8">
+              {/* Pagination */}
+              {examTotalPages > 1 && (
+                <div className="admin-pagination">
+                  <span className="admin-pagination-text">
+                    Showing {filteredTests.length === 0 ? 0 : (examCurrentPage - 1) * examItemsPerPage + 1} – {Math.min(examCurrentPage * examItemsPerPage, filteredTests.length)} of {filteredTests.length} {filteredTests.length === 1 ? 'exam' : 'exams'}
+                  </span>
+                  <div className="admin-pagination-controls">
                     <button
+                      type="button"
                       onClick={() => setExamCurrentPage(p => Math.max(1, p - 1))}
                       disabled={examCurrentPage === 1}
-                      className="p-2 bg-white border border-shnoor-light rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-shnoor-lavender transition-colors"
+                      className="admin-pagination-btn"
+                      title="Previous Page"
                     >
-                      <ChevronLeft size={20} className="text-shnoor-indigo" />
+                      <ChevronLeft size={16} />
                     </button>
-                    <span className="text-sm text-shnoor-navy font-medium">
-                      Page {examCurrentPage} of {examTotalPages}
-                    </span>
+
+                    {Array.from({ length: examTotalPages }, (_, i) => i + 1).map((pageNum) => (
+                      <button
+                        key={pageNum}
+                        type="button"
+                        onClick={() => setExamCurrentPage(pageNum)}
+                        className={`admin-pagination-btn ${examCurrentPage === pageNum ? 'admin-pagination-btn-active' : ''}`}
+                      >
+                        {String(pageNum).padStart(2, '0')}
+                      </button>
+                    ))}
+
                     <button
+                      type="button"
                       onClick={() => setExamCurrentPage(p => Math.min(examTotalPages, p + 1))}
                       disabled={examCurrentPage === examTotalPages}
-                      className="p-2 bg-white border border-shnoor-light rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-shnoor-lavender transition-colors"
+                      className="admin-pagination-btn"
+                      title="Next Page"
                     >
-                      <ChevronRight size={20} className="text-shnoor-indigo" />
+                      <ChevronRight size={16} />
                     </button>
                   </div>
-                )}
-              </>
-            )}
-          </>
-        )}
-      </div>
+                </div>
+              )}
+            </>
+          )}
+        </>
+      )}
     </div>
   );
 };
