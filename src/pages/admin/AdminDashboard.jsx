@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {
-  FileSpreadsheet, ArrowLeft, Users, AlertCircle, Video, Loader2, Building2, Briefcase
+  FileSpreadsheet, ArrowLeft, Users, AlertCircle, Video, Loader2, Building2, Briefcase, Landmark, FileText, X
 } from 'lucide-react';
 
 import { apiFetch } from '../../config/api';
@@ -120,10 +120,10 @@ const AdminDashboard = () => {
   const [sortBy, setSortBy] = useState('latest');
 
   const [examCurrentPage, setExamCurrentPage] = useState(1);
-  const examItemsPerPage = 15;
+  const examItemsPerPage = 9;
 
   const [instituteCurrentPage, setInstituteCurrentPage] = useState(1);
-  const instituteItemsPerPage = 15;
+  const instituteItemsPerPage = 10;
 
   const [resultsCurrentPage, setResultsCurrentPage] = useState(1);
   const [resultsRowsPerPage, setResultsRowsPerPage] = useState(40);
@@ -217,6 +217,13 @@ const AdminDashboard = () => {
 
   const clientParam = (isSuperAdmin && viewAsClientId) ? `?clientId=${viewAsClientId}` : '';
 
+  const handleSelectExam = (examId) => {
+    setSelectedExamId(examId);
+    setSelectedCandidates([]);
+    setResultsCurrentPage(1);
+    setStatusFilter('all');
+  };
+
   // Derived state: Get students for the selected exam
   const selectedExamStudents = selectedExamId ? (studentsData[selectedExamId] || []) : [];
   const selectedExamDetails = tests.find(t => t.id === selectedExamId);
@@ -226,13 +233,13 @@ const AdminDashboard = () => {
     if (selectedExamId && detailViewTab === 'feedback') {
       fetchFeedback();
     }
-  }, [selectedExamId, detailViewTab]);
+  }, [selectedExamId, detailViewTab, clientParam]);
 
   const fetchFeedback = async () => {
     setLoadingFeedback(true);
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/feedback/test/${selectedExamId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/feedback/test/${selectedExamId}${clientParam}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -420,7 +427,7 @@ const AdminDashboard = () => {
           questions: test.question_count,
           attempts: parseInt(test.total_attempts) || 0,
           avgScore: 0, // Will be updated from detailed results if available
-          passedCount: parseInt(test.pass_count) || 0,
+          passedCount: parseInt(test.pass_count ?? test.passed_count) || 0,
           passRate: parseInt(test.pass_percentage) || 0,
           status: test.status || 'draft',
           duration: test.duration || 60,
@@ -451,7 +458,7 @@ const AdminDashboard = () => {
   const fetchAllResults = async (testsList) => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await apiFetch('api/export/all-results', {
+      const response = await apiFetch(`api/export/all-results${clientParam}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -1444,7 +1451,7 @@ const AdminDashboard = () => {
 
       for (const testId of selectedTestsForUnassign) {
         try {
-          const response = await apiFetch(`api/institutes/${selectedInstituteForTests.id}/unassign-test/${testId}`, {
+          const response = await apiFetch(`api/institutes/${selectedInstituteForTests.id}/unassign-test/${testId}${clientParam}`, {
             method: 'DELETE',
             headers: {
               'Authorization': `Bearer ${token}`
@@ -1660,7 +1667,7 @@ const AdminDashboard = () => {
 
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await apiFetch(`api/student/institute/${encodeURIComponent(selectedInstituteForStudents.name)}/all`, {
+      const response = await apiFetch(`api/student/institute/${encodeURIComponent(selectedInstituteForStudents.name)}/all${clientParam}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -1694,7 +1701,7 @@ const AdminDashboard = () => {
 
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await apiFetch('api/student/bulk', {
+      const response = await apiFetch(`api/student/bulk${clientParam}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -1737,16 +1744,16 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleSelectRange = () => {
+  const handleSelectRange = (students = instituteStudentsForManagement) => {
     const startIdx = parseInt(selectionRange.start) - 1;
     const endIdx = parseInt(selectionRange.end) - 1;
 
-    if (isNaN(startIdx) || isNaN(endIdx) || startIdx < 0 || endIdx >= instituteStudentsForManagement.length || startIdx > endIdx) {
-      alert('Please enter a valid range (e.g., 1 to ' + instituteStudentsForManagement.length + ')');
+    if (isNaN(startIdx) || isNaN(endIdx) || startIdx < 0 || endIdx >= students.length || startIdx > endIdx) {
+      alert('Please enter a valid range (e.g., 1 to ' + students.length + ')');
       return;
     }
 
-    const studentsToSelect = instituteStudentsForManagement.slice(startIdx, endIdx + 1).map(s => s.id);
+    const studentsToSelect = students.slice(startIdx, endIdx + 1).map(s => s.id);
 
     setSelectedStudentsForDelete(prev => {
       const newSelection = new Set([...prev, ...studentsToSelect]);
@@ -1779,7 +1786,7 @@ const AdminDashboard = () => {
 
       for (const testId of selectedTestsForStudentModal) {
         try {
-          const response = await apiFetch('api/tests/assign', {
+          const response = await apiFetch(`api/tests/assign${clientParam}`, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${token}`,
@@ -1843,7 +1850,7 @@ const AdminDashboard = () => {
 
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await apiFetch(`api/institutes/students/${studentId}/assigned-tests`, {
+      const response = await apiFetch(`api/institutes/students/${studentId}/assigned-tests${clientParam}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -1874,7 +1881,7 @@ const AdminDashboard = () => {
 
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await apiFetch(`api/institutes/students/${studentId}/unassign-test/${testId}`, {
+      const response = await apiFetch(`api/institutes/students/${studentId}/unassign-test/${testId}${clientParam}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -2016,8 +2023,8 @@ const AdminDashboard = () => {
   };
 
   return (
-    <Suspense fallback={<div className="flex h-screen items-center justify-center bg-shnoor-lavender"><Loader2 className="animate-spin h-12 w-12 text-shnoor-indigo" /></div>}>
-      <div className="admin-dashboard-root min-h-screen bg-shnoor-lavender">
+    <Suspense fallback={<div className="flex h-screen items-center justify-center bg-[#F8F7FF]"><Loader2 className="animate-spin h-12 w-12 text-shnoor-indigo" /></div>}>
+      <div className="admin-dashboard-root">
         {/* Header */}
         <AdminHeader />
 
@@ -2026,7 +2033,7 @@ const AdminDashboard = () => {
           <div className="bg-white border-b border-shnoor-mist shadow-sm">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center gap-3">
               <div className="flex items-center gap-2 text-xs font-semibold text-shnoor-indigoMedium uppercase tracking-wide flex-shrink-0">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
+                <Building2 size={14} />
                 Viewing as:
               </div>
               <select
@@ -2050,7 +2057,7 @@ const AdminDashboard = () => {
                   onClick={() => { setViewAsClientId(''); setTests([]); setAllInstitutes([]); }}
                   className="text-xs text-shnoor-danger hover:underline flex items-center gap-1"
                 >
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                  <X size={12} />
                   Clear filter
                 </button>
               )}
@@ -2092,7 +2099,19 @@ const AdminDashboard = () => {
         )}
 
         {/* Main Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="admin-dashboard-content">
+
+          {/* Welcome Banner */}
+          {activeTab === 'exams' && !showCreateTest && !selectedExamId && (
+            <div className="welcome-banner">
+              <h2 className="welcome-banner-title">
+                Welcome back, {currentUser?.name || 'Admin'}!
+              </h2>
+              <p className="welcome-banner-subtitle">
+                {currentUser?.company_name || 'Shnoor International LLC'} • {isSuperAdmin ? 'Platform View' : 'Admin Portal'}
+              </p>
+            </div>
+          )}
 
           {/* Subscription Expiry Banner */}
           {!isSuperAdmin && daysRemaining !== null && daysRemaining <= 7 && (
@@ -2126,24 +2145,24 @@ const AdminDashboard = () => {
 
           {/* Tab Navigation */}
           {!showCreateTest && !selectedExamId && (
-            <div className="mb-4 sm:mb-8 overflow-x-auto pb-4 sm:pb-0 hide-scrollbar">
-              <div className="admin-tab-shell bg-white rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-mist p-2 flex sm:inline-flex space-x-2 w-max !max-w-none">
+            <div className="admin-tabs-container">
+              <div className="admin-tabs-shell">
                 {[
                   { id: 'exams', label: 'Manage Exams', icon: FileSpreadsheet },
-                  { id: 'institutes', label: 'Manage Institutes', icon: Building2 },
-                  { id: 'reports', label: 'Reports', icon: FileSpreadsheet },
+                  { id: 'institutes', label: 'Manage Institutes', icon: Landmark },
+                  { id: 'reports', label: 'Reports', icon: FileText },
                   { id: 'bulk-upload', label: 'Bulk Upload', icon: Users },
                   { id: 'violations', label: 'Violations', icon: AlertCircle },
                   { id: 'interviews', label: 'Interviews', icon: Video },
                   { id: 'job-openings', label: 'Job Openings', icon: Briefcase },
-                  ...(isSuperAdmin ? [{ id: 'subscription-plans', label: 'Subscription Plans', icon: FileSpreadsheet }] : [])
+                  ...(isSuperAdmin ? [{ id: 'subscription-plans', label: 'Subscription Plans', icon: FileText }] : [])
                 ].map((tab) => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`admin-tab-button flex items-center space-x-2 px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-medium transition-all shrink-0 text-sm sm:text-base ${activeTab === tab.id ? 'is-active' : ''}`}
+                    className={`admin-tab-btn ${activeTab === tab.id ? 'admin-tab-btn-active' : ''}`}
                   >
-                    <tab.icon size={20} />
+                    <tab.icon size={18} />
                     <span>{tab.label}</span>
                   </button>
                 ))}
@@ -2153,17 +2172,18 @@ const AdminDashboard = () => {
 
           {/* Create Test Modal/Section */}
           {showCreateTest ? (
-            <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-light p-8 mb-6">
-              <div className="flex items-center justify-between mb-8">
+            <div className="space-y-4 mb-6">
+              <div className="flex items-center justify-between">
                 <button
                   onClick={() => {
                     setShowCreateTest(false);
                     setEditingTest(null);
                   }}
-                  className="flex items-center text-shnoor-indigoMedium hover:text-shnoor-indigo transition-colors group"
+                  className="btn-secondary"
                   title={editingTest ? 'Cancel Editing' : 'Back to Exams'}
                 >
-                  <ArrowLeft size={22} className="group-hover:-translate-x-1 transition-transform" />
+                  <ArrowLeft size={16} />
+                  <span>Back to Exams</span>
                 </button>
               </div>
               <CreateTestSection
@@ -2180,12 +2200,17 @@ const AdminDashboard = () => {
               selectedExamStudents={selectedExamStudents}
               onBack={() => {
                 setSelectedExamId(null);
+                setSelectedCandidates([]);
+                setResultsCurrentPage(1);
                 setDetailViewTab('results');
               }}
               showQuickSelectMenu={showQuickSelectMenu}
               setShowQuickSelectMenu={setShowQuickSelectMenu}
               statusFilter={statusFilter}
-              setStatusFilter={setStatusFilter}
+              setStatusFilter={(filter) => {
+                setStatusFilter(filter);
+                setResultsCurrentPage(1);
+              }}
               selectedCandidates={selectedCandidates}
               setSelectedCandidates={setSelectedCandidates}
               exportToExcel={exportToExcel}
@@ -2228,16 +2253,17 @@ const AdminDashboard = () => {
                   setOpenMenuId={setOpenMenuId}
                   handlePreviewQuestions={handlePreviewQuestions}
                   handleViewTestHistory={handleViewTestHistory}
+                  handleViewJob={handleViewJob}
                   handleOpenCloneModal={handleOpenCloneModal}
                   handleViewTestDetails={handleViewTestDetails}
-                  setEditingTest={setEditingTest}
                   setShowCreateTest={setShowCreateTest}
                   handleTogglePublish={handleTogglePublish}
                   handleDeleteTest={handleDeleteTest}
-                  setSelectedExamId={setSelectedExamId}
+                  setSelectedExamId={handleSelectExam}
                   examCurrentPage={examCurrentPage}
                   setExamCurrentPage={setExamCurrentPage}
                   examTotalPages={examTotalPages}
+                  examItemsPerPage={examItemsPerPage}
                 />
               )}
 
@@ -2312,7 +2338,7 @@ const AdminDashboard = () => {
               {/* Job Openings Tab */}
               {activeTab === 'job-openings' && (
                 <div className="animate-fade-in">
-                  <AdminJobOpenings />
+                  <AdminJobOpenings clientId={viewAsClientId || null} />
                 </div>
               )}
 
@@ -2381,7 +2407,7 @@ const AdminDashboard = () => {
               handleJobRoleChange={handleJobRoleChange}
               handleAddJobRole={handleAddJobRole}
               handleRemoveJobRole={handleRemoveJobRole}
-              handleSaveJobRoles={handleSaveJobRoles}
+              handleSaveJobRoles={handleSaveJob}
               onClose={() => setShowJobModal(false)}
             />
           )}
