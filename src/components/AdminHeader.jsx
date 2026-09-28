@@ -133,18 +133,6 @@ const AdminHeader = () => {
 
   return (
     <>
-<<<<<<< HEAD
-  <header className="w-full bg-shnoor-navy h-[60px] sm:h-[72px] shadow-md sticky top-0 z-50">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
-      <div className="flex items-center gap-3 sm:gap-4">
-        {/* Logo icon */}
-        <div className="site-header-logo w-10 h-10 sm:w-12 sm:h-12 rounded-xl overflow-hidden flex items-center justify-center flex-shrink-0 bg-white">
-          <img
-            src={shnoorLogo}
-            alt="Shnoor Logo"
-            className="w-full h-full object-contain"
-          />
-=======
       <div className="w-full">
             <header className="admin-header w-full h-[60px] sm:h-[72px] shadow-sm relative z-50 rounded-none border-b border-gray-200">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
@@ -163,7 +151,6 @@ const AdminHeader = () => {
                       {isClientPortal ? 'Client Portal' : 'Admin Dashboard'}
                     </p>
                   </div>
->>>>>>> 4e96627e172f5f7636bb58820818f25fc0432ca4
                 </div>
 
                 {/* Right Side: Desktop Navigation */}
@@ -219,165 +206,6 @@ const AdminHeader = () => {
                   </button>
                 </div>
 
-<<<<<<< HEAD
-  {/* Right Side: Desktop Navigation */ }
-  <div className="hidden sm:flex items-center gap-4">
-    <ThemeSelector />
-    <Button
-      variant="primary"
-      className="admin-header-action !h-10 !px-5 text-sm hover:shadow-[0_0_15px_rgba(107,107,229,0.4)] hover:-translate-y-0.5 transition-all border-0 relative"
-      onClick={() => {
-        if (clientPlanId === 'trial') {
-          toast.error('This feature is not available in the 7-day free trial plan. Please upgrade your plan to access it.', { duration: 4000 });
-          return;
-        }
-        navigate(`${basePath}/student-messages`);
-      }}
-    >
-      <MessageSquare size={16} className="mr-2" />
-      <span>Messages</span>
-      {unreadCount > 0 && (
-        <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
-          {unreadCount > 99 ? '99+' : unreadCount}
-        </span>
-      )}
-    </Button>
-    {!isClientAdmin && (
-      <Button
-        variant="primary"
-        className="admin-header-action !h-10 !px-5 text-sm hover:shadow-[0_0_15px_rgba(107,107,229,0.4)] hover:-translate-y-0.5 transition-all border-0"
-        onClick={() => navigate('/admin/clients')}
-      >
-        <Building2 size={16} className="mr-2" />
-        <span>Clients</span>
-      </Button>
-    )}
-    <Button
-      variant="primary"
-      className="admin-header-action !h-10 !px-5 text-sm hover:shadow-[0_0_15px_rgba(107,107,229,0.4)] hover:-translate-y-0.5 transition-all border-0"
-      onClick={() => {
-        if (clientPlanId === 'trial') {
-          toast.error('This feature is not available in the 7-day free trial plan. Please upgrade your plan to access it.', { duration: 4000 });
-          return;
-        }
-        navigate(`${basePath}/live-proctoring`);
-      }}
-    >
-      <Video size={16} className="mr-2" />
-      <span>Live Proctoring</span>
-    </Button>
-    <Button
-      variant="primary"
-      className="admin-header-action !h-10 !px-5 text-sm hover:shadow-[0_0_15px_rgba(107,107,229,0.4)] hover:-translate-y-0.5 transition-all border-0"
-      onClick={() => navigate(`${basePath}/settings`)}
-    >
-      <Settings size={16} className="mr-2" />
-      <span>Settings</span>
-    </Button>
-    <Button
-      variant="secondary"
-      className="admin-logout-btn !h-10 !px-5 text-sm bg-transparent hover:bg-white/10 text-white border border-white/20"
-      onClick={handleLogout}
-    >
-      <LogOut size={16} className="mr-2" />
-      <span>Logout</span>
-    </Button>
-  </div>
-
-  {/* Mobile Menu Toggle Button */ }
-  <div className="sm:hidden flex items-center gap-2">
-    <ThemeSelector />
-    <button
-      onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-      className="text-white p-2 hover:bg-white/10 rounded-lg transition-colors relative min-w-[44px] min-h-[44px] flex items-center justify-center touch-manipulation"
-    >
-      {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-      {!mobileMenuOpen && unreadCount > 0 && (
-        <span className="absolute top-1 right-1 w-3 h-3 bg-red-500 rounded-full border border-shnoor-navy"></span>
-      )}
-    </button>
-  </div>
-        </div >
-
-  {/* Mobile Menu Dropdown */ }
-{
-  mobileMenuOpen && (
-    <div className="sm:hidden absolute top-[100%] left-0 w-full bg-shnoor-navy border-t border-white/10 shadow-xl z-40 pb-4 px-4 flex flex-col gap-2 pt-2">
-      <Button
-        variant="primary"
-        className="admin-header-action w-full justify-start !h-12 !px-4 text-sm border-0 relative"
-        onClick={() => {
-          if (clientPlanId === 'trial') {
-            toast.error('This feature is not available in the 7-day free trial plan. Please upgrade your plan to access it.', { duration: 4000 });
-            return;
-          }
-          navigate(`${basePath}/student-messages`);
-          setMobileMenuOpen(false);
-        }}
-      >
-        <MessageSquare size={18} className="mr-3" />
-        <span>Messages</span>
-        {unreadCount > 0 && (
-          <span className="ml-auto bg-red-500 text-white px-2 py-0.5 text-xs font-bold rounded-full">
-            {unreadCount > 99 ? '99+' : unreadCount}
-          </span>
-        )}
-      </Button>
-      {!isClientAdmin && (
-        <Button
-          variant="primary"
-          className="admin-header-action w-full justify-start !h-12 !px-4 text-sm border-0"
-          onClick={() => {
-            navigate('/admin/clients');
-            setMobileMenuOpen(false);
-          }}
-        >
-          <Building2 size={18} className="mr-3" />
-          <span>Clients</span>
-        </Button>
-      )}
-      <Button
-        variant="primary"
-        className="admin-header-action w-full justify-start !h-12 !px-4 text-sm border-0"
-        onClick={() => {
-          if (clientPlanId === 'trial') {
-            alert('This feature is not available in the 7-day free trial plan. Please upgrade your plan to access it.');
-            return;
-          }
-          navigate(`${basePath}/live-proctoring`);
-          setMobileMenuOpen(false);
-        }}
-      >
-        <Video size={18} className="mr-3" />
-        <span>Live Proctoring</span>
-      </Button>
-      <Button
-        variant="primary"
-        className="admin-header-action w-full justify-start !h-12 !px-4 text-sm border-0"
-        onClick={() => {
-          navigate(`${basePath}/settings`);
-          setMobileMenuOpen(false);
-        }}
-      >
-        <Settings size={18} className="mr-3" />
-        <span>Settings</span>
-      </Button>
-      <Button
-        variant="secondary"
-        className="w-full justify-start !h-12 !px-4 text-sm bg-transparent hover:bg-white/10 text-white border border-white/20"
-        onClick={() => {
-          handleLogout();
-          setMobileMenuOpen(false);
-        }}
-      >
-        <LogOut size={18} className="mr-3" />
-        <span>Logout</span>
-      </Button>
-    </div>
-  )
-}
-      </header >
-=======
             {/* Mobile Menu Toggle Button */}
             <div className="sm:hidden flex items-center gap-2 flex-shrink-0">
               <div className="admin-header-mobile-toggle">
@@ -470,7 +298,6 @@ const AdminHeader = () => {
           </div>
         </header>
       </div>
->>>>>>> 4e96627e172f5f7636bb58820818f25fc0432ca4
 
   {/* Toast Notification */ }
 {

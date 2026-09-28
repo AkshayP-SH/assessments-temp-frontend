@@ -70,13 +70,6 @@ const OrganisationSignup = () => {
       return;
     }
 
-<<<<<<< HEAD
-    if (emailError) {
-      return;
-    }
-
-=======
->>>>>>> 4e96627e172f5f7636bb58820818f25fc0432ca4
     setLoading(true);
 
     try {
@@ -231,20 +224,6 @@ const OrganisationSignup = () => {
                   onChange={handleChange}
                   required
                 />
-<<<<<<< HEAD
-  <div className="flex flex-col">
-    <InputField
-      label="Work Email Address *"
-      name="email"
-      type="email"
-      placeholder="admin@organisation.com"
-      value={formData.email}
-      onChange={handleChange}
-      required
-    />
-    {emailError && <p className="text-xs text-shnoor-danger mt-0 -translate-y-2">{emailError}</p>}
-  </div>
-=======
                 <InputField
                   label="Work Email Address"
                   name="email"
@@ -254,7 +233,6 @@ const OrganisationSignup = () => {
                   onChange={handleChange}
                   required
                 />
->>>>>>> 4e96627e172f5f7636bb58820818f25fc0432ca4
               </div >
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
