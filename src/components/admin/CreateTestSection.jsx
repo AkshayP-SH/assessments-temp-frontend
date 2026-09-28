@@ -184,25 +184,42 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                     }
 
                     if (test.questions && test.questions.length > 0) {
-                        const loadedQuestions = test.questions.map((q, idx) => ({
-                            id: q.id || Date.now() + idx,
-                            text: q.question_text,
-                            options: [q.option_a, q.option_b, q.option_c || '', q.option_d || ''],
-                            correctOption: q.correct_option.charCodeAt(0) - 65
-                        }));
+                        const loadedQuestions = test.questions.map((q, idx) => {
+                            let correctOpt = 0;
+                            if (typeof q.correct_option === 'number') {
+                                correctOpt = q.correct_option;
+                            } else if (typeof q.correct_option === 'string' && q.correct_option.trim()) {
+                                const trimmed = q.correct_option.trim().toUpperCase();
+                                if (['A', 'B', 'C', 'D'].includes(trimmed)) {
+                                    correctOpt = trimmed.charCodeAt(0) - 65;
+                                } else if (!isNaN(parseInt(trimmed, 10))) {
+                                    correctOpt = parseInt(trimmed, 10);
+                                }
+                            }
+                            return {
+                                id: q.id || Date.now() + idx,
+                                text: q.question_text || '',
+                                options: [q.option_a || '', q.option_b || '', q.option_c || '', q.option_d || ''],
+                                correctOption: correctOpt
+                            };
+                        });
                         setQuestions(loadedQuestions);
                     }
 
                     if (test.codingQuestions && test.codingQuestions.length > 0) {
                         const loadedCodingQuestions = test.codingQuestions.map((q, idx) => ({
                             id: q.id || Date.now() + idx,
-                            title: q.title,
-                            description: q.description,
-                            timeLimit: q.timeLimit || 2,
-                            memoryLimit: q.memoryLimit || 256,
-                            marks: q.marks || 10,
-                            publicTestCases: q.publicTestCases || [{ input: '', output: '', explanation: '' }],
-                            hiddenTestCases: q.hiddenTestCases || [{ input: '', output: '' }]
+                            title: q.title || '',
+                            description: q.description || '',
+                            timeLimit: parseFloat(q.timeLimit || q.time_limit) || 2,
+                            memoryLimit: parseInt(q.memoryLimit || q.memory_limit, 10) || 256,
+                            marks: parseInt(q.marks, 10) || 10,
+                            publicTestCases: (q.publicTestCases && q.publicTestCases.length > 0)
+                                ? q.publicTestCases
+                                : [{ input: '', output: '', explanation: '' }],
+                            hiddenTestCases: (q.hiddenTestCases && q.hiddenTestCases.length > 0)
+                                ? q.hiddenTestCases
+                                : [{ input: '', output: '' }]
                         }));
                         setCodingQuestions(loadedCodingQuestions);
                     }
