@@ -9,10 +9,18 @@ const UpgradeRequiredModal = ({ isOpen, onClose, quotaInfo }) => {
 
   const { resource, limit, used, tier } = quotaInfo;
 
-  const resourceName = resource === 'institutes' ? 'Institutes' : 
-                       resource === 'tests' ? 'Tests' : 
-                       resource === 'students' ? 'Students' : 
+<<<<<<< HEAD
+  // Format resource name nicely
+  const resourceName = resource === 'institutes' ? 'Institutes' :
+    resource === 'tests' ? 'Tests' :
+      resource === 'students' ? 'Students' :
+        resource;
+=======
+  const resourceName = resource === 'institutes' ? 'Institutes' :
+                       resource === 'tests' ? 'Tests' :
+                       resource === 'students' ? 'Students' :
                        resource;
+>>>>>>> 4e96627e172f5f7636bb58820818f25fc0432ca4
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-shnoor-navy/60 backdrop-blur-sm">

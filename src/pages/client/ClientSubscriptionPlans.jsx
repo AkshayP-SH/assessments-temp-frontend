@@ -62,36 +62,85 @@ const ClientSubscriptionPlans = () => {
     }
   };
 
+<<<<<<< HEAD
+  const handleSelectPlan = async (plan) => {
+    const planId = plan.plan_id || plan.id;
+=======
   useEffect(() => {
     fetchPlans();
   }, []);
 
-  const handleSelectPlan = async (plan) => {
-    const planId = plan.plan_id || plan.id;
+  const handleSelectPlan = async (planId) => {
+>>>>>>> 4e96627e172f5f7636bb58820818f25fc0432ca4
     setProcessingPlan(planId);
     setError('');
 
     try {
+<<<<<<< HEAD
       if (planId === 'trial') {
         const response = await apiFetch('api/settings/activate-trial', {
+=======
+      // Use the configured payment mode
+      const isDummyMode = DUMMY_PAYMENT_MODE;
+
+      if (isDummyMode) {
+        // Simulate payment processing delay
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        // Get the token from localStorage
+        const token = localStorage.getItem('clientToken') || localStorage.getItem('adminToken');
+
+        if (!token) {
+          throw new Error('Authentication token not found. Please login again.');
+        }
+
+        // Directly call verify payment with dummy data
+        const verifyResponse = await fetch(getApiUrl('api/settings/verify-payment'), {
+>>>>>>> 4e96627e172f5f7636bb58820818f25fc0432ca4
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${localStorage.getItem('clientToken')}`
           },
+<<<<<<< HEAD
         });
         const data = await response.json();
         if (data.success) {
           // Update local storage so the route guard allows access to dashboard
+=======
+          body: JSON.stringify({
+            razorpay_order_id: 'dummy_order_' + new Date().getTime(),
+            razorpay_payment_id: 'dummy_payment_' + new Date().getTime(),
+            razorpay_signature: 'dummy_signature',
+            plan_id: planId,
+            isDummyPayment: true,
+          }),
+        });
+
+        const verifyData = await verifyResponse.json();
+
+        if (verifyData.success) {
+          // Update local storage to reflect active subscription
+>>>>>>> 4e96627e172f5f7636bb58820818f25fc0432ca4
           const storedUser = JSON.parse(localStorage.getItem('clientUser') || '{}');
           storedUser.requiresPayment = false;
           storedUser.clientStatus = 'active';
           storedUser.subscriptionActive = true;
           localStorage.setItem('clientUser', JSON.stringify(storedUser));
+<<<<<<< HEAD
           localStorage.setItem('adminUser', JSON.stringify(storedUser));
 
           // Use window.location.href to force a full reload so contexts pick up the new state
           window.location.href = '/client/dashboard';
+=======
+          localStorage.setItem('adminUser', JSON.stringify(storedUser)); // Mirror for shared pages
+
+          // Payment successful, navigate to dashboard
+          navigate('/client/dashboard', {
+            replace: true,
+            state: { message: 'Payment successful! Your subscription is now active.' }
+          });
+>>>>>>> 4e96627e172f5f7636bb58820818f25fc0432ca4
         } else {
           setError(data.message || 'Failed to activate trial.');
         }
@@ -99,6 +148,7 @@ const ClientSubscriptionPlans = () => {
         return;
       }
 
+<<<<<<< HEAD
       // Use the configured payment mode
       const isDummyMode = DUMMY_PAYMENT_MODE;
 
@@ -110,11 +160,14 @@ const ClientSubscriptionPlans = () => {
         setProcessingPlan(null);
         return;
       }
+
+=======
+>>>>>>> 4e96627e172f5f7636bb58820818f25fc0432ca4
       // REAL RAZORPAY MODE (for future use)
       // Create Razorpay order
       const orderResponse = await apiFetch('api/settings/purchase-subscription', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('clientToken')}`
         },
@@ -346,9 +399,13 @@ const ClientSubscriptionPlans = () => {
                 <Button
                   onClick={() => handleSelectPlan(plan)}
                   disabled={processingPlan !== null}
+<<<<<<< HEAD
                   className={`w-full h-14 flex items-center justify-center gap-2 text-base font-bold shadow-lg transition-all duration-300 ${processingPlan === (plan.plan_id || plan.id)
-                      ? 'opacity-50 cursor-not-allowed'
-                      : 'hover:shadow-xl hover:scale-105'
+=======
+                  className={`w-full h-14 flex items-center justify-center gap-2 text-base font-bold shadow-lg transition-all duration-300 ${processingPlan === plan.plan_id
+>>>>>>> 4e96627e172f5f7636bb58820818f25fc0432ca4
+                    ? 'opacity-50 cursor-not-allowed'
+                    : 'hover:shadow-xl hover:scale-105'
                     }`}
                 >
                   {processingPlan === (plan.plan_id || plan.id) ? (

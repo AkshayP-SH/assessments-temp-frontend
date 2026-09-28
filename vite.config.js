@@ -88,7 +88,7 @@ export default defineConfig(({ mode }) => ({
     sourcemap: false,
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', 'buffer'],
+    include: ['react', 'react-dom'],
     force: false,
   },
   esbuild: {
