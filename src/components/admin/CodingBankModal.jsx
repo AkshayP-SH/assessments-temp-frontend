@@ -19,7 +19,6 @@ const CodingBankModal = ({ question, onClose, onSave, categories, tags }) => {
 
   useEffect(() => {
     if (question) {
-      // Fetch full question details with test cases
       fetchQuestionDetails(question.id);
     }
   }, [question]);
@@ -52,6 +51,37 @@ const CodingBankModal = ({ question, onClose, onSave, categories, tags }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Manual validation
+    if (!formData.title.trim()) {
+      return alert('Please enter a question title');
+    }
+    if (!formData.description.trim()) {
+      return alert('Please enter a problem description');
+    }
+    if (!formData.time_limit) {
+      return alert('Please enter a time limit');
+    }
+    if (!formData.memory_limit) {
+      return alert('Please enter a memory limit');
+    }
+    if (!formData.marks) {
+      return alert('Please enter the marks for this question');
+    }
+
+    // Check if test cases exist
+    if (formData.testCases.length === 0) {
+      return alert('Please add at least one test case');
+    }
+
+    // Check for empty test cases
+    for (let i = 0; i < formData.testCases.length; i++) {
+      const tc = formData.testCases[i];
+      if (!tc.input.trim() || !tc.output.trim()) {
+        return alert(`Please fill in input and output for Test Case ${i + 1}`);
+      }
+    }
+
     setSaving(true);
 
     try {
@@ -76,8 +106,7 @@ const CodingBankModal = ({ question, onClose, onSave, categories, tags }) => {
       } else {
         alert(data.message || 'Failed to save question');
       }
-    } catch (error) {
-      console.error('Error saving question:', error);
+    } catch {
       alert('Failed to save question');
     } finally {
       setSaving(false);
@@ -125,105 +154,101 @@ const CodingBankModal = ({ question, onClose, onSave, categories, tags }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-gray-900">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+        <div className="bg-white border-b border-gray-100 px-6 py-4 flex justify-between items-center shrink-0">
+          <h2 className="text-xl font-bold text-gray-900">
             {question ? 'Edit Coding Question' : 'Add Coding Question'}
           </h2>
           <button
+            type="button"
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-[#9A9AC9] hover:text-gray-900 transition-colors p-1"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="p-5 space-y-4 overflow-y-auto flex-1">
           {/* Title */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Title *
+            <label className="block text-sm font-bold text-gray-900 mb-1.5">
+              Title <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full h-10 px-4 rounded-xl border border-[#D1D1E6] bg-white text-sm text-gray-900 placeholder-[#9A9AC9] focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors"
               placeholder="e.g., Two Sum"
             />
           </div>
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Description *
+            <label className="block text-sm font-bold text-gray-900 mb-1.5">
+              Description <span className="text-red-500">*</span>
             </label>
             <textarea
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              required
-              rows={5}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              rows={3}
+              className="w-full px-4 py-2 rounded-xl border border-[#D1D1E6] bg-white text-sm text-gray-900 placeholder-[#9A9AC9] focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors resize-none"
               placeholder="Describe the problem..."
             />
           </div>
 
           {/* Time Limit, Memory Limit, Marks, Difficulty */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Time Limit (s) *
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+            <div className="flex flex-col justify-end">
+              <label className="block text-sm font-bold text-gray-900 mb-1.5">
+                Time Limit (s) <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
                 step="0.1"
                 value={formData.time_limit}
                 onChange={(e) => setFormData({ ...formData, time_limit: parseFloat(e.target.value) })}
-                required
                 min="0.1"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full h-10 px-4 rounded-xl border border-[#D1D1E6] bg-white text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors"
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Memory (MB) *
+            <div className="flex flex-col justify-end">
+              <label className="block text-sm font-bold text-gray-900 mb-1.5">
+                Memory (MB) <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
                 value={formData.memory_limit}
                 onChange={(e) => setFormData({ ...formData, memory_limit: parseInt(e.target.value) })}
-                required
                 min="1"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full h-10 px-4 rounded-xl border border-[#D1D1E6] bg-white text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors"
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Marks *
+            <div className="flex flex-col justify-end">
+              <label className="block text-sm font-bold text-gray-900 mb-1.5">
+                Marks <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
                 value={formData.marks}
                 onChange={(e) => setFormData({ ...formData, marks: parseInt(e.target.value) })}
-                required
                 min="1"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full h-10 px-4 rounded-xl border border-[#D1D1E6] bg-white text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors"
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Difficulty *
+            <div className="flex flex-col justify-end">
+              <label className="block text-sm font-bold text-gray-900 mb-1.5">
+                Difficulty <span className="text-red-500">*</span>
               </label>
               <select
                 value={formData.difficulty}
                 onChange={(e) => setFormData({ ...formData, difficulty: e.target.value })}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full h-10 px-4 rounded-xl border border-[#D1D1E6] bg-white text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors"
               >
                 <option value="easy">Easy</option>
                 <option value="medium">Medium</option>
@@ -232,140 +257,140 @@ const CodingBankModal = ({ question, onClose, onSave, categories, tags }) => {
             </div>
           </div>
 
-          {/* Category */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Category
-            </label>
-            <input
-              type="text"
-              value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              list="categories"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="e.g., algorithms, data-structures"
-            />
-            <datalist id="categories">
-              {categories.map(cat => (
-                <option key={cat} value={cat} />
-              ))}
-            </datalist>
-          </div>
-
-          {/* Tags */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Tags
-            </label>
-            <div className="flex gap-2 mb-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-bold text-gray-900 mb-1.5">
+                Category
+              </label>
               <input
                 type="text"
-                value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-                list="tags"
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Add tags..."
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                list="categories"
+                className="w-full h-10 px-4 rounded-xl border border-[#D1D1E6] bg-white text-sm text-gray-900 placeholder-[#9A9AC9] focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors"
+                placeholder="e.g., algorithms"
               />
-              <button
-                type="button"
-                onClick={addTag}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
-              >
-                Add
-              </button>
+              <datalist id="categories">
+                {categories.map(cat => (
+                  <option key={cat} value={cat} />
+                ))}
+              </datalist>
             </div>
-            <datalist id="tags">
-              {tags.map(tag => (
-                <option key={tag} value={tag} />
-              ))}
-            </datalist>
-            <div className="flex flex-wrap gap-2">
-              {formData.tags.map((tag, idx) => (
-                <span
-                  key={idx}
-                  className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm flex items-center gap-2"
+
+            <div>
+              <label className="block text-sm font-bold text-gray-900 mb-1.5">
+                Tags
+              </label>
+              <div className="flex gap-2 mb-2">
+                <input
+                  type="text"
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+                  list="tags"
+                  className="flex-1 h-10 px-4 rounded-xl border border-[#D1D1E6] bg-white text-sm text-gray-900 placeholder-[#9A9AC9] focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors"
+                  placeholder="Add tags..."
+                />
+                <button
+                  type="button"
+                  onClick={addTag}
+                  className="px-4 h-10 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors"
                 >
-                  {tag}
-                  <button
-                    type="button"
-                    onClick={() => removeTag(tag)}
-                    className="text-purple-600 hover:text-purple-800"
+                  Add
+                </button>
+              </div>
+              <datalist id="tags">
+                {tags.map(tag => (
+                  <option key={tag} value={tag} />
+                ))}
+              </datalist>
+              <div className="flex flex-wrap gap-2">
+                {formData.tags.map((tag, idx) => (
+                  <span
+                    key={idx}
+                    className="inline-flex items-center px-2 py-1 bg-purple-100 text-purple-800 rounded-md text-xs font-bold gap-2"
                   >
-                    ×
-                  </button>
-                </span>
-              ))}
+                    {tag}
+                    <button
+                      type="button"
+                      onClick={() => removeTag(tag)}
+                      className="text-purple-600 hover:text-purple-800"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
 
           {/* Test Cases */}
           <div>
-            <div className="flex justify-between items-center mb-4">
-              <label className="block text-sm font-medium text-gray-700">
+            <div className="flex justify-between items-center mb-3">
+              <label className="block text-sm font-bold text-gray-900">
                 Test Cases
               </label>
               <button
                 type="button"
                 onClick={addTestCase}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                className="flex items-center justify-center gap-2 px-4 h-10 bg-[#403f75] hover:bg-[#2d2d53] text-white rounded-xl font-bold transition-colors"
               >
                 <Plus className="w-4 h-4" />
                 Add Test Case
               </button>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3">
               {formData.testCases.map((tc, index) => (
-                <div key={index} className="border border-gray-300 rounded-lg p-4">
+                <div key={index} className="border border-[#D1D1E6] rounded-xl p-4 bg-gray-50">
                   <div className="flex justify-between items-center mb-3">
-                    <h4 className="font-medium text-gray-900">Test Case {index + 1}</h4>
+                    <h4 className="font-bold text-gray-900">Test Case {index + 1}</h4>
                     <button
                       type="button"
                       onClick={() => removeTestCase(index)}
-                      className="text-red-600 hover:text-red-800"
+                      className="text-red-400 hover:text-red-600 transition-colors p-1"
                     >
                       <Trash2 className="w-5 h-5" />
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-xs font-bold text-gray-900 mb-1.5">
                         Input
                       </label>
                       <textarea
                         value={tc.input}
                         onChange={(e) => updateTestCase(index, 'input', e.target.value)}
                         rows={2}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        className="w-full px-3 py-2 border border-[#D1D1E6] rounded-xl bg-white text-sm text-gray-900 placeholder-[#9A9AC9] focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors resize-none"
                         placeholder="Input data..."
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-xs font-bold text-gray-900 mb-1.5">
                         Expected Output
                       </label>
                       <textarea
                         value={tc.output}
                         onChange={(e) => updateTestCase(index, 'output', e.target.value)}
                         rows={2}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        className="w-full px-3 py-2 border border-[#D1D1E6] rounded-xl bg-white text-sm text-gray-900 placeholder-[#9A9AC9] focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors resize-none"
                         placeholder="Expected output..."
                       />
                     </div>
                   </div>
 
                   <div className="mb-3">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-xs font-bold text-gray-900 mb-1.5">
                       Explanation (Optional)
                     </label>
                     <input
                       type="text"
                       value={tc.explanation || ''}
                       onChange={(e) => updateTestCase(index, 'explanation', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                      className="w-full h-10 px-3 border border-[#D1D1E6] rounded-xl bg-white text-sm text-gray-900 placeholder-[#9A9AC9] focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors"
                       placeholder="Explain this test case..."
                     />
                   </div>
@@ -376,9 +401,9 @@ const CodingBankModal = ({ question, onClose, onSave, categories, tags }) => {
                       id={`hidden-${index}`}
                       checked={tc.is_hidden || false}
                       onChange={(e) => updateTestCase(index, 'is_hidden', e.target.checked)}
-                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      className="w-4 h-4 text-[#403f75] border-[#D1D1E6] rounded focus:ring-[#403f75]"
                     />
-                    <label htmlFor={`hidden-${index}`} className="ml-2 text-sm text-gray-700">
+                    <label htmlFor={`hidden-${index}`} className="ml-2 text-sm font-bold text-[#9A9AC9]">
                       Hidden test case (not visible to students)
                     </label>
                   </div>
@@ -386,28 +411,28 @@ const CodingBankModal = ({ question, onClose, onSave, categories, tags }) => {
               ))}
 
               {formData.testCases.length === 0 && (
-                <div className="text-center py-8 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
-                  <p>No test cases added yet. Click "Add Test Case" to create one.</p>
+                <div className="text-center py-6 text-[#9A9AC9] border-2 border-dashed border-[#D1D1E6] rounded-xl bg-gray-50 font-bold">
+                  <p>No test cases added yet.</p>
                 </div>
               )}
             </div>
           </div>
 
           {/* Actions */}
-          <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+          <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              className="px-6 h-12 border border-[#D1D1E6] rounded-xl text-[#9A9AC9] font-bold hover:bg-gray-50 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 h-12 bg-[#403f75] hover:bg-[#2d2d53] text-white rounded-xl font-bold shadow-sm transition-colors disabled:opacity-50"
             >
-              {saving ? 'Saving...' : (question ? 'Update Question' : 'Create Question')}
+              {saving ? 'Saving...' : 'Save Question'}
             </button>
           </div>
         </form>

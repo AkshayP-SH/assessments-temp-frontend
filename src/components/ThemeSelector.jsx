@@ -5,7 +5,7 @@ import { applyTheme, getSavedTheme } from '../utils/theme';
 const THEMES = [
   { id: 'default', label: 'Light', icon: Sun },
   { id: 'dark', label: 'Dark', icon: Moon },
-  { id: 'green', label: 'Green', icon: Leaf },
+  { id: 'green', label: 'Leaf', icon: Leaf },
 ];
 
 const ThemeSelector = ({ className = '', variant = 'dark' }) => {
@@ -17,10 +17,11 @@ const ThemeSelector = ({ className = '', variant = 'dark' }) => {
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
 
   useEffect(() => {
-    applyTheme(theme);
-  }, [theme]);
+    const handleThemeChange = (event) => {
+      const nextTheme = event.detail?.theme || getSavedTheme();
+      setTheme(nextTheme);
+    };
 
-  useEffect(() => {
     const handleStorage = (event) => {
       if (event.key === 'app-theme' || event.key === 'shnoor-theme') {
         setTheme(getSavedTheme());
@@ -33,10 +34,12 @@ const ThemeSelector = ({ className = '', variant = 'dark' }) => {
       }
     };
 
+    window.addEventListener('themechange', handleThemeChange);
     window.addEventListener('storage', handleStorage);
     document.addEventListener('mousedown', handleOutsideClick);
 
     return () => {
+      window.removeEventListener('themechange', handleThemeChange);
       window.removeEventListener('storage', handleStorage);
       document.removeEventListener('mousedown', handleOutsideClick);
     };
@@ -80,18 +83,18 @@ const ThemeSelector = ({ className = '', variant = 'dark' }) => {
   const ActiveIcon = theme === 'dark' ? Moon : theme === 'green' ? Leaf : Sun;
 
   return (
-    <div ref={rootRef} className={`relative ${className}`}>
+    <div ref={rootRef} className="relative">
       <button
         ref={triggerRef}
         type="button"
         onClick={() => setIsOpen((open) => !open)}
-        className={`theme-selector-trigger theme-selector-trigger--${variant} flex h-10 w-10 items-center justify-center rounded-xl ${className}`}
+        className={`theme-selector-trigger theme-selector-trigger--${variant} flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg sm:rounded-xl outline-none focus:outline-none transition-all ${className}`}
         aria-label="Change theme"
         aria-haspopup="menu"
         aria-expanded={isOpen}
         title="Change theme"
       >
-        <ActiveIcon size={18} />
+        <ActiveIcon size={18} className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
       </button>
 
       {isOpen && (
@@ -100,7 +103,8 @@ const ThemeSelector = ({ className = '', variant = 'dark' }) => {
           style={{ top: menuPosition.top, left: menuPosition.left }}
           className="theme-selector-menu fixed z-50 flex gap-1 rounded-2xl p-1.5 shadow-xl"
         >
-          {THEMES.map(({ id, label, icon: Icon }) => {
+          {THEMES.map((themeOption) => {
+            const { id, label } = themeOption;
             const isActive = theme === id;
 
             return (
@@ -109,13 +113,14 @@ const ThemeSelector = ({ className = '', variant = 'dark' }) => {
                 type="button"
                 onClick={() => {
                   setTheme(id);
+                  applyTheme(id);
                   setIsOpen(false);
                 }}
                 aria-label={label}
                 title={label}
-                className={`theme-selector-option flex h-10 w-10 items-center justify-center rounded-xl transition-colors ${isActive ? 'is-active' : ''}`}
+                className={`theme-selector-option flex h-10 w-10 items-center justify-center rounded-xl outline-none focus:outline-none transition-colors ${isActive ? 'is-active' : ''}`}
               >
-                <Icon size={17} />
+                <themeOption.icon size={17} />
               </button>
             );
           })}

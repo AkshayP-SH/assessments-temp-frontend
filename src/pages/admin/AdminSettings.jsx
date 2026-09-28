@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, Settings, User, BookOpen, CreditCard } from 'lucide-react';
+import { Settings, User, BookOpen, CreditCard, ArrowLeft } from 'lucide-react';
 import AdminLayout from '../../components/AdminLayout';
 import SystemSettingsTab from '../../components/admin/SystemSettingsTab';
 import ProfileTab from '../../components/admin/ProfileTab';
@@ -59,16 +59,16 @@ const AdminSettings = () => {
             <div className="mb-6">
                 <button
                     onClick={() => navigate(-1)}
-                    className="flex items-center gap-2 text-shnoor-indigo font-semibold hover:text-shnoor-navy transition-colors bg-white px-4 py-2 rounded-lg shadow-sm border border-shnoor-light hover:shadow-md w-fit"
+                    className="flex items-center gap-2 h-10 px-4 border border-[#D1D1E6] bg-transparent text-[#9A9AC9] rounded-xl text-sm font-semibold hover:bg-white hover:border-gray-300 transition-colors w-fit"
                 >
                     <ArrowLeft size={16} />
-                    Back to Dashboard
+                    Back
                 </button>
             </div>
 
             {/* Tab Navigation */}
-            <div className="bg-white border border-shnoor-light shadow-[0_8px_30px_rgba(14,14,39,0.06)] rounded-xl mb-6">
-                <div className="border-b border-shnoor-light">
+            <div className="bg-white shadow-sm rounded-2xl mb-6 overflow-hidden">
+                <div className="border-b border-gray-100">
                     <nav className="flex overflow-x-auto hide-scrollbar space-x-4 sm:space-x-8 px-4 sm:px-8 pt-4 sm:pt-6">
                         {tabs.map((tab) => {
                             const Icon = tab.icon;
@@ -76,9 +76,9 @@ const AdminSettings = () => {
                                 <button
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id)}
-                                    className={`flex items-center space-x-2 pb-3 sm:pb-4 px-1 border-b-2 font-medium text-sm transition-colors whitespace-nowrap shrink-0 ${activeTab === tab.id
-                                            ? 'border-shnoor-indigo text-shnoor-indigo'
-                                            : 'border-transparent text-shnoor-soft hover:text-shnoor-navy hover:border-shnoor-mist'
+                                    className={`flex items-center space-x-2 pb-3 sm:pb-4 px-1 border-b-2 font-bold text-sm transition-colors whitespace-nowrap shrink-0 ${activeTab === tab.id
+                                            ? 'border-[#403f75] text-[#403f75]'
+                                            : 'border-transparent text-[#9A9AC9] hover:text-gray-900 hover:border-gray-200'
                                         }`}
                                 >
                                     <Icon size={18} className="sm:size-5" />

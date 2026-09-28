@@ -145,7 +145,7 @@ export const AdminAuthProvider = ({ children }) => {
           checkAuthStatus({ silent: true });
         }
         return;
-      } catch (_error) {
+      } catch {
         localStorage.removeItem('adminUser');
       }
     }

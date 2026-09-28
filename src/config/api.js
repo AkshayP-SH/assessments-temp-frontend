@@ -111,8 +111,3 @@ export const apiFetch = async (endpoint, options = {}) => {
   }
 };
 
-export default {
-  getApiUrl,
-  API_URL,
-  apiFetch
-};

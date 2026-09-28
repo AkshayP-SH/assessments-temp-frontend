@@ -1,27 +1,18 @@
 // src/pages/admin/AdminDashboard.jsx
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import {
-  Plus, FileSpreadsheet, LogOut, Download, ArrowLeft,
-  Trash2, Eye, Users, CheckCircle, XCircle, UserCheck, ChevronDown, ChevronRight, ChevronLeft, Video, Loader2, X, Building2, MoreVertical, Copy, AlertCircle, Pencil, MessageSquare, Star, TrendingUp, BarChart3, Calendar, Filter, CheckSquare, Briefcase, Search, CreditCard
+  FileSpreadsheet, ArrowLeft, Users, AlertCircle, Video, Loader2, Building2, Briefcase, Landmark, FileText, X
 } from 'lucide-react';
 
-import axios from 'axios';
 import { apiFetch } from '../../config/api';
 import AdminHeader from '../../components/AdminHeader';
-import AdminLayout from '../../components/AdminLayout';
-import Card from '../../components/Card';
-import Badge from '../../components/Badge';
-import InputField from '../../components/InputField';
-import Button from '../../components/Button';
 import { useSEO } from '../../hooks/useSEO';
-import { lazy, Suspense } from 'react';
-import toast from 'react-hot-toast';
 import Pagination from '../../components/Pagination';
 
-// Lazy load large sections and modals to reduce the initial bundle size
+// Lazy load external submodules
 const CreateTestSection = lazy(() => import('../../components/admin/CreateTestSection'));
-const ExamSearchFilter = lazy(() => import('../../components/ExamSearchFilter'));
 const ViewTestDetailsModal = lazy(() => import('../../components/admin/ViewTestDetailsModal'));
 const EditTestDetailsModal = lazy(() => import('../../components/admin/EditTestDetailsModal'));
 const BulkStudentUpload = lazy(() => import('../../components/admin/BulkStudentUpload'));
@@ -31,7 +22,18 @@ const InterviewSchedule = lazy(() => import('./InterviewSchedule'));
 const AdminJobOpenings = lazy(() => import('../../components/admin/AdminJobOpenings'));
 const AdminReports = lazy(() => import('./AdminReports'));
 const SubscriptionPlansSettings = lazy(() => import('./SubscriptionPlansSettings'));
-const MySubscriptionTab = lazy(() => import('./MySubscriptionTab'));
+
+// Modular Admin Components
+import ExamsTab from './ExamsTab';
+import ResultsTab from './ResultsTab';
+import InstitutesTab from './InstitutesTab';
+import ViolationsTab from './ViolationsTab';
+import CloneModal from './CloneModal';
+import JobModal from './JobModal';
+import AssignedTestsModal from './AssignedTestsModal';
+import StudentManageModal from './StudentManageModal';
+import PreviewModal from './PreviewModal';
+import TestHistoryModal from './TestHistoryModal';
 
 const AdminDashboard = () => {
   useSEO({
@@ -53,15 +55,6 @@ const AdminDashboard = () => {
   const [selectedCandidates, setSelectedCandidates] = useState([]);
   const [statusFilter, setStatusFilter] = useState('all'); // 'all', 'pass', 'fail'
   const [showQuickSelectMenu, setShowQuickSelectMenu] = useState(false);
-
-  // Test Assignment States
-  const [institutes, setInstitutes] = useState([]);
-  const [expandedInstitutes, setExpandedInstitutes] = useState({});
-  const [instituteStudents, setInstituteStudents] = useState({});
-  const [selectedStudents, setSelectedStudents] = useState([]);
-  const [selectedTest, setSelectedTest] = useState('');
-  const [isLoadingInstitutes, setIsLoadingInstitutes] = useState(false);
-  const [isAssigning, setIsAssigning] = useState(false);
 
   // Job Role/Description Modal States
   const [showJobModal, setShowJobModal] = useState(false);
@@ -116,13 +109,6 @@ const AdminDashboard = () => {
     institute: ''
   });
   const [isAddingStudent, setIsAddingStudent] = useState(false);
-
-  // Student Tests Modal States
-  const [showStudentTestsModal, setShowStudentTestsModal] = useState(false);
-  const [selectedStudentForTests, setSelectedStudentForTests] = useState(null);
-  const [studentAssignedTests, setStudentAssignedTests] = useState([]);
-  const [isLoadingStudentTests, setIsLoadingStudentTests] = useState(false);
-  const [isUnassigningStudentTest, setIsUnassigningStudentTest] = useState(false);
   const [expandedStudentTests, setExpandedStudentTests] = useState({});
 
   // Search, Filter, Sort States
@@ -135,10 +121,10 @@ const AdminDashboard = () => {
   const [sortBy, setSortBy] = useState('latest');
 
   const [examCurrentPage, setExamCurrentPage] = useState(1);
-  const [examItemsPerPage, setExamItemsPerPage] = useState(6);
+  const [examItemsPerPage, setExamItemsPerPage] = useState(9);
 
   const [instituteCurrentPage, setInstituteCurrentPage] = useState(1);
-  const [instituteItemsPerPage, setInstituteItemsPerPage] = useState(6);
+  const [instituteItemsPerPage, setInstituteItemsPerPage] = useState(10);
 
   const [resultsCurrentPage, setResultsCurrentPage] = useState(1);
   const [resultsRowsPerPage, setResultsRowsPerPage] = useState(40);
@@ -163,13 +149,12 @@ const AdminDashboard = () => {
   const [loadingFeedback, setLoadingFeedback] = useState(false);
 
   // Violations Tab States
-  const [violations, setViolations] = useState([]);
+  const [, setViolations] = useState([]);
+  const [, setViolationSummary] = useState(null);
   const [flaggedStudents, setFlaggedStudents] = useState([]);
-  const [violationSummary, setViolationSummary] = useState([]);
   const [violationsByStudent, setViolationsByStudent] = useState([]);
   const [selectedTestForViolations, setSelectedTestForViolations] = useState('');
   const [isLoadingViolations, setIsLoadingViolations] = useState(false);
-  const [violationFilter, setViolationFilter] = useState('all'); // all, high, medium, low
 
   // Preview Questions Modal States
   const [showPreviewQuestionsModal, setShowPreviewQuestionsModal] = useState(false);
@@ -248,6 +233,13 @@ const AdminDashboard = () => {
   const buildHeaders = () => ({ 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` });
   const clientParam = (isSuperAdmin && viewAsClientId) ? `?clientId=${viewAsClientId}` : '';
 
+  const handleSelectExam = (examId) => {
+    setSelectedExamId(examId);
+    setSelectedCandidates([]);
+    setResultsCurrentPage(1);
+    setStatusFilter('all');
+  };
+
   // Derived state: Get students for the selected exam
   const selectedExamStudents = selectedExamId ? (studentsData[selectedExamId] || []) : [];
   const selectedExamDetails = tests.find(t => t.id === selectedExamId);
@@ -257,13 +249,13 @@ const AdminDashboard = () => {
     if (selectedExamId && detailViewTab === 'feedback') {
       fetchFeedback();
     }
-  }, [selectedExamId, detailViewTab]);
+  }, [selectedExamId, detailViewTab, clientParam]);
 
   const fetchFeedback = async () => {
     setLoadingFeedback(true);
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/feedback/test/${selectedExamId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/feedback/test/${selectedExamId}${clientParam}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -451,7 +443,7 @@ const AdminDashboard = () => {
           questions: test.question_count,
           attempts: parseInt(test.total_attempts) || 0,
           avgScore: 0, // Will be updated from detailed results if available
-          passedCount: parseInt(test.pass_count) || 0,
+          passedCount: parseInt(test.pass_count ?? test.passed_count) || 0,
           passRate: parseInt(test.pass_percentage) || 0,
           status: test.status || 'draft',
           duration: test.duration || 60,
@@ -467,10 +459,8 @@ const AdminDashboard = () => {
             day: 'numeric'
           })
         }));
-        setTests(transformedTests);
 
-        // Fetch results for each test
-        fetchAllResults(transformedTests);
+        setTests(transformedTests);
       }
     } catch (error) {
       console.error('Error fetching tests:', error);
@@ -479,106 +469,66 @@ const AdminDashboard = () => {
     }
   };
 
-  const fetchAllResults = async (testsList) => {
+  useEffect(() => {
+    if (selectedExamId && !studentsData[selectedExamId]) {
+      fetchResultsForTest(selectedExamId);
+    }
+  }, [selectedExamId, studentsData]);
+
+  const fetchResultsForTest = async (testId) => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await apiFetch('api/export/all-results', {
+      const response = await apiFetch(`api/export/all-results?testId=${testId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
 
       const data = await response.json();
-      if (response.ok && data.success) {
-        // Group results by test
-        const groupedResults = {};
-        const testStats = {};
-
-        data.results.forEach(result => {
-          // Match by test_id if available, otherwise fall back to name matching
-          let matchingTest;
-          if (result.test_id) {
-            matchingTest = testsList.find(t => t.id === result.test_id);
+      if (response.ok && data.success && Array.isArray(data.results)) {
+        const testObj = tests.find(t => t.id === testId);
+        const filtered = data.results.filter(result => {
+          if (result.test_id && (result.test_id === testId || String(result.test_id) === String(testId))) {
+            return true;
           }
-
-          if (!matchingTest) {
-            // Fallback to name matching
-            matchingTest = testsList.find(t =>
-              result.exam_name.toLowerCase().includes(t.name.toLowerCase()) ||
-              t.name.toLowerCase().includes(result.exam_name.toLowerCase())
-            );
+          if (testObj && testObj.name && result.exam_name && result.exam_name.trim().toLowerCase() === testObj.name.trim().toLowerCase()) {
+            return true;
           }
-
-          if (matchingTest) {
-            const testId = matchingTest.id;
-
-            if (!groupedResults[testId]) {
-              groupedResults[testId] = [];
-              testStats[testId] = { totalScore: 0, count: 0, passed: 0 };
-            }
-
-            const isPassed = result.percentage >= (result.passing_percentage || selectedExamDetails?.passingPercentage || 50);
-
-            groupedResults[testId].push({
-              id: result.roll_number,
-              student_id: result.student_id,
-              name: result.student_name,
-              email: result.student_email,
-              institute_name: result.institute_name || 'Not Specified',
-              score: result.marks_obtained,
-              total: result.total_marks,
-              passingPercentage: result.passing_percentage || selectedExamDetails?.passingPercentage || 50,
-              date: new Date(result.submitted_at).toLocaleDateString('en-IN', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-              }),
-              noFace: result.no_face_count || 0,
-              multipleFaces: result.multiple_faces_count || 0,
-              phoneDetected: result.phone_detected_count || 0,
-              loudNoise: result.loud_noise_count || 0,
-              voiceDetected: result.voice_detected_count || 0,
-              totalViolations: result.total_violations || 0,
-              highSeverityCount: result.high_severity_count || 0,
-              flagged: (result.high_severity_count || 0) >= 3
-            });
-
-            testStats[testId].totalScore += result.percentage;
-            testStats[testId].count += 1;
-            if (isPassed) {
-              testStats[testId].passed += 1;
-            }
-          }
+          return false;
         });
 
-        setStudentsData(groupedResults);
+        const testResults = filtered.map(result => ({
+          id: result.roll_number || result.student_id,
+          student_id: result.student_id,
+          name: result.student_name,
+          email: result.student_email,
+          institute_name: result.institute_name || 'Not Specified',
+          score: result.marks_obtained,
+          total: result.total_marks,
+          passingPercentage: result.passing_percentage || testObj?.passingPercentage || selectedExamDetails?.passingPercentage || 50,
+          date: result.submitted_at ? new Date(result.submitted_at).toLocaleDateString('en-IN', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+          }) : 'N/A',
+          noFace: result.no_face_count || 0,
+          multipleFaces: result.multiple_faces_count || 0,
+          phoneDetected: result.phone_detected_count || 0,
+          loudNoise: result.loud_noise_count || 0,
+          voiceDetected: result.voice_detected_count || 0,
+          totalViolations: result.total_violations || 0,
+          highSeverityCount: result.high_severity_count || 0,
+          flagged: (result.high_severity_count || 0) >= 3
+        }));
 
-        // Update tests with avg scores and detailed pass rate from results
-        // Only update attempts/passedCount if the export returned data for that test
-        setTests(prevTests => prevTests.map(test => ({
-          ...test,
-          // Only override attempts from export if it returned data; otherwise keep API value
-          attempts: testStats[test.id]?.count > 0 ? testStats[test.id].count : test.attempts,
-          avgScore: testStats[test.id]?.count
-            ? Math.round(testStats[test.id].totalScore / testStats[test.id].count)
-            : 0,
-          passedCount: testStats[test.id]?.count > 0 ? testStats[test.id].passed : test.passedCount,
-          passRate: testStats[test.id]?.count > 0
-            ? Math.round((testStats[test.id].passed / testStats[test.id].count) * 100)
-            : test.passRate
-        })));
+        setStudentsData(prev => ({
+          ...prev,
+          [testId]: testResults
+        }));
       }
     } catch (error) {
       console.error('Error fetching results:', error);
     }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('adminToken');
-    localStorage.removeItem('adminUser');
-    localStorage.removeItem('clientToken');
-    localStorage.removeItem('clientUser');
-    navigate('/login');
   };
 
   const handleDeleteTest = async (testId) => {
@@ -598,7 +548,6 @@ const AdminDashboard = () => {
       if (response.ok) {
         alert('Test deleted successfully');
         setTests(prevTests => prevTests.filter(test => test.id !== testId));
-        // Refresh institute list if we're on the institutes tab to update test counts
         if (activeTab === 'institutes') {
           fetchAllInstitutes();
         }
@@ -699,25 +648,27 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleCreateTestComplete = (publishedTest) => {
+  const handleCreateTestComplete = (updatedTest) => {
     setShowCreateTest(false);
     setEditingTest(null);
-    if (publishedTest) {
-      setTests(prevTests => prevTests.map(test => test.id === publishedTest.id
-        ? { ...test, status: publishedTest.status }
+    if (updatedTest) {
+      setTests(prevTests => prevTests.map(test => test.id === updatedTest.id
+        ? {
+          ...test,
+          ...updatedTest,
+          name: updatedTest.title || updatedTest.name || test.name,
+          questions: updatedTest.question_count ?? updatedTest.questions ?? test.questions,
+          duration: updatedTest.duration || test.duration,
+          passingPercentage: updatedTest.passing_percentage ?? updatedTest.passingPercentage ?? test.passingPercentage,
+          status: updatedTest.status || test.status
+        }
         : test
       ));
     }
     fetchTests(); // Refresh the list
   };
 
-  const handleEditTest = (test) => {
-    setEditingTest(test);
-    setShowCreateTest(true);
-  };
-
   const exportToExcel = async () => {
-    // Check if there are any students who took this exam
     if (selectedExamStudents.length === 0) {
       alert('No results to export. No students have taken this exam yet.');
       return;
@@ -725,12 +676,9 @@ const AdminDashboard = () => {
 
     try {
       const token = localStorage.getItem('adminToken');
-
-      // Build URL with optional studentIds filter
       let url = `api/export/results?testId=${selectedExamId}`;
 
       if (selectedCandidates.length > 0) {
-        // Export only selected students
         console.log('Exporting selected students:', selectedCandidates);
         url += `&studentIds=${selectedCandidates.join(',')}`;
       }
@@ -751,13 +699,11 @@ const AdminDashboard = () => {
         return;
       }
 
-      // Get the filename from the response headers
       const contentDisposition = response.headers.get('Content-Disposition');
       const filename = contentDisposition
         ? contentDisposition.split('filename=')[1].replace(/"/g, '')
         : `exam_${selectedExamId}_results.xlsx`;
 
-      // Download the file
       const blob = await response.blob();
       const downloadUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -768,7 +714,6 @@ const AdminDashboard = () => {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(downloadUrl);
 
-      // Clear selections after successful download if students were selected
       if (selectedCandidates.length > 0) {
         alert('Excel file downloaded successfully!');
         setSelectedCandidates([]);
@@ -780,40 +725,25 @@ const AdminDashboard = () => {
   };
 
   const handleDownloadShortlistedPDF = async () => {
-    // Guard clause: check if any candidates are selected
     if (selectedCandidates.length === 0) {
       alert('Please select at least one candidate');
       return;
     }
 
     try {
-      console.log('Selected Candidates IDs:', selectedCandidates);
-      console.log('All Students:', selectedExamStudents.map(s => ({
-        id: s.id,
-        student_id: s.student_id,
-        name: s.name
-      })));
-
-      // Filter selected students from the exam results
       const selectedStudents = selectedExamStudents.filter(student => {
         const studentIdentifier = student.student_id || student.id;
-        const isSelected = selectedCandidates.includes(studentIdentifier);
-        console.log(`Checking student ${student.name}: identifier=${studentIdentifier}, isSelected=${isSelected}`);
-        return isSelected;
+        return selectedCandidates.includes(studentIdentifier);
       });
-
-      console.log('Filtered Selected Students:', selectedStudents.length);
 
       if (selectedStudents.length === 0) {
         alert('Error: Could not find selected students. Please try again.');
         return;
       }
 
-      // Extract institute name from first selected student (or default)
       const collegeName = selectedStudents[0]?.institute_name || 'Not Specified';
       const examName = selectedExamDetails?.name || 'Exam';
 
-      // Prepare data for PDF generation
       const pdfData = selectedStudents.map(student => {
         const percentage = (student.score / student.total * 100);
         const isPassed = percentage >= (student.passingPercentage || selectedExamDetails?.passingPercentage || 50);
@@ -841,11 +771,7 @@ const AdminDashboard = () => {
         };
       });
 
-      console.log('PDF Data to send:', pdfData);
-
       const token = localStorage.getItem('adminToken');
-
-      // Make POST request with responseType: 'blob'
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/export/shortlisted-pdf`,
         {
@@ -862,39 +788,26 @@ const AdminDashboard = () => {
         }
       );
 
-      console.log('PDF Response received:', response.status, response.data);
-
-      // Handle the Blob download - create a proper download link
       const blob = new Blob([response.data], { type: 'application/pdf' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.download = `Shortlisted_${examName.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
-
-      // Append to body, click, and clean up
       document.body.appendChild(link);
       link.click();
 
-      // Clean up after a short delay to ensure download starts
       setTimeout(() => {
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
       }, 100);
 
       alert('PDF downloaded successfully!');
-
-      // Clear selections after successful download
       setSelectedCandidates([]);
     } catch (error) {
       console.error('PDF download error:', error);
-      console.error('Error response:', error.response?.data);
-      console.error('Error status:', error.response?.status);
-
-      // Try to get a more detailed error message
       let errorMessage = 'Failed to generate PDF. Please try again.';
       if (error.response?.data) {
         try {
-          // If the error response is JSON
           if (error.response.data instanceof Blob) {
             const text = await error.response.data.text();
             const jsonError = JSON.parse(text);
@@ -906,170 +819,14 @@ const AdminDashboard = () => {
           console.error('Error parsing error response:', e);
         }
       }
-
       alert(errorMessage);
     }
   };
 
-
-  // Fetch Institutes
-  const fetchInstitutes = async () => {
-    try {
-      setIsLoadingInstitutes(true);
-      const token = localStorage.getItem('adminToken');
-      const response = await apiFetch('api/tests/institutes', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      const data = await response.json();
-      if (response.ok && data.success) {
-        setInstitutes(data.institutes);
-      } else {
-        console.error('Failed to fetch institutes:', data.message);
-      }
-    } catch (error) {
-      console.error('Error fetching institutes:', error);
-    } finally {
-      setIsLoadingInstitutes(false);
-    }
-  };
-
-  // Toggle Institute Expansion
-  const toggleInstitute = async (instituteName) => {
-    const isExpanded = expandedInstitutes[instituteName];
-    setExpandedInstitutes(prev => ({
-      ...prev,
-      [instituteName]: !isExpanded
-    }));
-
-    // Fetch students if not already loaded
-    if (!isExpanded && !instituteStudents[instituteName]) {
-      try {
-        const token = localStorage.getItem('adminToken');
-        const response = await apiFetch(`api/tests/institutes/${encodeURIComponent(instituteName)}/students`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        const data = await response.json();
-        if (response.ok && data.success) {
-          setInstituteStudents(prev => ({
-            ...prev,
-            [instituteName]: data.students
-          }));
-        }
-      } catch (error) {
-        console.error('Error fetching students:', error);
-      }
-    }
-  };
-
-  // Toggle All Students from an Institute
-  const toggleAllStudents = (instituteName, students) => {
-    const studentIds = students.map(s => s.id);
-    const allSelected = studentIds.every(id => selectedStudents.includes(id));
-
-    if (allSelected) {
-      // Deselect all from this institute
-      setSelectedStudents(prev => prev.filter(id => !studentIds.includes(id)));
-    } else {
-      // Select all from this institute
-      setSelectedStudents(prev => {
-        const newSelection = [...prev];
-        studentIds.forEach(id => {
-          if (!newSelection.includes(id)) {
-            newSelection.push(id);
-          }
-        });
-        return newSelection;
-      });
-    }
-  };
-
-  // Toggle Individual Student
-  const toggleStudent = (studentId) => {
-    setSelectedStudents(prev => {
-      if (prev.includes(studentId)) {
-        return prev.filter(id => id !== studentId);
-      } else {
-        return [...prev, studentId];
-      }
-    });
-  };
-
-  // Helper function to get the correct passing percentage
   const getPassingPercentage = (student) => {
     return student.passingPercentage || selectedExamDetails?.passingPercentage || 50;
   };
 
-  // Assign Test to Selected Students
-  const handleAssignTest = async () => {
-    if (!selectedTest) {
-      alert('⚠️ Please select a test to assign');
-      return;
-    }
-
-    if (selectedStudents.length === 0) {
-      alert('⚠️ Please select at least one student');
-      return;
-    }
-
-    if (!confirm(`Assign test to ${selectedStudents.length} student(s)?`)) {
-      return;
-    }
-
-    try {
-      setIsAssigning(true);
-      const token = localStorage.getItem('adminToken');
-      const response = await apiFetch('api/tests/assign', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          test_id: parseInt(selectedTest),
-          student_ids: selectedStudents
-        })
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        // Show message about assignments
-        alert(`✅ ${data.message}`);
-        setSelectedStudents([]);
-        setSelectedTest('');
-      } else {
-        // Handle case where all students already have the test (for backward compatibility)
-        if (data.already_assigned > 0 && data.newly_assigned === 0) {
-          alert(`ℹ️ ${data.message}`);
-          setSelectedStudents([]);
-          setSelectedTest('');
-        } else {
-          alert(`❌ ${data.message || 'Failed to assign test'}`);
-        }
-      }
-    } catch (error) {
-      console.error('Error assigning test:', error);
-      alert('❌ An error occurred while assigning the test');
-    } finally {
-      setIsAssigning(false);
-    }
-  };
-
-  // Helper function to capitalize institute name for display
-  const capitalizeInstitute = (instituteName) => {
-    if (!instituteName) return '';
-    return instituteName.toLowerCase().split(' ').map(word =>
-      word.charAt(0).toUpperCase() + word.slice(1)
-    ).join(' ');
-  };
-
-  // Handle viewing job role and description
   const handleViewJob = async (test) => {
     setSelectedJobTest(test);
     setIsEditingJob(false);
@@ -1095,7 +852,6 @@ const AdminDashboard = () => {
         setJobRoles(roles);
         setSelectedJobRoleIndex(0);
       } else {
-        // Fallback to test's default job role
         setJobRoles([{
           jobRole: test.jobRole || '',
           jobDescription: test.description || '',
@@ -1105,7 +861,6 @@ const AdminDashboard = () => {
       }
     } catch (error) {
       console.error('Error fetching job roles:', error);
-      // Fallback to test's default job role
       setJobRoles([{
         jobRole: test.jobRole || '',
         jobDescription: test.description || '',
@@ -1117,9 +872,7 @@ const AdminDashboard = () => {
     }
   };
 
-  // Handle saving job role and description
   const handleSaveJob = async () => {
-
     try {
       setIsSavingJob(true);
       const token = localStorage.getItem('adminToken');
@@ -1172,7 +925,6 @@ const AdminDashboard = () => {
     setJobRoles(newJobRoles);
   };
 
-  // View/Edit Test Details Functions
   const handleViewTestDetails = (test) => {
     setSelectedTestForDetails(test);
     setShowViewDetailsModal(true);
@@ -1188,11 +940,10 @@ const AdminDashboard = () => {
   const handleSaveTestDetails = () => {
     setShowEditDetailsModal(false);
     setSelectedTestForDetails(null);
-    fetchTests(); // Refresh the test list
+    fetchTests();
     alert('Test details updated successfully!');
   };
 
-  // Clone Test Functions
   const handleOpenCloneModal = (test) => {
     setTestToClone(test);
     setCloneTestName(`${test.name} (Copy)`);
@@ -1201,7 +952,6 @@ const AdminDashboard = () => {
     setOpenMenuId(null);
   };
 
-  // Preview Questions Functions
   const handlePreviewQuestions = async (test) => {
     setPreviewTest(test);
     setShowPreviewQuestionsModal(true);
@@ -1240,7 +990,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // Test History Functions
   const handleViewTestHistory = async (test) => {
     setShowTestHistoryModal(true);
     setIsLoadingHistory(true);
@@ -1297,7 +1046,6 @@ const AdminDashboard = () => {
       return;
     }
 
-    // Check if test name already exists
     const nameExists = tests.some(t => t.name.toLowerCase() === cloneTestName.trim().toLowerCase());
     if (nameExists) {
       setCloneError('A test with this name already exists. Please choose a different name.');
@@ -1327,7 +1075,7 @@ const AdminDashboard = () => {
         setShowCloneModal(false);
         setTestToClone(null);
         setCloneTestName('');
-        fetchTests(); // Refresh the test list
+        fetchTests();
       } else {
         setCloneError(data.message || 'Failed to clone test');
       }
@@ -1440,7 +1188,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // Multi-Institute Selection Handlers
   const toggleInstituteSelection = (instituteId) => {
     setSelectedInstitutes(prev => {
       if (prev.includes(instituteId)) {
@@ -1453,10 +1200,8 @@ const AdminDashboard = () => {
 
   const toggleAllInstitutes = () => {
     if (selectedInstitutes.length === allInstitutes.length) {
-      // Deselect all
       setSelectedInstitutes([]);
     } else {
-      // Select all
       setSelectedInstitutes(allInstitutes.map(inst => inst.id));
     }
   };
@@ -1487,9 +1232,7 @@ const AdminDashboard = () => {
       const successfulAssignmentsByInstitute = {};
       const errors = [];
 
-      // Loop through each institute
       for (const instituteId of selectedInstitutes) {
-        // Loop through each selected test
         for (const testId of selectedTestsForMultipleInstitutes) {
           try {
             const response = await apiFetch(`api/institutes/${instituteId}/assign-test${clientParam}`, {
@@ -1527,12 +1270,10 @@ const AdminDashboard = () => {
             errors.push(`${institute?.display_name || `Institute ${instituteId}`} - ${test?.name || `Test ${testId}`}: ${error.message}`);
           }
 
-          // Small delay to avoid overwhelming the server
           await new Promise(resolve => setTimeout(resolve, 100));
         }
       }
 
-      // Show summary
       let summaryMessage = '';
       if (successCount > 0) {
         summaryMessage += `✓ Successfully assigned ${successCount} test${successCount !== 1 ? 's' : ''}\n`;
@@ -1552,10 +1293,9 @@ const AdminDashboard = () => {
 
       alert(summaryMessage || 'Test assignment completed');
 
-      // Clear selections and refresh
       setSelectedInstitutes([]);
       setSelectedTestsForMultipleInstitutes([]);
-      setIsTestDropdownOpen(false); // Close dropdown after assignment
+      setIsTestDropdownOpen(false);
       setAllInstitutes(prevInstitutes => prevInstitutes.map(institute => ({
         ...institute,
         assigned_tests_count: Number(institute.assigned_tests_count || 0) + (successfulAssignmentsByInstitute[institute.id] || 0)
@@ -1614,7 +1354,6 @@ const AdminDashboard = () => {
       let failCount = 0;
       const errors = [];
 
-      // Loop through each selected test
       for (const testId of selectedTestsForInstitute) {
         try {
           const response = await apiFetch(`api/institutes/${selectedInstituteForTests.id}/assign-test${clientParam}`, {
@@ -1649,11 +1388,9 @@ const AdminDashboard = () => {
           errors.push(`${test?.name || `Test ${testId}`}: ${error.message}`);
         }
 
-        // Small delay to avoid overwhelming the server
         await new Promise(resolve => setTimeout(resolve, 100));
       }
 
-      // Show summary
       let summaryMessage = '';
       if (successCount > 0) {
         summaryMessage += `✓ Successfully assigned ${successCount} test${successCount !== 1 ? 's' : ''}\n`;
@@ -1688,38 +1425,6 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleUnassignTestFromInstitute = async (testId, testTitle) => {
-    if (!confirm(`Are you sure you want to unassign "${testTitle}" from this institute?`)) {
-      return;
-    }
-
-    try {
-      const token = localStorage.getItem('adminToken');
-      const response = await apiFetch(`api/institutes/${selectedInstituteForTests.id}/unassign-test/${testId}${clientParam}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        alert(data.message || 'Test unassigned successfully');
-        handleViewAssignedTests(selectedInstituteForTests);
-        setAllInstitutes(prevInstitutes => prevInstitutes.map(institute => institute.id === selectedInstituteForTests.id
-          ? { ...institute, assigned_tests_count: Math.max(0, Number(institute.assigned_tests_count || 0) - 1) }
-          : institute
-        ));
-      } else {
-        alert(data.message || 'Failed to unassign test');
-      }
-    } catch (error) {
-      console.error('Error unassigning test:', error);
-      alert('Failed to unassign test');
-    }
-  };
-
   const handleBulkUnassignTests = async () => {
     if (selectedTestsForUnassign.length === 0) {
       alert('Please select tests to unassign');
@@ -1740,7 +1445,7 @@ const AdminDashboard = () => {
 
       for (const testId of selectedTestsForUnassign) {
         try {
-          const response = await apiFetch(`api/institutes/${selectedInstituteForTests.id}/unassign-test/${testId}`, {
+          const response = await apiFetch(`api/institutes/${selectedInstituteForTests.id}/unassign-test/${testId}${clientParam}`, {
             method: 'DELETE',
             headers: {
               'Authorization': `Bearer ${token}`
@@ -1794,6 +1499,38 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleUnassignTest = async (testId, testTitle) => {
+    if (!confirm(`Are you sure you want to unassign "${testTitle}" from this institute?`)) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await apiFetch(`api/institutes/${selectedInstituteForTests.id}/unassign-test/${testId}${clientParam}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        alert(data.message || 'Test unassigned successfully');
+        handleViewAssignedTests(selectedInstituteForTests);
+        setAllInstitutes(prevInstitutes => prevInstitutes.map(institute => institute.id === selectedInstituteForTests.id
+          ? { ...institute, assigned_tests_count: Math.max(0, Number(institute.assigned_tests_count || 0) - 1) }
+          : institute
+        ));
+      } else {
+        alert(data.message || 'Failed to unassign test');
+      }
+    } catch (error) {
+      console.error('Error unassigning test:', error);
+      alert('Failed to unassign test');
+    }
+  };
+
   // Student Management Functions
   const handleManageStudents = async (institute) => {
     setSelectedInstituteForStudents(institute);
@@ -1837,7 +1574,6 @@ const AdminDashboard = () => {
       return;
     }
 
-    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(newStudentData.email.trim())) {
       alert('Please enter a valid email address');
@@ -1864,8 +1600,12 @@ const AdminDashboard = () => {
       const data = await response.json();
 
       if (response.ok && data.success) {
+<<<<<<< HEAD
         // Show success message with test assignment info
         toast.success(data.message || 'Student added successfully');
+=======
+        alert(data.message || 'Student added successfully');
+>>>>>>> 4e96627e172f5f7636bb58820818f25fc0432ca4
         setShowAddStudentForm(false);
         setNewStudentData({
           full_name: '',
@@ -1874,7 +1614,7 @@ const AdminDashboard = () => {
           institute: selectedInstituteForStudents.display_name
         });
         handleManageStudents(selectedInstituteForStudents);
-        fetchAllInstitutes(); // Refresh to update student counts
+        fetchAllInstitutes();
       } else {
         toast.error(data.message || 'Failed to add student');
       }
@@ -1926,7 +1666,7 @@ const AdminDashboard = () => {
 
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await apiFetch(`api/student/institute/${encodeURIComponent(selectedInstituteForStudents.name)}/all`, {
+      const response = await apiFetch(`api/student/institute/${encodeURIComponent(selectedInstituteForStudents.name)}/all${clientParam}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -1960,7 +1700,7 @@ const AdminDashboard = () => {
 
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await apiFetch('api/student/bulk', {
+      const response = await apiFetch(`api/student/bulk${clientParam}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -2003,16 +1743,16 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleSelectRange = () => {
+  const handleSelectRange = (students = instituteStudentsForManagement) => {
     const startIdx = parseInt(selectionRange.start) - 1;
     const endIdx = parseInt(selectionRange.end) - 1;
 
-    if (isNaN(startIdx) || isNaN(endIdx) || startIdx < 0 || endIdx >= instituteStudentsForManagement.length || startIdx > endIdx) {
-      alert('Please enter a valid range (e.g., 1 to ' + instituteStudentsForManagement.length + ')');
+    if (isNaN(startIdx) || isNaN(endIdx) || startIdx < 0 || endIdx >= students.length || startIdx > endIdx) {
+      alert('Please enter a valid range (e.g., 1 to ' + students.length + ')');
       return;
     }
 
-    const studentsToSelect = instituteStudentsForManagement.slice(startIdx, endIdx + 1).map(s => s.id);
+    const studentsToSelect = students.slice(startIdx, endIdx + 1).map(s => s.id);
 
     setSelectedStudentsForDelete(prev => {
       const newSelection = new Set([...prev, ...studentsToSelect]);
@@ -2043,10 +1783,9 @@ const AdminDashboard = () => {
       let totalAlreadyAssigned = 0;
       let totalFailed = 0;
 
-      // Loop through each selected test
       for (const testId of selectedTestsForStudentModal) {
         try {
-          const response = await apiFetch('api/tests/assign', {
+          const response = await apiFetch(`api/tests/assign${clientParam}`, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${token}`,
@@ -2071,11 +1810,9 @@ const AdminDashboard = () => {
           totalFailed += selectedStudentsForDelete.length;
         }
 
-        // Small delay to avoid overwhelming the server
         await new Promise(resolve => setTimeout(resolve, 100));
       }
 
-      // Show summary message
       let summaryMessage = '';
       if (totalSuccess > 0) {
         summaryMessage += `✅ Successfully assigned ${totalSuccess} test assignment${totalSuccess !== 1 ? 's' : ''}\n`;
@@ -2090,8 +1827,6 @@ const AdminDashboard = () => {
       alert(summaryMessage || '✅ Tests assigned successfully');
       setSelectedStudentsForDelete([]);
       setSelectedTestsForStudentModal([]);
-      // Refresh the student list to update assigned test counts
-      // Refresh student list + institute-level counts
       handleManageStudents(selectedInstituteForStudents);
       fetchAllInstitutes();
     } catch (error) {
@@ -2102,22 +1837,19 @@ const AdminDashboard = () => {
     }
   };
 
-  // Toggle Student Tests Dropdown
   const toggleStudentTests = async (student) => {
     const studentId = student.id;
 
-    // If already expanded, collapse it
     if (expandedStudentTests[studentId]) {
       setExpandedStudentTests(prev => ({ ...prev, [studentId]: null }));
       return;
     }
 
-    // Otherwise, fetch and expand
     setExpandedStudentTests(prev => ({ ...prev, [studentId]: { loading: true, tests: [] } }));
 
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await apiFetch(`api/institutes/students/${studentId}/assigned-tests`, {
+      const response = await apiFetch(`api/institutes/students/${studentId}/assigned-tests${clientParam}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -2141,7 +1873,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // Unassign Test from Student (Dropdown version)
   const handleUnassignTestFromStudent = async (studentId, testId, testTitle, studentName) => {
     if (!confirm(`Are you sure you want to unassign "${testTitle}" from ${studentName}?`)) {
       return;
@@ -2149,7 +1880,7 @@ const AdminDashboard = () => {
 
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await apiFetch(`api/institutes/students/${studentId}/unassign-test/${testId}`, {
+      const response = await apiFetch(`api/institutes/students/${studentId}/unassign-test/${testId}${clientParam}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -2161,15 +1892,12 @@ const AdminDashboard = () => {
       if (response.ok && data.success) {
         alert(data.message || 'Test unassigned successfully');
 
-        // Refresh the expanded tests for this student
         const studentData = expandedStudentTests[studentId]?.student;
         if (studentData) {
           toggleStudentTests(studentData);
-          // Re-expand after a brief delay
           setTimeout(() => toggleStudentTests(studentData), 100);
         }
 
-        // Refresh the student list to update counts
         handleManageStudents(selectedInstituteForStudents);
       } else {
         alert(data.message || 'Failed to unassign test');
@@ -2188,7 +1916,6 @@ const AdminDashboard = () => {
       setIsLoadingViolations(true);
       const token = localStorage.getItem('adminToken');
 
-      // Fetch violations, flagged students, summary, and by-student data in parallel
       const [violationsRes, flaggedRes, summaryRes, byStudentRes] = await Promise.all([
         apiFetch(`api/proctoring/violations/test/${selectedTestForViolations}`, {
           headers: { 'Authorization': `Bearer ${token}` }
@@ -2274,47 +2001,37 @@ const AdminDashboard = () => {
         return;
       }
 
-      // Get the filename from the response headers
       const contentDisposition = response.headers.get('Content-Disposition');
       const filename = contentDisposition
         ? contentDisposition.split('filename=')[1].replace(/"/g, '')
         : `violations_report_${selectedTestForViolations}.xlsx`;
 
-      // Download the file
       const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
+      const downloadUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.href = url;
+      link.href = downloadUrl;
       link.download = filename;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      window.URL.revokeObjectURL(downloadUrl);
     } catch (error) {
       console.error('Export violations error:', error);
       alert('Failed to export violations report. Please try again.');
     }
   };
 
-  // Get filtered violations
-  const getFilteredViolations = () => {
-    if (violationFilter === 'all') return violations;
-    return violations.filter(v => v.severity === violationFilter);
-  };
-
-  const filteredViolations = getFilteredViolations();
-
   return (
-    <Suspense fallback={<div className="flex h-screen items-center justify-center bg-shnoor-lavender"><Loader2 className="animate-spin h-12 w-12 text-shnoor-indigo" /></div>}>
-      <div className="admin-dashboard-root min-h-screen bg-shnoor-lavender">
+    <Suspense fallback={<div className="flex h-screen items-center justify-center bg-[#E5E5F3] dark:bg-[#11111d]"><Loader2 className="animate-spin h-12 w-12 text-[#403f75] dark:text-[#9A9AC9]" /></div>}>
+      <div className="admin-dashboard-root min-h-screen bg-[#E5E5F3] dark:bg-[#11111d]">
         {/* Header */}
         <AdminHeader />
 
         {/* Super Admin — Client Scope Selector */}
         {isSuperAdmin && (
-          <div className="bg-white border-b border-shnoor-mist shadow-sm">
+          <div className="bg-white dark:bg-[#25254A] border-b border-shnoor-mist dark:border-[#383863] shadow-sm">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center gap-3">
-              <div className="flex items-center gap-2 text-xs font-semibold text-shnoor-indigoMedium uppercase tracking-wide flex-shrink-0">
+              <div className="flex items-center gap-2 text-xs font-semibold text-shnoor-indigoMedium dark:text-[#9A9AC9] uppercase tracking-wide flex-shrink-0">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
                 Viewing as:
               </div>
@@ -2325,7 +2042,7 @@ const AdminDashboard = () => {
                   setTests([]);
                   setAllInstitutes([]);
                 }}
-                className="h-8 pl-3 pr-8 rounded-lg border border-shnoor-mist bg-white text-sm text-shnoor-navy focus:outline-none focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo transition-colors"
+                className="h-8 pl-3 pr-8 rounded-lg border border-shnoor-mist dark:border-[#383863] bg-white dark:bg-[#25254A] text-sm text-shnoor-navy dark:text-white focus:outline-none focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo transition-colors"
               >
                 <option value="">All Clients (Platform View)</option>
                 {clientsList.map(c => (
@@ -2339,7 +2056,7 @@ const AdminDashboard = () => {
                   onClick={() => { setViewAsClientId(''); setTests([]); setAllInstitutes([]); }}
                   className="text-xs text-shnoor-danger hover:underline flex items-center gap-1"
                 >
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                  <X size={12} />
                   Clear filter
                 </button>
               )}
@@ -2380,9 +2097,13 @@ const AdminDashboard = () => {
           </div>
         )}
 
-        {/* Main Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
+
+        {/* Main Content */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
+          <div className="admin-dashboard-content">
+
+<<<<<<< HEAD
           {/* Subscription Expiry Banner */}
           {!isSuperAdmin && daysRemaining !== null && daysRemaining <= 7 && (
             <div className={`mb-6 p-4 rounded-xl shadow-sm border flex items-center justify-between animate-fade-in ${daysRemaining <= 1
@@ -4890,442 +4611,453 @@ const AdminDashboard = () => {
                             <p className="text-shnoor-indigoMedium">No students match your search</p>
                           </div>
                         );
+=======
+            {/* Welcome Banner */}
+            {activeTab === 'exams' && !showCreateTest && !selectedExamId && (
+              <div className="welcome-banner">
+                <h2 className="welcome-banner-title">
+                  Welcome back, {currentUser?.name || 'Admin'}!
+                </h2>
+                <p className="welcome-banner-subtitle">
+                  {currentUser?.company_name || 'Shnoor International LLC'} • {isSuperAdmin ? 'Platform View' : 'Admin Portal'}
+                </p>
+              </div>
+            )}
+
+            {/* Subscription Expiry Banner */}
+            {!isSuperAdmin && daysRemaining !== null && daysRemaining <= 7 && (
+              <div className={`mb-6 p-4 rounded-xl shadow-sm border flex items-center justify-between animate-fade-in ${daysRemaining <= 1
+                ? 'bg-red-50 border-red-200 text-red-800'
+                : 'bg-yellow-50 border-yellow-200 text-yellow-800'
+                }`}>
+                <div className="flex items-center">
+                  <AlertCircle size={20} className={`mr-3 ${daysRemaining <= 1 ? 'text-red-500' : 'text-yellow-600'}`} />
+                  <div>
+                    <h4 className="font-bold">Subscription Alert</h4>
+                    <p className="text-sm mt-0.5">
+                      {daysRemaining <= 0
+                        ? 'Your subscription has expired. Please renew to avoid losing access.'
+                        : `Your subscription will expire in ${daysRemaining} day${daysRemaining === 1 ? '' : 's'}. Renew now to avoid interruption.`
+>>>>>>> 4e96627e172f5f7636bb58820818f25fc0432ca4
                       }
-
-                      return (
-                        <>
-                          {/* Select All Checkbox */}
-                          {/* Selection Controls */}
-                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3 p-3 bg-white rounded-lg">
-                            <div className="flex items-center space-x-3">
-                              <input
-                                type="checkbox"
-                                checked={selectedStudentsForDelete.length === filteredStudents.length && filteredStudents.length > 0}
-                                onChange={() => toggleAllStudentsForDelete(filteredStudents)}
-                                className="w-5 h-5 text-shnoor-indigo border-shnoor-mist rounded focus:ring-2 focus:ring-shnoor-lavender"
-                              />
-                              <span className="text-sm font-bold text-shnoor-indigo">
-                                {selectedStudentsForDelete.length > 0 ? `${selectedStudentsForDelete.length} selected` : 'Select All'}
-                              </span>
-                            </div>
-
-                            <div className="flex items-center space-x-2">
-                              <span className="text-sm text-shnoor-indigoMedium">Select Range:</span>
-                              <input
-                                type="number"
-                                min="1"
-                                max={filteredStudents.length}
-                                className="w-16 px-2 py-1 text-sm border border-shnoor-light rounded focus:ring-2 focus:ring-shnoor-lavender"
-                                placeholder="1"
-                                value={selectionRange.start}
-                                onChange={(e) => setSelectionRange({ ...selectionRange, start: e.target.value })}
-                              />
-                              <span className="text-sm text-shnoor-indigoMedium">to</span>
-                              <input
-                                type="number"
-                                min="1"
-                                max={filteredStudents.length}
-                                className="w-16 px-2 py-1 text-sm border border-shnoor-light rounded focus:ring-2 focus:ring-shnoor-lavender"
-                                placeholder={filteredStudents.length.toString()}
-                                value={selectionRange.end}
-                                onChange={(e) => setSelectionRange({ ...selectionRange, end: e.target.value })}
-                              />
-                              <button
-                                onClick={handleSelectRange}
-                                className="px-3 py-1 bg-shnoor-indigo hover:bg-shnoor-navy text-white text-sm rounded transition-colors"
-                              >
-                                Select
-                              </button>
-                            </div>
-                          </div>
-
-                          <div className="space-y-2 max-h-96 overflow-y-auto">
-                            {filteredStudents.map((student, index) => (
-                              <div key={student.id}>
-                                <div
-                                  className={`flex items-center justify-between p-4 border rounded-xl hover:shadow-md transition-all ${selectedStudentsForDelete.includes(student.id)
-                                    ? 'bg-shnoor-lavender border-shnoor-indigo'
-                                    : 'bg-white border-shnoor-light'
-                                    }`}
-                                >
-                                  <div className="flex items-center space-x-3 flex-1">
-                                    <span className="text-sm font-bold text-shnoor-indigo w-6">{index + 1}.</span>
-                                    <input
-                                      type="checkbox"
-                                      checked={selectedStudentsForDelete.includes(student.id)}
-                                      onChange={() => toggleStudentForDelete(student.id)}
-                                      className="w-5 h-5 text-shnoor-indigo border-shnoor-mist rounded focus:ring-2 focus:ring-shnoor-lavender"
-                                    />
-                                    <div className="flex-1">
-                                      <h5 className="font-bold text-shnoor-navy">{student.full_name}</h5>
-                                      <p className="text-sm text-shnoor-indigoMedium">
-                                        {student.email} • {student.roll_number || 'No roll number'}
-                                        {student.assigned_tests_count > 0 && (
-                                          <button
-                                            onClick={() => toggleStudentTests(student)}
-                                            className="ml-2 text-xs text-shnoor-indigo hover:text-shnoor-navy font-medium underline"
-                                          >
-                                            ({student.assigned_tests_count} test{student.assigned_tests_count !== 1 ? 's' : ''} assigned)
-                                          </button>
-                                        )}
-                                        {student.assigned_tests_count === 0 && (
-                                          <span className="ml-2 text-xs text-shnoor-soft">
-                                            (0 tests assigned)
-                                          </span>
-                                        )}
-                                      </p>
-                                    </div>
-                                  </div>
-                                  <div className="flex items-center space-x-2">
-                                    {student.assigned_tests_count > 0 && (
-                                      <button
-                                        onClick={() => toggleStudentTests(student)}
-                                        className="p-2 text-shnoor-indigo hover:bg-shnoor-lavender rounded-lg transition-colors"
-                                        title="View Assigned Tests"
-                                      >
-                                        <ChevronDown
-                                          size={18}
-                                          className={`transition-transform ${expandedStudentTests[student.id] ? 'rotate-180' : ''}`}
-                                        />
-                                      </button>
-                                    )}
-                                    <button
-                                      onClick={() => handleDeleteStudent(student.id, student.full_name)}
-                                      className="p-2 text-shnoor-indigo hover:bg-shnoor-lavender rounded-lg transition-colors"
-                                      title="Delete Student"
-                                    >
-                                      <Trash2 size={18} />
-                                    </button>
-                                  </div>
-                                </div>
-
-                                {/* Expanded Tests Dropdown */}
-                                {expandedStudentTests[student.id] && (
-                                  <div className="ml-12 mr-4 mt-2 mb-2 p-4 bg-shnoor-lavender rounded-lg border border-shnoor-light">
-                                    {expandedStudentTests[student.id].loading ? (
-                                      <div className="flex items-center justify-center py-4">
-                                        <Loader2 className="animate-spin text-shnoor-indigo" size={20} />
-                                        <span className="ml-2 text-sm text-shnoor-indigoMedium">Loading tests...</span>
-                                      </div>
-                                    ) : expandedStudentTests[student.id].tests.length === 0 ? (
-                                      <div className="text-center py-4">
-                                        <FileSpreadsheet className="mx-auto mb-2 text-shnoor-mist" size={32} />
-                                        <p className="text-sm text-shnoor-indigoMedium">No tests assigned</p>
-                                      </div>
-                                    ) : (
-                                      <div className="space-y-2">
-                                        <h6 className="text-xs font-bold text-shnoor-navy mb-2">Assigned Tests:</h6>
-                                        {expandedStudentTests[student.id].tests.map((test) => (
-                                          <div
-                                            key={test.id}
-                                            className="flex items-center justify-between p-3 bg-white rounded-lg border border-shnoor-light hover:shadow-sm transition-all"
-                                          >
-                                            <div className="flex-1">
-                                              <h6 className="text-sm font-semibold text-shnoor-navy">{test.title}</h6>
-                                              <p className="text-xs text-shnoor-indigoMedium">
-                                                {test.question_count} questions • {test.duration_minutes} mins
-                                                {test.status && (
-                                                  <span className={`ml-2 px-2 py-0.5 rounded text-xs font-medium ${test.status === 'completed'
-                                                    ? 'bg-green-100 text-green-700'
-                                                    : test.status === 'in_progress'
-                                                      ? 'bg-yellow-100 text-yellow-700'
-                                                      : 'bg-blue-100 text-blue-700'
-                                                    }`}>
-                                                    {test.status === 'completed' ? 'Completed' : test.status === 'in_progress' ? 'In Progress' : 'Not Started'}
-                                                  </span>
-                                                )}
-                                              </p>
-                                            </div>
-                                            <button
-                                              onClick={() => handleUnassignTestFromStudent(student.id, test.id, test.title, student.full_name)}
-                                              className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                                              title="Unassign Test"
-                                            >
-                                              <Trash2 size={16} />
-                                            </button>
-                                          </div>
-                                        ))}
-                                      </div>
-                                    )}
-                                  </div>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        </>
-                      );
-                    })()}
+                    </p>
                   </div>
                 </div>
+                <button
+                  onClick={() => navigate('/client/subscription-plans')}
+                  className={`px-4 py-2 rounded-lg text-sm font-bold shadow-sm transition-colors ${daysRemaining <= 1
+                    ? 'bg-red-600 hover:bg-red-700 text-white'
+                    : 'bg-yellow-500 hover:bg-yellow-600 text-white'
+                    }`}
+                >
+                  Renew Now
+                </button>
+              </div>
+            )}
 
-                <div className="p-6 border-t border-shnoor-light flex justify-end">
+            {/* Tab Navigation */}
+            {!showCreateTest && !selectedExamId && (
+              <div className="admin-tabs-container">
+                <div className="admin-tabs-shell">
+                  {[
+                    { id: 'exams', label: 'Manage Exams', icon: FileSpreadsheet },
+                    { id: 'institutes', label: 'Manage Institutes', icon: Landmark },
+                    { id: 'reports', label: 'Reports', icon: FileText },
+                    { id: 'bulk-upload', label: 'Bulk Upload', icon: Users },
+                    { id: 'violations', label: 'Violations', icon: AlertCircle },
+                    { id: 'interviews', label: 'Interviews', icon: Video },
+                    { id: 'job-openings', label: 'Job Openings', icon: Briefcase },
+                    ...(isSuperAdmin ? [{ id: 'subscription-plans', label: 'Subscription Plans', icon: FileText }] : [])
+                  ].map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`admin-tab-btn ${activeTab === tab.id ? 'admin-tab-btn-active' : ''}`}
+                    >
+                      <tab.icon size={18} />
+                      <span>{tab.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Create Test Modal/Section */}
+            {showCreateTest ? (
+              <div className="space-y-4 mb-6">
+                <div className="flex items-center justify-between">
                   <button
                     onClick={() => {
-                      setShowStudentManagementModal(false);
-                      setSelectedStudentsForDelete([]);
-                      setSelectedTestsForStudentModal([]);
-                      setStudentSearchTerm('');
-                      setExpandedStudentTests({});
+                      setShowCreateTest(false);
+                      setEditingTest(null);
                     }}
-                    className="px-6 py-3 bg-shnoor-light hover:bg-shnoor-mist text-shnoor-navy rounded-xl font-medium transition-colors"
+                    className="btn-secondary"
+                    title={editingTest ? 'Cancel Editing' : 'Back to Exams'}
                   >
-                    Close
+                    <ArrowLeft size={16} />
+                    <span>Back to Exams</span>
                   </button>
                 </div>
+                <CreateTestSection
+                  onComplete={handleCreateTestComplete}
+                  onSaved={fetchTests}
+                  editingTest={editingTest}
+                  clientId={viewAsClientId || null}
+                />
               </div>
-            </div>
-          )}
+            ) : selectedExamId ? (
+              /* Detail View: Student Results for a specific exam */
+              <ResultsTab
+                selectedExamDetails={selectedExamDetails}
+                selectedExamStudents={selectedExamStudents}
+                onBack={() => {
+                  setSelectedExamId(null);
+                  setSelectedCandidates([]);
+                  setResultsCurrentPage(1);
+                  setDetailViewTab('results');
+                }}
+                showQuickSelectMenu={showQuickSelectMenu}
+                setShowQuickSelectMenu={setShowQuickSelectMenu}
+                statusFilter={statusFilter}
+                setStatusFilter={(filter) => {
+                  setStatusFilter(filter);
+                  setResultsCurrentPage(1);
+                }}
+                selectedCandidates={selectedCandidates}
+                setSelectedCandidates={setSelectedCandidates}
+                exportToExcel={exportToExcel}
+                handleDownloadShortlistedPDF={handleDownloadShortlistedPDF}
+                detailViewTab={detailViewTab}
+                setDetailViewTab={setDetailViewTab}
+                getPassingPercentage={getPassingPercentage}
+                resultsCurrentPage={resultsCurrentPage}
+                setResultsCurrentPage={setResultsCurrentPage}
+                resultsRowsPerPage={resultsRowsPerPage}
+                setResultsRowsPerPage={setResultsRowsPerPage}
+                onScheduleInterview={(student) => {
+                  setSelectedStudentForInterview(student);
+                  setShowInterviewScheduleModal(true);
+                }}
+                loadingFeedback={loadingFeedback}
+                feedbackData={feedbackData}
+                feedbackStats={feedbackStats}
+              />
+            ) : (
+              /* List View: All Exams & Other Tabs */
+              <>
+                {activeTab === 'exams' && (
+                  <ExamsTab
+                    loading={loading}
+                    tests={tests}
+                    filteredTests={filteredTests}
+                    paginatedTests={paginatedTests}
+                    searchTerm={searchTerm}
+                    setSearchTerm={setSearchTerm}
+                    filters={filters}
+                    setFilters={setFilters}
+                    sortBy={sortBy}
+                    setSortBy={setSortBy}
+                    selectedTests={selectedTests}
+                    toggleAllTests={toggleAllTests}
+                    handleBulkDeleteTests={handleBulkDeleteTests}
+                    toggleTestSelection={toggleTestSelection}
+                    openMenuId={openMenuId}
+                    setOpenMenuId={setOpenMenuId}
+                    handlePreviewQuestions={handlePreviewQuestions}
+                    handleViewTestHistory={handleViewTestHistory}
+                    handleViewJob={handleViewJob}
+                    handleOpenCloneModal={handleOpenCloneModal}
+                    handleViewTestDetails={handleViewTestDetails}
+                    setShowCreateTest={setShowCreateTest}
+                    handleTogglePublish={handleTogglePublish}
+                    handleDeleteTest={handleDeleteTest}
+                    setSelectedExamId={handleSelectExam}
+                    setEditingTest={setEditingTest}
+                    examCurrentPage={examCurrentPage}
+                    setExamCurrentPage={setExamCurrentPage}
+                    examTotalPages={examTotalPages}
+                    examItemsPerPage={examItemsPerPage}
+                  />
+                )}
 
-          {/* Registration Control Modal */}
-          {showRegistrationControlModal && selectedInstituteForRegistration && (
-            <InstituteRegistrationControl
-              institute={selectedInstituteForRegistration}
-              onClose={() => {
-                setShowRegistrationControlModal(false);
-                setSelectedInstituteForRegistration(null);
-              }}
-              onUpdate={() => {
-                fetchAllInstitutes();
-              }}
-            />
-          )}
+                {/* Institutes Tab */}
+                {activeTab === 'institutes' && (
+                  <InstitutesTab
+                    instituteSearchTerm={instituteSearchTerm}
+                    setInstituteSearchTerm={setInstituteSearchTerm}
+                    newInstituteName={newInstituteName}
+                    setNewInstituteName={setNewInstituteName}
+                    handleAddInstitute={handleAddInstitute}
+                    isAddingInstitute={isAddingInstitute}
+                    selectedInstitutes={selectedInstitutes}
+                    setSelectedInstitutes={setSelectedInstitutes}
+                    allInstitutes={allInstitutes}
+                    selectedTestsForMultipleInstitutes={selectedTestsForMultipleInstitutes}
+                    setSelectedTestsForMultipleInstitutes={setSelectedTestsForMultipleInstitutes}
+                    isTestDropdownOpen={isTestDropdownOpen}
+                    setIsTestDropdownOpen={setIsTestDropdownOpen}
+                    tests={tests}
+                    handleAssignTestToMultipleInstitutes={handleAssignTestToMultipleInstitutes}
+                    isAssigningTestToMultipleInstitutes={isAssigningTestToMultipleInstitutes}
+                    toggleAllInstitutes={toggleAllInstitutes}
+                    isLoadingAllInstitutes={isLoadingAllInstitutes}
+                    paginatedInstitutes={paginatedInstitutes}
+                    toggleInstituteSelection={toggleInstituteSelection}
+                    handleViewAssignedTests={handleViewAssignedTests}
+                    handleManageStudents={handleManageStudents}
+                    setSelectedInstituteForRegistration={setSelectedInstituteForRegistration}
+                    setShowRegistrationControlModal={setShowRegistrationControlModal}
+                    handleDeleteInstitute={handleDeleteInstitute}
+                    instituteTotalPages={instituteTotalPages}
+                    instituteCurrentPage={instituteCurrentPage}
+                    setInstituteCurrentPage={setInstituteCurrentPage}
+                  />
+                )}
 
-          {/* Preview Questions Modal */}
-          {showPreviewQuestionsModal && previewTest && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-              <div className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] max-w-4xl w-full max-h-[90vh] overflow-hidden">
-                <div className="bg-gradient-to-r from-shnoor-indigo to-shnoor-navy px-6 py-4 flex justify-between items-center">
-                  <div>
-                    <h3 className="text-xl font-bold text-white">{previewTest.name}</h3>
-                    <p className="text-shnoor-lavender text-sm mt-1">Preview Questions</p>
+                {/* Reports Tab */}
+                {activeTab === 'reports' && (
+                  <div className="space-y-6">
+                    <AdminReports />
                   </div>
-                  <button
-                    onClick={() => setShowPreviewQuestionsModal(false)}
-                    className="text-white hover:bg-white/20 rounded-full p-2 transition-colors"
-                  >
-                    <X size={24} />
-                  </button>
-                </div>
+                )}
 
-                <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-                  {isLoadingPreview ? (
-                    <div className="flex items-center justify-center py-12">
-                      <Loader2 className="animate-spin text-shnoor-indigo" size={32} />
-                      <span className="ml-3 text-shnoor-indigoMedium">Loading questions...</span>
-                    </div>
-                  ) : previewQuestions.length === 0 ? (
-                    <div className="text-center py-12">
-                      <FileSpreadsheet className="mx-auto mb-3 text-shnoor-mist" size={48} />
-                      <p className="text-shnoor-indigoMedium">No questions found</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-6">
-                      {previewQuestions.map((question, index) => (
-                        <div key={question.id} className="p-4 bg-white rounded-xl border border-shnoor-light">
-                          <div className="flex items-start space-x-3 mb-3">
-                            <span className="flex-shrink-0 w-8 h-8 bg-shnoor-lavender text-shnoor-indigo rounded-full flex items-center justify-center font-bold text-sm">
-                              {index + 1}
-                            </span>
-                            <div className="flex-1">
-                              <span className="inline-block mb-2 px-2 py-1 rounded text-xs font-bold bg-shnoor-lavender text-shnoor-indigo">
-                                {question.type === 'coding' ? 'Coding' : 'MCQ'}
-                              </span>
-                              <p className="text-shnoor-navy font-medium">
-                                {question.type === 'coding' ? question.title : question.question_text}
-                              </p>
-                            </div>
-                          </div>
-                          {question.type === 'coding' ? (
-                            <div className="ml-11 space-y-3">
-                              <p className="text-sm text-shnoor-indigoMedium whitespace-pre-wrap">
-                                {question.description || 'No description provided'}
-                              </p>
-                              <div className="flex flex-wrap gap-3 text-sm text-shnoor-indigoMedium">
-                                <span><strong>Time limit:</strong> {question.timeLimit ?? 'N/A'}s</span>
-                                <span><strong>Memory:</strong> {question.memoryLimit ?? 'N/A'} MB</span>
-                                <span><strong>Marks:</strong> {question.marks || 10}</span>
-                              </div>
-                              {question.publicTestCases?.length > 0 && (
-                                <div className="space-y-2">
-                                  <p className="text-sm font-bold text-shnoor-navy">Public test cases</p>
-                                  {question.publicTestCases.map((testCase, testCaseIndex) => (
-                                    <div key={`${question.id}-test-${testCaseIndex}`} className="p-3 rounded-lg bg-shnoor-lavender border border-shnoor-light text-sm">
-                                      <p className="text-shnoor-indigoMedium"><strong>Input:</strong></p>
-                                      <pre className="whitespace-pre-wrap font-mono text-shnoor-indigoMedium bg-white/60 rounded px-2 py-1 mt-1">{testCase.input || '(empty)'}</pre>
-                                      <p className="text-shnoor-indigoMedium mt-2"><strong>Output:</strong></p>
-                                      <pre className="whitespace-pre-wrap font-mono text-shnoor-indigoMedium bg-white/60 rounded px-2 py-1 mt-1">{testCase.output || '(empty)'}</pre>
-                                      {testCase.explanation && <p className="mt-1 text-shnoor-soft"><strong>Explanation:</strong> {testCase.explanation}</p>}
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          ) : (
-                            <div className="ml-11 space-y-2">
-                              {[
-                                { label: 'A', value: question.option_a },
-                                { label: 'B', value: question.option_b },
-                                { label: 'C', value: question.option_c },
-                                { label: 'D', value: question.option_d }
-                              ].filter(opt => opt.value).map((option) => (
-                                <div
-                                  key={option.label}
-                                  className={`p-3 rounded-lg border ${question.correct_option === option.label
-                                    ? 'bg-shnoor-successLight border-shnoor-success text-shnoor-success'
-                                    : 'bg-white border-shnoor-light text-shnoor-indigoMedium'
-                                    }`}
-                                >
-                                  <span className="font-bold mr-2">{option.label}.</span>
-                                  {option.value}
-                                  {question.correct_option === option.label && (
-                                    <span className="ml-2 text-xs font-bold text-shnoor-success">(Correct Answer)</span>
-                                  )}
-                                </div>
-                              ))}
-                              <div className="text-sm text-shnoor-indigoMedium mt-2">
-                                <span className="font-bold">Marks:</span> {question.marks || 1}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div className="p-6 border-t border-shnoor-light flex justify-end">
-                  <button
-                    onClick={() => setShowPreviewQuestionsModal(false)}
-                    className="px-6 py-3 bg-shnoor-light hover:bg-shnoor-lavender text-shnoor-navy rounded-xl font-medium transition-colors"
-                  >
-                    Close
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Test History Modal */}
-          {showTestHistoryModal && testHistory && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-              <div className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] max-w-2xl w-full">
-                <div className="bg-gradient-to-r from-shnoor-indigo to-shnoor-navy px-6 py-4 flex justify-between items-center">
-                  <div>
-                    <h3 className="text-xl font-bold text-white">Test History</h3>
-                    <p className="text-shnoor-lavender text-sm mt-1">{testHistory.testName}</p>
+                {/* Bulk Student Upload Tab */}
+                {activeTab === 'bulk-upload' && (
+                  <div className="space-y-6">
+                    <BulkStudentUpload clientId={viewAsClientId || null} />
                   </div>
-                  <button
-                    onClick={() => setShowTestHistoryModal(false)}
-                    className="text-white hover:bg-white/20 rounded-full p-2 transition-colors"
-                  >
-                    <X size={24} />
-                  </button>
-                </div>
+                )}
 
-                <div className="p-6">
-                  {isLoadingHistory ? (
-                    <div className="flex items-center justify-center py-12">
-                      <Loader2 className="animate-spin text-shnoor-indigo" size={32} />
-                      <span className="ml-3 text-shnoor-indigoMedium">Loading history...</span>
-                    </div>
-                  ) : (
-                    <div className="space-y-6">
-                      {/* Created Info */}
-                      <div className="p-4 bg-shnoor-successLight rounded-xl border border-shnoor-successLight">
-                        <div className="flex items-center space-x-3 mb-3">
-                          <div className="w-10 h-10 bg-shnoor-successLight rounded-full flex items-center justify-center">
-                            <Plus className="text-shnoor-success" size={20} />
-                          </div>
-                          <div>
-                            <h4 className="font-bold text-shnoor-navy">Created</h4>
-                            <p className="text-sm text-shnoor-indigoMedium">Test was created</p>
-                          </div>
-                        </div>
-                        <div className="ml-13 space-y-2">
-                          <div className="flex items-center space-x-2 text-sm">
-                            <Users size={16} className="text-shnoor-indigoMedium" />
-                            <span className="text-shnoor-indigoMedium">By:</span>
-                            <span className="font-bold text-shnoor-navy">{testHistory.createdBy}</span>
-                          </div>
-                          <div className="flex items-center space-x-2 text-sm">
-                            <Calendar size={16} className="text-shnoor-indigoMedium" />
-                            <span className="text-shnoor-indigoMedium">On:</span>
-                            <span className="font-bold text-shnoor-navy">
-                              {new Date(testHistory.createdAt).toLocaleString('en-US', {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
+                {/* Violations Tab */}
+                {activeTab === 'violations' && (
+                  <ViolationsTab
+                    tests={tests}
+                    selectedTestForViolations={selectedTestForViolations}
+                    setSelectedTestForViolations={setSelectedTestForViolations}
+                    violationsByStudent={violationsByStudent}
+                    flaggedStudents={flaggedStudents}
+                    isLoadingViolations={isLoadingViolations}
+                    exportViolationsToExcel={exportViolationsToExcel}
+                  />
+                )}
 
-                      {/* Updated Info */}
-                      <div className="p-4 bg-shnoor-lavender rounded-xl border border-shnoor-light">
-                        <div className="flex items-center space-x-3 mb-3">
-                          <div className="w-10 h-10 bg-shnoor-lavender rounded-full flex items-center justify-center">
-                            <Pencil className="text-shnoor-indigo" size={20} />
-                          </div>
-                          <div>
-                            <h4 className="font-bold text-shnoor-navy">Last Updated</h4>
-                            <p className="text-sm text-shnoor-indigoMedium">Most recent modification</p>
-                          </div>
-                        </div>
-                        <div className="ml-13 space-y-2">
-                          <div className="flex items-center space-x-2 text-sm">
-                            <Users size={16} className="text-shnoor-indigoMedium" />
-                            <span className="text-shnoor-indigoMedium">By:</span>
-                            <span className="font-bold text-shnoor-navy">{testHistory.updatedBy}</span>
-                          </div>
-                          <div className="flex items-center space-x-2 text-sm">
-                            <Calendar size={16} className="text-shnoor-indigoMedium" />
-                            <span className="text-shnoor-indigoMedium">On:</span>
-                            <span className="font-bold text-shnoor-navy">
-                              {new Date(testHistory.updatedAt).toLocaleString('en-US', {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                {/* Interviews Tab */}
+                {activeTab === 'interviews' && (
+                  <div className="space-y-6">
+                    <InterviewsList />
+                  </div>
+                )}
 
-                <div className="p-6 border-t border-shnoor-light flex justify-end">
-                  <button
-                    onClick={() => setShowTestHistoryModal(false)}
-                    className="px-6 py-3 bg-shnoor-light hover:bg-shnoor-lavender text-shnoor-navy rounded-xl font-medium transition-colors"
-                  >
-                    Close
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+                {/* Job Openings Tab */}
+                {activeTab === 'job-openings' && (
+                  <div className="animate-fade-in">
+                    <AdminJobOpenings clientId={viewAsClientId || null} />
+                  </div>
+                )}
 
-          {/* Interview Schedule Modal */}
-          {showInterviewScheduleModal && selectedStudentForInterview && (
-            <InterviewSchedule
-              student={selectedStudentForInterview}
-              testId={selectedExamId}
-              onClose={() => {
-                setShowInterviewScheduleModal(false);
-                setSelectedStudentForInterview(null);
-              }}
-              onScheduled={() => {
-                setShowInterviewScheduleModal(false);
-                setSelectedStudentForInterview(null);
-              }}
-            />
-          )}
+                {/* Subscription Plans Tab */}
+                {activeTab === 'subscription-plans' && isSuperAdmin && (
+                  <div className="space-y-6">
+                    <SubscriptionPlansSettings />
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* Clone Test Modal */}
+            {showCloneModal && testToClone && (
+              <CloneModal
+                testToClone={testToClone}
+                cloneTestName={cloneTestName}
+                setCloneTestName={setCloneTestName}
+                isCloning={isCloning}
+                cloneError={cloneError}
+                handleCloneTestSubmit={handleCloneTest}
+                onClose={() => {
+                  setShowCloneModal(false);
+                  setTestToClone(null);
+                  setCloneTestName('');
+                  setCloneError('');
+                }}
+              />
+            )}
+
+            {/* View Test Details Modal */}
+            {showViewDetailsModal && selectedTestForDetails && (
+              <ViewTestDetailsModal
+                test={selectedTestForDetails}
+                onClose={() => {
+                  setShowViewDetailsModal(false);
+                  setSelectedTestForDetails(null);
+                }}
+                onEdit={handleEditTestDetails}
+              />
+            )}
+
+            {/* Edit Test Details Modal */}
+            {showEditDetailsModal && selectedTestForDetails && (
+              <EditTestDetailsModal
+                test={selectedTestForDetails}
+                onClose={() => {
+                  setShowEditDetailsModal(false);
+                  setSelectedTestForDetails(null);
+                }}
+                onSave={handleSaveTestDetails}
+              />
+            )}
+
+            {/* Job Role/Description Modal */}
+            {showJobModal && (
+              <JobModal
+                selectedJobTest={selectedJobTest}
+                jobRoles={jobRoles}
+                selectedJobRoleIndex={selectedJobRoleIndex}
+                setSelectedJobRoleIndex={setSelectedJobRoleIndex}
+                isEditingJob={isEditingJob}
+                setIsEditingJob={setIsEditingJob}
+                isSavingJob={isSavingJob}
+                isLoadingJobRoles={isLoadingJobRoles}
+                handleJobRoleChange={handleJobRoleChange}
+                handleAddJobRole={handleAddJobRole}
+                handleRemoveJobRole={handleRemoveJobRole}
+                handleSaveJobRoles={handleSaveJob}
+                onClose={() => setShowJobModal(false)}
+              />
+            )}
+
+            {/* Assigned Tests Modal */}
+            {showAssignedTestsModal && selectedInstituteForTests && (
+              <AssignedTestsModal
+                selectedInstituteForTests={selectedInstituteForTests}
+                isLoadingAssignedTests={isLoadingAssignedTests}
+                assignedTests={assignedTests}
+                tests={tests}
+                selectedTestsForInstitute={selectedTestsForInstitute}
+                setSelectedTestsForInstitute={setSelectedTestsForInstitute}
+                isInstituteTestDropdownOpen={isInstituteTestDropdownOpen}
+                setIsInstituteTestDropdownOpen={setIsInstituteTestDropdownOpen}
+                isAssigningTestToInstitute={isAssigningTestToInstitute}
+                handleAssignTestToInstitute={handleAssignTestToInstitute}
+                selectedTestsForUnassign={selectedTestsForUnassign}
+                toggleTestForUnassign={toggleTestForUnassign}
+                toggleAllTestsForUnassign={toggleAllTestsForUnassign}
+                handleBulkUnassignTests={handleBulkUnassignTests}
+                handleUnassignTest={handleUnassignTest}
+                isUnassigningTests={isUnassigningTests}
+                onClose={() => {
+                  setShowAssignedTestsModal(false);
+                  setSelectedInstituteForTests(null);
+                  setAssignedTests([]);
+                  setSelectedTestsForInstitute([]);
+                  setSelectedTestsForUnassign([]);
+                  setIsInstituteTestDropdownOpen(false);
+                }}
+              />
+            )}
+
+            {/* Student Management Modal */}
+            {showStudentManagementModal && selectedInstituteForStudents && (
+              <StudentManageModal
+                selectedInstituteForStudents={selectedInstituteForStudents}
+                isLoadingStudentsForManagement={isLoadingStudentsForManagement}
+                instituteStudentsForManagement={instituteStudentsForManagement}
+                studentSearchTerm={studentSearchTerm}
+                setStudentSearchTerm={setStudentSearchTerm}
+                showAddStudentForm={showAddStudentForm}
+                setShowAddStudentForm={setShowAddStudentForm}
+                newStudentData={newStudentData}
+                setNewStudentData={setNewStudentData}
+                isAddingStudent={isAddingStudent}
+                handleAddStudent={handleAddStudent}
+                selectedStudentsForDelete={selectedStudentsForDelete}
+                toggleStudentForDelete={toggleStudentForDelete}
+                toggleAllStudentsForDelete={toggleAllStudentsForDelete}
+                selectionRange={selectionRange}
+                setSelectionRange={setSelectionRange}
+                handleSelectRange={handleSelectRange}
+                handleBulkDeleteStudents={handleBulkDeleteStudents}
+                handleDeleteAllStudents={handleDeleteAllStudents}
+                tests={tests}
+                selectedTestsForStudentModal={selectedTestsForStudentModal}
+                setSelectedTestsForStudentModal={setSelectedTestsForStudentModal}
+                isStudentTestDropdownOpen={isStudentTestDropdownOpen}
+                setIsStudentTestDropdownOpen={setIsStudentTestDropdownOpen}
+                isAssigningTestInModal={isAssigningTestInModal}
+                handleAssignTestInModal={handleAssignTestInModal}
+                expandedStudentTests={expandedStudentTests}
+                toggleStudentTests={toggleStudentTests}
+                handleUnassignTestFromStudent={handleUnassignTestFromStudent}
+                handleDeleteStudent={handleDeleteStudent}
+                onClose={() => {
+                  setShowStudentManagementModal(false);
+                  setSelectedInstituteForStudents(null);
+                  setInstituteStudentsForManagement([]);
+                  setShowAddStudentForm(false);
+                  setSelectedStudentsForDelete([]);
+                  setSelectedTestsForStudentModal([]);
+                  setIsStudentTestDropdownOpen(false);
+                  setStudentSearchTerm('');
+                  setSelectionRange({ start: '', end: '' });
+                  setNewStudentData({
+                    full_name: '',
+                    email: '',
+                    roll_number: '',
+                    institute: ''
+                  });
+                }}
+              />
+            )}
+
+            {/* Registration Control Modal */}
+            {showRegistrationControlModal && selectedInstituteForRegistration && (
+              <InstituteRegistrationControl
+                institute={selectedInstituteForRegistration}
+                onClose={() => {
+                  setShowRegistrationControlModal(false);
+                  setSelectedInstituteForRegistration(null);
+                }}
+              />
+            )}
+
+            {/* Preview Questions Modal */}
+            {showPreviewQuestionsModal && previewTest && (
+              <PreviewModal
+                previewTest={previewTest}
+                isLoadingPreview={isLoadingPreview}
+                previewQuestions={previewQuestions}
+                onClose={() => {
+                  setShowPreviewQuestionsModal(false);
+                  setPreviewTest(null);
+                  setPreviewQuestions([]);
+                }}
+              />
+            )}
+
+            {/* Test History Modal */}
+            {showTestHistoryModal && testHistory && (
+              <TestHistoryModal
+                isLoadingHistory={isLoadingHistory}
+                testHistory={testHistory}
+                onClose={() => setShowTestHistoryModal(false)}
+              />
+            )}
+
+            {/* Interview Schedule Modal */}
+            {showInterviewScheduleModal && selectedStudentForInterview && (
+              <InterviewSchedule
+                student={selectedStudentForInterview}
+                testId={selectedExamId}
+                onClose={() => {
+                  setShowInterviewScheduleModal(false);
+                  setSelectedStudentForInterview(null);
+                }}
+                onScheduled={() => {
+                  setShowInterviewScheduleModal(false);
+                  setSelectedStudentForInterview(null);
+                }}
+              />
+            )}
+          </div>
         </div>
       </div>
     </Suspense>

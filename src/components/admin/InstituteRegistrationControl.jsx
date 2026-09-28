@@ -60,11 +60,11 @@ const InstituteRegistrationControl = ({ institute, onClose, onUpdate }) => {
   const getStatusIcon = (status) => {
     switch (status) {
       case 'open':
-        return <Unlock className="w-5 h-5 text-shnoor-indigo" />;
+        return <Unlock className="w-5 h-5 text-emerald-600" />;
       case 'closed':
-        return <Lock className="w-5 h-5 text-shnoor-indigo" />;
+        return <Lock className="w-5 h-5 text-rose-600" />;
       case 'paused':
-        return <Pause className="w-5 h-5 text-shnoor-indigoMedium" />;
+        return <Pause className="w-5 h-5 text-amber-600" />;
       default:
         return null;
     }
@@ -73,45 +73,41 @@ const InstituteRegistrationControl = ({ institute, onClose, onUpdate }) => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'open':
-        return 'bg-shnoor-lavender border-shnoor-light text-shnoor-indigo';
+        return 'bg-emerald-50/70 border-emerald-200 text-emerald-900';
       case 'closed':
-        return 'bg-shnoor-lavender border-shnoor-light text-shnoor-indigo';
+        return 'bg-rose-50/70 border-rose-200 text-rose-900';
       case 'paused':
-        return 'bg-shnoor-lavender border-shnoor-light text-shnoor-indigoMedium';
+        return 'bg-amber-50/70 border-amber-200 text-amber-900';
       default:
-        return 'bg-shnoor-lavender border-shnoor-light text-shnoor-indigoMedium';
+        return 'bg-slate-50 border-slate-200 text-slate-700';
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-shnoor-indigo to-shnoor-navy text-white px-6 py-4 flex justify-between items-center">
+    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col border border-slate-100">
+        <div className="bg-[#44448E] px-6 py-4 flex justify-between items-center text-white flex-shrink-0">
           <div>
-            <h2 className="text-xl font-bold">Registration Control</h2>
-            <p className="text-shnoor-lavender text-sm">{institute.display_name}</p>
+            <h2 className="text-lg font-bold tracking-tight">Registration Control</h2>
+            <p className="text-indigo-200 text-xs mt-0.5 font-medium">{institute.display_name}</p>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 hover:bg-white/20 rounded-lg transition-colors"
+            className="text-white/80 hover:text-white hover:bg-white/10 rounded-lg p-1.5 transition-colors"
             disabled={isSaving}
           >
             <X size={20} />
           </button>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-6">
-          {/* Error Message */}
           {error && (
-            <div className="bg-shnoor-lavender border-l-4 border-shnoor-indigo text-shnoor-navy p-3 rounded-r-lg flex items-start text-sm">
-              <AlertCircle size={18} className="mr-2 flex-shrink-0 mt-0.5" />
+            <div className="bg-rose-50 border-l-4 border-rose-500 text-rose-800 p-3 rounded-r-lg flex items-start text-xs font-medium">
+              <AlertCircle size={16} className="mr-2 flex-shrink-0 mt-0.5 text-rose-600" />
               <span>{error}</span>
             </div>
           )}
 
-          {/* Current Status Info */}
           {(() => {
             const now = new Date();
             const startTime = institute.registration_start_time ? new Date(institute.registration_start_time) : null;
@@ -124,122 +120,138 @@ const InstituteRegistrationControl = ({ institute, onClose, onUpdate }) => {
             let statusColor = getStatusColor(effectiveStatus);
             let statusIcon = getStatusIcon(effectiveStatus);
             
-            // Override if not yet open
             if (notYetOpen) {
               effectiveStatus = 'not_yet_open';
               statusText = 'Not Yet Open';
-              statusColor = 'bg-shnoor-lavender border-shnoor-light text-shnoor-indigoMedium';
-              statusIcon = <Lock className="w-5 h-5 text-shnoor-indigoMedium" />;
+              statusColor = 'bg-slate-50 border-slate-200 text-slate-700';
+              statusIcon = <Lock className="w-5 h-5 text-slate-500" />;
             }
-            // Override if deadline passed
             else if (deadlinePassed && effectiveStatus === 'open') {
               effectiveStatus = 'closed';
               statusText = 'Closed (Deadline Passed)';
-              statusColor = 'bg-shnoor-lavender border-shnoor-light text-shnoor-indigo';
-              statusIcon = <Lock className="w-5 h-5 text-shnoor-indigo" />;
+              statusColor = 'bg-rose-50/70 border-rose-200 text-rose-900';
+              statusIcon = <Lock className="w-5 h-5 text-rose-600" />;
             }
             
             return (
-              <div className={`border-2 rounded-lg p-4 ${statusColor}`}>
-                <div className="flex items-center space-x-3">
-                  {statusIcon}
+              <div className={`border rounded-xl p-4 transition-all ${statusColor}`}>
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-white/80 rounded-lg shadow-xs">
+                    {statusIcon}
+                  </div>
                   <div>
-                    <p className="font-semibold">Current Status</p>
-                    <p className="text-sm capitalize">{statusText}</p>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Current Status</p>
+                    <p className="text-sm font-bold capitalize mt-0.5">{statusText}</p>
                   </div>
                 </div>
                 {institute.registration_start_time && (
-                  <p className="text-sm mt-2">
-                    Start: {new Date(institute.registration_start_time).toLocaleString('en-IN', { 
+                  <p className="text-xs mt-2.5 text-slate-600">
+                    <span className="font-semibold text-slate-700">Start:</span> {new Date(institute.registration_start_time).toLocaleString('en-IN', { 
                       timeZone: 'Asia/Kolkata',
                       dateStyle: 'medium',
                       timeStyle: 'short'
                     })} IST
-                    {notYetOpen && <span className="ml-2 font-semibold">(Not Yet Open)</span>}
+                    {notYetOpen && <span className="ml-1.5 font-semibold text-amber-600">(Not Yet Open)</span>}
                   </p>
                 )}
                 {institute.registration_deadline && (
-                  <p className="text-sm mt-2">
-                    Deadline: {new Date(institute.registration_deadline).toLocaleString('en-IN', { 
+                  <p className="text-xs mt-1.5 text-slate-600">
+                    <span className="font-semibold text-slate-700">Deadline:</span> {new Date(institute.registration_deadline).toLocaleString('en-IN', { 
                       timeZone: 'Asia/Kolkata',
                       dateStyle: 'medium',
                       timeStyle: 'short'
                     })} IST
-                    {deadlinePassed && <span className="ml-2 font-semibold">(Passed)</span>}
+                    {deadlinePassed && <span className="ml-1.5 font-semibold text-rose-600">(Passed)</span>}
                   </p>
                 )}
               </div>
             );
           })()}
 
-          {/* Registration Status */}
           <div>
-            <label className="block text-sm font-semibold text-shnoor-navy mb-3">
-              Registration Status <span className="text-shnoor-indigo">*</span>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2.5">
+              Registration Status <span className="text-rose-500">*</span>
             </label>
-            <div className="space-y-3">
-              <label className="flex items-center p-4 border-2 border-shnoor-light rounded-lg cursor-pointer hover:bg-shnoor-lavender transition-colors">
+            <div className="space-y-2.5">
+              <label className={`flex items-center p-3.5 border rounded-xl cursor-pointer transition-all ${
+                formData.registration_status === 'open'
+                  ? 'border-[#44448E] bg-indigo-50/40 shadow-xs'
+                  : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50'
+              }`}>
                 <input
                   type="radio"
                   name="status"
                   value="open"
                   checked={formData.registration_status === 'open'}
                   onChange={(e) => setFormData({ ...formData, registration_status: e.target.value })}
-                  className="w-4 h-4 text-shnoor-indigo"
+                  className="w-4 h-4 text-[#44448E] accent-[#44448E]"
                   disabled={isSaving}
                 />
-                <div className="ml-3 flex items-center space-x-2">
-                  <Unlock className="w-5 h-5 text-shnoor-indigo" />
+                <div className="ml-3 flex items-center gap-2.5">
+                  <div className="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg">
+                    <Unlock className="w-4 h-4" />
+                  </div>
                   <div>
-                    <p className="font-medium text-shnoor-navy">Open</p>
-                    <p className="text-sm text-shnoor-indigoMedium">Students can register</p>
+                    <p className="text-sm font-semibold text-slate-900">Open</p>
+                    <p className="text-xs text-slate-500">Students can register</p>
                   </div>
                 </div>
               </label>
 
-              <label className="flex items-center p-4 border-2 border-shnoor-light rounded-lg cursor-pointer hover:bg-shnoor-lavender transition-colors">
+              <label className={`flex items-center p-3.5 border rounded-xl cursor-pointer transition-all ${
+                formData.registration_status === 'paused'
+                  ? 'border-[#44448E] bg-indigo-50/40 shadow-xs'
+                  : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50'
+              }`}>
                 <input
                   type="radio"
                   name="status"
                   value="paused"
                   checked={formData.registration_status === 'paused'}
                   onChange={(e) => setFormData({ ...formData, registration_status: e.target.value })}
-                  className="w-4 h-4 text-shnoor-indigoMedium"
+                  className="w-4 h-4 text-[#44448E] accent-[#44448E]"
                   disabled={isSaving}
                 />
-                <div className="ml-3 flex items-center space-x-2">
-                  <Pause className="w-5 h-5 text-shnoor-indigoMedium" />
+                <div className="ml-3 flex items-center gap-2.5">
+                  <div className="p-1.5 bg-amber-50 text-amber-600 rounded-lg">
+                    <Pause className="w-4 h-4" />
+                  </div>
                   <div>
-                    <p className="font-medium text-shnoor-navy">Paused</p>
-                    <p className="text-sm text-shnoor-indigoMedium">Temporarily disabled</p>
+                    <p className="text-sm font-semibold text-slate-900">Paused</p>
+                    <p className="text-xs text-slate-500">Temporarily disabled</p>
                   </div>
                 </div>
               </label>
 
-              <label className="flex items-center p-4 border-2 border-shnoor-light rounded-lg cursor-pointer hover:bg-shnoor-lavender transition-colors">
+              <label className={`flex items-center p-3.5 border rounded-xl cursor-pointer transition-all ${
+                formData.registration_status === 'closed'
+                  ? 'border-[#44448E] bg-indigo-50/40 shadow-xs'
+                  : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50'
+              }`}>
                 <input
                   type="radio"
                   name="status"
                   value="closed"
                   checked={formData.registration_status === 'closed'}
                   onChange={(e) => setFormData({ ...formData, registration_status: e.target.value })}
-                  className="w-4 h-4 text-shnoor-indigo"
+                  className="w-4 h-4 text-[#44448E] accent-[#44448E]"
                   disabled={isSaving}
                 />
-                <div className="ml-3 flex items-center space-x-2">
-                  <Lock className="w-5 h-5 text-shnoor-indigo" />
+                <div className="ml-3 flex items-center gap-2.5">
+                  <div className="p-1.5 bg-rose-50 text-rose-600 rounded-lg">
+                    <Lock className="w-4 h-4" />
+                  </div>
                   <div>
-                    <p className="font-medium text-shnoor-navy">Closed</p>
-                    <p className="text-sm text-shnoor-indigoMedium">Registration permanently closed</p>
+                    <p className="text-sm font-semibold text-slate-900">Closed</p>
+                    <p className="text-xs text-slate-500">Registration permanently closed</p>
                   </div>
                 </div>
               </label>
             </div>
           </div>
 
-          {/* Registration Start Time */}
           <div>
-            <label className="block text-sm font-semibold text-shnoor-navy mb-2">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
               Registration Start Time (Optional)
             </label>
             <CustomDateTimePicker
@@ -248,14 +260,13 @@ const InstituteRegistrationControl = ({ institute, onClose, onUpdate }) => {
               placeholder="YYYY-MM-DD HH:MM or click to select"
               disabled={isSaving}
             />
-            <p className="text-xs text-shnoor-indigoMedium mt-2">
-              Type date/time or click calendar icon. Format: YYYY-MM-DD HH:MM (24-hour). Time is in IST (Asia/Kolkata timezone).
+            <p className="text-[11px] text-slate-400 mt-1.5">
+              Format: YYYY-MM-DD HH:MM (24-hour). Time is in IST (Asia/Kolkata timezone).
             </p>
           </div>
 
-          {/* Registration Deadline */}
           <div>
-            <label className="block text-sm font-semibold text-shnoor-navy mb-2">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
               Registration Deadline (Optional)
             </label>
             <CustomDateTimePicker
@@ -264,17 +275,16 @@ const InstituteRegistrationControl = ({ institute, onClose, onUpdate }) => {
               placeholder="YYYY-MM-DD HH:MM or click to select"
               disabled={isSaving}
             />
-            <p className="text-xs text-shnoor-indigoMedium mt-2">
-              Type date/time or click calendar icon. Format: YYYY-MM-DD HH:MM (24-hour). Time is in IST (Asia/Kolkata timezone).
+            <p className="text-[11px] text-slate-400 mt-1.5">
+              Format: YYYY-MM-DD HH:MM (24-hour). Time is in IST (Asia/Kolkata timezone).
             </p>
           </div>
 
-          {/* Info Box */}
-          <div className="bg-shnoor-lavender border-l-4 border-shnoor-indigo p-4 rounded-r-lg">
+          <div className="bg-slate-50 border border-slate-200/80 p-4 rounded-xl">
             <div className="flex items-start">
-              <AlertCircle size={16} className="text-shnoor-indigo mr-2 flex-shrink-0 mt-0.5" />
-              <div className="text-sm text-shnoor-navy">
-                <p className="font-semibold mb-1">How it works:</p>
+              <AlertCircle size={15} className="text-[#44448E] mr-2.5 flex-shrink-0 mt-0.5" />
+              <div className="text-xs text-slate-600">
+                <p className="font-bold text-slate-800 mb-1">How it works:</p>
                 <ul className="list-disc list-inside space-y-1">
                   <li>Status "Closed" or "Paused" blocks all registrations</li>
                   <li>Start time blocks registrations before the specified time</li>
@@ -286,12 +296,11 @@ const InstituteRegistrationControl = ({ institute, onClose, onUpdate }) => {
           </div>
         </form>
 
-        {/* Footer */}
-        <div className="bg-shnoor-lavender border-t border-shnoor-light px-6 py-4 flex justify-end space-x-3">
+        <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-end gap-3 bg-slate-50/50">
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2 border border-shnoor-light text-shnoor-navy rounded-lg hover:bg-shnoor-mist transition-colors text-sm font-medium"
+            className="btn-secondary"
             disabled={isSaving}
           >
             Cancel
@@ -300,17 +309,17 @@ const InstituteRegistrationControl = ({ institute, onClose, onUpdate }) => {
             type="submit"
             onClick={handleSubmit}
             disabled={isSaving}
-            className="px-5 py-2 bg-shnoor-indigo text-white rounded-lg hover:bg-shnoor-navy transition-all shadow-lg hover:-translate-y-0.5 text-sm font-medium flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 px-5 py-2 bg-[#44448E] hover:bg-[#383878] text-white rounded-xl text-sm font-semibold shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSaving ? (
               <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-white mr-1"></div>
                 Saving...
               </>
             ) : (
               <>
-                <Save size={16} className="mr-2" />
-                Save Changes
+                <Save size={15} />
+                <span>Save Changes</span>
               </>
             )}
           </button>

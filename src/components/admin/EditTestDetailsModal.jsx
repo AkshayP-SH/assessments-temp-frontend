@@ -33,13 +33,10 @@ const EditTestDetailsModal = ({ test, onClose, onSave }) => {
 
   const formatDateTimeForInput = (dateTimeString) => {
     if (!dateTimeString) return '';
-    // Parse the datetime from backend and convert to Asia/Kolkata timezone
     const date = new Date(dateTimeString);
 
-    // Convert to Asia/Kolkata timezone (IST)
     const istDate = new Date(date.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
 
-    // Format for datetime-local input (YYYY-MM-DDTHH:MM)
     const year = istDate.getFullYear();
     const month = String(istDate.getMonth() + 1).padStart(2, '0');
     const day = String(istDate.getDate()).padStart(2, '0');
@@ -85,12 +82,10 @@ const EditTestDetailsModal = ({ test, onClose, onSave }) => {
 
   const convertISTToUTC = (dateTimeString) => {
     if (!dateTimeString) return null;
-    // Parse the datetime-local value as IST and convert to UTC
     const [datePart, timePart] = dateTimeString.split('T');
     const [year, month, day] = datePart.split('-');
     const [hours, minutes] = timePart.split(':');
 
-    // Create date string in IST format
     const istDateString = `${year}-${month}-${day}T${hours}:${minutes}:00+05:30`;
     const date = new Date(istDateString);
 
@@ -145,99 +140,97 @@ const EditTestDetailsModal = ({ test, onClose, onSave }) => {
   if (!test) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col">
-        {/* Header */}
-        <div className="bg-shnoor-indigo text-white px-6 py-4 flex justify-between items-center">
+    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col border border-slate-100">
+        <div className="bg-[#44448E] text-white px-6 py-4 flex justify-between items-center flex-shrink-0">
           <div>
-            <h2 className="text-xl font-bold">Edit Test Details</h2>
-            <p className="text-shnoor-indigoMedium text-sm">{test.name}</p>
+            <h2 className="text-lg font-bold tracking-tight">Edit Test Details</h2>
+            <p className="text-indigo-200 text-xs mt-0.5 font-medium">{test.name}</p>
           </div>
-          <Button
+          <button
             onClick={onClose}
-            className="p-1.5 hover:bg-white/20 rounded-lg transition-colors"
+            className="text-white/80 hover:text-white hover:bg-white/10 rounded-lg p-1.5 transition-colors"
             disabled={isSaving}
           >
             <X size={20} />
-          </Button>
+          </button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-5">
-          {/* Error Message */}
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
           {saveError && (
-            <div className="bg-shnoor-dangerLight border-l-4 border-shnoor-danger text-shnoor-danger p-3 rounded-r-lg flex items-start text-sm">
-              <AlertCircle size={18} className="mr-2 flex-shrink-0 mt-0.5" />
+            <div className="bg-rose-50 border border-rose-200 text-rose-700 p-3 rounded-xl flex items-start text-xs font-medium">
+              <AlertCircle size={16} className="mr-2 flex-shrink-0 mt-0.5" />
               <span>{saveError}</span>
             </div>
           )}
 
-          {/* Job Role */}
           <div>
-            <label className="block text-sm font-semibold text-shnoor-navy mb-2">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5 block">
               Job Role
             </label>
             <input
               type="text"
               value={formData.jobRole}
               onChange={(e) => handleChange('jobRole', e.target.value)}
-              className={`w-full px-4 py-2.5 border-2 rounded-lg focus:ring-4 focus:border-shnoor-indigo transition-all text-sm text-shnoor-navy font-medium bg-white shadow-sm ${errors.jobRole ? 'border-shnoor-danger bg-shnoor-dangerLight focus:ring-shnoor-dangerLight' : 'border-shnoor-light focus:ring-shnoor-mist'
+              className={`w-full px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 transition-all text-sm font-medium bg-white shadow-2xs ${errors.jobRole
+                ? 'border-rose-300 bg-rose-50/30 text-rose-900 focus:ring-rose-500/15 focus:border-rose-500'
+                : 'border-slate-200 text-slate-800 focus:ring-[#44448E]/15 focus:border-[#44448E]'
                 }`}
               placeholder="e.g., Software Developer"
               disabled={isSaving}
             />
             {errors.jobRole && (
-              <p className="text-shnoor-danger text-xs mt-1.5 flex items-center">
+              <p className="text-rose-600 text-xs mt-1.5 flex items-center">
                 <AlertCircle size={12} className="mr-1" />
                 {errors.jobRole}
               </p>
             )}
           </div>
 
-          {/* Description */}
           <div>
-            <label className="block text-sm font-semibold text-shnoor-navy mb-2">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5 block">
               Job Description
             </label>
             <textarea
               value={formData.description}
               onChange={(e) => handleChange('description', e.target.value)}
               rows={3}
-              className="w-full px-4 py-2.5 border-2 border-shnoor-light rounded-lg focus:ring-4 focus:ring-shnoor-mist focus:border-shnoor-indigo transition-all resize-none text-sm text-shnoor-navy font-medium bg-white shadow-sm"
+              className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#44448E]/15 focus:border-[#44448E] transition-all resize-none text-sm text-slate-800 font-medium bg-white shadow-2xs placeholder:text-slate-400"
               placeholder="Describe the job role..."
               disabled={isSaving}
             />
           </div>
 
-          {/* Date & Time */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div>
-              <label className="block text-sm font-semibold text-shnoor-navy mb-2">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5 block">
                 Start Date & Time
               </label>
               <input
                 type="datetime-local"
                 value={formData.startDateTime}
                 onChange={(e) => handleChange('startDateTime', e.target.value)}
-                className="w-full px-4 py-2.5 border-2 border-shnoor-light rounded-lg focus:ring-4 focus:ring-shnoor-mist focus:border-shnoor-indigo transition-all text-sm text-shnoor-navy font-medium bg-white shadow-sm"
+                className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#44448E]/15 focus:border-[#44448E] transition-all text-sm text-slate-800 font-medium bg-white shadow-2xs"
                 disabled={isSaving}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-shnoor-navy mb-2">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5 block">
                 End Date & Time
               </label>
               <input
                 type="datetime-local"
                 value={formData.endDateTime}
                 onChange={(e) => handleChange('endDateTime', e.target.value)}
-                className={`w-full px-4 py-2.5 border-2 rounded-lg focus:ring-4 focus:border-shnoor-indigo transition-all text-sm text-shnoor-navy font-medium bg-white shadow-sm ${errors.endDateTime ? 'border-shnoor-danger bg-shnoor-dangerLight focus:ring-shnoor-dangerLight' : 'border-shnoor-light focus:ring-shnoor-mist'
+                className={`w-full px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 transition-all text-sm font-medium bg-white shadow-2xs ${errors.endDateTime
+                  ? 'border-rose-300 bg-rose-50/30 text-rose-900 focus:ring-rose-500/15 focus:border-rose-500'
+                  : 'border-slate-200 text-slate-800 focus:ring-[#44448E]/15 focus:border-[#44448E]'
                   }`}
                 disabled={isSaving}
               />
               {errors.endDateTime && (
-                <p className="text-shnoor-danger text-xs mt-1.5 flex items-center">
+                <p className="text-rose-600 text-xs mt-1.5 flex items-center">
                   <AlertCircle size={12} className="mr-1" />
                   {errors.endDateTime}
                 </p>
@@ -245,11 +238,10 @@ const EditTestDetailsModal = ({ test, onClose, onSave }) => {
             </div>
           </div>
 
-          {/* Test Settings */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
             <div>
-              <label className="block text-sm font-semibold text-shnoor-navy mb-2">
-                Duration (min) <span className="text-shnoor-danger">*</span>
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5 block">
+                Duration (min) <span className="text-rose-500">*</span>
               </label>
               <input
                 type="number"
@@ -257,18 +249,20 @@ const EditTestDetailsModal = ({ test, onClose, onSave }) => {
                 max="300"
                 value={formData.duration}
                 onChange={(e) => handleChange('duration', e.target.value)}
-                className={`w-full px-4 py-2.5 border-2 rounded-lg focus:ring-4 focus:border-shnoor-indigo transition-all text-sm text-shnoor-navy font-medium bg-white shadow-sm ${errors.duration ? 'border-shnoor-danger bg-shnoor-dangerLight focus:ring-shnoor-dangerLight' : 'border-shnoor-light focus:ring-shnoor-mist'
+                className={`w-full px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 transition-all text-sm font-medium bg-white shadow-2xs ${errors.duration
+                  ? 'border-rose-300 bg-rose-50/30 text-rose-900 focus:ring-rose-500/15 focus:border-rose-500'
+                  : 'border-slate-200 text-slate-800 focus:ring-[#44448E]/15 focus:border-[#44448E]'
                   }`}
                 disabled={isSaving}
               />
               {errors.duration && (
-                <p className="text-shnoor-danger text-xs mt-1">{errors.duration}</p>
+                <p className="text-rose-600 text-xs mt-1">{errors.duration}</p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-shnoor-navy mb-2">
-                Passing % <span className="text-shnoor-danger">*</span>
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5 block">
+                Passing % <span className="text-rose-500">*</span>
               </label>
               <input
                 type="number"
@@ -276,18 +270,20 @@ const EditTestDetailsModal = ({ test, onClose, onSave }) => {
                 max="100"
                 value={formData.passingPercentage}
                 onChange={(e) => handleChange('passingPercentage', e.target.value)}
-                className={`w-full px-4 py-2.5 border-2 rounded-lg focus:ring-4 focus:border-shnoor-indigo transition-all text-sm text-shnoor-navy font-medium bg-white shadow-sm ${errors.passingPercentage ? 'border-shnoor-danger bg-shnoor-dangerLight focus:ring-shnoor-dangerLight' : 'border-shnoor-light focus:ring-shnoor-mist'
+                className={`w-full px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 transition-all text-sm font-medium bg-white shadow-2xs ${errors.passingPercentage
+                  ? 'border-rose-300 bg-rose-50/30 text-rose-900 focus:ring-rose-500/15 focus:border-rose-500'
+                  : 'border-slate-200 text-slate-800 focus:ring-[#44448E]/15 focus:border-[#44448E]'
                   }`}
                 disabled={isSaving}
               />
               {errors.passingPercentage && (
-                <p className="text-shnoor-danger text-xs mt-1">{errors.passingPercentage}</p>
+                <p className="text-rose-600 text-xs mt-1">{errors.passingPercentage}</p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-shnoor-navy mb-2">
-                Max Attempts <span className="text-shnoor-danger">*</span>
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5 block">
+                Max Attempts <span className="text-rose-500">*</span>
               </label>
               <input
                 type="number"
@@ -295,58 +291,55 @@ const EditTestDetailsModal = ({ test, onClose, onSave }) => {
                 max="10"
                 value={formData.maxAttempts}
                 onChange={(e) => handleChange('maxAttempts', e.target.value)}
-                className={`w-full px-4 py-2.5 border-2 rounded-lg focus:ring-4 focus:border-shnoor-indigo transition-all text-sm text-shnoor-navy font-medium bg-white shadow-sm ${errors.maxAttempts ? 'border-shnoor-danger bg-shnoor-dangerLight focus:ring-shnoor-dangerLight' : 'border-shnoor-light focus:ring-shnoor-mist'
+                className={`w-full px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 transition-all text-sm font-medium bg-white shadow-2xs ${errors.maxAttempts
+                  ? 'border-rose-300 bg-rose-50/30 text-rose-900 focus:ring-rose-500/15 focus:border-rose-500'
+                  : 'border-slate-200 text-slate-800 focus:ring-[#44448E]/15 focus:border-[#44448E]'
                   }`}
                 disabled={isSaving}
               />
               {errors.maxAttempts && (
-                <p className="text-shnoor-danger text-xs mt-1">{errors.maxAttempts}</p>
+                <p className="text-rose-600 text-xs mt-1">{errors.maxAttempts}</p>
               )}
             </div>
           </div>
 
-          {/* Info Box */}
           {test.status === 'published' && (
-            <div className="bg-shnoor-lavender border-l-4 border-shnoor-indigo p-3 rounded-r-lg">
-              <div className="flex items-start">
-                <AlertCircle size={16} className="text-shnoor-indigo mr-2 flex-shrink-0 mt-0.5" />
-                <p className="text-xs text-shnoor-indigoMedium">
-                  <span className="font-semibold text-shnoor-indigo">Note:</span> Changes will be reflected immediately. Questions cannot be modified for published tests.
-                </p>
-              </div>
+            <div className="bg-slate-50 border border-slate-200/80 p-3.5 rounded-xl flex items-start gap-2.5 text-xs text-slate-600">
+              <AlertCircle size={16} className="text-[#44448E] shrink-0 mt-0.5" />
+              <p>
+                <strong className="text-slate-800">Note:</strong> Changes will be reflected immediately. Questions cannot be modified for published tests.
+              </p>
             </div>
           )}
         </form>
 
-        {/* Footer */}
-        <div className="bg-white border-t border-shnoor-light px-6 py-4 flex justify-end space-x-3">
-          <Button
-            type="Button"
-            variant="secondary"
+        <div className="bg-slate-50/60 border-t border-slate-100 px-6 py-4 flex justify-end gap-2.5">
+          <button
+            type="button"
             onClick={onClose}
-            className="text-sm px-5 py-2 !font-bold"
+            className="btn-secondary"
             disabled={isSaving}
           >
             Cancel
-          </Button>
-          <Button
+          </button>
+          <button
             type="submit"
-            variant="primary"
             onClick={handleSubmit}
             disabled={isSaving}
-            className="text-sm px-5 py-2 !font-bold bg-shnoor-indigo hover:bg-shnoor-navy flex items-center disabled:opacity-50 disabled:cursor-not-allowed"          >
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#44448E] hover:bg-[#383878] text-white rounded-xl text-sm font-semibold shadow-xs hover:shadow active:scale-[0.99] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             {isSaving ? (
               <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Saving...
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                <span>Saving...</span>
               </>
             ) : (
               <>
-                <Save size={16} className="mr-2" />
-                Save Changes
+                <Save size={16} />
+                <span>Save Changes</span>
               </>
             )}
-          </Button>
+          </button>
         </div>
       </div>
     </div>

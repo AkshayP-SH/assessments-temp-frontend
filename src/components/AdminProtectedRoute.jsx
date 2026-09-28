@@ -13,7 +13,6 @@ const AdminProtectedRoute = ({ children }) => {
     }
   }, [isAuthenticated, hasStoredToken, loading, checkAuthStatus]);
 
-  // Show loading spinner while checking authentication
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -25,7 +24,6 @@ const AdminProtectedRoute = ({ children }) => {
     );
   }
 
-  // Redirect to login if not authenticated
   if (!isAuthenticated) {
     if (hasStoredToken) {
       return (
@@ -37,12 +35,10 @@ const AdminProtectedRoute = ({ children }) => {
         </div>
       );
     }
-    // Check if this is a client route so we can pre-select the org tab
     const isClientRoute = location.pathname.startsWith('/client/');
     return <Navigate to={isClientRoute ? '/login?portal=org' : '/login'} state={{ from: location }} replace />;
   }
 
-  // Render protected content if authenticated
   return children;
 };
 

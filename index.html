@@ -5,6 +5,17 @@
     <link rel="icon" type="image/png" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SHNOOR Assessments - Secure Examination Portal</title>
+    <script>
+      (function() {
+        try {
+          var saved = localStorage.getItem('app-theme') || localStorage.getItem('shnoor-theme') || 'default';
+          var theme = saved === 'leaf' ? 'green' : saved;
+          if (theme && theme !== 'default') {
+            document.documentElement.setAttribute('data-theme', theme);
+          }
+        } catch (e) {}
+      })();
+    </script>
     <meta name="description" content="AI-powered secure examination portal. Conduct and manage online assessments with live proctoring, coding challenges, and real-time analytics." />
 
     <!-- Mobile browser chrome color -->
@@ -60,18 +71,15 @@
         min-height: 100vh;
       }
 
-      /* Prevent layout shift by reserving space for images */
       img {
         max-width: 100%;
         height: auto;
       }
 
-      /* Loading state */
       #root {
         min-height: 100vh;
       }
 
-      /* Prevent flash of unstyled content */
       .loading {
         display: flex;
         align-items: center;

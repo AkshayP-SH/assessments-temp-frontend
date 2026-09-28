@@ -41,7 +41,7 @@ export default function JobApplicationForm({ job, onClose, onSuccess }) {
             } else {
                 setError(data.message || 'Failed to submit application');
             }
-        } catch (err) {
+        } catch {
             setError('Network error. Please check your connection and try again.');
         } finally {
             setSubmitting(false);

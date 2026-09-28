@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Video, Calendar, Clock, AlertCircle } from 'lucide-react';
 import { io } from 'socket.io-client';
 import { apiFetch } from '../config/api';
+import { clearStorageKeepTheme } from '../utils/theme';
 
 const StudentInterviews = () => {
   const navigate = useNavigate();
@@ -43,7 +44,6 @@ const StudentInterviews = () => {
     socketRef.current = socket;
 
     socket.on('connect', () => {
-      console.log('Student dashboard socket connected');
 
       // Join student-specific room if we have student ID
       if (studentIdRef.current) {
@@ -53,7 +53,6 @@ const StudentInterviews = () => {
 
     // Listen for incoming call notifications
     socket.on('interview:incoming-call', (data) => {
-      console.log('Incoming call notification:', data);
       const { interviewId, testTitle, instituteName } = data;
 
       setIncomingBanner({
@@ -89,7 +88,6 @@ const StudentInterviews = () => {
     });
 
     socket.on('disconnect', () => {
-      console.log('Student dashboard socket disconnected');
     });
   };
 
@@ -109,7 +107,7 @@ const StudentInterviews = () => {
       });
 
       if (response.status === 401) {
-        localStorage.clear();
+        clearStorageKeepTheme();
         navigate('/login');
         return;
       }

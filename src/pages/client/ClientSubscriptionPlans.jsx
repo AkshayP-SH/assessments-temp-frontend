@@ -32,10 +32,6 @@ const ClientSubscriptionPlans = () => {
   const requiresPayment = location.state?.requiresPayment || false;
   const subscriptionExpired = location.state?.subscriptionExpired || false;
 
-  useEffect(() => {
-    fetchPlans();
-  }, []);
-
   const fetchPlans = async () => {
     try {
       const response = await apiFetch('api/subscription-plans');
@@ -66,6 +62,10 @@ const ClientSubscriptionPlans = () => {
     }
   };
 
+  useEffect(() => {
+    fetchPlans();
+  }, []);
+
   const handleSelectPlan = async (plan) => {
     const planId = plan.plan_id || plan.id;
     setProcessingPlan(planId);
@@ -75,7 +75,7 @@ const ClientSubscriptionPlans = () => {
       if (planId === 'trial') {
         const response = await apiFetch('api/settings/activate-trial', {
           method: 'POST',
-          headers: { 
+          headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${localStorage.getItem('clientToken')}`
           },
@@ -110,7 +110,6 @@ const ClientSubscriptionPlans = () => {
         setProcessingPlan(null);
         return;
       }
-
       // REAL RAZORPAY MODE (for future use)
       // Create Razorpay order
       const orderResponse = await apiFetch('api/settings/purchase-subscription', {
@@ -347,7 +346,11 @@ const ClientSubscriptionPlans = () => {
                 <Button
                   onClick={() => handleSelectPlan(plan)}
                   disabled={processingPlan !== null}
+<<<<<<< HEAD
                   className={`w-full h-14 flex items-center justify-center gap-2 text-base font-bold shadow-lg transition-all duration-300 ${processingPlan === (plan.plan_id || plan.id)
+=======
+                  className={`w-full h-14 flex items-center justify-center gap-2 text-base font-bold shadow-lg transition-all duration-300 ${processingPlan === plan.plan_id
+>>>>>>> 4e96627e172f5f7636bb58820818f25fc0432ca4
                       ? 'opacity-50 cursor-not-allowed'
                       : 'hover:shadow-xl hover:scale-105'
                     }`}

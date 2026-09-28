@@ -7,6 +7,7 @@ import JobBoard from './JobBoard';
 import MyApplications from './MyApplications';
 import StudentSupportChatbot from '../components/chatbot/StudentSupportChatbot';
 import ThemeSelector from '../components/ThemeSelector';
+import { clearStorageKeepTheme } from '../utils/theme';
 import { apiFetch } from '../config/api';
 import shnoorLogo from '../assets/shnoor-logo.png';
 import { useSEO } from '../hooks/useSEO';
@@ -37,7 +38,6 @@ const Dashboard = () => {
 
   const [availableTests, setAvailableTests] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [testsWithProgress, setTestsWithProgress] = useState(new Set());
   const [selectedTest, setSelectedTest] = useState(null);
   const [showJobModal, setShowJobModal] = useState(false);
@@ -85,7 +85,7 @@ const Dashboard = () => {
         // Handle 401 - Token expired or invalid
         if (response.status === 401) {
           console.log('Authentication token expired or invalid');
-          localStorage.clear();
+          clearStorageKeepTheme();
           navigate('/login');
           return;
         }
@@ -142,11 +142,11 @@ const Dashboard = () => {
           );
           setTestsWithProgress(testsWithProgressSet);
         } else {
-          setError('Failed to load tests');
+          alert('Failed to load tests');
         }
       } catch (err) {
         console.error('Error loading tests:', err);
-        setError('Connection error. Please try again later.');
+        alert('Connection error. Please try again later.');
       } finally {
         setLoading(false);
       }
@@ -179,7 +179,7 @@ const Dashboard = () => {
   }, [activeTab]);
 
   const handleLogout = () => {
-    localStorage.clear();
+    clearStorageKeepTheme();
     navigate('/login');
   };
 
@@ -388,7 +388,7 @@ const Dashboard = () => {
         <div className="w-full max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center border-white/10 sm:border-transparent sm:h-16">
             <div className="flex items-center space-x-3 sm:space-x-4">
-              <div className="site-header-logo w-10 h-10 sm:w-12 sm:h-12 rounded-xl overflow-hidden shadow-sm flex-shrink-0 bg-white">
+              <div className="site-header-logo w-10 h-10 sm:w-12 sm:h-12 rounded-xl overflow-hidden shadow-sm flex-shrink-0 bg-white p-1 flex items-center justify-center">
                 <img
                   src={shnoorLogo}
                   alt="Shnoor Logo"
@@ -396,8 +396,8 @@ const Dashboard = () => {
                 />
               </div>
               <div>
-                <h1 className="text-white font-bold text-base sm:text-lg leading-tight">Assessment Portal</h1>
-                <p className="text-white/75 text-[10px] sm:text-xs">Student Dashboard</p>
+                <h1 className="text-white font-bold text-base sm:text-lg leading-tight uppercase tracking-wide">SHNOOR Assessments</h1>
+                <p className="site-header-subtitle text-white/75 text-[10px] sm:text-xs uppercase tracking-widest font-semibold">Student Dashboard</p>
               </div>
             </div>
 
@@ -409,10 +409,10 @@ const Dashboard = () => {
               <ThemeSelector variant="dark" />
               <button
                 onClick={handleLogout}
-                className="admin-logout-btn flex items-center justify-center space-x-2 px-3 sm:px-5 py-2 !h-9 sm:!h-10 text-white bg-transparent border border-white/20 hover:bg-white/10 rounded-lg transition-colors text-xs sm:text-sm font-medium"
+                className="admin-logout-btn flex items-center justify-center space-x-2 px-4 sm:px-6 py-2.5 sm:py-3 !h-9 sm:!h-10 bg-shnoor-indigo text-white hover:bg-shnoor-indigo/90 rounded-xl transition-all text-sm sm:text-base font-medium"
               >
-                <LogOut size={16} className="hidden sm:block" />
-                <LogOut size={14} className="sm:hidden" />
+                <LogOut size={18} className="hidden sm:block" />
+                <LogOut size={16} className="sm:hidden" />
                 <span className="hidden sm:inline">Logout</span>
               </button>
             </div>
@@ -425,7 +425,7 @@ const Dashboard = () => {
         {/* Tab Navigation - COMMENTED OUT */}
 
         <div className="mb-6 sm:mb-8 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:pb-0 scrollbar-hide">
-          <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-mist p-2 inline-flex min-w-max space-x-2">
+          <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-mist p-2 inline-flex w-max space-x-2 !max-w-none">
             <button
               onClick={() => setActiveTab('tests')}
               className={`flex items-center space-x-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-medium transition-all text-sm sm:text-base ${activeTab === 'tests'
@@ -484,13 +484,9 @@ const Dashboard = () => {
               </div>
             )}
 
-            {error && (
-              <div className="bg-shnoor-dangerLight border border-shnoor-dangerLight text-shnoor-danger px-4 py-3 rounded-lg mb-6 shadow-sm">
-                {error}
-              </div>
-            )}
 
-            {!loading && !error && availableTests.length === 0 && (
+
+            {!loading && availableTests.length === 0 && (
               <div className="text-center py-12 bg-white rounded-xl border border-shnoor-mist shadow-[0_8px_30px_rgba(14,14,39,0.06)]">
                 <BookOpen className="mx-auto h-12 w-12 text-shnoor-mist mb-4" />
                 <h3 className="text-lg font-bold text-shnoor-navy">No Tests Available</h3>
@@ -498,7 +494,7 @@ const Dashboard = () => {
               </div>
             )}
 
-            {!loading && !error && availableTests.length > 0 && (
+            {!loading && availableTests.length > 0 && (
               <>
                 <ExamSearchFilter
                   onSearchChange={setSearchTerm}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BookOpen, Code, Plus, Search, Filter, Edit, Trash2, Eye } from 'lucide-react';
+import { BookOpen, Code, Plus, Search, Filter, Edit, Trash2 } from 'lucide-react';
 import { apiFetch } from '../../config/api';
 import MCQBankModal from '../../components/admin/MCQBankModal';
 import CodingBankModal from '../../components/admin/CodingBankModal';
