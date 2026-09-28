@@ -6,6 +6,8 @@ const API_BASE_URL = import.meta.env.PROD
   ? window.location.origin
   : (configuredApiUrl || 'http://localhost:5000');
 
+
+
 // Timeout for API requests (30 seconds for cold starts)
 const API_TIMEOUT = 30000;
 

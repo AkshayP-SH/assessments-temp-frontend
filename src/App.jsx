@@ -17,8 +17,7 @@ const LoadingFallback = () => (
   </div>
 );
 
-// All routes are lazy-loaded — LandingPage included (it was the only eager one)
-const LandingPage = React.lazy(() => import('./pages/LandingPage'));
+import LandingPage from './pages/LandingPage';
 const Login = React.lazy(() => import('./components/Login'));
 const Register = React.lazy(() => import('./components/Register'));
 const ForgotPassword = React.lazy(() => import('./components/ForgotPassword'));
@@ -80,19 +79,17 @@ const AppRoutes = () => {
   return (
     <>
       <GlobalThemeSelector />
-      <UpgradeRequiredModal 
-        isOpen={showUpgradeModal} 
-        onClose={() => setShowUpgradeModal(false)} 
-        quotaInfo={quotaInfo} 
+      <UpgradeRequiredModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        quotaInfo={quotaInfo}
       />
       <Routes>
         {/* Public Routes — each group has its own Suspense so a failure in one
             section doesn't block the rest of the app from rendering */}
         <Route path="/" element={
           <ErrorBoundary>
-            <Suspense fallback={<LoadingFallback />}>
-              <LandingPage />
-            </Suspense>
+            <LandingPage />
           </ErrorBoundary>
         } />
         <Route path="/privacy-policy" element={<Suspense fallback={<LoadingFallback />}><PrivacyPolicy /></Suspense>} />

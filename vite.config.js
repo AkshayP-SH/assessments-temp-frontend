@@ -16,6 +16,32 @@ export default defineConfig(({ mode }) => ({
     hmr: {
       overlay: false,
     },
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+      },
+      '/socket.io': {
+        target: 'http://localhost:5000',
+        ws: true,
+        changeOrigin: true,
+      },
+    },
+  },
+  preview: {
+    port: 5173,
+    strictPort: true,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+      },
+      '/socket.io': {
+        target: 'http://localhost:5000',
+        ws: true,
+        changeOrigin: true,
+      },
+    },
   },
   define: {
     global: 'globalThis',
@@ -54,14 +80,18 @@ export default defineConfig(({ mode }) => ({
           ) {
             return 'ml-vendor';
           }
+          if (id.includes('node_modules/lucide-react/')) {
+            return 'lucide-vendor';
+          }
           if (
-            id.includes('node_modules/lucide-react/') ||
-            id.includes('node_modules/react-select/') ||
             id.includes('node_modules/react-markdown/') ||
             id.includes('node_modules/remark-gfm/') ||
             id.includes('node_modules/dompurify/')
           ) {
-            return 'ui-vendor';
+            return 'markdown-vendor';
+          }
+          if (id.includes('node_modules/react-select/')) {
+            return 'select-vendor';
           }
           if (id.includes('node_modules/peerjs/') || id.includes('node_modules/webrtc-adapter/')) {
             return 'webrtc-vendor';

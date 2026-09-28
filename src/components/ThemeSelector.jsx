@@ -1,11 +1,28 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Leaf, Moon, Sun } from 'lucide-react';
 import { applyTheme, getSavedTheme } from '../utils/theme';
 
+const SunIcon = ({ className = "w-[18px] h-[18px]" }) => (
+  <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+  </svg>
+);
+
+const MoonIcon = ({ className = "w-[18px] h-[18px]" }) => (
+  <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+  </svg>
+);
+
+const LeafIcon = ({ className = "w-[18px] h-[18px]" }) => (
+  <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+    <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+  </svg>
+);
+
 const THEMES = [
-  { id: 'default', label: 'Light', icon: Sun },
-  { id: 'dark', label: 'Dark', icon: Moon },
-  { id: 'green', label: 'Leaf', icon: Leaf },
+  { id: 'default', label: 'Light', Icon: SunIcon },
+  { id: 'dark', label: 'Dark', Icon: MoonIcon },
+  { id: 'green', label: 'Leaf', Icon: LeafIcon },
 ];
 
 const ThemeSelector = ({ className = '', variant = 'dark' }) => {
@@ -80,7 +97,7 @@ const ThemeSelector = ({ className = '', variant = 'dark' }) => {
     };
   }, [isOpen]);
 
-  const ActiveIcon = theme === 'dark' ? Moon : theme === 'green' ? Leaf : Sun;
+  const ActiveIcon = theme === 'dark' ? MoonIcon : theme === 'green' ? LeafIcon : SunIcon;
 
   return (
     <div ref={rootRef} className="relative">
@@ -88,13 +105,13 @@ const ThemeSelector = ({ className = '', variant = 'dark' }) => {
         ref={triggerRef}
         type="button"
         onClick={() => setIsOpen((open) => !open)}
-        className={`theme-selector-trigger theme-selector-trigger--${variant} flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg sm:rounded-xl outline-none focus:outline-none transition-all ${className}`}
+        className={`theme-selector-trigger theme-selector-trigger--${variant} flex h-10 w-10 sm:h-11 sm:w-11 min-w-[40px] min-h-[40px] items-center justify-center rounded-xl outline-none focus:outline-none transition-all ${className}`}
         aria-label="Change theme"
         aria-haspopup="menu"
         aria-expanded={isOpen}
         title="Change theme"
       >
-        <ActiveIcon size={18} className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
+        <ActiveIcon className="w-[18px] h-[18px]" />
       </button>
 
       {isOpen && (
@@ -120,7 +137,7 @@ const ThemeSelector = ({ className = '', variant = 'dark' }) => {
                 title={label}
                 className={`theme-selector-option flex h-10 w-10 items-center justify-center rounded-xl outline-none focus:outline-none transition-colors ${isActive ? 'is-active' : ''}`}
               >
-                <themeOption.icon size={17} />
+                <themeOption.Icon className="w-[18px] h-[18px]" />
               </button>
             );
           })}

@@ -1,8 +1,14 @@
-import { useState, useEffect, useCallback, useMemo, memo } from 'react';
+import { useState, useEffect, useCallback, memo } from 'react';
 import { BookOpen, Code, Plus, Search, Edit, Trash2 } from 'lucide-react';
 import { apiFetch } from '../../config/api';
 import MCQBankModal from './MCQBankModal';
 import CodingBankModal from './CodingBankModal';
+
+const getAuthToken = () =>
+  localStorage.getItem('adminToken') ||
+  localStorage.getItem('token') ||
+  localStorage.getItem('clientToken') ||
+  '';
 
 const QuestionBankTab = () => {
   const [activeTab, setActiveTab] = useState('mcq'); // mcq or coding
@@ -26,10 +32,112 @@ const QuestionBankTab = () => {
     return () => clearTimeout(timerId);
   }, [searchTerm]);
 
+  const fetchCategories = useCallback(async () => {
+    try {
+      const token = getAuthToken();
+      const response = await apiFetch('api/question-bank/categories', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await response.json();
+      if (data && data.success && Array.isArray(data.categories)) {
+        setCategories(data.categories);
+      } else {
+        setCategories([]);
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      setCategories([]);
+    }
+  }, []);
+
+  const fetchTags = useCallback(async () => {
+    try {
+      const token = getAuthToken();
+      const response = await apiFetch('api/question-bank/tags', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await response.json();
+      if (data && data.success && Array.isArray(data.tags)) {
+        setTags(data.tags);
+      } else {
+        setTags([]);
+      }
+    } catch (error) {
+      console.error('Error fetching tags:', error);
+      setTags([]);
+    }
+  }, []);
+
+  const fetchMCQQuestions = useCallback(async () => {
+    setLoading(true);
+    try {
+      const token = getAuthToken();
+      const params = new URLSearchParams();
+      if (selectedDifficulty) params.append('difficulty', selectedDifficulty);
+      if (selectedCategory) params.append('category', selectedCategory);
+      if (debouncedSearchTerm) params.append('search', debouncedSearchTerm);
+
+      const response = await apiFetch(`api/question-bank/mcq?${params.toString()}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await response.json();
+      if (data && data.success && Array.isArray(data.questions)) {
+        const seen = new Set();
+        const unique = data.questions.filter((q) => {
+          const key = (q.question_text || '').trim().toLowerCase();
+          if (!key || seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+        setMcqQuestions(unique);
+      } else {
+        setMcqQuestions([]);
+      }
+    } catch (error) {
+      console.error('Error fetching MCQ questions:', error);
+      setMcqQuestions([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedDifficulty, selectedCategory, debouncedSearchTerm]);
+
+  const fetchCodingQuestions = useCallback(async () => {
+    setLoading(true);
+    try {
+      const token = getAuthToken();
+      const params = new URLSearchParams();
+      if (selectedDifficulty) params.append('difficulty', selectedDifficulty);
+      if (selectedCategory) params.append('category', selectedCategory);
+      if (debouncedSearchTerm) params.append('search', debouncedSearchTerm);
+
+      const response = await apiFetch(`api/question-bank/coding?${params.toString()}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await response.json();
+      if (data && data.success && Array.isArray(data.questions)) {
+        const seen = new Set();
+        const unique = data.questions.filter((q) => {
+          const key = (q.title || '').trim().toLowerCase();
+          if (!key || seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+        setCodingQuestions(unique);
+      } else {
+        setCodingQuestions([]);
+      }
+    } catch (error) {
+      console.error('Error fetching coding questions:', error);
+      setCodingQuestions([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedDifficulty, selectedCategory, debouncedSearchTerm]);
+
   useEffect(() => {
     fetchCategories();
     fetchTags();
-  }, []);
+  }, [fetchCategories, fetchTags]);
 
   useEffect(() => {
     if (activeTab === 'mcq') {
@@ -37,95 +145,19 @@ const QuestionBankTab = () => {
     } else {
       fetchCodingQuestions();
     }
-  }, [activeTab, selectedDifficulty, selectedCategory, debouncedSearchTerm]);
-
-  const fetchCategories = async () => {
-    try {
-      const token = localStorage.getItem('adminToken');
-      const response = await apiFetch('api/question-bank/categories', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
-      if (data.success) {
-        setCategories(data.categories);
-      }
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-    }
-  };
-
-  const fetchTags = async () => {
-    try {
-      const token = localStorage.getItem('adminToken');
-      const response = await apiFetch('api/question-bank/tags', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
-      if (data.success) {
-        setTags(data.tags);
-      }
-    } catch (error) {
-      console.error('Error fetching tags:', error);
-    }
-  };
-
-  const fetchMCQQuestions = async () => {
-    setLoading(true);
-    try {
-      const token = localStorage.getItem('adminToken');
-      const params = new URLSearchParams();
-      if (selectedDifficulty) params.append('difficulty', selectedDifficulty);
-      if (selectedCategory) params.append('category', selectedCategory);
-      if (debouncedSearchTerm) params.append('search', debouncedSearchTerm);
-
-      const response = await apiFetch(`api/question-bank/mcq?${params.toString()}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
-      if (data.success) {
-        setMcqQuestions(data.questions);
-      }
-    } catch (error) {
-      console.error('Error fetching MCQ questions:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchCodingQuestions = async () => {
-    setLoading(true);
-    try {
-      const token = localStorage.getItem('adminToken');
-      const params = new URLSearchParams();
-      if (selectedDifficulty) params.append('difficulty', selectedDifficulty);
-      if (selectedCategory) params.append('category', selectedCategory);
-      if (debouncedSearchTerm) params.append('search', debouncedSearchTerm);
-
-      const response = await apiFetch(`api/question-bank/coding?${params.toString()}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
-      if (data.success) {
-        setCodingQuestions(data.questions);
-      }
-    } catch (error) {
-      console.error('Error fetching coding questions:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [activeTab, fetchMCQQuestions, fetchCodingQuestions]);
 
   const handleDeleteMCQ = useCallback(async (id) => {
     if (!confirm('Are you sure you want to delete this question?')) return;
 
     try {
-      const token = localStorage.getItem('adminToken');
+      const token = getAuthToken();
       const response = await apiFetch(`api/question-bank/mcq/${id}`, {
         method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` }
       });
       const data = await response.json();
-      if (data.success) {
+      if (data && data.success) {
         alert('Question deleted successfully');
         fetchMCQQuestions();
       }
@@ -133,19 +165,19 @@ const QuestionBankTab = () => {
       console.error('Error deleting question:', error);
       alert('Failed to delete question');
     }
-  }, []);
+  }, [fetchMCQQuestions]);
 
   const handleDeleteCoding = useCallback(async (id) => {
     if (!confirm('Are you sure you want to delete this question?')) return;
 
     try {
-      const token = localStorage.getItem('adminToken');
+      const token = getAuthToken();
       const response = await apiFetch(`api/question-bank/coding/${id}`, {
         method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` }
       });
       const data = await response.json();
-      if (data.success) {
+      if (data && data.success) {
         alert('Question deleted successfully');
         fetchCodingQuestions();
       }
@@ -153,6 +185,16 @@ const QuestionBankTab = () => {
       console.error('Error deleting question:', error);
       alert('Failed to delete question');
     }
+  }, [fetchCodingQuestions]);
+
+  const handleEditMCQ = useCallback((q) => {
+    setEditingQuestion(q);
+    setShowMCQModal(true);
+  }, []);
+
+  const handleEditCoding = useCallback((q) => {
+    setEditingQuestion(q);
+    setShowCodingModal(true);
   }, []);
 
   const getDifficultyColor = useCallback((difficulty) => {
@@ -182,7 +224,7 @@ const QuestionBankTab = () => {
             }`}
           >
             <BookOpen className="w-4 h-4 mr-2" />
-            MCQ Questions ({mcqQuestions.length})
+            MCQ Questions ({(mcqQuestions || []).length})
           </button>
           <button
             onClick={() => setActiveTab('coding')}
@@ -193,7 +235,7 @@ const QuestionBankTab = () => {
             }`}
           >
             <Code className="w-4 h-4 mr-2" />
-            Coding Questions ({codingQuestions.length})
+            Coding Questions ({(codingQuestions || []).length})
           </button>
         </nav>
       </div>
@@ -228,7 +270,7 @@ const QuestionBankTab = () => {
             className="w-full h-12 px-4 rounded-xl border border-[#D1D1E6] bg-white text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors"
           >
             <option value="">All Categories</option>
-            {categories.map(cat => (
+            {(categories || []).map((cat) => (
               <option key={cat} value={cat}>{cat}</option>
             ))}
           </select>
@@ -259,20 +301,14 @@ const QuestionBankTab = () => {
         ) : activeTab === 'mcq' ? (
           <MCQQuestionsList
             questions={mcqQuestions}
-            onEdit={useCallback((q) => {
-              setEditingQuestion(q);
-              setShowMCQModal(true);
-            }, [])}
+            onEdit={handleEditMCQ}
             onDelete={handleDeleteMCQ}
             getDifficultyColor={getDifficultyColor}
           />
         ) : (
           <CodingQuestionsList
             questions={codingQuestions}
-            onEdit={useCallback((q) => {
-              setEditingQuestion(q);
-              setShowCodingModal(true);
-            }, [])}
+            onEdit={handleEditCoding}
             onDelete={handleDeleteCoding}
             getDifficultyColor={getDifficultyColor}
           />
@@ -292,8 +328,8 @@ const QuestionBankTab = () => {
             setEditingQuestion(null);
             fetchMCQQuestions();
           }}
-          categories={categories}
-          tags={tags}
+          categories={categories || []}
+          tags={tags || []}
         />
       )}
 
@@ -309,8 +345,8 @@ const QuestionBankTab = () => {
             setEditingQuestion(null);
             fetchCodingQuestions();
           }}
-          categories={categories}
-          tags={tags}
+          categories={categories || []}
+          tags={tags || []}
         />
       )}
     </div>
@@ -318,8 +354,9 @@ const QuestionBankTab = () => {
 };
 
 // MCQ Questions List Component
-const MCQQuestionsList = memo(({ questions, onEdit, onDelete, getDifficultyColor }) => {
-  if (questions.length === 0) {
+const MCQQuestionsList = memo(({ questions = [], onEdit, onDelete, getDifficultyColor }) => {
+  const list = Array.isArray(questions) ? questions : [];
+  if (list.length === 0) {
     return (
       <div className="bg-white rounded-2xl shadow-sm p-16 text-center mt-2">
         <BookOpen className="w-16 h-16 mx-auto mb-6 text-[#9A9AC9] opacity-60" />
@@ -331,7 +368,7 @@ const MCQQuestionsList = memo(({ questions, onEdit, onDelete, getDifficultyColor
 
   return (
     <div className="space-y-4">
-      {questions.map((q) => (
+      {list.map((q) => (
         <div key={q.id} className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md transition-shadow">
           <div className="flex justify-between items-start mb-3">
             <div className="flex-1">
@@ -346,7 +383,7 @@ const MCQQuestionsList = memo(({ questions, onEdit, onDelete, getDifficultyColor
                 <span className="px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-800">
                   {q.marks} marks
                 </span>
-                {q.tags && q.tags.map((tag, idx) => (
+                {Array.isArray(q.tags) && q.tags.map((tag, idx) => (
                   <span key={idx} className="px-2 py-1 rounded text-xs font-medium bg-purple-100 text-purple-800">
                     {tag}
                   </span>
@@ -356,7 +393,7 @@ const MCQQuestionsList = memo(({ questions, onEdit, onDelete, getDifficultyColor
             <div className="flex gap-2 ml-4">
               <button
                 onClick={() => onEdit(q)}
-                className="p-2 text-shnoor-indigo hover:bg-shnoor-lavender rounded-lg transition-colors"
+                className="p-2 text-[#403f75] hover:bg-[#edeefc] rounded-lg transition-colors"
                 title="Edit"
               >
                 <Edit className="w-5 h-5" />
@@ -402,8 +439,9 @@ const MCQQuestionsList = memo(({ questions, onEdit, onDelete, getDifficultyColor
 });
 
 // Coding Questions List Component
-const CodingQuestionsList = memo(({ questions, onEdit, onDelete, getDifficultyColor }) => {
-  if (questions.length === 0) {
+const CodingQuestionsList = memo(({ questions = [], onEdit, onDelete, getDifficultyColor }) => {
+  const list = Array.isArray(questions) ? questions : [];
+  if (list.length === 0) {
     return (
       <div className="bg-white rounded-2xl shadow-sm p-16 text-center mt-2">
         <Code className="w-16 h-16 mx-auto mb-6 text-[#9A9AC9] opacity-60" />
@@ -415,7 +453,7 @@ const CodingQuestionsList = memo(({ questions, onEdit, onDelete, getDifficultyCo
 
   return (
     <div className="space-y-4">
-      {questions.map((q) => (
+      {list.map((q) => (
         <div key={q.id} className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md transition-shadow">
           <div className="flex justify-between items-start mb-3">
             <div className="flex-1">
@@ -434,7 +472,7 @@ const CodingQuestionsList = memo(({ questions, onEdit, onDelete, getDifficultyCo
                 <span className="px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800">
                   {q.test_case_count} test cases
                 </span>
-                {q.tags && q.tags.map((tag, idx) => (
+                {Array.isArray(q.tags) && q.tags.map((tag, idx) => (
                   <span key={idx} className="px-2 py-1 rounded text-xs font-medium bg-purple-100 text-purple-800">
                     {tag}
                   </span>
@@ -469,3 +507,4 @@ const CodingQuestionsList = memo(({ questions, onEdit, onDelete, getDifficultyCo
 });
 
 export default QuestionBankTab;
+
