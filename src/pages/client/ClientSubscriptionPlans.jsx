@@ -346,11 +346,7 @@ const ClientSubscriptionPlans = () => {
                 <Button
                   onClick={() => handleSelectPlan(plan)}
                   disabled={processingPlan !== null}
-<<<<<<< HEAD
                   className={`w-full h-14 flex items-center justify-center gap-2 text-base font-bold shadow-lg transition-all duration-300 ${processingPlan === (plan.plan_id || plan.id)
-=======
-                  className={`w-full h-14 flex items-center justify-center gap-2 text-base font-bold shadow-lg transition-all duration-300 ${processingPlan === plan.plan_id
->>>>>>> 4e96627e172f5f7636bb58820818f25fc0432ca4
                       ? 'opacity-50 cursor-not-allowed'
                       : 'hover:shadow-xl hover:scale-105'
                     }`}

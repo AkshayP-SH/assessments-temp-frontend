@@ -1600,12 +1600,7 @@ const AdminDashboard = () => {
       const data = await response.json();
 
       if (response.ok && data.success) {
-<<<<<<< HEAD
-        // Show success message with test assignment info
-        toast.success(data.message || 'Student added successfully');
-=======
         alert(data.message || 'Student added successfully');
->>>>>>> 4e96627e172f5f7636bb58820818f25fc0432ca4
         setShowAddStudentForm(false);
         setNewStudentData({
           full_name: '',
