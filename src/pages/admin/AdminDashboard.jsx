@@ -2,6 +2,7 @@
 import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 import {
   FileSpreadsheet, ArrowLeft, Users, AlertCircle, Video, Loader2, Building2, Briefcase, Landmark, FileText, X
 } from 'lucide-react';
@@ -120,10 +121,10 @@ const AdminDashboard = () => {
   const [sortBy, setSortBy] = useState('latest');
 
   const [examCurrentPage, setExamCurrentPage] = useState(1);
-  const examItemsPerPage = 9;
+  const [examItemsPerPage, setExamItemsPerPage] = useState(9);
 
   const [instituteCurrentPage, setInstituteCurrentPage] = useState(1);
-  const instituteItemsPerPage = 10;
+  const [instituteItemsPerPage, setInstituteItemsPerPage] = useState(10);
 
   const [resultsCurrentPage, setResultsCurrentPage] = useState(1);
   const [resultsRowsPerPage, setResultsRowsPerPage] = useState(40);
@@ -2252,6 +2253,7 @@ const AdminDashboard = () => {
             setExamCurrentPage={setExamCurrentPage}
             examTotalPages={examTotalPages}
             examItemsPerPage={examItemsPerPage}
+            setExamItemsPerPage={setExamItemsPerPage}
           />
         )}
 
@@ -2286,6 +2288,8 @@ const AdminDashboard = () => {
             instituteTotalPages={instituteTotalPages}
             instituteCurrentPage={instituteCurrentPage}
             setInstituteCurrentPage={setInstituteCurrentPage}
+            instituteItemsPerPage={instituteItemsPerPage}
+            setInstituteItemsPerPage={setInstituteItemsPerPage}
           />
         )}
 

@@ -1,17 +1,12 @@
 import { useState, useEffect } from 'react';
 import { apiFetch } from '../../config/api';
 import CodingQuestionSelector from './CodingQuestionSelector';
-<<<<<<< HEAD
-import MCQBankSelector from './MCQBankSelector';
-import toast from 'react-hot-toast';
-=======
 import TestInitStep from './TestInitStep';
 import TestManualStep from './TestManualStep';
 import TestBulkStep from './TestBulkStep';
 import TestSuccessStep from './TestSuccessStep';
 import CodingQuestionModal from './CodingQuestionModal';
 import CodingViewModal from './CodingViewModal';
->>>>>>> 4e96627e172f5f7636bb58820818f25fc0432ca4
 
 const ENABLE_CODE_EXECUTION = true;
 
@@ -659,20 +654,12 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                     if (onSaved) onSaved();
                     setStep('success');
                 } else {
-<<<<<<< HEAD
-                    toast.error(data.message || 'Failed to create test');
-=======
                     showToast(data.message || 'Failed to create test');
->>>>>>> 4e96627e172f5f7636bb58820818f25fc0432ca4
                 }
             }
         } catch (error) {
             console.error('Submit error:', error);
-<<<<<<< HEAD
-            toast.error('Failed to save test. Please try again.');
-=======
             showToast('Failed to save test. Please try again.');
->>>>>>> 4e96627e172f5f7636bb58820818f25fc0432ca4
         } finally {
             setIsUploading(false);
         }

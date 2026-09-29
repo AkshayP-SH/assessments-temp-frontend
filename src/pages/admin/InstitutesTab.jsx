@@ -4,6 +4,7 @@ import {
   ChevronDown, UserCheck, Users, Calendar, Trash2,
   ChevronLeft, ChevronRight
 } from 'lucide-react';
+import Pagination from '../../components/Pagination';
 
 const InstitutesTab = ({
   instituteSearchTerm,
@@ -34,6 +35,8 @@ const InstitutesTab = ({
   instituteTotalPages,
   instituteCurrentPage,
   setInstituteCurrentPage,
+  instituteItemsPerPage,
+  setInstituteItemsPerPage
 }) => {
   return (
     <div className="space-y-6">
@@ -373,25 +376,16 @@ const InstitutesTab = ({
             </div>
           )}
 
-          {instituteTotalPages > 1 && allInstitutes.length > 0 && (
-            <div className="flex justify-center items-center space-x-4 mt-8">
-              <button
-                onClick={() => setInstituteCurrentPage(p => Math.max(1, p - 1))}
-                disabled={instituteCurrentPage === 1}
-                className="p-2 bg-white border border-shnoor-light rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-shnoor-lavender transition-colors"
-              >
-                <ChevronLeft size={20} className="text-shnoor-indigo" />
-              </button>
-              <span className="text-sm text-shnoor-navy font-medium">
-                Page {instituteCurrentPage} of {instituteTotalPages}
-              </span>
-              <button
-                onClick={() => setInstituteCurrentPage(p => Math.min(instituteTotalPages, p + 1))}
-                disabled={instituteCurrentPage === instituteTotalPages}
-                className="p-2 bg-white border border-shnoor-light rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-shnoor-lavender transition-colors"
-              >
-                <ChevronRight size={20} className="text-shnoor-indigo" />
-              </button>
+          {allInstitutes.length > 0 && (
+            <div className="mt-8">
+              <Pagination 
+                currentPage={instituteCurrentPage}
+                totalPages={instituteTotalPages}
+                onPageChange={setInstituteCurrentPage}
+                itemsPerPage={instituteItemsPerPage}
+                onItemsPerPageChange={setInstituteItemsPerPage}
+                totalItems={allInstitutes.length}
+              />
             </div>
           )}
         </div>

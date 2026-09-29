@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 
 const ExamSearchFilter = lazy(() => import('../../components/ExamSearchFilter'));
+import Pagination from '../../components/Pagination';
 
 const ExamsTab = ({
   loading,
@@ -37,7 +38,8 @@ const ExamsTab = ({
   examCurrentPage,
   setExamCurrentPage,
   examTotalPages,
-  examItemsPerPage = 9,
+  examItemsPerPage,
+  setExamItemsPerPage
 }) => {
   useEffect(() => {
     const handleWindowClick = () => {
@@ -318,44 +320,16 @@ const ExamsTab = ({
                 })}
               </div>
 
-              {/* Pagination */}
-              {examTotalPages > 1 && (
-                <div className="admin-pagination">
-                  <span className="admin-pagination-text">
-                    Showing {filteredTests.length === 0 ? 0 : (examCurrentPage - 1) * examItemsPerPage + 1} – {Math.min(examCurrentPage * examItemsPerPage, filteredTests.length)} of {filteredTests.length} {filteredTests.length === 1 ? 'exam' : 'exams'}
-                  </span>
-                  <div className="admin-pagination-controls">
-                    <button
-                      type="button"
-                      onClick={() => setExamCurrentPage(p => Math.max(1, p - 1))}
-                      disabled={examCurrentPage === 1}
-                      className="admin-pagination-btn"
-                      title="Previous Page"
-                    >
-                      <ChevronLeft size={16} />
-                    </button>
-
-                    {Array.from({ length: examTotalPages }, (_, i) => i + 1).map((pageNum) => (
-                      <button
-                        key={pageNum}
-                        type="button"
-                        onClick={() => setExamCurrentPage(pageNum)}
-                        className={`admin-pagination-btn ${examCurrentPage === pageNum ? 'admin-pagination-btn-active' : ''}`}
-                      >
-                        {String(pageNum).padStart(2, '0')}
-                      </button>
-                    ))}
-
-                    <button
-                      type="button"
-                      onClick={() => setExamCurrentPage(p => Math.min(examTotalPages, p + 1))}
-                      disabled={examCurrentPage === examTotalPages}
-                      className="admin-pagination-btn"
-                      title="Next Page"
-                    >
-                      <ChevronRight size={16} />
-                    </button>
-                  </div>
+              {filteredTests.length > 0 && (
+                <div className="mt-6">
+                  <Pagination 
+                    currentPage={examCurrentPage}
+                    totalPages={examTotalPages}
+                    onPageChange={setExamCurrentPage}
+                    itemsPerPage={examItemsPerPage}
+                    onItemsPerPageChange={setExamItemsPerPage}
+                    totalItems={filteredTests.length}
+                  />
                 </div>
               )}
             </>

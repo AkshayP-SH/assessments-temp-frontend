@@ -71,6 +71,41 @@ const ClientSubscriptionPlans = () => {
     setError('');
 
     try {
+      const token = localStorage.getItem('clientToken') || localStorage.getItem('adminToken');
+      if (!token) {
+        throw new Error('Authentication token not found. Please login again.');
+      }
+
+      if (planId === 'trial') {
+        const response = await fetch(getApiUrl('api/settings/activate-trial'), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+          const storedUser = JSON.parse(localStorage.getItem('clientUser') || '{}');
+          storedUser.requiresPayment = false;
+          storedUser.clientStatus = 'active';
+          storedUser.subscriptionActive = true;
+          localStorage.setItem('clientUser', JSON.stringify(storedUser));
+          localStorage.setItem('adminUser', JSON.stringify(storedUser));
+          
+          navigate('/client/dashboard', {
+            replace: true,
+            state: { message: '7-Day Trial activated successfully!' }
+          });
+        } else {
+          setError(data.message || 'Failed to activate trial.');
+        }
+        setProcessingPlan(null);
+        return;
+      }
+
       // Use the configured payment mode
       const isDummyMode = DUMMY_PAYMENT_MODE;
 
@@ -78,19 +113,12 @@ const ClientSubscriptionPlans = () => {
         // Simulate payment processing delay
         await new Promise(resolve => setTimeout(resolve, 1500));
 
-        // Get the token from localStorage
-        const token = localStorage.getItem('clientToken') || localStorage.getItem('adminToken');
-
-        if (!token) {
-          throw new Error('Authentication token not found. Please login again.');
-        }
-
         // Directly call verify payment with dummy data
         const verifyResponse = await fetch(getApiUrl('api/settings/verify-payment'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('clientToken')}`
+            'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify({
             razorpay_order_id: 'dummy_order_' + new Date().getTime(),
@@ -118,7 +146,7 @@ const ClientSubscriptionPlans = () => {
             state: { message: 'Payment successful! Your subscription is now active.' }
           });
         } else {
-          setError(data.message || 'Failed to activate trial.');
+          setError(verifyData.message || 'Failed to activate subscription.');
         }
         setProcessingPlan(null);
         return;
@@ -358,9 +386,9 @@ const ClientSubscriptionPlans = () => {
 
               <div className="p-8 pt-0 mt-auto">
                 <Button
-                  onClick={() => handleSelectPlan(plan)}
+                  onClick={() => handleSelectPlan(plan.plan_id || plan.id)}
                   disabled={processingPlan !== null}
-                  className={`w-full h-14 flex items-center justify-center gap-2 text-base font-bold shadow-lg transition-all duration-300 ${processingPlan === plan.plan_id
+                  className={`w-full h-14 flex items-center justify-center gap-2 text-base font-bold shadow-lg transition-all duration-300 ${processingPlan === (plan.plan_id || plan.id)
                     ? 'opacity-50 cursor-not-allowed'
                     : 'hover:shadow-xl hover:scale-105'
                     }`}

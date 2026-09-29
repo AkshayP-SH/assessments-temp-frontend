@@ -93,14 +93,14 @@ const AdminHeader = () => {
   useEffect(() => {
     const fetchUnreadCount = async () => {
       try {
-        const token = localStorage.getItem('adminToken');
+        const token = localStorage.getItem('clientToken') || localStorage.getItem('adminToken');
         if (!token) return;
 
         const response = await fetch(`${API_URL}/api/student-messages/unread-count`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
 
-        if (response.status === 401) return;
+        if (response.status === 401 || response.status === 403) return;
 
         const data = await response.json();
         if (data.success) {
