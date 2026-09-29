@@ -268,29 +268,13 @@
 
 /* Admin Dashboard - Root Layout */
 .admin-dashboard-root {
-  background-color: #F8F7FF;
+  background-color: #F4F6FB;
   min-height: 100vh;
   width: 100%;
 }
 
 .admin-dashboard-content {
   width: 100%;
-  max-width: 80rem;
-  margin-left: auto;
-  margin-right: auto;
-  padding: 1.5rem 1rem;
-}
-
-@media (min-width: 640px) {
-  .admin-dashboard-content {
-    padding: 2rem 1.5rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  .admin-dashboard-content {
-    padding: 2rem 2rem;
-  }
 }
 
 /* Admin Dashboard - Welcome Banner */

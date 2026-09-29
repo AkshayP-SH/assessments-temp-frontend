@@ -564,10 +564,6 @@ const AdminDashboard = () => {
   };
 
   const handleDeleteTest = async (testId) => {
-    if (!confirm('Are you sure you want to delete this test? This action cannot be undone.')) {
-      return;
-    }
-
     try {
       const token = localStorage.getItem('adminToken');
       const response = await apiFetch(`api/tests/${testId}${clientParam}`, {
@@ -578,7 +574,6 @@ const AdminDashboard = () => {
       });
 
       if (response.ok) {
-        alert('Test deleted successfully');
         setTests(prevTests => prevTests.filter(test => test.id !== testId));
         if (activeTab === 'institutes') {
           fetchAllInstitutes();
@@ -2049,8 +2044,8 @@ const AdminDashboard = () => {
   };
 
   return (
-    <Suspense fallback={<div className="flex h-screen items-center justify-center bg-[#E5E5F3] dark:bg-[#11111d]"><Loader2 className="animate-spin h-12 w-12 text-[#403f75] dark:text-[#9A9AC9]" /></div>}>
-      <div className="admin-dashboard-root min-h-screen bg-[#E5E5F3] dark:bg-[#11111d]">
+    <Suspense fallback={<div className="flex h-screen items-center justify-center bg-[#F4F6FB] dark:bg-[#11111d]"><Loader2 className="animate-spin h-12 w-12 text-[#403f75] dark:text-[#9A9AC9]" /></div>}>
+      <div className="admin-dashboard-root min-h-screen bg-[#F4F6FB] dark:bg-[#11111d]">
         {/* Header with integrated Viewing as selector */}
         <AdminHeader
           viewAsControl={
@@ -2108,7 +2103,7 @@ const AdminDashboard = () => {
         {/* Client Admin — Usage Stats Bar */}
         {!isSuperAdmin && quota && (
           <div className="bg-white border-b border-shnoor-mist">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-wrap items-center gap-4">
+            <div className="w-full px-4 sm:px-6 lg:pr-6 lg:pl-[88px] py-2 flex flex-wrap items-center gap-4">
               {[
                 { label: 'Tests', used: quota.limits?.tests?.used, max: quota.limits?.tests?.max },
                 { label: 'Institutes', used: quota.limits?.institutes?.used, max: quota.limits?.institutes?.max },
@@ -2133,10 +2128,8 @@ const AdminDashboard = () => {
           </div>
         )}
 
-
-
         {/* Main Content with offset for sidebar rail */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 lg:pl-24 pt-3 sm:pt-4 pb-12 transition-all">
+        <div className="w-full px-4 sm:px-6 lg:pr-6 lg:pl-[88px] pt-4 sm:pt-6 pb-12 transition-all">
           <div className="admin-dashboard-content">
 
             {/* Subscription Expiry Banner */}
@@ -2195,18 +2188,16 @@ const AdminDashboard = () => {
                           key={tab.id}
                           type="button"
                           onClick={() => setActiveTab(tab.id)}
-                          className={`flex items-center h-11 px-3 w-full rounded-xl transition-all duration-200 cursor-pointer relative group/item ${
-                            isActive
-                              ? 'bg-[#403f75] dark:bg-indigo-600 text-white font-bold shadow-md shadow-[#403f75]/25'
-                              : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/90 dark:hover:bg-slate-800/80'
-                          }`}
+                          className={`flex items-center h-11 px-3 w-full rounded-xl transition-all duration-200 cursor-pointer relative group/item ${isActive
+                            ? 'bg-[#403f75] dark:bg-indigo-600 text-white font-bold shadow-md shadow-[#403f75]/25'
+                            : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/90 dark:hover:bg-slate-800/80'
+                            }`}
                         >
                           <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
                             <Icon
                               size={19}
-                              className={`transition-transform duration-150 group-hover/item:scale-110 ${
-                                isActive ? 'text-white' : 'text-slate-500 dark:text-slate-400 group-hover/item:text-slate-800 dark:group-hover/item:text-white'
-                              }`}
+                              className={`transition-transform duration-150 group-hover/item:scale-110 ${isActive ? 'text-white' : 'text-slate-500 dark:text-slate-400 group-hover/item:text-slate-800 dark:group-hover/item:text-white'
+                                }`}
                             />
                           </div>
                           <span className="ml-3 opacity-0 max-w-0 group-hover:max-w-[170px] group-hover:opacity-100 transition-all duration-300 ease-out whitespace-nowrap overflow-hidden text-sm font-bold tracking-tight text-left">
@@ -2239,15 +2230,15 @@ const AdminDashboard = () => {
                           type="button"
                           onClick={() => setActiveTab(tab.id)}
                           className={`group inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-[13px] font-semibold rounded-xl transition-all duration-150 whitespace-nowrap flex-shrink-0 cursor-pointer ${isActive
-                              ? 'bg-[#403f75] dark:bg-indigo-600 text-white font-bold shadow-xs'
-                              : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/90 dark:hover:bg-slate-800/70'
+                            ? 'bg-[#403f75] dark:bg-indigo-600 text-white font-bold shadow-xs'
+                            : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/90 dark:hover:bg-slate-800/70'
                             }`}
                         >
                           <Icon
                             size={15}
                             className={`flex-shrink-0 transition-transform duration-150 group-hover:scale-105 ${isActive
-                                ? 'text-white'
-                                : 'text-slate-500 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-white'
+                              ? 'text-white'
+                              : 'text-slate-500 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-white'
                               }`}
                           />
                           <span>{tab.label}</span>

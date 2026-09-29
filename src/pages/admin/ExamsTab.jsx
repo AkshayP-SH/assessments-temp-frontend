@@ -1,8 +1,8 @@
-import React, { Suspense, lazy, useEffect } from 'react';
+import React, { Suspense, lazy, useEffect, useState } from 'react';
 import {
   FileSpreadsheet, Plus, Trash2, CheckCircle2,
   MoreVertical, Eye, Copy, Users, ChevronLeft, ChevronRight,
-  FileText, BookOpen, Edit2, BarChart2, CheckSquare
+  FileText, BookOpen, Edit2, BarChart2, AlertCircle, Loader2, X
 } from 'lucide-react';
 
 const ExamSearchFilter = lazy(() => import('../../components/ExamSearchFilter'));
@@ -39,6 +39,9 @@ const ExamsTab = ({
   examTotalPages,
   examItemsPerPage = 9,
 }) => {
+  const [testToDelete, setTestToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   useEffect(() => {
     const handleWindowClick = () => {
       if (openMenuId) setOpenMenuId(null);
@@ -46,6 +49,19 @@ const ExamsTab = ({
     window.addEventListener('click', handleWindowClick);
     return () => window.removeEventListener('click', handleWindowClick);
   }, [openMenuId, setOpenMenuId]);
+
+  const confirmDeleteTest = async () => {
+    if (!testToDelete) return;
+    try {
+      setIsDeleting(true);
+      await handleDeleteTest(testToDelete.id);
+      setTestToDelete(null);
+    } catch (error) {
+      console.error('Error deleting test:', error);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   return (
     <div className="w-full">
@@ -147,8 +163,8 @@ const ExamsTab = ({
             </div>
           ) : (
             <>
-              {/* Modern Exam Cards Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+              {/* Compact Modern Exam Cards Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">
                 {paginatedTests.map((test) => {
                   const attempts = test.attempts || 0;
                   const passedCount = test.passedCount ?? test.passed_count ?? test.passed ?? 0;
@@ -159,12 +175,12 @@ const ExamsTab = ({
                   return (
                     <div
                       key={test.id}
-                      className="bg-white dark:bg-[#1E1E38] rounded-2xl border border-slate-200/90 dark:border-slate-700/80 p-5 shadow-2xs hover:shadow-md hover:border-[#403f75]/40 dark:hover:border-indigo-500/40 transition-all flex flex-col justify-between group relative"
+                      className="bg-white dark:bg-[#1E1E38] rounded-2xl border border-slate-200/90 dark:border-slate-700/80 p-4 sm:p-4.5 shadow-2xs hover:shadow-md hover:border-[#403f75]/40 dark:hover:border-indigo-500/40 transition-all flex flex-col justify-between group relative"
                     >
                       {/* Top Header Row */}
                       <div>
-                        <div className="flex items-center justify-between gap-2 mb-3.5">
-                          <div className="flex items-center gap-2.5">
+                        <div className="flex items-center justify-between gap-2 mb-2.5">
+                          <div className="flex items-center gap-2">
                             <input
                               type="checkbox"
                               checked={selectedTests.includes(test.id)}
@@ -172,8 +188,8 @@ const ExamsTab = ({
                               className="w-4 h-4 text-[#403f75] border-slate-300 rounded focus:ring-2 focus:ring-[#403f75] cursor-pointer"
                               title="Select exam"
                             />
-                            <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/70 text-[#403f75] dark:text-indigo-300 flex items-center justify-center flex-shrink-0 border border-indigo-100/80 dark:border-indigo-900/60">
-                              <FileSpreadsheet size={16} />
+                            <div className="w-7 h-7 rounded-lg bg-indigo-50 dark:bg-indigo-950/70 text-[#403f75] dark:text-indigo-300 flex items-center justify-center flex-shrink-0 border border-indigo-100/80 dark:border-indigo-900/60">
+                              <FileSpreadsheet size={15} />
                             </div>
                           </div>
 
@@ -196,10 +212,10 @@ const ExamsTab = ({
                                   e.stopPropagation();
                                   setOpenMenuId(openMenuId === test.id ? null : test.id);
                                 }}
-                                className="w-8 h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/70 text-slate-500 hover:text-slate-800 dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+                                className="w-7 h-7 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/70 text-slate-500 hover:text-slate-800 dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer"
                                 title="More options"
                               >
-                                <MoreVertical size={16} />
+                                <MoreVertical size={15} />
                               </button>
 
                               {openMenuId === test.id && (
@@ -259,49 +275,52 @@ const ExamsTab = ({
                           </div>
                         </div>
 
-                        {/* Title & Metadata */}
+                        {/* Title & Metadata with clean 2-line wrap or ellipsis */}
                         <div>
-                          <h3 className="font-bold text-base sm:text-lg text-slate-900 dark:text-white truncate group-hover:text-[#403f75] dark:group-hover:text-indigo-300 transition-colors" title={test.name}>
+                          <h3
+                            className="font-bold text-sm sm:text-base text-slate-900 dark:text-white line-clamp-2 leading-snug break-words group-hover:text-[#403f75] dark:group-hover:text-indigo-300 transition-colors"
+                            title={test.name}
+                          >
                             {test.name}
                           </h3>
-                          <div className="flex items-center gap-2 text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 mt-1">
+                          <div className="flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-400 mt-1">
                             <span className="flex items-center gap-1.5">
-                              <FileText size={15} className="text-slate-400" />
+                              <FileText size={14} className="text-slate-400 flex-shrink-0" />
                               <span>{test.questions || test.total_questions || 0} Questions • {test.duration || 60} mins</span>
                             </span>
                           </div>
-                          <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                          <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
                             Created: {formattedDate}
                           </p>
                         </div>
                       </div>
 
                       {/* Stats Section */}
-                      <div className="mt-4 pt-3.5 border-t border-slate-100 dark:border-slate-800">
-                        <div className="grid grid-cols-2 gap-2 bg-slate-50 dark:bg-slate-800/60 rounded-xl p-3 border border-slate-100 dark:border-slate-700/60">
-                          <div className="flex items-center gap-2.5">
-                            <div className="w-8 h-8 rounded-lg bg-white dark:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-300 shadow-2xs">
-                              <Users size={16} />
+                      <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800">
+                        <div className="grid grid-cols-2 gap-2 bg-slate-50/90 dark:bg-slate-800/60 rounded-xl p-2.5 border border-slate-100 dark:border-slate-700/60">
+                          <div className="flex items-center gap-2">
+                            <div className="w-7 h-7 rounded-lg bg-white dark:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-300 shadow-2xs flex-shrink-0">
+                              <Users size={14} />
                             </div>
-                            <div>
-                              <p className="text-sm font-extrabold text-slate-900 dark:text-white leading-tight">{attempts}</p>
-                              <p className="text-xs font-medium text-slate-500 dark:text-slate-400 leading-tight">Attempted</p>
+                            <div className="min-w-0">
+                              <p className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white leading-tight truncate">{attempts}</p>
+                              <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 leading-tight">Attempted</p>
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-2.5">
-                            <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shadow-2xs">
-                              <CheckCircle2 size={16} />
+                          <div className="flex items-center gap-2">
+                            <div className="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shadow-2xs flex-shrink-0">
+                              <CheckCircle2 size={14} />
                             </div>
-                            <div>
-                              <p className="text-sm font-extrabold text-emerald-600 dark:text-emerald-400 leading-tight">{passedCount} ({passRate}%)</p>
-                              <p className="text-xs font-medium text-slate-500 dark:text-slate-400 leading-tight">Passed</p>
+                            <div className="min-w-0">
+                              <p className="text-xs sm:text-sm font-extrabold text-emerald-600 dark:text-emerald-400 leading-tight truncate">{passedCount} ({passRate}%)</p>
+                              <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 leading-tight">Passed</p>
                             </div>
                           </div>
                         </div>
 
                         {/* Card Footer Actions */}
-                        <div className="flex items-center gap-2 mt-4">
+                        <div className="flex items-center gap-2 mt-2.5">
                           {isPublished ? (
                             <button
                               type="button"
@@ -309,9 +328,9 @@ const ExamsTab = ({
                                 e.stopPropagation();
                                 setSelectedExamId(test.id);
                               }}
-                              className="flex-1 inline-flex items-center justify-center gap-1.5 h-10 bg-[#403f75] hover:bg-[#2d2c55] active:scale-98 text-white text-xs sm:text-sm font-bold rounded-xl transition-all shadow-xs cursor-pointer"
+                              className="flex-1 inline-flex items-center justify-center gap-1.5 h-9 bg-[#403f75] hover:bg-[#2d2c55] active:scale-98 text-white text-xs sm:text-sm font-bold rounded-xl transition-all shadow-xs cursor-pointer"
                             >
-                              <BarChart2 size={15} />
+                              <BarChart2 size={14} />
                               <span>Results</span>
                             </button>
                           ) : (
@@ -323,9 +342,9 @@ const ExamsTab = ({
                                   setEditingTest(test);
                                   setShowCreateTest(true);
                                 }}
-                                className="flex-1 inline-flex items-center justify-center gap-1.5 h-10 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-bold rounded-xl transition-all cursor-pointer border border-slate-200/80 dark:border-slate-600"
+                                className="flex-1 inline-flex items-center justify-center gap-1.5 h-9 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-bold rounded-xl transition-all cursor-pointer border border-slate-200/80 dark:border-slate-600"
                               >
-                                <Edit2 size={14} />
+                                <Edit2 size={13} />
                                 <span>Edit</span>
                               </button>
                               <button
@@ -334,23 +353,26 @@ const ExamsTab = ({
                                   e.stopPropagation();
                                   handleTogglePublish(test.id, test.status);
                                 }}
-                                className="flex-1 inline-flex items-center justify-center gap-1.5 h-10 bg-emerald-50 hover:bg-emerald-100 active:scale-98 text-emerald-700 text-xs sm:text-sm font-bold rounded-xl transition-all border border-emerald-200 shadow-2xs cursor-pointer"
+                                className="flex-1 inline-flex items-center justify-center gap-1.5 h-9 bg-emerald-50 hover:bg-emerald-100 active:scale-98 text-emerald-700 text-xs sm:text-sm font-bold rounded-xl transition-all border border-emerald-200 shadow-2xs cursor-pointer"
                               >
-                                <CheckCircle2 size={14} className="text-emerald-600" />
+                                <CheckCircle2 size={13} className="text-emerald-600" />
                                 <span>Publish</span>
                               </button>
                             </>
                           )}
+
+                          {/* Delete Button with high-visibility hover state */}
                           <button
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleDeleteTest(test.id);
+                              setTestToDelete(test);
                             }}
-                            className="w-10 h-10 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/50 text-slate-400 hover:text-red-600 flex items-center justify-center transition-colors cursor-pointer border border-transparent hover:border-red-200 dark:hover:border-red-900"
+                            className="w-9 h-9 rounded-xl text-slate-400 hover:text-red-600 bg-slate-50 dark:bg-slate-800/80 hover:bg-red-50 dark:hover:bg-red-950/60 border border-slate-200/80 dark:border-slate-700 hover:border-red-300 dark:hover:border-red-800/80 flex items-center justify-center transition-all cursor-pointer shadow-2xs hover:shadow-xs group/del active:scale-95"
                             title="Delete Exam"
+                            aria-label={`Delete ${test.name}`}
                           >
-                            <Trash2 size={16} />
+                            <Trash2 size={15} className="transition-transform group-hover/del:scale-110 text-slate-400 group-hover/del:text-red-600" />
                           </button>
                         </div>
                       </div>
@@ -406,9 +428,73 @@ const ExamsTab = ({
           )}
         </>
       )}
+
+      {/* Delete Confirmation Modal */}
+      {testToDelete && (
+        <div
+          className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in duration-150"
+          onClick={() => {
+            if (!isDeleting) setTestToDelete(null);
+          }}
+        >
+          <div
+            className="bg-white dark:bg-[#1E1E38] rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 dark:border-slate-700 animate-in zoom-in-95 duration-150"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400 flex items-center justify-center flex-shrink-0 border border-red-100 dark:border-red-900/60 shadow-xs">
+                  <AlertCircle size={24} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg font-extrabold text-slate-900 dark:text-white leading-tight">
+                    Delete Exam
+                  </h3>
+                  <p className="text-sm text-slate-600 dark:text-slate-300 mt-2 leading-relaxed">
+                    Are you sure you want to delete <span className="font-bold text-slate-900 dark:text-white break-words">"{testToDelete.name}"</span>?
+                  </p>
+                  <p className="text-xs text-rose-600 dark:text-rose-400 font-medium mt-3 bg-rose-50 dark:bg-rose-950/50 p-2.5 rounded-xl border border-rose-100 dark:border-rose-900/60 leading-relaxed">
+                    This action cannot be undone. All questions, student attempts, and results for this exam will be permanently removed.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setTestToDelete(null)}
+                  disabled={isDeleting}
+                  className="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-slate-800 dark:text-slate-300 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmDeleteTest}
+                  disabled={isDeleting}
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 active:scale-98 text-white text-sm font-bold rounded-xl transition-all shadow-sm shadow-red-500/20 cursor-pointer disabled:opacity-50 min-w-[120px]"
+                >
+                  {isDeleting ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      <span>Deleting...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 size={16} />
+                      <span>Delete Exam</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 export default ExamsTab;
+
 

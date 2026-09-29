@@ -124,7 +124,7 @@ const AdminHeader = ({ viewAsControl, title }) => {
     <>
       <div className="w-full sticky top-0 z-50">
         <header className="admin-header w-full h-[60px] sm:h-[68px] shadow-sm sticky top-0 z-50 rounded-none border-b border-gray-200 bg-white/95 dark:bg-[#1A1A32]/95 backdrop-blur-md">
-          <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between gap-4">
+          <div className="w-full px-4 sm:px-6 lg:px-6 h-full flex items-center justify-between gap-4">
             {/* Left: Brand Logo & Title + Tenant Scope Switcher */}
             <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
               <div className="site-header-logo w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center flex-shrink-0 bg-white border border-[#D1D1E6] dark:border-transparent shadow-2xs">
