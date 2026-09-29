@@ -11,7 +11,7 @@ import { clearStorageKeepTheme } from '../utils/theme';
 import { apiFetch } from '../config/api';
 import shnoorLogo from '../assets/shnoor-logo.png';
 import { useSEO } from '../hooks/useSEO';
-
+import { useQuery } from '@tanstack/react-query';
 const STUDENT_DASHBOARD_TABS = ['tests', 'interviews', 'job-board', 'my-applications'];
 
 const Dashboard = () => {
@@ -36,9 +36,6 @@ const Dashboard = () => {
       .join(' ');
   };
 
-  const [availableTests, setAvailableTests] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [testsWithProgress, setTestsWithProgress] = useState(new Set());
   const [selectedTest, setSelectedTest] = useState(null);
   const [showJobModal, setShowJobModal] = useState(false);
   const [selectedJobRoleIndex, setSelectedJobRoleIndex] = useState(0);
@@ -56,123 +53,77 @@ const Dashboard = () => {
   });
   const [sortBy, setSortBy] = useState('latest');
 
-  useEffect(() => {
-    const fetchData = async () => {
-      // Validate token type - force re-login if old Firebase token
+  const { data: dashboardData, isLoading: loading } = useQuery({
+    queryKey: ['studentTests'],
+    queryFn: async () => {
       const { validateAndCleanupToken } = await import('../utils/tokenValidator');
       if (!validateAndCleanupToken()) {
         navigate('/login');
-        return;
+        return { availableTests: [], testsWithProgress: new Set() };
       }
 
       const token = localStorage.getItem('studentAuthToken');
       if (!token) {
         navigate('/login');
-        return;
+        return { availableTests: [], testsWithProgress: new Set() };
       }
 
       setStudentName(localStorage.getItem('studentName') || 'Student');
       setStudentId(localStorage.getItem('studentId') || '');
       setInstitute(localStorage.getItem('institute') || '');
 
-      try {
-        const response = await apiFetch('api/student/tests', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
+      const response = await apiFetch('api/student/tests', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
 
-        // Handle 401 - Token expired or invalid
-        if (response.status === 401) {
-          console.log('Authentication token expired or invalid');
-          clearStorageKeepTheme();
-          navigate('/login');
-          return;
-        }
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch tests');
-        }
-
-        const data = await response.json();
-        console.log('=== STUDENT TESTS API RESPONSE ===');
-        console.log('Full response:', data);
-        console.log('Tests count:', data.tests?.length);
-        if (data.tests && data.tests.length > 0) {
-          console.log('First test:', data.tests[0]);
-          console.log('First test jobRoles:', data.tests[0].jobRoles);
-        }
-
-        if (data.success) {
-          setAvailableTests(data.tests);
-
-          // Check for saved progress for each test
-          const progressChecks = await Promise.all(
-            data.tests.map(async (test) => {
-              // Skip progress check if test is not available, already taken, or no attempts left
-              if (!test.isAvailable || test.alreadyTaken || !test.hasAttemptsLeft) {
-                return { testId: test.id, hasProgress: false };
-              }
-
-              try {
-                const progressResponse = await apiFetch(`api/student/test/${test.id}`, {
-                  headers: {
-                    'Authorization': `Bearer ${token}`
-                  }
-                });
-
-                if (progressResponse.ok) {
-                  const progressData = await progressResponse.json();
-                  return {
-                    testId: test.id,
-                    hasProgress: progressData.savedProgress !== null
-                  };
-                }
-              } catch (err) {
-                console.error(`Error checking progress for test ${test.id}:`, err);
-              }
-              return { testId: test.id, hasProgress: false };
-            })
-          );
-
-          const testsWithProgressSet = new Set(
-            progressChecks
-              .filter(p => p.hasProgress)
-              .map(p => p.testId)
-          );
-          setTestsWithProgress(testsWithProgressSet);
-        } else {
-          alert('Failed to load tests');
-        }
-      } catch (err) {
-        console.error('Error loading tests:', err);
-        alert('Connection error. Please try again later.');
-      } finally {
-        setLoading(false);
+      if (response.status === 401) {
+        clearStorageKeepTheme();
+        navigate('/login');
+        return { availableTests: [], testsWithProgress: new Set() };
       }
-    };
 
-    fetchData();
-  }, [navigate]);
+      if (!response.ok) {
+        throw new Error('Failed to fetch tests');
+      }
 
-  // Poll every 30 s so newly-assigned tests appear without a manual refresh
-  useEffect(() => {
-    const refreshTests = async () => {
-      const token = localStorage.getItem('studentAuthToken');
-      if (!token) return;
-      try {
-        const res = await apiFetch('api/student/tests', { headers: { 'Authorization': `Bearer ${token}` } });
-        if (res.ok) {
-          const data = await res.json();
-          if (data.success) setAvailableTests(prev =>
-            JSON.stringify(data.tests) === JSON.stringify(prev) ? prev : data.tests
-          );
-        }
-      } catch { /* silent */ }
-    };
-    const id = setInterval(refreshTests, 30000);
-    return () => clearInterval(id);
-  }, []);
+      const data = await response.json();
+      
+      if (!data.success) {
+        throw new Error('Failed to load tests');
+      }
+
+      const availableTests = data.tests || [];
+
+      // Check for saved progress for each test
+      const progressChecks = await Promise.all(
+        availableTests.map(async (test) => {
+          if (!test.isAvailable || test.alreadyTaken || !test.hasAttemptsLeft) {
+            return { testId: test.id, hasProgress: false };
+          }
+          try {
+            const progressResponse = await apiFetch(`api/student/test/${test.id}`, {
+              headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (progressResponse.ok) {
+              const progressData = await progressResponse.json();
+              return { testId: test.id, hasProgress: progressData.savedProgress !== null };
+            }
+          } catch (err) {
+            console.error(`Error checking progress for test ${test.id}:`, err);
+          }
+          return { testId: test.id, hasProgress: false };
+        })
+      );
+
+      const testsWithProgress = new Set(progressChecks.filter(p => p.hasProgress).map(p => p.testId));
+      
+      return { availableTests, testsWithProgress };
+    },
+    refetchInterval: 30000, // Poll every 30 s
+  });
+
+  const availableTests = dashboardData?.availableTests || [];
+  const testsWithProgress = dashboardData?.testsWithProgress || new Set();
 
   useEffect(() => {
     localStorage.setItem('studentDashboardTab', activeTab);

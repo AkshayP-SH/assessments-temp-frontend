@@ -17,8 +17,9 @@ const LoadingFallback = () => (
   </div>
 );
 
-// All routes are lazy-loaded — LandingPage included (it was the only eager one)
-const LandingPage = React.lazy(() => import('./pages/LandingPage'));
+import LandingPage from './pages/LandingPage';
+
+// All routes are lazy-loaded except the landing page for better LCP
 const Login = React.lazy(() => import('./components/Login'));
 const Register = React.lazy(() => import('./components/Register'));
 const ForgotPassword = React.lazy(() => import('./components/ForgotPassword'));
@@ -146,17 +147,31 @@ const AppRoutes = () => {
   );
 };
 
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+      staleTime: 5 * 60 * 1000, // 5 minutes cache invalidation timer
+    },
+  },
+});
+
 function App() {
   return (
     <ErrorBoundary>
-      <AdminAuthProvider>
-        <ClientAuthProvider>
-          <Router>
-            {/* Per-route Suspense boundaries are defined inside AppRoutes */}
-            <AppRoutes />
-          </Router>
-        </ClientAuthProvider>
-      </AdminAuthProvider>
+      <QueryClientProvider client={queryClient}>
+        <AdminAuthProvider>
+          <ClientAuthProvider>
+            <Router>
+              {/* Per-route Suspense boundaries are defined inside AppRoutes */}
+              <AppRoutes />
+            </Router>
+          </ClientAuthProvider>
+        </AdminAuthProvider>
+      </QueryClientProvider>
     </ErrorBoundary>
   );
 }

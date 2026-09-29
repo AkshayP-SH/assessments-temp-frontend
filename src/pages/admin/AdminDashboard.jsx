@@ -2057,36 +2057,7 @@ const AdminDashboard = () => {
           </div>
         )}
 
-        {/* Tab Navigation */}
-        {!showCreateTest && !selectedExamId && (
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 mb-4 sm:mb-8 overflow-x-auto hide-scrollbar">
-            <div className="bg-white dark:bg-[#25254A] rounded-[24px] shadow-sm p-2 flex sm:inline-flex space-x-2 w-max !max-w-none">
-              {[
-                { id: 'exams', label: 'Manage Exams', icon: FileSpreadsheet },
-                { id: 'institutes', label: 'Manage Institutes', icon: Building2 },
-                { id: 'reports', label: 'Reports', icon: FileSpreadsheet },
-                { id: 'bulk-upload', label: 'Bulk Upload', icon: Users },
-                { id: 'violations', label: 'Violations', icon: AlertCircle },
-                { id: 'interviews', label: 'Interviews', icon: Video },
-                { id: 'job-openings', label: 'Job Openings', icon: Briefcase },
-                ...(isSuperAdmin ? [{ id: 'subscription-plans', label: 'Subscription Plans', icon: FileSpreadsheet }] : [])
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center space-x-2 px-5 py-2.5 font-bold transition-all shrink-0 text-sm sm:text-base rounded-xl ${
-                    activeTab === tab.id 
-                      ? 'bg-[#403f75] text-white shadow-sm' 
-                      : 'text-[#9A9AC9] hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-[#383863]'
-                  }`}
-                >
-                  <tab.icon size={18} />
-                  <span>{tab.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+
 
         {/* Main Content */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">

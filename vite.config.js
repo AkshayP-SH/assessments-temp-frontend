@@ -17,6 +17,10 @@ export default defineConfig(({ mode }) => ({
       overlay: false,
     },
   },
+  preview: {
+    port: 5173,
+    strictPort: true,
+  },
   define: {
     global: 'globalThis',
   },

@@ -52,10 +52,34 @@ export const apiFetch = async (endpoint, options = {}) => {
   const timeoutId = setTimeout(() => controller.abort(), timeoutDuration);
 
   try {
-    const response = await fetch(getApiUrl(endpoint), {
-      ...options,
-      signal: controller.signal
-    });
+    const { default: apiClient } = await import('../utils/apiInterceptor');
+    
+    // Convert fetch options to axios config
+    const axiosConfig = {
+      method: options.method || 'GET',
+      url: getApiUrl(endpoint),
+      headers: options.headers || {},
+      signal: controller.signal,
+      data: options.body,
+    };
+    
+    // axios throws on non-2xx statuses, but fetch doesn't
+    axiosConfig.validateStatus = () => true; 
+    
+    const axiosResponse = await apiClient(axiosConfig);
+    
+    // Mock the fetch Response object
+    const response = {
+      ok: axiosResponse.status >= 200 && axiosResponse.status < 300,
+      status: axiosResponse.status,
+      statusText: axiosResponse.statusText,
+      headers: new Headers(axiosResponse.headers),
+      url: axiosResponse.config.url,
+      json: async () => axiosResponse.data,
+      text: async () => typeof axiosResponse.data === 'string' ? axiosResponse.data : JSON.stringify(axiosResponse.data),
+      blob: async () => new Blob([axiosResponse.data]),
+      clone: function() { return { ...this }; },
+    };
 
     // Check for maintenance mode (503 status)
     if (shouldHandleGlobalRedirect && response.status === 503 && !endpoint.includes('/settings/public')) {

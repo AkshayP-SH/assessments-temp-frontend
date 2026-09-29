@@ -269,9 +269,9 @@ const LandingPage = () => {
               <div className="px-6 pt-6 pb-4">
                 <p className="text-xs font-bold text-theme-auth-acc uppercase tracking-[0.2em] mb-2">LIVE PLATFORM VIEW</p>
                 <div className="flex items-start justify-between">
-                  <h3 className="text-xl font-extrabold text-white leading-snug pr-4">
+                  <h2 className="text-xl font-extrabold text-white leading-snug pr-4">
                     Secure assessments, real-time proctoring, and actionable results
-                  </h3>
+                  </h2>
                   <div className="flex-shrink-0 bg-white/10 border border-white/15 rounded-xl px-3 py-2 text-center">
                     <p className="text-[10px] text-theme-auth-acc uppercase tracking-wider font-bold">Active</p>
                     <p className="text-[10px] text-theme-auth-acc uppercase tracking-wider font-bold">exams</p>
@@ -293,7 +293,7 @@ const LandingPage = () => {
                 </div>
                 <div className="flex gap-2 flex-wrap">
                   {['Test Builder', 'Live Proctoring', 'Reports'].map(t => (
-                    <span key={t} className="text-[11px] font-semibold text-theme-auth-acc bg-white/10 border border-white/10 px-2.5 py-1 rounded-lg">{t}</span>
+                    <span key={t} className="text-[11px] font-semibold text-white bg-white/10 border border-white/10 px-2.5 py-1 rounded-lg">{t}</span>
                   ))}
                 </div>
               </div>
@@ -701,27 +701,27 @@ const LandingPage = () => {
             </div>
             <div>
               <p className="text-xs font-extrabold text-theme-auth-acc uppercase tracking-widest mb-5">Contacts</p>
-              <ul className="flex flex-col gap-3.5 text-slate-300 text-sm">
+              <ul className="flex flex-col gap-1 text-slate-300 text-sm">
                 <li>
-                  <a href="mailto:info@shnoor.com" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start">
+                  <a href="mailto:info@shnoor.com" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start py-2">
                     <Mail className="w-4 h-4 text-theme-auth-acc flex-shrink-0" />
                     <span>info@shnoor.com (General)</span>
                   </a>
                 </li>
                 <li>
-                  <a href="mailto:proc@shnoor.com" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start">
+                  <a href="mailto:proc@shnoor.com" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start py-2">
                     <Mail className="w-4 h-4 text-theme-auth-acc flex-shrink-0" />
                     <span>proc@shnoor.com (Sales)</span>
                   </a>
                 </li>
                 <li>
-                  <a href="tel:+919429694298" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start">
+                  <a href="tel:+919429694298" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start py-2">
                     <Phone className="w-4 h-4 text-theme-auth-acc flex-shrink-0" />
                     <span>+91-9429694298</span>
                   </a>
                 </li>
                 <li>
-                  <a href="tel:+919041914601" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start">
+                  <a href="tel:+919041914601" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start py-2">
                     <Phone className="w-4 h-4 text-theme-auth-acc flex-shrink-0" />
                     <span>+91-9041914601</span>
                   </a>
@@ -730,21 +730,21 @@ const LandingPage = () => {
             </div>
             <div>
               <p className="text-xs font-extrabold text-theme-auth-acc uppercase tracking-widest mb-5">Useful Links</p>
-              <ul className="flex flex-col gap-3.5 text-slate-300 text-sm">
+              <ul className="flex flex-col gap-1 text-slate-300 text-sm">
                 <li>
-                  <a href="https://www.linkedin.com/company/shnoor-international/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start group">
+                  <a href="https://www.linkedin.com/company/shnoor-international/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start group py-2">
                     <img src={linkedinIcon} alt="LinkedIn" className="w-4 h-4 rounded-xs object-contain flex-shrink-0 group-hover:scale-110 transition-transform" />
                     <span>We are Social</span>
                   </a>
                 </li>
                 <li>
-                  <a href="https://api.whatsapp.com/qr/D6I7XIACKIKVD1?autoload=1&app_absent=0" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start group">
+                  <a href="https://api.whatsapp.com/qr/D6I7XIACKIKVD1?autoload=1&app_absent=0" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start group py-2">
                     <img src={whatsappIcon} alt="WhatsApp" className="w-4 h-4 rounded-xs object-contain flex-shrink-0 group-hover:scale-110 transition-transform" />
                     <span>Let's Connect</span>
                   </a>
                 </li>
                 <li>
-                  <a href="/company-profile.pdf" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start group">
+                  <a href="/company-profile.pdf" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start group py-2">
                     <FileText className="w-4 h-4 text-theme-auth-acc flex-shrink-0 group-hover:scale-110 transition-transform" />
                     <span>Company Profile</span>
                   </a>
@@ -753,13 +753,13 @@ const LandingPage = () => {
             </div>
           </div>
           <div className="border-t border-white/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="flex flex-col sm:flex-row items-center gap-2 text-sm text-slate-400">
+            <div className="flex flex-col sm:flex-row items-center gap-2 text-sm text-slate-300">
               <p>© Copyrights 2025. All Rights Reserved. SHNOOR INTERNATIONAL LLC</p>
               <div className="hidden sm:flex items-center gap-2">
-                <span className="text-white/20">•</span>
-                <Link to="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link>
-                <span className="text-white/20">•</span>
-                <Link to="/terms-and-conditions" className="hover:text-white transition-colors">Terms &amp; Conditions</Link>
+                <span className="text-slate-500">•</span>
+                <Link to="/privacy-policy" className="hover:text-white transition-colors py-2 px-1">Privacy Policy</Link>
+                <span className="text-slate-500">•</span>
+                <Link to="/terms-and-conditions" className="hover:text-white transition-colors py-2 px-1">Terms &amp; Conditions</Link>
               </div>
             </div>
             <div className="text-slate-300 flex items-center gap-2 text-sm font-semibold">

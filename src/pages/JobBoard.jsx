@@ -2,6 +2,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, Briefcase, Building2, Clock, ArrowLeft, Loader2, RefreshCw, Search, CheckCircle2, CheckCircle, X } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiFetch } from '../config/api';
 import ThemeSelector from '../components/ThemeSelector';
 import { clearStorageKeepTheme } from '../utils/theme';
@@ -42,15 +43,11 @@ export default function JobBoard({ isEmbedded = false }) {
     });
 
     const navigate = useNavigate();
-    const [jobs, setJobs] = useState([]);
-    const [loading, setLoading] = useState(true);
+
     const [search, setSearch] = useState('');
-    const [error, setError] = useState('');
-    const [applications, setApplications] = useState(new Map());
     const [enrollingJobs, setEnrollingJobs] = useState(new Set());
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [successData, setSuccessData] = useState(null);
-
     const [studentName, setStudentName] = useState('');
     const [studentId, setStudentId] = useState('');
     const [institute, setInstitute] = useState('');
@@ -64,12 +61,9 @@ export default function JobBoard({ isEmbedded = false }) {
             .join(' ');
     };
 
-    const fetchJobsAndEnrollments = async () => {
-        setLoading(true);
-        setError('');
-        try {
-            // Fetch all published jobs (active + closed/expired)
-            // Fallback to /public/active if backend is on older build and returns 404
+    const { data: queryData, isLoading: loading, error: queryError, refetch: fetchJobsAndEnrollments } = useQuery({
+        queryKey: ['jobBoardData'],
+        queryFn: async () => {
             let jobsRes = await apiFetch('/api/job-openings/public/all');
 
             if (jobsRes.status === 404) {
@@ -79,71 +73,58 @@ export default function JobBoard({ isEmbedded = false }) {
             const jobsData = await jobsRes.json();
 
             if (!jobsRes.ok || !jobsData.success) {
-                setError('Could not load job openings. Please try again.');
-                setLoading(false);
-                return;
+                throw new Error('Could not load job openings. Please try again.');
             }
 
             let allJobs = Array.isArray(jobsData.data) ? [...jobsData.data] : [];
             const allJobIds = new Set(allJobs.map(job => job.id));
+            const applicationsMap = new Map();
 
-            // Fetch enrolled jobs (if authenticated)
             const token = localStorage.getItem('studentAuthToken');
             if (token) {
-                try {
-                    const enrolledRes = await apiFetch('/api/job-applications/my-applications', {
-                        headers: {
-                            'Authorization': `Bearer ${token}`
+                const enrolledRes = await apiFetch('/api/job-applications/my-applications', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (enrolledRes.status === 401) {
+                    clearStorageKeepTheme();
+                    window.location.href = '/login';
+                    return { jobs: [], applications: applicationsMap };
+                }
+                
+                const enrolledData = await enrolledRes.json();
+                if (enrolledData.success) {
+                    enrolledData.data.forEach(app => {
+                        applicationsMap.set(app.job_opening_id, app);
+                        if (!allJobIds.has(app.job_opening_id)) {
+                            allJobs.push({
+                                id: app.job_opening_id,
+                                company_name: app.company_name,
+                                job_role: app.job_role,
+                                job_description: app.job_description,
+                                registration_deadline: app.registration_deadline,
+                                eligibility_criteria: app.eligibility_criteria,
+                                application_link: null,
+                                published_at: null,
+                                is_enrolled: true
+                            });
                         }
                     });
-                    const enrolledData = await enrolledRes.json();
-
-                    if (enrolledRes.status === 401) {
-                        clearStorageKeepTheme();
-                        navigate('/login');
-                        return;
-                    }
-
-                    if (enrolledData.success) {
-                        const applicationsMap = new Map();
-                        enrolledData.data.forEach(app => {
-                            applicationsMap.set(app.job_opening_id, app);
-
-                            // If enrolled job is not in published list, add it
-                            if (!allJobIds.has(app.job_opening_id)) {
-                                allJobs.push({
-                                    id: app.job_opening_id,
-                                    company_name: app.company_name,
-                                    job_role: app.job_role,
-                                    job_description: app.job_description,
-                                    registration_deadline: app.registration_deadline,
-                                    eligibility_criteria: app.eligibility_criteria,
-                                    application_link: null,
-                                    published_at: null,
-                                    is_enrolled: true // Flag to indicate this is an enrolled job
-                                });
-                            }
-                        });
-                        setApplications(applicationsMap);
-                    }
-                } catch (err) {
-                    console.error('Failed to fetch enrolled jobs:', err);
                 }
             }
-
-            setJobs(allJobs);
-        } catch {
-            setError('Network error — could not reach the server.');
-        } finally {
-            setLoading(false);
+            
+            return { jobs: allJobs, applications: applicationsMap };
         }
-    };
+    });
+
+    const jobs = queryData?.jobs || [];
+    const applications = queryData?.applications || new Map();
+    const error = queryError?.message || '';
 
     useEffect(() => {
         setStudentName(localStorage.getItem('studentName') || 'Student');
         setStudentId(localStorage.getItem('studentId') || '');
         setInstitute(localStorage.getItem('institute') || '');
-        fetchJobsAndEnrollments();
     }, []);
 
     const handleLogout = () => {
