@@ -259,20 +259,20 @@ const QuestionBankTab = () => {
         ) : activeTab === 'mcq' ? (
           <MCQQuestionsList
             questions={mcqQuestions}
-            onEdit={useCallback((q) => {
+            onEdit={(q) => {
               setEditingQuestion(q);
               setShowMCQModal(true);
-            }, [])}
+            }}
             onDelete={handleDeleteMCQ}
             getDifficultyColor={getDifficultyColor}
           />
         ) : (
           <CodingQuestionsList
             questions={codingQuestions}
-            onEdit={useCallback((q) => {
+            onEdit={(q) => {
               setEditingQuestion(q);
               setShowCodingModal(true);
-            }, [])}
+            }}
             onDelete={handleDeleteCoding}
             getDifficultyColor={getDifficultyColor}
           />
