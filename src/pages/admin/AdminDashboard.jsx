@@ -469,21 +469,32 @@ const AdminDashboard = () => {
       });
 
       const data = await response.json();
-      if (response.ok && data.success) {
-        const testResults = data.results.map(result => ({
-          id: result.roll_number,
+      if (response.ok && data.success && Array.isArray(data.results)) {
+        const testObj = tests.find(t => t.id === testId);
+        const filtered = data.results.filter(result => {
+          if (result.test_id && (result.test_id === testId || String(result.test_id) === String(testId))) {
+            return true;
+          }
+          if (testObj && testObj.name && result.exam_name && result.exam_name.trim().toLowerCase() === testObj.name.trim().toLowerCase()) {
+            return true;
+          }
+          return false;
+        });
+
+        const testResults = filtered.map(result => ({
+          id: result.roll_number || result.student_id,
           student_id: result.student_id,
           name: result.student_name,
           email: result.student_email,
           institute_name: result.institute_name || 'Not Specified',
           score: result.marks_obtained,
           total: result.total_marks,
-          passingPercentage: result.passing_percentage || selectedExamDetails?.passingPercentage || 50,
-          date: new Date(result.submitted_at).toLocaleDateString('en-IN', {
+          passingPercentage: result.passing_percentage || testObj?.passingPercentage || selectedExamDetails?.passingPercentage || 50,
+          date: result.submitted_at ? new Date(result.submitted_at).toLocaleDateString('en-IN', {
             year: 'numeric',
             month: 'short',
             day: 'numeric'
-          }),
+          }) : 'N/A',
           noFace: result.no_face_count || 0,
           multipleFaces: result.multiple_faces_count || 0,
           phoneDetected: result.phone_detected_count || 0,
@@ -621,12 +632,20 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleCreateTestComplete = (publishedTest) => {
+  const handleCreateTestComplete = (updatedTest) => {
     setShowCreateTest(false);
     setEditingTest(null);
-    if (publishedTest) {
-      setTests(prevTests => prevTests.map(test => test.id === publishedTest.id
-        ? { ...test, status: publishedTest.status }
+    if (updatedTest) {
+      setTests(prevTests => prevTests.map(test => test.id === updatedTest.id
+        ? {
+          ...test,
+          ...updatedTest,
+          name: updatedTest.title || updatedTest.name || test.name,
+          questions: updatedTest.question_count ?? updatedTest.questions ?? test.questions,
+          duration: updatedTest.duration || test.duration,
+          passingPercentage: updatedTest.passing_percentage ?? updatedTest.passingPercentage ?? test.passingPercentage,
+          status: updatedTest.status || test.status
+        }
         : test
       ));
     }
@@ -2061,453 +2080,454 @@ const AdminDashboard = () => {
 
         {/* Main Content */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
-        <div className="admin-dashboard-content">
+          <div className="admin-dashboard-content">
 
-          {/* Welcome Banner */}
-          {activeTab === 'exams' && !showCreateTest && !selectedExamId && (
-            <div className="welcome-banner">
-              <h2 className="welcome-banner-title">
-                Welcome back, {currentUser?.name || 'Admin'}!
-              </h2>
-              <p className="welcome-banner-subtitle">
-                {currentUser?.company_name || 'Shnoor International LLC'} • {isSuperAdmin ? 'Platform View' : 'Admin Portal'}
-              </p>
-            </div>
-          )}
+            {/* Welcome Banner */}
+            {activeTab === 'exams' && !showCreateTest && !selectedExamId && (
+              <div className="welcome-banner">
+                <h2 className="welcome-banner-title">
+                  Welcome back, {currentUser?.name || 'Admin'}!
+                </h2>
+                <p className="welcome-banner-subtitle">
+                  {currentUser?.company_name || 'Shnoor International LLC'} • {isSuperAdmin ? 'Platform View' : 'Admin Portal'}
+                </p>
+              </div>
+            )}
 
-          {/* Subscription Expiry Banner */}
-          {!isSuperAdmin && daysRemaining !== null && daysRemaining <= 7 && (
-            <div className={`mb-6 p-4 rounded-xl shadow-sm border flex items-center justify-between animate-fade-in ${daysRemaining <= 1
-              ? 'bg-red-50 border-red-200 text-red-800'
-              : 'bg-yellow-50 border-yellow-200 text-yellow-800'
-              }`}>
-              <div className="flex items-center">
-                <AlertCircle size={20} className={`mr-3 ${daysRemaining <= 1 ? 'text-red-500' : 'text-yellow-600'}`} />
-                <div>
-                  <h4 className="font-bold">Subscription Alert</h4>
-                  <p className="text-sm mt-0.5">
-                    {daysRemaining <= 0
-                      ? 'Your subscription has expired. Please renew to avoid losing access.'
-                      : `Your subscription will expire in ${daysRemaining} day${daysRemaining === 1 ? '' : 's'}. Renew now to avoid interruption.`
-                    }
-                  </p>
+            {/* Subscription Expiry Banner */}
+            {!isSuperAdmin && daysRemaining !== null && daysRemaining <= 7 && (
+              <div className={`mb-6 p-4 rounded-xl shadow-sm border flex items-center justify-between animate-fade-in ${daysRemaining <= 1
+                ? 'bg-red-50 border-red-200 text-red-800'
+                : 'bg-yellow-50 border-yellow-200 text-yellow-800'
+                }`}>
+                <div className="flex items-center">
+                  <AlertCircle size={20} className={`mr-3 ${daysRemaining <= 1 ? 'text-red-500' : 'text-yellow-600'}`} />
+                  <div>
+                    <h4 className="font-bold">Subscription Alert</h4>
+                    <p className="text-sm mt-0.5">
+                      {daysRemaining <= 0
+                        ? 'Your subscription has expired. Please renew to avoid losing access.'
+                        : `Your subscription will expire in ${daysRemaining} day${daysRemaining === 1 ? '' : 's'}. Renew now to avoid interruption.`
+                      }
+                    </p>
+                  </div>
                 </div>
-              </div>
-              <button
-                onClick={() => navigate('/client/subscription-plans')}
-                className={`px-4 py-2 rounded-lg text-sm font-bold shadow-sm transition-colors ${daysRemaining <= 1
-                  ? 'bg-red-600 hover:bg-red-700 text-white'
-                  : 'bg-yellow-500 hover:bg-yellow-600 text-white'
-                  }`}
-              >
-                Renew Now
-              </button>
-            </div>
-          )}
-
-          {/* Tab Navigation */}
-          {!showCreateTest && !selectedExamId && (
-            <div className="admin-tabs-container">
-              <div className="admin-tabs-shell">
-                {[
-                  { id: 'exams', label: 'Manage Exams', icon: FileSpreadsheet },
-                  { id: 'institutes', label: 'Manage Institutes', icon: Landmark },
-                  { id: 'reports', label: 'Reports', icon: FileText },
-                  { id: 'bulk-upload', label: 'Bulk Upload', icon: Users },
-                  { id: 'violations', label: 'Violations', icon: AlertCircle },
-                  { id: 'interviews', label: 'Interviews', icon: Video },
-                  { id: 'job-openings', label: 'Job Openings', icon: Briefcase },
-                  ...(isSuperAdmin ? [{ id: 'subscription-plans', label: 'Subscription Plans', icon: FileText }] : [])
-                ].map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`admin-tab-btn ${activeTab === tab.id ? 'admin-tab-btn-active' : ''}`}
-                  >
-                    <tab.icon size={18} />
-                    <span>{tab.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Create Test Modal/Section */}
-          {showCreateTest ? (
-            <div className="space-y-4 mb-6">
-              <div className="flex items-center justify-between">
                 <button
-                  onClick={() => {
-                    setShowCreateTest(false);
-                    setEditingTest(null);
-                  }}
-                  className="btn-secondary"
-                  title={editingTest ? 'Cancel Editing' : 'Back to Exams'}
+                  onClick={() => navigate('/client/subscription-plans')}
+                  className={`px-4 py-2 rounded-lg text-sm font-bold shadow-sm transition-colors ${daysRemaining <= 1
+                    ? 'bg-red-600 hover:bg-red-700 text-white'
+                    : 'bg-yellow-500 hover:bg-yellow-600 text-white'
+                    }`}
                 >
-                  <ArrowLeft size={16} />
-                  <span>Back to Exams</span>
+                  Renew Now
                 </button>
               </div>
-              <CreateTestSection
-                onComplete={handleCreateTestComplete}
-                onSaved={fetchTests}
-                editingTest={editingTest}
-                clientId={viewAsClientId || null}
+            )}
+
+            {/* Tab Navigation */}
+            {!showCreateTest && !selectedExamId && (
+              <div className="admin-tabs-container">
+                <div className="admin-tabs-shell">
+                  {[
+                    { id: 'exams', label: 'Manage Exams', icon: FileSpreadsheet },
+                    { id: 'institutes', label: 'Manage Institutes', icon: Landmark },
+                    { id: 'reports', label: 'Reports', icon: FileText },
+                    { id: 'bulk-upload', label: 'Bulk Upload', icon: Users },
+                    { id: 'violations', label: 'Violations', icon: AlertCircle },
+                    { id: 'interviews', label: 'Interviews', icon: Video },
+                    { id: 'job-openings', label: 'Job Openings', icon: Briefcase },
+                    ...(isSuperAdmin ? [{ id: 'subscription-plans', label: 'Subscription Plans', icon: FileText }] : [])
+                  ].map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`admin-tab-btn ${activeTab === tab.id ? 'admin-tab-btn-active' : ''}`}
+                    >
+                      <tab.icon size={18} />
+                      <span>{tab.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Create Test Modal/Section */}
+            {showCreateTest ? (
+              <div className="space-y-4 mb-6">
+                <div className="flex items-center justify-between">
+                  <button
+                    onClick={() => {
+                      setShowCreateTest(false);
+                      setEditingTest(null);
+                    }}
+                    className="btn-secondary"
+                    title={editingTest ? 'Cancel Editing' : 'Back to Exams'}
+                  >
+                    <ArrowLeft size={16} />
+                    <span>Back to Exams</span>
+                  </button>
+                </div>
+                <CreateTestSection
+                  onComplete={handleCreateTestComplete}
+                  onSaved={fetchTests}
+                  editingTest={editingTest}
+                  clientId={viewAsClientId || null}
+                />
+              </div>
+            ) : selectedExamId ? (
+              /* Detail View: Student Results for a specific exam */
+              <ResultsTab
+                selectedExamDetails={selectedExamDetails}
+                selectedExamStudents={selectedExamStudents}
+                onBack={() => {
+                  setSelectedExamId(null);
+                  setSelectedCandidates([]);
+                  setResultsCurrentPage(1);
+                  setDetailViewTab('results');
+                }}
+                showQuickSelectMenu={showQuickSelectMenu}
+                setShowQuickSelectMenu={setShowQuickSelectMenu}
+                statusFilter={statusFilter}
+                setStatusFilter={(filter) => {
+                  setStatusFilter(filter);
+                  setResultsCurrentPage(1);
+                }}
+                selectedCandidates={selectedCandidates}
+                setSelectedCandidates={setSelectedCandidates}
+                exportToExcel={exportToExcel}
+                handleDownloadShortlistedPDF={handleDownloadShortlistedPDF}
+                detailViewTab={detailViewTab}
+                setDetailViewTab={setDetailViewTab}
+                getPassingPercentage={getPassingPercentage}
+                resultsCurrentPage={resultsCurrentPage}
+                setResultsCurrentPage={setResultsCurrentPage}
+                resultsRowsPerPage={resultsRowsPerPage}
+                setResultsRowsPerPage={setResultsRowsPerPage}
+                onScheduleInterview={(student) => {
+                  setSelectedStudentForInterview(student);
+                  setShowInterviewScheduleModal(true);
+                }}
+                loadingFeedback={loadingFeedback}
+                feedbackData={feedbackData}
+                feedbackStats={feedbackStats}
               />
-            </div>
-          ) : selectedExamId ? (
-            /* Detail View: Student Results for a specific exam */
-            <ResultsTab
-              selectedExamDetails={selectedExamDetails}
-              selectedExamStudents={selectedExamStudents}
-              onBack={() => {
-                setSelectedExamId(null);
-                setSelectedCandidates([]);
-                setResultsCurrentPage(1);
-                setDetailViewTab('results');
-              }}
-              showQuickSelectMenu={showQuickSelectMenu}
-              setShowQuickSelectMenu={setShowQuickSelectMenu}
-              statusFilter={statusFilter}
-              setStatusFilter={(filter) => {
-                setStatusFilter(filter);
-                setResultsCurrentPage(1);
-              }}
-              selectedCandidates={selectedCandidates}
-              setSelectedCandidates={setSelectedCandidates}
-              exportToExcel={exportToExcel}
-              handleDownloadShortlistedPDF={handleDownloadShortlistedPDF}
-              detailViewTab={detailViewTab}
-              setDetailViewTab={setDetailViewTab}
-              getPassingPercentage={getPassingPercentage}
-              resultsCurrentPage={resultsCurrentPage}
-              setResultsCurrentPage={setResultsCurrentPage}
-              resultsRowsPerPage={resultsRowsPerPage}
-              setResultsRowsPerPage={setResultsRowsPerPage}
-              onScheduleInterview={(student) => {
-                setSelectedStudentForInterview(student);
-                setShowInterviewScheduleModal(true);
-              }}
-              loadingFeedback={loadingFeedback}
-              feedbackData={feedbackData}
-              feedbackStats={feedbackStats}
-            />
-          ) : (
-            /* List View: All Exams & Other Tabs */
-            <>
-              {activeTab === 'exams' && (
-                <ExamsTab
-                  loading={loading}
-                  tests={tests}
-                  filteredTests={filteredTests}
-                  paginatedTests={paginatedTests}
-                  searchTerm={searchTerm}
-                  setSearchTerm={setSearchTerm}
-                  filters={filters}
-                  setFilters={setFilters}
-                  sortBy={sortBy}
-                  setSortBy={setSortBy}
-                  selectedTests={selectedTests}
-                  toggleAllTests={toggleAllTests}
-                  handleBulkDeleteTests={handleBulkDeleteTests}
-                  toggleTestSelection={toggleTestSelection}
-                  openMenuId={openMenuId}
-                  setOpenMenuId={setOpenMenuId}
-                  handlePreviewQuestions={handlePreviewQuestions}
-                  handleViewTestHistory={handleViewTestHistory}
-                  handleViewJob={handleViewJob}
-                  handleOpenCloneModal={handleOpenCloneModal}
-                  handleViewTestDetails={handleViewTestDetails}
-                  setShowCreateTest={setShowCreateTest}
-                  handleTogglePublish={handleTogglePublish}
-                  handleDeleteTest={handleDeleteTest}
-                  setSelectedExamId={handleSelectExam}
-                  examCurrentPage={examCurrentPage}
-                  setExamCurrentPage={setExamCurrentPage}
-                  examTotalPages={examTotalPages}
-                  examItemsPerPage={examItemsPerPage}
-                />
-              )}
+            ) : (
+              /* List View: All Exams & Other Tabs */
+              <>
+                {activeTab === 'exams' && (
+                  <ExamsTab
+                    loading={loading}
+                    tests={tests}
+                    filteredTests={filteredTests}
+                    paginatedTests={paginatedTests}
+                    searchTerm={searchTerm}
+                    setSearchTerm={setSearchTerm}
+                    filters={filters}
+                    setFilters={setFilters}
+                    sortBy={sortBy}
+                    setSortBy={setSortBy}
+                    selectedTests={selectedTests}
+                    toggleAllTests={toggleAllTests}
+                    handleBulkDeleteTests={handleBulkDeleteTests}
+                    toggleTestSelection={toggleTestSelection}
+                    openMenuId={openMenuId}
+                    setOpenMenuId={setOpenMenuId}
+                    handlePreviewQuestions={handlePreviewQuestions}
+                    handleViewTestHistory={handleViewTestHistory}
+                    handleViewJob={handleViewJob}
+                    handleOpenCloneModal={handleOpenCloneModal}
+                    handleViewTestDetails={handleViewTestDetails}
+                    setShowCreateTest={setShowCreateTest}
+                    handleTogglePublish={handleTogglePublish}
+                    handleDeleteTest={handleDeleteTest}
+                    setSelectedExamId={handleSelectExam}
+                    setEditingTest={setEditingTest}
+                    examCurrentPage={examCurrentPage}
+                    setExamCurrentPage={setExamCurrentPage}
+                    examTotalPages={examTotalPages}
+                    examItemsPerPage={examItemsPerPage}
+                  />
+                )}
 
-              {/* Institutes Tab */}
-              {activeTab === 'institutes' && (
-                <InstitutesTab
-                  instituteSearchTerm={instituteSearchTerm}
-                  setInstituteSearchTerm={setInstituteSearchTerm}
-                  newInstituteName={newInstituteName}
-                  setNewInstituteName={setNewInstituteName}
-                  handleAddInstitute={handleAddInstitute}
-                  isAddingInstitute={isAddingInstitute}
-                  selectedInstitutes={selectedInstitutes}
-                  setSelectedInstitutes={setSelectedInstitutes}
-                  allInstitutes={allInstitutes}
-                  selectedTestsForMultipleInstitutes={selectedTestsForMultipleInstitutes}
-                  setSelectedTestsForMultipleInstitutes={setSelectedTestsForMultipleInstitutes}
-                  isTestDropdownOpen={isTestDropdownOpen}
-                  setIsTestDropdownOpen={setIsTestDropdownOpen}
-                  tests={tests}
-                  handleAssignTestToMultipleInstitutes={handleAssignTestToMultipleInstitutes}
-                  isAssigningTestToMultipleInstitutes={isAssigningTestToMultipleInstitutes}
-                  toggleAllInstitutes={toggleAllInstitutes}
-                  isLoadingAllInstitutes={isLoadingAllInstitutes}
-                  paginatedInstitutes={paginatedInstitutes}
-                  toggleInstituteSelection={toggleInstituteSelection}
-                  handleViewAssignedTests={handleViewAssignedTests}
-                  handleManageStudents={handleManageStudents}
-                  setSelectedInstituteForRegistration={setSelectedInstituteForRegistration}
-                  setShowRegistrationControlModal={setShowRegistrationControlModal}
-                  handleDeleteInstitute={handleDeleteInstitute}
-                  instituteTotalPages={instituteTotalPages}
-                  instituteCurrentPage={instituteCurrentPage}
-                  setInstituteCurrentPage={setInstituteCurrentPage}
-                />
-              )}
+                {/* Institutes Tab */}
+                {activeTab === 'institutes' && (
+                  <InstitutesTab
+                    instituteSearchTerm={instituteSearchTerm}
+                    setInstituteSearchTerm={setInstituteSearchTerm}
+                    newInstituteName={newInstituteName}
+                    setNewInstituteName={setNewInstituteName}
+                    handleAddInstitute={handleAddInstitute}
+                    isAddingInstitute={isAddingInstitute}
+                    selectedInstitutes={selectedInstitutes}
+                    setSelectedInstitutes={setSelectedInstitutes}
+                    allInstitutes={allInstitutes}
+                    selectedTestsForMultipleInstitutes={selectedTestsForMultipleInstitutes}
+                    setSelectedTestsForMultipleInstitutes={setSelectedTestsForMultipleInstitutes}
+                    isTestDropdownOpen={isTestDropdownOpen}
+                    setIsTestDropdownOpen={setIsTestDropdownOpen}
+                    tests={tests}
+                    handleAssignTestToMultipleInstitutes={handleAssignTestToMultipleInstitutes}
+                    isAssigningTestToMultipleInstitutes={isAssigningTestToMultipleInstitutes}
+                    toggleAllInstitutes={toggleAllInstitutes}
+                    isLoadingAllInstitutes={isLoadingAllInstitutes}
+                    paginatedInstitutes={paginatedInstitutes}
+                    toggleInstituteSelection={toggleInstituteSelection}
+                    handleViewAssignedTests={handleViewAssignedTests}
+                    handleManageStudents={handleManageStudents}
+                    setSelectedInstituteForRegistration={setSelectedInstituteForRegistration}
+                    setShowRegistrationControlModal={setShowRegistrationControlModal}
+                    handleDeleteInstitute={handleDeleteInstitute}
+                    instituteTotalPages={instituteTotalPages}
+                    instituteCurrentPage={instituteCurrentPage}
+                    setInstituteCurrentPage={setInstituteCurrentPage}
+                  />
+                )}
 
-              {/* Reports Tab */}
-              {activeTab === 'reports' && (
-                <div className="space-y-6">
-                  <AdminReports />
-                </div>
-              )}
+                {/* Reports Tab */}
+                {activeTab === 'reports' && (
+                  <div className="space-y-6">
+                    <AdminReports />
+                  </div>
+                )}
 
-              {/* Bulk Student Upload Tab */}
-              {activeTab === 'bulk-upload' && (
-                <div className="space-y-6">
-                  <BulkStudentUpload clientId={viewAsClientId || null} />
-                </div>
-              )}
+                {/* Bulk Student Upload Tab */}
+                {activeTab === 'bulk-upload' && (
+                  <div className="space-y-6">
+                    <BulkStudentUpload clientId={viewAsClientId || null} />
+                  </div>
+                )}
 
-              {/* Violations Tab */}
-              {activeTab === 'violations' && (
-                <ViolationsTab
-                  tests={tests}
-                  selectedTestForViolations={selectedTestForViolations}
-                  setSelectedTestForViolations={setSelectedTestForViolations}
-                  violationsByStudent={violationsByStudent}
-                  flaggedStudents={flaggedStudents}
-                  isLoadingViolations={isLoadingViolations}
-                  exportViolationsToExcel={exportViolationsToExcel}
-                />
-              )}
+                {/* Violations Tab */}
+                {activeTab === 'violations' && (
+                  <ViolationsTab
+                    tests={tests}
+                    selectedTestForViolations={selectedTestForViolations}
+                    setSelectedTestForViolations={setSelectedTestForViolations}
+                    violationsByStudent={violationsByStudent}
+                    flaggedStudents={flaggedStudents}
+                    isLoadingViolations={isLoadingViolations}
+                    exportViolationsToExcel={exportViolationsToExcel}
+                  />
+                )}
 
-              {/* Interviews Tab */}
-              {activeTab === 'interviews' && (
-                <div className="space-y-6">
-                  <InterviewsList />
-                </div>
-              )}
+                {/* Interviews Tab */}
+                {activeTab === 'interviews' && (
+                  <div className="space-y-6">
+                    <InterviewsList />
+                  </div>
+                )}
 
-              {/* Job Openings Tab */}
-              {activeTab === 'job-openings' && (
-                <div className="animate-fade-in">
-                  <AdminJobOpenings clientId={viewAsClientId || null} />
-                </div>
-              )}
+                {/* Job Openings Tab */}
+                {activeTab === 'job-openings' && (
+                  <div className="animate-fade-in">
+                    <AdminJobOpenings clientId={viewAsClientId || null} />
+                  </div>
+                )}
 
-              {/* Subscription Plans Tab */}
-              {activeTab === 'subscription-plans' && isSuperAdmin && (
-                <div className="space-y-6">
-                  <SubscriptionPlansSettings />
-                </div>
-              )}
-            </>
-          )}
+                {/* Subscription Plans Tab */}
+                {activeTab === 'subscription-plans' && isSuperAdmin && (
+                  <div className="space-y-6">
+                    <SubscriptionPlansSettings />
+                  </div>
+                )}
+              </>
+            )}
 
-          {/* Clone Test Modal */}
-          {showCloneModal && testToClone && (
-            <CloneModal
-              testToClone={testToClone}
-              cloneTestName={cloneTestName}
-              setCloneTestName={setCloneTestName}
-              isCloning={isCloning}
-              cloneError={cloneError}
-              handleCloneTestSubmit={handleCloneTest}
-              onClose={() => {
-                setShowCloneModal(false);
-                setTestToClone(null);
-                setCloneTestName('');
-                setCloneError('');
-              }}
-            />
-          )}
+            {/* Clone Test Modal */}
+            {showCloneModal && testToClone && (
+              <CloneModal
+                testToClone={testToClone}
+                cloneTestName={cloneTestName}
+                setCloneTestName={setCloneTestName}
+                isCloning={isCloning}
+                cloneError={cloneError}
+                handleCloneTestSubmit={handleCloneTest}
+                onClose={() => {
+                  setShowCloneModal(false);
+                  setTestToClone(null);
+                  setCloneTestName('');
+                  setCloneError('');
+                }}
+              />
+            )}
 
-          {/* View Test Details Modal */}
-          {showViewDetailsModal && selectedTestForDetails && (
-            <ViewTestDetailsModal
-              test={selectedTestForDetails}
-              onClose={() => {
-                setShowViewDetailsModal(false);
-                setSelectedTestForDetails(null);
-              }}
-              onEdit={handleEditTestDetails}
-            />
-          )}
+            {/* View Test Details Modal */}
+            {showViewDetailsModal && selectedTestForDetails && (
+              <ViewTestDetailsModal
+                test={selectedTestForDetails}
+                onClose={() => {
+                  setShowViewDetailsModal(false);
+                  setSelectedTestForDetails(null);
+                }}
+                onEdit={handleEditTestDetails}
+              />
+            )}
 
-          {/* Edit Test Details Modal */}
-          {showEditDetailsModal && selectedTestForDetails && (
-            <EditTestDetailsModal
-              test={selectedTestForDetails}
-              onClose={() => {
-                setShowEditDetailsModal(false);
-                setSelectedTestForDetails(null);
-              }}
-              onSave={handleSaveTestDetails}
-            />
-          )}
+            {/* Edit Test Details Modal */}
+            {showEditDetailsModal && selectedTestForDetails && (
+              <EditTestDetailsModal
+                test={selectedTestForDetails}
+                onClose={() => {
+                  setShowEditDetailsModal(false);
+                  setSelectedTestForDetails(null);
+                }}
+                onSave={handleSaveTestDetails}
+              />
+            )}
 
-          {/* Job Role/Description Modal */}
-          {showJobModal && (
-            <JobModal
-              selectedJobTest={selectedJobTest}
-              jobRoles={jobRoles}
-              selectedJobRoleIndex={selectedJobRoleIndex}
-              setSelectedJobRoleIndex={setSelectedJobRoleIndex}
-              isEditingJob={isEditingJob}
-              setIsEditingJob={setIsEditingJob}
-              isSavingJob={isSavingJob}
-              isLoadingJobRoles={isLoadingJobRoles}
-              handleJobRoleChange={handleJobRoleChange}
-              handleAddJobRole={handleAddJobRole}
-              handleRemoveJobRole={handleRemoveJobRole}
-              handleSaveJobRoles={handleSaveJob}
-              onClose={() => setShowJobModal(false)}
-            />
-          )}
+            {/* Job Role/Description Modal */}
+            {showJobModal && (
+              <JobModal
+                selectedJobTest={selectedJobTest}
+                jobRoles={jobRoles}
+                selectedJobRoleIndex={selectedJobRoleIndex}
+                setSelectedJobRoleIndex={setSelectedJobRoleIndex}
+                isEditingJob={isEditingJob}
+                setIsEditingJob={setIsEditingJob}
+                isSavingJob={isSavingJob}
+                isLoadingJobRoles={isLoadingJobRoles}
+                handleJobRoleChange={handleJobRoleChange}
+                handleAddJobRole={handleAddJobRole}
+                handleRemoveJobRole={handleRemoveJobRole}
+                handleSaveJobRoles={handleSaveJob}
+                onClose={() => setShowJobModal(false)}
+              />
+            )}
 
-          {/* Assigned Tests Modal */}
-          {showAssignedTestsModal && selectedInstituteForTests && (
-            <AssignedTestsModal
-              selectedInstituteForTests={selectedInstituteForTests}
-              isLoadingAssignedTests={isLoadingAssignedTests}
-              assignedTests={assignedTests}
-              tests={tests}
-              selectedTestsForInstitute={selectedTestsForInstitute}
-              setSelectedTestsForInstitute={setSelectedTestsForInstitute}
-              isInstituteTestDropdownOpen={isInstituteTestDropdownOpen}
-              setIsInstituteTestDropdownOpen={setIsInstituteTestDropdownOpen}
-              isAssigningTestToInstitute={isAssigningTestToInstitute}
-              handleAssignTestToInstitute={handleAssignTestToInstitute}
-              selectedTestsForUnassign={selectedTestsForUnassign}
-              toggleTestForUnassign={toggleTestForUnassign}
-              toggleAllTestsForUnassign={toggleAllTestsForUnassign}
-              handleBulkUnassignTests={handleBulkUnassignTests}
-              handleUnassignTest={handleUnassignTest}
-              isUnassigningTests={isUnassigningTests}
-              onClose={() => {
-                setShowAssignedTestsModal(false);
-                setSelectedInstituteForTests(null);
-                setAssignedTests([]);
-                setSelectedTestsForInstitute([]);
-                setSelectedTestsForUnassign([]);
-                setIsInstituteTestDropdownOpen(false);
-              }}
-            />
-          )}
+            {/* Assigned Tests Modal */}
+            {showAssignedTestsModal && selectedInstituteForTests && (
+              <AssignedTestsModal
+                selectedInstituteForTests={selectedInstituteForTests}
+                isLoadingAssignedTests={isLoadingAssignedTests}
+                assignedTests={assignedTests}
+                tests={tests}
+                selectedTestsForInstitute={selectedTestsForInstitute}
+                setSelectedTestsForInstitute={setSelectedTestsForInstitute}
+                isInstituteTestDropdownOpen={isInstituteTestDropdownOpen}
+                setIsInstituteTestDropdownOpen={setIsInstituteTestDropdownOpen}
+                isAssigningTestToInstitute={isAssigningTestToInstitute}
+                handleAssignTestToInstitute={handleAssignTestToInstitute}
+                selectedTestsForUnassign={selectedTestsForUnassign}
+                toggleTestForUnassign={toggleTestForUnassign}
+                toggleAllTestsForUnassign={toggleAllTestsForUnassign}
+                handleBulkUnassignTests={handleBulkUnassignTests}
+                handleUnassignTest={handleUnassignTest}
+                isUnassigningTests={isUnassigningTests}
+                onClose={() => {
+                  setShowAssignedTestsModal(false);
+                  setSelectedInstituteForTests(null);
+                  setAssignedTests([]);
+                  setSelectedTestsForInstitute([]);
+                  setSelectedTestsForUnassign([]);
+                  setIsInstituteTestDropdownOpen(false);
+                }}
+              />
+            )}
 
-          {/* Student Management Modal */}
-          {showStudentManagementModal && selectedInstituteForStudents && (
-            <StudentManageModal
-              selectedInstituteForStudents={selectedInstituteForStudents}
-              isLoadingStudentsForManagement={isLoadingStudentsForManagement}
-              instituteStudentsForManagement={instituteStudentsForManagement}
-              studentSearchTerm={studentSearchTerm}
-              setStudentSearchTerm={setStudentSearchTerm}
-              showAddStudentForm={showAddStudentForm}
-              setShowAddStudentForm={setShowAddStudentForm}
-              newStudentData={newStudentData}
-              setNewStudentData={setNewStudentData}
-              isAddingStudent={isAddingStudent}
-              handleAddStudent={handleAddStudent}
-              selectedStudentsForDelete={selectedStudentsForDelete}
-              toggleStudentForDelete={toggleStudentForDelete}
-              toggleAllStudentsForDelete={toggleAllStudentsForDelete}
-              selectionRange={selectionRange}
-              setSelectionRange={setSelectionRange}
-              handleSelectRange={handleSelectRange}
-              handleBulkDeleteStudents={handleBulkDeleteStudents}
-              handleDeleteAllStudents={handleDeleteAllStudents}
-              tests={tests}
-              selectedTestsForStudentModal={selectedTestsForStudentModal}
-              setSelectedTestsForStudentModal={setSelectedTestsForStudentModal}
-              isStudentTestDropdownOpen={isStudentTestDropdownOpen}
-              setIsStudentTestDropdownOpen={setIsStudentTestDropdownOpen}
-              isAssigningTestInModal={isAssigningTestInModal}
-              handleAssignTestInModal={handleAssignTestInModal}
-              expandedStudentTests={expandedStudentTests}
-              toggleStudentTests={toggleStudentTests}
-              handleUnassignTestFromStudent={handleUnassignTestFromStudent}
-              handleDeleteStudent={handleDeleteStudent}
-              onClose={() => {
-                setShowStudentManagementModal(false);
-                setSelectedInstituteForStudents(null);
-                setInstituteStudentsForManagement([]);
-                setShowAddStudentForm(false);
-                setSelectedStudentsForDelete([]);
-                setSelectedTestsForStudentModal([]);
-                setIsStudentTestDropdownOpen(false);
-                setStudentSearchTerm('');
-                setSelectionRange({ start: '', end: '' });
-                setNewStudentData({
-                  full_name: '',
-                  email: '',
-                  roll_number: '',
-                  institute: ''
-                });
-              }}
-            />
-          )}
+            {/* Student Management Modal */}
+            {showStudentManagementModal && selectedInstituteForStudents && (
+              <StudentManageModal
+                selectedInstituteForStudents={selectedInstituteForStudents}
+                isLoadingStudentsForManagement={isLoadingStudentsForManagement}
+                instituteStudentsForManagement={instituteStudentsForManagement}
+                studentSearchTerm={studentSearchTerm}
+                setStudentSearchTerm={setStudentSearchTerm}
+                showAddStudentForm={showAddStudentForm}
+                setShowAddStudentForm={setShowAddStudentForm}
+                newStudentData={newStudentData}
+                setNewStudentData={setNewStudentData}
+                isAddingStudent={isAddingStudent}
+                handleAddStudent={handleAddStudent}
+                selectedStudentsForDelete={selectedStudentsForDelete}
+                toggleStudentForDelete={toggleStudentForDelete}
+                toggleAllStudentsForDelete={toggleAllStudentsForDelete}
+                selectionRange={selectionRange}
+                setSelectionRange={setSelectionRange}
+                handleSelectRange={handleSelectRange}
+                handleBulkDeleteStudents={handleBulkDeleteStudents}
+                handleDeleteAllStudents={handleDeleteAllStudents}
+                tests={tests}
+                selectedTestsForStudentModal={selectedTestsForStudentModal}
+                setSelectedTestsForStudentModal={setSelectedTestsForStudentModal}
+                isStudentTestDropdownOpen={isStudentTestDropdownOpen}
+                setIsStudentTestDropdownOpen={setIsStudentTestDropdownOpen}
+                isAssigningTestInModal={isAssigningTestInModal}
+                handleAssignTestInModal={handleAssignTestInModal}
+                expandedStudentTests={expandedStudentTests}
+                toggleStudentTests={toggleStudentTests}
+                handleUnassignTestFromStudent={handleUnassignTestFromStudent}
+                handleDeleteStudent={handleDeleteStudent}
+                onClose={() => {
+                  setShowStudentManagementModal(false);
+                  setSelectedInstituteForStudents(null);
+                  setInstituteStudentsForManagement([]);
+                  setShowAddStudentForm(false);
+                  setSelectedStudentsForDelete([]);
+                  setSelectedTestsForStudentModal([]);
+                  setIsStudentTestDropdownOpen(false);
+                  setStudentSearchTerm('');
+                  setSelectionRange({ start: '', end: '' });
+                  setNewStudentData({
+                    full_name: '',
+                    email: '',
+                    roll_number: '',
+                    institute: ''
+                  });
+                }}
+              />
+            )}
 
-          {/* Registration Control Modal */}
-          {showRegistrationControlModal && selectedInstituteForRegistration && (
-            <InstituteRegistrationControl
-              institute={selectedInstituteForRegistration}
-              onClose={() => {
-                setShowRegistrationControlModal(false);
-                setSelectedInstituteForRegistration(null);
-              }}
-            />
-          )}
+            {/* Registration Control Modal */}
+            {showRegistrationControlModal && selectedInstituteForRegistration && (
+              <InstituteRegistrationControl
+                institute={selectedInstituteForRegistration}
+                onClose={() => {
+                  setShowRegistrationControlModal(false);
+                  setSelectedInstituteForRegistration(null);
+                }}
+              />
+            )}
 
-          {/* Preview Questions Modal */}
-          {showPreviewQuestionsModal && previewTest && (
-            <PreviewModal
-              previewTest={previewTest}
-              isLoadingPreview={isLoadingPreview}
-              previewQuestions={previewQuestions}
-              onClose={() => {
-                setShowPreviewQuestionsModal(false);
-                setPreviewTest(null);
-                setPreviewQuestions([]);
-              }}
-            />
-          )}
+            {/* Preview Questions Modal */}
+            {showPreviewQuestionsModal && previewTest && (
+              <PreviewModal
+                previewTest={previewTest}
+                isLoadingPreview={isLoadingPreview}
+                previewQuestions={previewQuestions}
+                onClose={() => {
+                  setShowPreviewQuestionsModal(false);
+                  setPreviewTest(null);
+                  setPreviewQuestions([]);
+                }}
+              />
+            )}
 
-          {/* Test History Modal */}
-          {showTestHistoryModal && testHistory && (
-            <TestHistoryModal
-              isLoadingHistory={isLoadingHistory}
-              testHistory={testHistory}
-              onClose={() => setShowTestHistoryModal(false)}
-            />
-          )}
+            {/* Test History Modal */}
+            {showTestHistoryModal && testHistory && (
+              <TestHistoryModal
+                isLoadingHistory={isLoadingHistory}
+                testHistory={testHistory}
+                onClose={() => setShowTestHistoryModal(false)}
+              />
+            )}
 
-          {/* Interview Schedule Modal */}
-          {showInterviewScheduleModal && selectedStudentForInterview && (
-            <InterviewSchedule
-              student={selectedStudentForInterview}
-              testId={selectedExamId}
-              onClose={() => {
-                setShowInterviewScheduleModal(false);
-                setSelectedStudentForInterview(null);
-              }}
-              onScheduled={() => {
-                setShowInterviewScheduleModal(false);
-                setSelectedStudentForInterview(null);
-              }}
-            />
-          )}
+            {/* Interview Schedule Modal */}
+            {showInterviewScheduleModal && selectedStudentForInterview && (
+              <InterviewSchedule
+                student={selectedStudentForInterview}
+                testId={selectedExamId}
+                onClose={() => {
+                  setShowInterviewScheduleModal(false);
+                  setSelectedStudentForInterview(null);
+                }}
+                onScheduled={() => {
+                  setShowInterviewScheduleModal(false);
+                  setSelectedStudentForInterview(null);
+                }}
+              />
+            )}
+          </div>
         </div>
-      </div>
       </div>
     </Suspense>
   );

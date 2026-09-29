@@ -30,6 +30,7 @@ const ExamsTab = ({
   handleOpenCloneModal,
   handleViewTestDetails,
   setShowCreateTest,
+  setEditingTest,
   handleTogglePublish,
   handleDeleteTest,
   setSelectedExamId,
@@ -107,30 +108,33 @@ const ExamsTab = ({
             </div>
           ) : (
             <>
-              {/* Optional Bulk Actions Bar if items selected */}
-              {selectedTests.length > 0 && (
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 p-4 bg-white rounded-xl border border-shnoor-light space-y-3 sm:space-y-0 shadow-sm">
-                  <label className="flex items-center space-x-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={selectedTests.length === filteredTests.length && filteredTests.length > 0}
-                      onChange={toggleAllTests}
-                      className="w-5 h-5 text-shnoor-indigo border-shnoor-mist rounded focus:ring-2 focus:ring-shnoor-indigo"
-                    />
-                    <span className="text-sm font-bold text-shnoor-indigo">
-                      {selectedTests.length} selected
-                    </span>
-                  </label>
+              {/* Select All / Bulk Actions Bar */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 p-3 bg-white rounded-xl border border-shnoor-mist space-y-2 sm:space-y-0 shadow-xs">
+                <label className="flex items-center space-x-2.5 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={selectedTests.length === filteredTests.length && filteredTests.length > 0}
+                    ref={(el) => {
+                      if (el) el.indeterminate = selectedTests.length > 0 && selectedTests.length < filteredTests.length;
+                    }}
+                    onChange={toggleAllTests}
+                    className="w-4 h-4 text-shnoor-indigo border-shnoor-mist rounded focus:ring-2 focus:ring-shnoor-indigo cursor-pointer"
+                  />
+                  <span className="text-sm font-bold text-shnoor-navy">
+                    Select All {selectedTests.length > 0 && `(${selectedTests.length} selected)`}
+                  </span>
+                </label>
+                {selectedTests.length > 0 && (
                   <button
                     type="button"
                     onClick={handleBulkDeleteTests}
-                    className="w-full sm:w-auto px-4 py-2 bg-shnoor-danger hover:bg-shnoor-danger text-white rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
+                    className="w-full sm:w-auto px-3.5 py-1.5 bg-shnoor-danger hover:bg-shnoor-danger text-white rounded-lg font-medium transition-colors flex items-center justify-center space-x-2 text-xs shadow-xs cursor-pointer"
                   >
-                    <Trash2 size={16} />
+                    <Trash2 size={15} />
                     <span>Delete {selectedTests.length} Test{selectedTests.length !== 1 ? 's' : ''}</span>
                   </button>
-                </div>
-              )}
+                )}
+              </div>
 
               {/* Exam Cards Grid */}
               <div className="admin-exams-grid">
@@ -138,7 +142,7 @@ const ExamsTab = ({
                   const attempts = test.attempts || 0;
                   const passedCount = test.passedCount ?? test.passed_count ?? test.passed ?? 0;
                   const passRate = test.passRate ?? (attempts > 0 ? Math.round((passedCount / attempts) * 100) : 0);
-                  const initialLetter = test.name ? test.name.trim().charAt(0).toLowerCase() : 'f';
+                  const initialLetter = test.name ? test.name.trim().charAt(0).toUpperCase() : 'F';
                   const formattedDate = test.date || (test.created_at ? new Date(test.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Sep 18, 2026');
 
                   return (
@@ -190,17 +194,6 @@ const ExamsTab = ({
                                 >
                                   <Eye size={14} className="text-gray-400" />
                                   <span>View Details</span>
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setOpenMenuId(null);
-                                    handleViewJob(test);
-                                  }}
-                                  className="w-full text-left px-3.5 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2 cursor-pointer"
-                                >
-                                  <FileText size={14} className="text-gray-400" />
-                                  <span>Job Role</span>
                                 </button>
                                 <button
                                   type="button"
