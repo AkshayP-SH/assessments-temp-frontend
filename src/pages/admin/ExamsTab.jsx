@@ -27,7 +27,6 @@ const ExamsTab = ({
   setOpenMenuId,
   handlePreviewQuestions,
   handleViewTestHistory,
-  handleViewJob,
   handleOpenCloneModal,
   handleViewTestDetails,
   setShowCreateTest,

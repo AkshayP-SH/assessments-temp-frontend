@@ -178,7 +178,6 @@ const AdminDashboard = () => {
     return sessionStorage.getItem('superAdminSelectedClientId') || '';
   });
   const [quota, setQuota] = useState(null); // plan quota for client admin
-  const [clientPlanId, setClientPlanId] = useState(null);
 
   const isSuperAdmin = (() => {
     try {
@@ -2349,6 +2348,7 @@ const AdminDashboard = () => {
                     setExamCurrentPage={setExamCurrentPage}
                     examTotalPages={examTotalPages}
                     examItemsPerPage={examItemsPerPage}
+                    setExamItemsPerPage={setExamItemsPerPage}
                   />
                 )}
 
@@ -2383,6 +2383,8 @@ const AdminDashboard = () => {
                     instituteTotalPages={instituteTotalPages}
                     instituteCurrentPage={instituteCurrentPage}
                     setInstituteCurrentPage={setInstituteCurrentPage}
+                    instituteItemsPerPage={instituteItemsPerPage}
+                    setInstituteItemsPerPage={setInstituteItemsPerPage}
                   />
                 )}
 
