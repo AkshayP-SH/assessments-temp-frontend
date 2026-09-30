@@ -3,11 +3,11 @@ import AdminHeader from './AdminHeader';
 
 const AdminLayout = ({ children, title = "Dashboard" }) => {
   return (
-    <div className="min-h-screen bg-shnoor-lavender font-sans">
+    <div className="min-h-screen bg-[#F4F6FB] dark:bg-[#11111d] font-sans">
       <AdminHeader title={title} />
 
       <main className="max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-      {children}
+        {children}
       </main>
     </div>
   );
