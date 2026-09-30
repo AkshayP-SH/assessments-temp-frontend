@@ -23,7 +23,7 @@ const ClientSubscriptionPlans = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const { clientUser, logout } = useClientAuth();
+  const { logout } = useClientAuth();
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -55,7 +55,7 @@ const ClientSubscriptionPlans = () => {
       } else {
         setError('Failed to load subscription plans');
       }
-    } catch (err) {
+    } catch {
       setError('Failed to load subscription plans');
     } finally {
       setLoading(false);
@@ -106,138 +106,13 @@ const ClientSubscriptionPlans = () => {
         return;
       }
 
-      // Use the configured payment mode
-      const isDummyMode = DUMMY_PAYMENT_MODE;
-
-      if (isDummyMode) {
-        // Simulate payment processing delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
-
-        // Directly call verify payment with dummy data
-        const verifyResponse = await fetch(getApiUrl('api/settings/verify-payment'), {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            razorpay_order_id: 'dummy_order_' + new Date().getTime(),
-            razorpay_payment_id: 'dummy_payment_' + new Date().getTime(),
-            razorpay_signature: 'dummy_signature',
-            plan_id: planId,
-            isDummyPayment: true,
-          }),
-        });
-
-        const verifyData = await verifyResponse.json();
-
-        if (verifyData.success) {
-          // Update local storage to reflect active subscription
-          const storedUser = JSON.parse(localStorage.getItem('clientUser') || '{}');
-          storedUser.requiresPayment = false;
-          storedUser.clientStatus = 'active';
-          storedUser.subscriptionActive = true;
-          localStorage.setItem('clientUser', JSON.stringify(storedUser));
-          localStorage.setItem('adminUser', JSON.stringify(storedUser)); // Mirror for shared pages
-
-          // Payment successful, navigate to dashboard
-          navigate('/client/dashboard', {
-            replace: true,
-            state: { message: 'Payment successful! Your subscription is now active.' }
-          });
-        } else {
-          setError(verifyData.message || 'Failed to activate subscription.');
-        }
-        setProcessingPlan(null);
-        return;
-      }
-
-      // REAL RAZORPAY MODE (for future use)
-      // Create Razorpay order
-      const orderResponse = await apiFetch('api/settings/purchase-subscription', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('clientToken')}`
-        },
-        body: JSON.stringify({ plan_id: planId }),
+      const selectedPlan = plans.find(p => (p.plan_id || p.id) === planId);
+      navigate('/client/payment', {
+        state: { planId, plan: selectedPlan }
       });
 
-      const orderData = await orderResponse.json();
-
-      if (!orderData.success) {
-        throw new Error(orderData.message || 'Failed to create order');
-      }
-
-      // Load Razorpay SDK
-      const script = document.createElement('script');
-      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-      script.async = true;
-      document.body.appendChild(script);
-
-      script.onload = () => {
-        const options = {
-          key: orderData.key_id,
-          amount: orderData.amount,
-          currency: orderData.currency,
-          name: 'SHNOOR Assessments',
-          description: 'Subscription Plan',
-          order_id: orderData.order_id,
-          handler: async (response) => {
-            // Verify payment
-            try {
-              const verifyResponse = await apiFetch('api/settings/verify-payment', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  razorpay_order_id: response.razorpay_order_id,
-                  razorpay_payment_id: response.razorpay_payment_id,
-                  razorpay_signature: response.razorpay_signature,
-                  plan_id: planId,
-                }),
-              });
-
-              const verifyData = await verifyResponse.json();
-
-              if (verifyData.success) {
-                // Payment successful, navigate to dashboard
-                navigate('/client/dashboard', {
-                  replace: true,
-                  state: { message: 'Payment successful! Your subscription is now active.' }
-                });
-              } else {
-                setError('Payment verification failed. Please contact support.');
-              }
-            } catch (err) {
-              setError('Payment verification failed. Please contact support.');
-            } finally {
-              setProcessingPlan(null);
-            }
-          },
-          prefill: {
-            email: clientUser?.email || '',
-            name: clientUser?.fullName || '',
-          },
-          theme: {
-            color: '#6366f1',
-          },
-          modal: {
-            ondismiss: () => {
-              setProcessingPlan(null);
-            },
-          },
-        };
-
-        const rzp = new window.Razorpay(options);
-        rzp.open();
-      };
-
-      script.onerror = () => {
-        setError('Failed to load payment gateway. Please try again.');
-        setProcessingPlan(null);
-      };
     } catch (err) {
-      setError(err.message || 'Failed to initiate payment');
+      setError(err.message || 'Failed to process selection');
       setProcessingPlan(null);
     }
   };

@@ -8,7 +8,7 @@ import shnoorLogo from '../assets/shnoor-logo.png';
 import ThemeSelector from './ThemeSelector';
 import toast from 'react-hot-toast';
 
-const AdminHeader = () => {
+const AdminHeader = ({ viewAsControl, title }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [unreadCount, setUnreadCount] = useState(0);
@@ -123,6 +123,7 @@ const AdminHeader = () => {
     localStorage.removeItem('adminUser');
     localStorage.removeItem('clientToken');
     localStorage.removeItem('clientUser');
+    sessionStorage.removeItem('superAdminSelectedClientId');
     // Always go to unified login; org tab pre-selected for client admins
     if (isClientPortal || isClientAdmin) {
       navigate('/login?portal=org');
@@ -133,78 +134,107 @@ const AdminHeader = () => {
 
   return (
     <>
-      <div className="w-full">
-            <header className="admin-header w-full h-[60px] sm:h-[72px] shadow-sm relative z-50 rounded-none border-b border-gray-200">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
-                <div className="flex items-center gap-2.5 sm:gap-4 min-w-0">
-                  {/* Logo icon */}
-                  <div className="site-header-logo w-10 h-10 sm:w-12 sm:h-12 rounded-xl overflow-hidden flex items-center justify-center flex-shrink-0 bg-white border border-[#D1D1E6] dark:border-transparent">
-                    <img
-                      src={shnoorLogo}
-                      alt="Shnoor Logo"
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h1 className="admin-header-title font-bold text-base sm:text-lg leading-tight truncate">Shnoor Assessment</h1>
-                    <p className="admin-header-subtitle text-[10px] sm:text-xs truncate">
-                      {isClientPortal ? 'Client Portal' : 'Admin Dashboard'}
-                    </p>
-                  </div>
-                </div>
 
-                {/* Right Side: Desktop Navigation */}
-                <div className="hidden sm:flex items-center gap-3">
-                  <div className="flex items-center justify-center">
-                    <ThemeSelector variant="light" className="admin-header-btn !rounded-xl !w-10 !h-10 !p-0" />
+
+      <div className="w-full sticky top-0 z-50">
+        <header className="admin-header w-full h-[60px] sm:h-[68px] shadow-sm sticky top-0 z-50 rounded-none border-b border-gray-200 bg-white/95 dark:bg-[#1A1A32]/95 backdrop-blur-md">
+          <div className="w-full px-4 sm:px-6 lg:px-6 h-full flex items-center justify-between gap-4">
+            {/* Left: Brand Logo & Title + Tenant Scope Switcher */}
+            <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
+              <div className="site-header-logo w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center flex-shrink-0 bg-white border border-[#D1D1E6] dark:border-transparent shadow-2xs">
+                <img
+                  src={shnoorLogo}
+                  alt="Shnoor Logo"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              <div className="flex-shrink-0">
+                <h1 className="admin-header-title font-extrabold text-base sm:text-lg lg:text-xl leading-tight whitespace-nowrap text-slate-900 dark:text-white tracking-tight">
+                  Shnoor Assessment
+                </h1>
+                <p className="admin-header-subtitle text-xs font-semibold text-[#403f75] dark:text-indigo-400 whitespace-nowrap leading-tight mt-0.5">
+                  {isClientPortal ? 'Client Portal' : 'Admin Dashboard'}
+                </p>
+              </div>
+
+              {viewAsControl && (
+                <>
+                  <div className="hidden md:block h-7 w-[1px] bg-slate-200 dark:bg-slate-700 mx-1" />
+                  <div className="hidden md:flex items-center">
+                    {viewAsControl}
                   </div>
-                  <button
-                    className={`admin-header-btn h-10 px-4 text-sm font-bold transition-all border rounded-xl flex items-center justify-center relative ${location.pathname.includes('student-messages') ? 'admin-header-btn-active' : ''
-                      }`}
-                    onClick={() => navigate(`${basePath}/student-messages`)}
-                  >
-                    <MessageSquare size={16} className="mr-2" />
-                    <span>Messages</span>
-                    {unreadCount > 0 && (
-                      <span className="admin-header-badge absolute -top-1 -right-1 w-5 h-5 text-white text-xs font-bold rounded-full flex items-center justify-center">
-                        {unreadCount > 99 ? '99+' : unreadCount}
-                      </span>
-                    )}
-                  </button>
-                  {!isClientAdmin && (
-                    <button
-                      className={`admin-header-btn h-10 px-4 text-sm font-bold transition-all border rounded-xl flex items-center justify-center relative ${location.pathname.includes('clients') ? 'admin-header-btn-active' : ''
-                        }`}
-                      onClick={() => navigate('/admin/clients')}
-                    >
-                      <Building2 size={16} className="mr-2" />
-                      <span>Clients</span>
-                    </button>
+                </>
+              )}
+            </div>
+
+            {/* Right Side: Desktop Navigation */}
+            <div className="hidden sm:flex items-center gap-2 flex-shrink-0">
+              <div className="flex items-center bg-slate-100/90 dark:bg-[#1E1E38] p-1 rounded-xl border border-slate-200/90 dark:border-slate-700/80 shadow-2xs gap-0.5">
+                <ThemeSelector variant="light" className="!rounded-lg !w-9 !h-9 !p-0 !border-0 !shadow-none !bg-transparent hover:bg-white/80 dark:hover:bg-slate-750 transition-all text-slate-600 dark:text-slate-300" />
+                <div className="h-5 w-[1px] bg-slate-300/80 dark:bg-slate-700 mx-1" />
+
+                <button
+                  className={`h-9 px-3.5 text-xs sm:text-sm font-bold rounded-lg transition-all flex items-center justify-center relative ${location.pathname.includes('student-messages')
+                    ? 'bg-white dark:bg-[#2A2A4E] text-[#403f75] dark:text-indigo-300 shadow-xs'
+                    : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/70 dark:hover:bg-slate-700/60'
+                    }`}
+                  onClick={() => navigate(`${basePath}/student-messages`)}
+                >
+                  <MessageSquare size={15} className="mr-2 text-current" />
+                  <span>Messages</span>
+                  {unreadCount > 0 && (
+                    <span className="ml-1.5 px-1.5 py-0.2 bg-red-500 text-white text-[10px] font-black rounded-full">
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
                   )}
+                </button>
+
+                {!isClientAdmin && (
                   <button
-                    className={`admin-header-btn h-10 px-4 text-sm font-bold transition-all border rounded-xl flex items-center justify-center relative ${location.pathname.includes('live-proctoring') ? 'admin-header-btn-active' : ''
+                    className={`h-9 px-3.5 text-xs sm:text-sm font-bold rounded-lg transition-all flex items-center justify-center relative ${location.pathname.includes('clients')
+                      ? 'bg-white dark:bg-[#2A2A4E] text-[#403f75] dark:text-indigo-300 shadow-xs'
+                      : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/70 dark:hover:bg-slate-700/60'
                       }`}
-                    onClick={() => navigate(`${basePath}/live-proctoring`)}
+                    onClick={() => navigate('/admin/clients')}
                   >
-                    <Video size={16} className="mr-2" />
-                    <span>Live Proctoring</span>
+                    <Building2 size={15} className="mr-2 text-current" />
+                    <span>Clients</span>
                   </button>
-                  <button
-                    className={`admin-header-btn h-10 px-4 text-sm font-bold transition-all border rounded-xl flex items-center justify-center relative ${location.pathname.includes('settings') ? 'admin-header-btn-active' : ''
-                      }`}
-                    onClick={() => navigate(`${basePath}/settings`)}
-                  >
-                    <Settings size={16} className="mr-2" />
-                    <span>Settings</span>
-                  </button>
-                  <button
-                    className="admin-header-logout h-10 px-6 text-sm font-bold transition-all border-0 relative rounded-xl flex items-center justify-center shadow-sm ml-2"
-                    onClick={handleLogout}
-                  >
-                    <LogOut size={16} className="mr-2" />
-                    <span>Logout</span>
-                  </button>
-                </div>
+                )}
+
+                <button
+                  className={`h-9 px-3.5 text-xs sm:text-sm font-bold rounded-lg transition-all flex items-center justify-center relative ${location.pathname.includes('live-proctoring')
+                    ? 'bg-white dark:bg-[#2A2A4E] text-[#403f75] dark:text-indigo-300 shadow-xs'
+                    : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/70 dark:hover:bg-slate-700/60'
+                    }`}
+                  onClick={() => navigate(`${basePath}/live-proctoring`)}
+                >
+                  <Video size={15} className="mr-2 text-current" />
+                  <span>Live Proctoring</span>
+                </button>
+
+                <button
+                  className={`h-9 px-3.5 text-xs sm:text-sm font-bold rounded-lg transition-all flex items-center justify-center relative ${location.pathname.includes('settings')
+                    ? 'bg-white dark:bg-[#2A2A4E] text-[#403f75] dark:text-indigo-300 shadow-xs'
+                    : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/70 dark:hover:bg-slate-700/60'
+                    }`}
+                  onClick={() => navigate(`${basePath}/settings`)}
+                >
+                  <Settings size={15} className="mr-2 text-current" />
+                  <span>Settings</span>
+                </button>
+              </div>
+
+              <button
+                className="h-10 px-4 text-xs sm:text-sm font-bold text-rose-600 dark:text-rose-400 bg-rose-50/90 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 border border-rose-200/80 dark:border-rose-800/60 rounded-xl transition-all flex items-center justify-center shadow-2xs cursor-pointer ml-2 flex-shrink-0 active:scale-98 whitespace-nowrap"
+                onClick={handleLogout}
+                title="Logout from admin"
+              >
+                <LogOut size={15} className="mr-1.5 text-rose-600 dark:text-rose-400" />
+                <span>Logout</span>
+              </button>
+            </div>
+
 
             {/* Mobile Menu Toggle Button */}
             <div className="sm:hidden flex items-center gap-2 flex-shrink-0">
@@ -225,6 +255,11 @@ const AdminHeader = () => {
             {/* Mobile Menu Dropdown */}
             {mobileMenuOpen && (
               <div className="admin-header-mobile-menu">
+                {viewAsControl && (
+                  <div className="p-3 mb-2 bg-[#F1F3FB] dark:bg-[#1E1E38] rounded-xl">
+                    {viewAsControl}
+                  </div>
+                )}
                 <button
                   type="button"
                   className="admin-header-mobile-btn"

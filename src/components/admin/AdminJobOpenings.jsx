@@ -64,7 +64,8 @@ export default function AdminJobOpenings({ clientId }) {
             const data = await res.json();
             if (data.success) {
                 const testsFromApi = data.tests || data.data || [];
-                const normalizedTests = testsFromApi.map((test) => ({
+                const publishedOnly = testsFromApi.filter((test) => test.status === 'published');
+                const normalizedTests = publishedOnly.map((test) => ({
                     ...test,
                     display_name: test.test_name || test.title || test.name || 'Untitled Test',
                     display_duration: test.time_limit ?? test.duration ?? '—',

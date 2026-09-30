@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { apiFetch } from '../../config/api';
 
-const MCQBankModal = ({ question, onClose, onSave, categories, tags }) => {
+const MCQBankModal = ({ question, onClose, onSave, categories = [], tags = [] }) => {
   const [formData, setFormData] = useState({
     question_text: '',
     option_a: '',
@@ -40,7 +40,7 @@ const MCQBankModal = ({ question, onClose, onSave, categories, tags }) => {
     setSaving(true);
 
     try {
-      const token = localStorage.getItem('adminToken');
+      const token = localStorage.getItem('adminToken') || localStorage.getItem('token') || localStorage.getItem('clientToken') || '';
       const url = question 
         ? `api/question-bank/mcq/${question.id}`
         : 'api/question-bank/mcq';
@@ -236,7 +236,7 @@ const MCQBankModal = ({ question, onClose, onSave, categories, tags }) => {
                 placeholder="e.g., programming, aptitude"
               />
               <datalist id="categories">
-                {categories.map(cat => (
+                {(categories || []).map(cat => (
                   <option key={cat} value={cat} />
                 ))}
               </datalist>

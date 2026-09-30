@@ -317,6 +317,13 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
             showToast('Please fill in all fields and select a correct answer');
             return;
         }
+        const isDuplicate = questions.some(
+            q => q.text && q.text.trim().toLowerCase() === currentQuestion.text.trim().toLowerCase()
+        );
+        if (isDuplicate) {
+            showToast('A question with this text is already added to the test.');
+            return;
+        }
         setQuestions([...questions, { ...currentQuestion, id: Date.now() }]);
         setCurrentQuestion({
             text: '',
@@ -331,9 +338,15 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
     };
 
     const handleSelectMcqFromBank = (selectedBankQuestions) => {
-        const existingBankIds = new Set(questions.filter((q) => q.bankId).map((q) => q.bankId));
         const converted = selectedBankQuestions
-            .filter((q) => !existingBankIds.has(q.id))
+            .filter((q) => {
+                const isDuplicate = questions.some(
+                    (existing) =>
+                        (existing.bankId && existing.bankId === q.id) ||
+                        (existing.text && q.question_text && existing.text.trim().toLowerCase() === q.question_text.trim().toLowerCase())
+                );
+                return !isDuplicate;
+            })
             .map((q) => {
                 const correctLetter = (q.correct_option || 'A').toUpperCase();
                 const correctIdx = Math.max(0, 'ABCD'.indexOf(correctLetter));
@@ -350,11 +363,11 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
             });
 
         if (converted.length === 0) {
-            showToast('These questions are already in your test list (see panel on the right).');
+            showToast('Selected questions are already added to this test.');
             return;
         }
 
-        setQuestions([...questions, ...converted]);
+        setQuestions((prevQuestions) => [...prevQuestions, ...converted]);
         setBankSelectorKey((k) => k + 1);
 
         if (converted.length < selectedBankQuestions.length) {
@@ -407,6 +420,16 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
             return;
         }
 
+        // Duplicate check for coding questions
+        const isDuplicate = codingQuestions.some(
+            q => (!editingCodingQuestionId || q.id !== editingCodingQuestionId) &&
+                 q.title && q.title.trim().toLowerCase() === currentCodingQuestion.title.trim().toLowerCase()
+        );
+        if (isDuplicate) {
+            showToast('A coding question with this title is already added to this test.');
+            return;
+        }
+
         if (editingCodingQuestionId) {
             setCodingQuestions(codingQuestions.map(q =>
                 q.id === editingCodingQuestionId ? { ...currentCodingQuestion, id: editingCodingQuestionId } : q
@@ -452,8 +475,14 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
     };
 
     const handleSelectFromBank = (selectedQuestions) => {
-        const existingBankIds = new Set(codingQuestions.filter((q) => q.bankId).map((q) => q.bankId));
-        const newSelections = selectedQuestions.filter((q) => !existingBankIds.has(q.id));
+        const newSelections = selectedQuestions.filter((q) => {
+            const isDuplicate = codingQuestions.some(
+                (existing) =>
+                    (existing.bankId && existing.bankId === q.id) ||
+                    (existing.title && q.title && existing.title.trim().toLowerCase() === q.title.trim().toLowerCase())
+            );
+            return !isDuplicate;
+        });
 
         if (newSelections.length === 0) {
             showToast('Selected questions are already added to this test.');
@@ -507,7 +536,13 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                 );
 
                 const validQuestions = detailedQuestions.filter(q => q !== null);
-                setCodingQuestions([...codingQuestions, ...validQuestions]);
+                setCodingQuestions((prev) => {
+                    const uniqueNew = validQuestions.filter(vq => !prev.some(
+                        p => (p.bankId && p.bankId === vq.bankId) ||
+                             (p.title && vq.title && p.title.trim().toLowerCase() === vq.title.trim().toLowerCase())
+                    ));
+                    return [...prev, ...uniqueNew];
+                });
             } catch (error) {
                 console.error('Error fetching question details:', error);
                 showToast('Failed to load some question details');
@@ -599,6 +634,8 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                     showToast('Test updated successfully!');
                     setViewMode(true);
                     setStep('init');
+                    if (onSaved) onSaved();
+                    if (onComplete) onComplete(data.test);
                 } else {
                     showToast(data.message || 'Failed to update test');
                 }

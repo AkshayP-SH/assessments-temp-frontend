@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import {
-  FileSpreadsheet, ArrowLeft, Users, AlertCircle, Video, Loader2, Building2, Briefcase, Landmark, FileText, X
+  FileSpreadsheet, ArrowLeft, Users, AlertCircle, Video, Loader2, Building2, Briefcase, Landmark, FileText, X,
+  BarChart3, UploadCloud, ShieldAlert, CreditCard
 } from 'lucide-react';
 
 import { apiFetch } from '../../config/api';
@@ -171,9 +172,11 @@ const AdminDashboard = () => {
   const [showInterviewScheduleModal, setShowInterviewScheduleModal] = useState(false);
   const [selectedStudentForInterview, setSelectedStudentForInterview] = useState(null);
 
-  // Super admin client filter — lets super admin scope the dashboard to a specific client
+  // Super admin client filter — defaults to Shnoor International
   const [clientsList, setClientsList] = useState([]);
-  const [viewAsClientId, setViewAsClientId] = useState(''); // '' = all clients (super admin default)
+  const [viewAsClientId, setViewAsClientId] = useState(() => {
+    return sessionStorage.getItem('superAdminSelectedClientId') || '';
+  });
   const [quota, setQuota] = useState(null); // plan quota for client admin
   const [clientPlanId, setClientPlanId] = useState(null);
 
@@ -190,6 +193,15 @@ const AdminDashboard = () => {
     } catch { return {}; }
   }, []);
 
+  const defaultClientId = useMemo(() => {
+    const shnoorClient = clientsList.find(c =>
+      (c.company_name && c.company_name.toLowerCase().includes('shnoor')) ||
+      (c.name && c.name.toLowerCase().includes('shnoor')) ||
+      String(c.id) === '1'
+    );
+    return shnoorClient ? String(shnoorClient.id) : (clientsList.length > 0 ? String(clientsList[0].id) : '');
+  }, [clientsList]);
+
   // Calculate days remaining for banner
   const daysRemaining = useMemo(() => {
     if (!currentUser?.subscriptionEndDate) return null;
@@ -197,13 +209,49 @@ const AdminDashboard = () => {
     return Math.ceil(diff / (1000 * 60 * 60 * 24));
   }, [currentUser]);
 
-  // Fetch clients list for super admin selector
+  // Fetch clients list for super admin selector and default to Shnoor International
   useEffect(() => {
     if (!isSuperAdmin) return;
     const token = localStorage.getItem('adminToken');
     apiFetch('api/clients', { headers: { 'Authorization': `Bearer ${token}` } })
       .then(r => r.json())
-      .then(d => { if (d.success) setClientsList(d.clients || []); })
+      .then(d => {
+        if (d.success) {
+          const list = d.clients || [];
+          setClientsList(list);
+
+          const savedId = sessionStorage.getItem('superAdminSelectedClientId');
+          // If already explicitly selected by Super Admin in this session, keep that choice
+          if (savedId !== null && savedId !== undefined) {
+            if (savedId === '') {
+              setViewAsClientId('');
+              return;
+            }
+            const exists = list.some(c => String(c.id) === String(savedId));
+            if (exists) {
+              setViewAsClientId(String(savedId));
+              return;
+            }
+          }
+
+          // Find Shnoor International or client 1 as default organization
+          const shnoorClient = list.find(c =>
+            (c.company_name && c.company_name.toLowerCase().includes('shnoor')) ||
+            (c.name && c.name.toLowerCase().includes('shnoor')) ||
+            String(c.id) === '1'
+          );
+
+          if (shnoorClient) {
+            const defaultId = String(shnoorClient.id);
+            setViewAsClientId(defaultId);
+            sessionStorage.setItem('superAdminSelectedClientId', defaultId);
+          } else if (list.length > 0) {
+            const defaultId = String(list[0].id);
+            setViewAsClientId(defaultId);
+            sessionStorage.setItem('superAdminSelectedClientId', defaultId);
+          }
+        }
+      })
       .catch(() => { });
   }, [isSuperAdmin]);
 
@@ -519,10 +567,6 @@ const AdminDashboard = () => {
   };
 
   const handleDeleteTest = async (testId) => {
-    if (!confirm('Are you sure you want to delete this test? This action cannot be undone.')) {
-      return;
-    }
-
     try {
       const token = localStorage.getItem('adminToken');
       const response = await apiFetch(`api/tests/${testId}${clientParam}`, {
@@ -533,7 +577,6 @@ const AdminDashboard = () => {
       });
 
       if (response.ok) {
-        alert('Test deleted successfully');
         setTests(prevTests => prevTests.filter(test => test.id !== testId));
         if (activeTab === 'institutes') {
           fetchAllInstitutes();
@@ -2004,57 +2047,66 @@ const AdminDashboard = () => {
   };
 
   return (
-    <Suspense fallback={<div className="flex h-screen items-center justify-center bg-[#E5E5F3] dark:bg-[#11111d]"><Loader2 className="animate-spin h-12 w-12 text-[#403f75] dark:text-[#9A9AC9]" /></div>}>
-      <div className="admin-dashboard-root min-h-screen bg-[#E5E5F3] dark:bg-[#11111d]">
-        {/* Header */}
-        <AdminHeader />
-
-        {/* Super Admin — Client Scope Selector */}
-        {isSuperAdmin && (
-          <div className="bg-white dark:bg-[#25254A] border-b border-shnoor-mist dark:border-[#383863] shadow-sm">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center gap-3">
-              <div className="flex items-center gap-2 text-xs font-semibold text-shnoor-indigoMedium dark:text-[#9A9AC9] uppercase tracking-wide flex-shrink-0">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
-                Viewing as:
+    <Suspense fallback={<div className="flex h-screen items-center justify-center bg-[#F4F6FB] dark:bg-[#11111d]"><Loader2 className="animate-spin h-12 w-12 text-[#403f75] dark:text-[#9A9AC9]" /></div>}>
+      <div className="admin-dashboard-root min-h-screen bg-[#F4F6FB] dark:bg-[#11111d]">
+        {/* Header with integrated Viewing as selector */}
+        <AdminHeader
+          viewAsControl={
+            isSuperAdmin ? (
+              <div className="flex items-center gap-2.5 bg-slate-100/90 hover:bg-slate-100 dark:bg-[#1E1E38] dark:hover:bg-[#25254A] border border-slate-200/90 dark:border-slate-700/80 px-3 py-1 rounded-xl transition-all shadow-2xs">
+                <Building2 size={16} className="text-[#403f75] dark:text-[#9A9AC9] flex-shrink-0" />
+                <div className="flex flex-col min-w-0">
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 leading-none">
+                    View As
+                  </span>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <select
+                      value={viewAsClientId}
+                      onChange={e => {
+                        const val = e.target.value;
+                        setViewAsClientId(val);
+                        sessionStorage.setItem('superAdminSelectedClientId', val);
+                        setTests([]);
+                        setAllInstitutes([]);
+                      }}
+                      className="bg-transparent text-xs font-bold text-slate-800 dark:text-slate-100 focus:outline-none cursor-pointer pr-1 max-w-[200px] truncate"
+                    >
+                      <option value="" className="text-slate-800 bg-white dark:bg-[#1E1E38] dark:text-white font-medium">
+                        All Clients (Platform View)
+                      </option>
+                      {clientsList.map(c => (
+                        <option key={c.id} value={c.id} className="text-slate-800 bg-white dark:bg-[#1E1E38] dark:text-white font-medium">
+                          {c.company_name || c.name} {c.status !== 'active' ? '(suspended)' : ''}
+                        </option>
+                      ))}
+                    </select>
+                    {defaultClientId && viewAsClientId !== defaultClientId && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setViewAsClientId(defaultClientId);
+                          sessionStorage.setItem('superAdminSelectedClientId', defaultClientId);
+                          setTests([]);
+                          setAllInstitutes([]);
+                        }}
+                        className="p-0.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-all cursor-pointer flex items-center justify-center"
+                        title="Remove filter (Reset to Shnoor International)"
+                        aria-label="Remove filter"
+                      >
+                        <X size={13} className="stroke-[2.5]" />
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
-              <select
-                value={viewAsClientId}
-                onChange={e => {
-                  setViewAsClientId(e.target.value);
-                  setTests([]);
-                  setAllInstitutes([]);
-                }}
-                className="h-8 pl-3 pr-8 rounded-lg border border-shnoor-mist dark:border-[#383863] bg-white dark:bg-[#25254A] text-sm text-shnoor-navy dark:text-white focus:outline-none focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo transition-colors"
-              >
-                <option value="">All Clients (Platform View)</option>
-                {clientsList.map(c => (
-                  <option key={c.id} value={c.id}>
-                    {c.company_name || c.name} {c.status !== 'active' ? '(suspended)' : ''}
-                  </option>
-                ))}
-              </select>
-              {viewAsClientId && (
-                <button
-                  onClick={() => { setViewAsClientId(''); setTests([]); setAllInstitutes([]); }}
-                  className="text-xs text-shnoor-danger hover:underline flex items-center gap-1"
-                >
-                  <X size={12} />
-                  Clear filter
-                </button>
-              )}
-              {viewAsClientId && (
-                <span className="ml-auto text-xs bg-shnoor-indigo text-white px-2.5 py-1 rounded-full font-medium">
-                  Scoped to: {clientsList.find(c => String(c.id) === String(viewAsClientId))?.company_name || clientsList.find(c => String(c.id) === String(viewAsClientId))?.name || 'Client'}
-                </span>
-              )}
-            </div>
-          </div>
-        )}
+            ) : null
+          }
+        />
 
         {/* Client Admin — Usage Stats Bar */}
         {!isSuperAdmin && quota && (
           <div className="bg-white border-b border-shnoor-mist">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-wrap items-center gap-4">
+            <div className="w-full px-4 sm:px-6 lg:pr-6 lg:pl-[88px] py-2 flex flex-wrap items-center gap-4">
               {[
                 { label: 'Tests', used: quota.limits?.tests?.used, max: quota.limits?.tests?.max },
                 { label: 'Institutes', used: quota.limits?.institutes?.used, max: quota.limits?.institutes?.max },
@@ -2079,27 +2131,13 @@ const AdminDashboard = () => {
           </div>
         )}
 
-
-
-        {/* Main Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
+        {/* Main Content with offset for sidebar rail */}
+        <div className="w-full px-4 sm:px-6 lg:pr-6 lg:pl-[88px] pt-4 sm:pt-6 pb-12 transition-all">
           <div className="admin-dashboard-content">
-
-            {/* Welcome Banner */}
-            {activeTab === 'exams' && !showCreateTest && !selectedExamId && (
-              <div className="welcome-banner">
-                <h2 className="welcome-banner-title">
-                  Welcome back, {currentUser?.name || 'Admin'}!
-                </h2>
-                <p className="welcome-banner-subtitle">
-                  {currentUser?.company_name || 'Shnoor International LLC'} • {isSuperAdmin ? 'Platform View' : 'Admin Portal'}
-                </p>
-              </div>
-            )}
 
             {/* Subscription Expiry Banner */}
             {!isSuperAdmin && daysRemaining !== null && daysRemaining <= 7 && (
-              <div className={`mb-6 p-4 rounded-xl shadow-sm border flex items-center justify-between animate-fade-in ${daysRemaining <= 1
+              <div className={`mb-4 p-4 rounded-xl shadow-sm border flex items-center justify-between animate-fade-in ${daysRemaining <= 1
                 ? 'bg-red-50 border-red-200 text-red-800'
                 : 'bg-yellow-50 border-yellow-200 text-yellow-800'
                 }`}>
@@ -2113,20 +2151,484 @@ const AdminDashboard = () => {
                         : `Your subscription will expire in ${daysRemaining} day${daysRemaining === 1 ? '' : 's'}. Renew now to avoid interruption.`
                 }
                     </p>
-          </div>
-        </div>
-        <button
-          onClick={() => navigate('/client/subscription-plans')}
-          className={`px-4 py-2 rounded-lg text-sm font-bold shadow-sm transition-colors ${daysRemaining <= 1
-            ? 'bg-red-600 hover:bg-red-700 text-white'
-            : 'bg-yellow-500 hover:bg-yellow-600 text-white'
-            }`}
-        >
-          Renew Now
-        </button>
-      </div>
-    )
-  }
+                  </div>
+                </div>
+                <button
+                  onClick={() => navigate('/client/subscription-plans')}
+                  className={`px-4 py-2 rounded-lg text-sm font-bold shadow-sm transition-colors ${daysRemaining <= 1
+                    ? 'bg-red-600 hover:bg-red-700 text-white'
+                    : 'bg-yellow-500 hover:bg-yellow-600 text-white'
+                    }`}
+                >
+                  Renew Now
+                </button>
+              </div>
+            )}
+
+            {/* JioHotstar / Disney+ Style Expandable Sidebar Navigation Rail */}
+            {!showCreateTest && !selectedExamId && (
+              <>
+                {/* Desktop Expandable Light-Themed Sidebar Rail */}
+                <aside
+                  aria-label="Module Navigation"
+                  className="hidden lg:flex fixed left-0 top-[60px] sm:top-[68px] bottom-0 w-[72px] hover:w-60 bg-white/95 dark:bg-[#1A1A32]/95 backdrop-blur-xl border-r border-slate-200/90 dark:border-slate-800 z-40 transition-all duration-300 ease-in-out flex-col justify-between py-5 shadow-sm group overflow-hidden select-none"
+                >
+                  <div className="flex flex-col gap-2 w-full px-2.5">
+                    {[
+                      { id: 'exams', label: 'Manage Exams', icon: FileSpreadsheet },
+                      { id: 'institutes', label: 'Manage Institutes', icon: Landmark },
+                      { id: 'reports', label: 'Reports', icon: BarChart3 },
+                      { id: 'bulk-upload', label: 'Bulk Upload', icon: UploadCloud },
+                      { id: 'violations', label: 'Violations', icon: ShieldAlert },
+                      { id: 'interviews', label: 'Interviews', icon: Video },
+                      { id: 'job-openings', label: 'Job Openings', icon: Briefcase },
+                      ...(isSuperAdmin ? [{ id: 'subscription-plans', label: 'Subscription Plans', icon: CreditCard }] : [])
+                    ].map((tab) => {
+                      const isActive = activeTab === tab.id;
+                      const Icon = tab.icon;
+                      return (
+                        <button
+                          key={tab.id}
+                          type="button"
+                          onClick={() => setActiveTab(tab.id)}
+                          className={`flex items-center h-11 px-3 w-full rounded-xl transition-all duration-200 cursor-pointer relative group/item ${isActive
+                            ? 'bg-[#403f75] dark:bg-indigo-600 text-white font-bold shadow-md shadow-[#403f75]/25'
+                            : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/90 dark:hover:bg-slate-800/80'
+                            }`}
+                        >
+                          <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
+                            <Icon
+                              size={19}
+                              className={`transition-transform duration-150 group-hover/item:scale-110 ${isActive ? 'text-white' : 'text-slate-500 dark:text-slate-400 group-hover/item:text-slate-800 dark:group-hover/item:text-white'
+                                }`}
+                            />
+                          </div>
+                          <span className="ml-3 opacity-0 max-w-0 group-hover:max-w-[170px] group-hover:opacity-100 transition-all duration-300 ease-out whitespace-nowrap overflow-hidden text-sm font-bold tracking-tight text-left">
+                            {tab.label}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </aside>
+
+                {/* Mobile / Tablet Horizontal Capsule Navigation */}
+                <div className="lg:hidden mb-6 w-full">
+                  <div className="bg-white/95 dark:bg-[#1A1A32]/95 backdrop-blur-md p-1.5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-2xs inline-flex flex-nowrap items-center gap-1.5 max-w-full overflow-x-auto scrollbar-none" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                    {[
+                      { id: 'exams', label: 'Manage Exams', icon: FileSpreadsheet },
+                      { id: 'institutes', label: 'Manage Institutes', icon: Landmark },
+                      { id: 'reports', label: 'Reports', icon: BarChart3 },
+                      { id: 'bulk-upload', label: 'Bulk Upload', icon: UploadCloud },
+                      { id: 'violations', label: 'Violations', icon: ShieldAlert },
+                      { id: 'interviews', label: 'Interviews', icon: Video },
+                      { id: 'job-openings', label: 'Job Openings', icon: Briefcase },
+                      ...(isSuperAdmin ? [{ id: 'subscription-plans', label: 'Subscription Plans', icon: CreditCard }] : [])
+                    ].map((tab) => {
+                      const isActive = activeTab === tab.id;
+                      const Icon = tab.icon;
+                      return (
+                        <button
+                          key={tab.id}
+                          type="button"
+                          onClick={() => setActiveTab(tab.id)}
+                          className={`group inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-[13px] font-semibold rounded-xl transition-all duration-150 whitespace-nowrap flex-shrink-0 cursor-pointer ${isActive
+                            ? 'bg-[#403f75] dark:bg-indigo-600 text-white font-bold shadow-xs'
+                            : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/90 dark:hover:bg-slate-800/70'
+                            }`}
+                        >
+                          <Icon
+                            size={15}
+                            className={`flex-shrink-0 transition-transform duration-150 group-hover:scale-105 ${isActive
+                              ? 'text-white'
+                              : 'text-slate-500 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-white'
+                              }`}
+                          />
+                          <span>{tab.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Create Test Modal/Section */}
+            {showCreateTest ? (
+              <div className="space-y-4 mb-6">
+                <div className="flex items-center justify-between">
+                  <button
+                    onClick={() => {
+                      setShowCreateTest(false);
+                      setEditingTest(null);
+                    }}
+                    className="btn-secondary"
+                    title={editingTest ? 'Cancel Editing' : 'Back to Exams'}
+                  >
+                    <ArrowLeft size={16} />
+                    <span>Back to Exams</span>
+                  </button>
+                </div>
+                <CreateTestSection
+                  onComplete={handleCreateTestComplete}
+                  onSaved={fetchTests}
+                  editingTest={editingTest}
+                  clientId={viewAsClientId || null}
+                />
+              </div>
+            ) : selectedExamId ? (
+              /* Detail View: Student Results for a specific exam */
+              <ResultsTab
+                selectedExamDetails={selectedExamDetails}
+                selectedExamStudents={selectedExamStudents}
+                onBack={() => {
+                  setSelectedExamId(null);
+                  setSelectedCandidates([]);
+                  setResultsCurrentPage(1);
+                  setDetailViewTab('results');
+                }}
+                showQuickSelectMenu={showQuickSelectMenu}
+                setShowQuickSelectMenu={setShowQuickSelectMenu}
+                statusFilter={statusFilter}
+                setStatusFilter={(filter) => {
+                  setStatusFilter(filter);
+                  setResultsCurrentPage(1);
+                }}
+                selectedCandidates={selectedCandidates}
+                setSelectedCandidates={setSelectedCandidates}
+                exportToExcel={exportToExcel}
+                handleDownloadShortlistedPDF={handleDownloadShortlistedPDF}
+                detailViewTab={detailViewTab}
+                setDetailViewTab={setDetailViewTab}
+                getPassingPercentage={getPassingPercentage}
+                resultsCurrentPage={resultsCurrentPage}
+                setResultsCurrentPage={setResultsCurrentPage}
+                resultsRowsPerPage={resultsRowsPerPage}
+                setResultsRowsPerPage={setResultsRowsPerPage}
+                onScheduleInterview={(student) => {
+                  setSelectedStudentForInterview(student);
+                  setShowInterviewScheduleModal(true);
+                }}
+                loadingFeedback={loadingFeedback}
+                feedbackData={feedbackData}
+                feedbackStats={feedbackStats}
+              />
+            ) : (
+              /* List View: All Exams & Other Tabs */
+              <>
+                {activeTab === 'exams' && (
+                  <ExamsTab
+                    loading={loading}
+                    tests={tests}
+                    filteredTests={filteredTests}
+                    paginatedTests={paginatedTests}
+                    searchTerm={searchTerm}
+                    setSearchTerm={setSearchTerm}
+                    filters={filters}
+                    setFilters={setFilters}
+                    sortBy={sortBy}
+                    setSortBy={setSortBy}
+                    selectedTests={selectedTests}
+                    toggleAllTests={toggleAllTests}
+                    handleBulkDeleteTests={handleBulkDeleteTests}
+                    toggleTestSelection={toggleTestSelection}
+                    openMenuId={openMenuId}
+                    setOpenMenuId={setOpenMenuId}
+                    handlePreviewQuestions={handlePreviewQuestions}
+                    handleViewTestHistory={handleViewTestHistory}
+                    handleViewJob={handleViewJob}
+                    handleOpenCloneModal={handleOpenCloneModal}
+                    handleViewTestDetails={handleViewTestDetails}
+                    setShowCreateTest={setShowCreateTest}
+                    handleTogglePublish={handleTogglePublish}
+                    handleDeleteTest={handleDeleteTest}
+                    setSelectedExamId={handleSelectExam}
+                    setEditingTest={setEditingTest}
+                    examCurrentPage={examCurrentPage}
+                    setExamCurrentPage={setExamCurrentPage}
+                    examTotalPages={examTotalPages}
+                    examItemsPerPage={examItemsPerPage}
+                  />
+                )}
+
+                {/* Institutes Tab */}
+                {activeTab === 'institutes' && (
+                  <InstitutesTab
+                    instituteSearchTerm={instituteSearchTerm}
+                    setInstituteSearchTerm={setInstituteSearchTerm}
+                    newInstituteName={newInstituteName}
+                    setNewInstituteName={setNewInstituteName}
+                    handleAddInstitute={handleAddInstitute}
+                    isAddingInstitute={isAddingInstitute}
+                    selectedInstitutes={selectedInstitutes}
+                    setSelectedInstitutes={setSelectedInstitutes}
+                    allInstitutes={allInstitutes}
+                    selectedTestsForMultipleInstitutes={selectedTestsForMultipleInstitutes}
+                    setSelectedTestsForMultipleInstitutes={setSelectedTestsForMultipleInstitutes}
+                    isTestDropdownOpen={isTestDropdownOpen}
+                    setIsTestDropdownOpen={setIsTestDropdownOpen}
+                    tests={tests}
+                    handleAssignTestToMultipleInstitutes={handleAssignTestToMultipleInstitutes}
+                    isAssigningTestToMultipleInstitutes={isAssigningTestToMultipleInstitutes}
+                    toggleAllInstitutes={toggleAllInstitutes}
+                    isLoadingAllInstitutes={isLoadingAllInstitutes}
+                    paginatedInstitutes={paginatedInstitutes}
+                    toggleInstituteSelection={toggleInstituteSelection}
+                    handleViewAssignedTests={handleViewAssignedTests}
+                    handleManageStudents={handleManageStudents}
+                    setSelectedInstituteForRegistration={setSelectedInstituteForRegistration}
+                    setShowRegistrationControlModal={setShowRegistrationControlModal}
+                    handleDeleteInstitute={handleDeleteInstitute}
+                    instituteTotalPages={instituteTotalPages}
+                    instituteCurrentPage={instituteCurrentPage}
+                    setInstituteCurrentPage={setInstituteCurrentPage}
+                  />
+                )}
+
+                {/* Reports Tab */}
+                {activeTab === 'reports' && (
+                  <div className="space-y-6">
+                    <AdminReports />
+                  </div>
+                )}
+
+                {/* Bulk Student Upload Tab */}
+                {activeTab === 'bulk-upload' && (
+                  <div className="space-y-6">
+                    <BulkStudentUpload clientId={viewAsClientId || null} />
+                  </div>
+                )}
+
+                {/* Violations Tab */}
+                {activeTab === 'violations' && (
+                  <ViolationsTab
+                    tests={tests}
+                    selectedTestForViolations={selectedTestForViolations}
+                    setSelectedTestForViolations={setSelectedTestForViolations}
+                    violationsByStudent={violationsByStudent}
+                    flaggedStudents={flaggedStudents}
+                    isLoadingViolations={isLoadingViolations}
+                    exportViolationsToExcel={exportViolationsToExcel}
+                  />
+                )}
+
+                {/* Interviews Tab */}
+                {activeTab === 'interviews' && (
+                  <div className="space-y-6">
+                    <InterviewsList />
+                  </div>
+                )}
+
+                {/* Job Openings Tab */}
+                {activeTab === 'job-openings' && (
+                  <div className="animate-fade-in">
+                    <AdminJobOpenings clientId={viewAsClientId || null} />
+                  </div>
+                )}
+
+                {/* Subscription Plans Tab */}
+                {activeTab === 'subscription-plans' && isSuperAdmin && (
+                  <div className="space-y-6">
+                    <SubscriptionPlansSettings />
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* Clone Test Modal */}
+            {showCloneModal && testToClone && (
+              <CloneModal
+                testToClone={testToClone}
+                cloneTestName={cloneTestName}
+                setCloneTestName={setCloneTestName}
+                isCloning={isCloning}
+                cloneError={cloneError}
+                handleCloneTestSubmit={handleCloneTest}
+                onClose={() => {
+                  setShowCloneModal(false);
+                  setTestToClone(null);
+                  setCloneTestName('');
+                  setCloneError('');
+                }}
+              />
+            )}
+
+            {/* View Test Details Modal */}
+            {showViewDetailsModal && selectedTestForDetails && (
+              <ViewTestDetailsModal
+                test={selectedTestForDetails}
+                onClose={() => {
+                  setShowViewDetailsModal(false);
+                  setSelectedTestForDetails(null);
+                }}
+                onEdit={handleEditTestDetails}
+              />
+            )}
+
+            {/* Edit Test Details Modal */}
+            {showEditDetailsModal && selectedTestForDetails && (
+              <EditTestDetailsModal
+                test={selectedTestForDetails}
+                onClose={() => {
+                  setShowEditDetailsModal(false);
+                  setSelectedTestForDetails(null);
+                }}
+                onSave={handleSaveTestDetails}
+              />
+            )}
+
+            {/* Job Role/Description Modal */}
+            {showJobModal && (
+              <JobModal
+                selectedJobTest={selectedJobTest}
+                jobRoles={jobRoles}
+                selectedJobRoleIndex={selectedJobRoleIndex}
+                setSelectedJobRoleIndex={setSelectedJobRoleIndex}
+                isEditingJob={isEditingJob}
+                setIsEditingJob={setIsEditingJob}
+                isSavingJob={isSavingJob}
+                isLoadingJobRoles={isLoadingJobRoles}
+                handleJobRoleChange={handleJobRoleChange}
+                handleAddJobRole={handleAddJobRole}
+                handleRemoveJobRole={handleRemoveJobRole}
+                handleSaveJobRoles={handleSaveJob}
+                onClose={() => setShowJobModal(false)}
+              />
+            )}
+
+            {/* Assigned Tests Modal */}
+            {showAssignedTestsModal && selectedInstituteForTests && (
+              <AssignedTestsModal
+                selectedInstituteForTests={selectedInstituteForTests}
+                isLoadingAssignedTests={isLoadingAssignedTests}
+                assignedTests={assignedTests}
+                tests={tests}
+                selectedTestsForInstitute={selectedTestsForInstitute}
+                setSelectedTestsForInstitute={setSelectedTestsForInstitute}
+                isInstituteTestDropdownOpen={isInstituteTestDropdownOpen}
+                setIsInstituteTestDropdownOpen={setIsInstituteTestDropdownOpen}
+                isAssigningTestToInstitute={isAssigningTestToInstitute}
+                handleAssignTestToInstitute={handleAssignTestToInstitute}
+                selectedTestsForUnassign={selectedTestsForUnassign}
+                toggleTestForUnassign={toggleTestForUnassign}
+                toggleAllTestsForUnassign={toggleAllTestsForUnassign}
+                handleBulkUnassignTests={handleBulkUnassignTests}
+                handleUnassignTest={handleUnassignTest}
+                isUnassigningTests={isUnassigningTests}
+                onClose={() => {
+                  setShowAssignedTestsModal(false);
+                  setSelectedInstituteForTests(null);
+                  setAssignedTests([]);
+                  setSelectedTestsForInstitute([]);
+                  setSelectedTestsForUnassign([]);
+                  setIsInstituteTestDropdownOpen(false);
+                }}
+              />
+            )}
+
+            {/* Student Management Modal */}
+            {showStudentManagementModal && selectedInstituteForStudents && (
+              <StudentManageModal
+                selectedInstituteForStudents={selectedInstituteForStudents}
+                isLoadingStudentsForManagement={isLoadingStudentsForManagement}
+                instituteStudentsForManagement={instituteStudentsForManagement}
+                studentSearchTerm={studentSearchTerm}
+                setStudentSearchTerm={setStudentSearchTerm}
+                showAddStudentForm={showAddStudentForm}
+                setShowAddStudentForm={setShowAddStudentForm}
+                newStudentData={newStudentData}
+                setNewStudentData={setNewStudentData}
+                isAddingStudent={isAddingStudent}
+                handleAddStudent={handleAddStudent}
+                selectedStudentsForDelete={selectedStudentsForDelete}
+                toggleStudentForDelete={toggleStudentForDelete}
+                toggleAllStudentsForDelete={toggleAllStudentsForDelete}
+                selectionRange={selectionRange}
+                setSelectionRange={setSelectionRange}
+                handleSelectRange={handleSelectRange}
+                handleBulkDeleteStudents={handleBulkDeleteStudents}
+                handleDeleteAllStudents={handleDeleteAllStudents}
+                tests={tests}
+                selectedTestsForStudentModal={selectedTestsForStudentModal}
+                setSelectedTestsForStudentModal={setSelectedTestsForStudentModal}
+                isStudentTestDropdownOpen={isStudentTestDropdownOpen}
+                setIsStudentTestDropdownOpen={setIsStudentTestDropdownOpen}
+                isAssigningTestInModal={isAssigningTestInModal}
+                handleAssignTestInModal={handleAssignTestInModal}
+                expandedStudentTests={expandedStudentTests}
+                toggleStudentTests={toggleStudentTests}
+                handleUnassignTestFromStudent={handleUnassignTestFromStudent}
+                handleDeleteStudent={handleDeleteStudent}
+                onClose={() => {
+                  setShowStudentManagementModal(false);
+                  setSelectedInstituteForStudents(null);
+                  setInstituteStudentsForManagement([]);
+                  setShowAddStudentForm(false);
+                  setSelectedStudentsForDelete([]);
+                  setSelectedTestsForStudentModal([]);
+                  setIsStudentTestDropdownOpen(false);
+                  setStudentSearchTerm('');
+                  setSelectionRange({ start: '', end: '' });
+                  setNewStudentData({
+                    full_name: '',
+                    email: '',
+                    roll_number: '',
+                    institute: ''
+                  });
+                }}
+              />
+            )}
+
+            {/* Registration Control Modal */}
+            {showRegistrationControlModal && selectedInstituteForRegistration && (
+              <InstituteRegistrationControl
+                institute={selectedInstituteForRegistration}
+                onClose={() => {
+                  setShowRegistrationControlModal(false);
+                  setSelectedInstituteForRegistration(null);
+                }}
+              />
+            )}
+
+            {/* Preview Questions Modal */}
+            {showPreviewQuestionsModal && previewTest && (
+              <PreviewModal
+                previewTest={previewTest}
+                isLoadingPreview={isLoadingPreview}
+                previewQuestions={previewQuestions}
+                onClose={() => {
+                  setShowPreviewQuestionsModal(false);
+                  setPreviewTest(null);
+                  setPreviewQuestions([]);
+                }}
+              />
+            )}
+
+            {/* Test History Modal */}
+            {showTestHistoryModal && testHistory && (
+              <TestHistoryModal
+                isLoadingHistory={isLoadingHistory}
+                testHistory={testHistory}
+                onClose={() => setShowTestHistoryModal(false)}
+              />
+            )}
+
+            {/* Interview Schedule Modal */}
+            {showInterviewScheduleModal && selectedStudentForInterview && (
+              <InterviewSchedule
+                student={selectedStudentForInterview}
+                testId={selectedExamId}
+                onClose={() => {
+                  setShowInterviewScheduleModal(false);
+                  setSelectedStudentForInterview(null);
+                }}
+                onScheduled={() => {
+                  setShowInterviewScheduleModal(false);
+                  setSelectedStudentForInterview(null);
+                }}
+              />
+            )}
+
 
   {/* Tab Navigation */ }
   {

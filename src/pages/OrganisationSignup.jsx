@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import Button from '../components/Button';
 import InputField from '../components/InputField';
@@ -29,7 +29,7 @@ const OrganisationSignup = () => {
     description: 'Create your organisation account on SHNOOR Assessments to streamline your technical hiring and proctoring.',
   });
 
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     orgName: '',
@@ -67,6 +67,11 @@ const OrganisationSignup = () => {
     e.preventDefault();
     if (!formData.orgName || !formData.email || !formData.password) {
       setError('Please fill in required fields (Name, Email, Password).');
+      return;
+    }
+
+    if (!isBusinessEmail(formData.email)) {
+      setError("Please use your organization's work email address.");
       return;
     }
 
@@ -224,15 +229,20 @@ const OrganisationSignup = () => {
                   onChange={handleChange}
                   required
                 />
-                <InputField
-                  label="Work Email Address"
-                  name="email"
-                  type="email"
-                  placeholder="admin@organisation.com"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                />
+                <div>
+                  <InputField
+                    label="Work Email Address"
+                    name="email"
+                    type="email"
+                    placeholder="admin@organisation.com"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                  />
+                  {emailError && (
+                    <p className="text-shnoor-danger text-xs mt-1 -mb-3">{emailError}</p>
+                  )}
+                </div>
               </div >
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

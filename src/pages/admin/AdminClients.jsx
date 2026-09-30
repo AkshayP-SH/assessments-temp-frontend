@@ -18,9 +18,9 @@ const StatusBadge = ({ active }) => (
 );
 
 const StatPill = ({ label, value }) => (
-  <div className="flex flex-col items-center bg-[#E5E5F3] dark:bg-gray-800 rounded-lg px-4 py-3 min-w-[80px]">
+  <div className="flex flex-col items-center bg-slate-100 dark:bg-gray-800 rounded-lg px-4 py-3 min-w-[80px]">
     <span className="text-xl font-bold text-gray-900 dark:text-white">{value ?? '-'}</span>
-    <span className="text-[10px] text-[#6A6A9D] dark:text-gray-400 uppercase tracking-wide mt-1">{label}</span>
+    <span className="text-[10px] text-slate-500 dark:text-gray-400 uppercase tracking-wide mt-1">{label}</span>
   </div>
 );
 
@@ -822,7 +822,7 @@ const ClientDetailPanel = ({ client, onClose, onStatusChange, onDelete, onClient
           </div>
           <div>
             <label className="block text-sm font-bold text-[#4A4A7A] dark:text-gray-300 uppercase tracking-wide mb-1.5">Registration Token</label>
-            <div className="bg-[#E5E5F3] dark:bg-gray-800 rounded-lg px-4 py-3">
+            <div className="bg-slate-100 dark:bg-gray-800 rounded-lg px-4 py-3">
               <code className="text-sm font-mono text-gray-800 dark:text-gray-200 break-all">{client.registration_token}</code>
             </div>
           </div>
@@ -1038,7 +1038,7 @@ const AdminClients = () => {
           <div className="bg-white rounded-2xl shadow-sm overflow-hidden mb-8">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm whitespace-nowrap">
-                <thead className="bg-[#E5E5F3] dark:bg-[#1a1a2e] text-gray-900 dark:text-gray-200 border-b border-[#D1D1E6] dark:border-[#383863]">
+                <thead className="bg-slate-100/90 dark:bg-[#1a1a2e] text-slate-900 dark:text-gray-200 border-b border-slate-200 dark:border-[#383863]">
                   <tr>
                     <th className="px-5 py-4 font-bold tracking-wide">Organization</th>
                     <th className="px-5 py-4 font-bold tracking-wide">Plan</th>
@@ -1100,7 +1100,7 @@ const AdminClients = () => {
                         <td className="px-5 py-4 text-center">
                           <button
                             onClick={() => setSelectedClient(client)}
-                            className="h-8 px-4 bg-[#E5E5F3] dark:bg-[#383863] hover:bg-[#D1D1E6] dark:hover:bg-[#403f75] text-[#403f75] dark:text-white rounded-lg text-xs font-bold transition-colors"
+                            className="h-8 px-4 bg-slate-100 dark:bg-[#383863] hover:bg-slate-200 dark:hover:bg-[#403f75] text-slate-800 dark:text-white rounded-lg text-xs font-bold transition-colors cursor-pointer"
                           >
                             Manage
                           </button>

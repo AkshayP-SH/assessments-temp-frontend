@@ -46,7 +46,14 @@ const CodingBankSelector = ({ onClose, onSelect }) => {
       });
       const data = await response.json();
       if (data.success) {
-        setQuestions(data.questions);
+        const seen = new Set();
+        const uniqueQuestions = (data.questions || []).filter((q) => {
+          const key = (q.title || '').trim().toLowerCase();
+          if (!key || seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+        setQuestions(uniqueQuestions);
       }
     } catch (error) {
       console.error('Error fetching questions:', error);

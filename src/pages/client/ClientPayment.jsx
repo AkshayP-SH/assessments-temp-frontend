@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useClientAuth } from '../../contexts/ClientAuthContext';
 import { getApiUrl } from '../../config/api';
 import AdminHeader from '../../components/AdminHeader';
 import Button from '../../components/Button';
@@ -15,7 +14,6 @@ const ClientPayment = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const { clientUser } = useClientAuth();
   
   const [paymentMethod, setPaymentMethod] = useState('upi');
   const [processing, setProcessing] = useState(false);

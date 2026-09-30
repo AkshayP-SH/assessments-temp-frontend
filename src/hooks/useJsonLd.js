@@ -18,7 +18,7 @@ export function useJsonLd(schema) {
       const el = document.getElementById('json-ld-schema');
       if (el) el.remove();
     };
-  }, [JSON.stringify(schema)]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(schema)]);  
 }
 
 export default useJsonLd;

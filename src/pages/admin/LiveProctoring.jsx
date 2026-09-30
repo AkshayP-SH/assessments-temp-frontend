@@ -345,7 +345,7 @@ const LiveProctoring = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#E0E0EF] dark:bg-[#11111d]">
+    <div className="min-h-screen bg-[#F4F6FB] dark:bg-[#11111d]">
       {/* Header */}
       <header className="bg-transparent pt-6 pb-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
