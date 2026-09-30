@@ -7,14 +7,6 @@ import AdminHeader from '../../components/AdminHeader';
 import Button from '../../components/Button';
 import { useSEO } from '../../hooks/useSEO';
 
-// ============================================================================
-// PAYMENT MODE CONFIGURATION
-// ============================================================================
-// Set to true for dummy/test payments (no actual payment gateway)
-// Set to false for real Razorpay integration
-const DUMMY_PAYMENT_MODE = true;
-// ============================================================================
-
 const ClientSubscriptionPlans = () => {
   useSEO({
     title: 'Subscription Plans - SHNOOR Assessments',
@@ -23,7 +15,7 @@ const ClientSubscriptionPlans = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const { clientUser, logout } = useClientAuth();
+  const { logout } = useClientAuth();
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -106,12 +98,9 @@ const ClientSubscriptionPlans = () => {
         return;
       }
 
-      // Use the configured payment mode
-      const isDummyMode = DUMMY_PAYMENT_MODE;
 
-      if (isDummyMode) {
-        // Simulate payment processing delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
+      // Simulate payment processing delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
         // Directly call verify payment with dummy data
         const verifyResponse = await fetch(getApiUrl('api/settings/verify-payment'), {
@@ -149,93 +138,7 @@ const ClientSubscriptionPlans = () => {
           setError(verifyData.message || 'Failed to activate subscription.');
         }
         setProcessingPlan(null);
-        return;
-      }
 
-      // REAL RAZORPAY MODE (for future use)
-      // Create Razorpay order
-      const orderResponse = await apiFetch('api/settings/purchase-subscription', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('clientToken')}`
-        },
-        body: JSON.stringify({ plan_id: planId }),
-      });
-
-      const orderData = await orderResponse.json();
-
-      if (!orderData.success) {
-        throw new Error(orderData.message || 'Failed to create order');
-      }
-
-      // Load Razorpay SDK
-      const script = document.createElement('script');
-      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-      script.async = true;
-      document.body.appendChild(script);
-
-      script.onload = () => {
-        const options = {
-          key: orderData.key_id,
-          amount: orderData.amount,
-          currency: orderData.currency,
-          name: 'SHNOOR Assessments',
-          description: 'Subscription Plan',
-          order_id: orderData.order_id,
-          handler: async (response) => {
-            // Verify payment
-            try {
-              const verifyResponse = await apiFetch('api/settings/verify-payment', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  razorpay_order_id: response.razorpay_order_id,
-                  razorpay_payment_id: response.razorpay_payment_id,
-                  razorpay_signature: response.razorpay_signature,
-                  plan_id: planId,
-                }),
-              });
-
-              const verifyData = await verifyResponse.json();
-
-              if (verifyData.success) {
-                // Payment successful, navigate to dashboard
-                navigate('/client/dashboard', {
-                  replace: true,
-                  state: { message: 'Payment successful! Your subscription is now active.' }
-                });
-              } else {
-                setError('Payment verification failed. Please contact support.');
-              }
-            } catch (err) {
-              setError('Payment verification failed. Please contact support.');
-            } finally {
-              setProcessingPlan(null);
-            }
-          },
-          prefill: {
-            email: clientUser?.email || '',
-            name: clientUser?.fullName || '',
-          },
-          theme: {
-            color: '#6366f1',
-          },
-          modal: {
-            ondismiss: () => {
-              setProcessingPlan(null);
-            },
-          },
-        };
-
-        const rzp = new window.Razorpay(options);
-        rzp.open();
-      };
-
-      script.onerror = () => {
-        setError('Failed to load payment gateway. Please try again.');
-        setProcessingPlan(null);
-      };
     } catch (err) {
       setError(err.message || 'Failed to initiate payment');
       setProcessingPlan(null);
