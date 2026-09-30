@@ -90,10 +90,10 @@ const CustomDropdown = memo(({
         aria-haspopup="listbox"
         aria-controls={dropdownId}
         aria-activedescendant={isOpen && options[activeIndex] ? `${dropdownId}-${activeIndex}` : undefined}
-        className={`flex items-center justify-between gap-1.5 sm:gap-2 px-3 py-2 w-full text-xs sm:text-sm border border-shnoor-mist rounded-lg focus:ring-2 focus:ring-shnoor-indigo focus:border-shnoor-indigo bg-white cursor-pointer hover:border-shnoor-indigo transition-all shadow-sm font-bold text-shnoor-navy min-h-[38px] ${buttonClassName}`}
+        className={`flex items-center justify-between gap-1.5 sm:gap-2 px-3 py-2 w-full text-xs sm:text-sm border border-theme-stroke rounded-lg focus:ring-2 focus:ring-theme-accent focus:border-theme-accent bg-theme-hdr cursor-pointer hover:border-theme-accent transition-all shadow-sm font-bold text-theme-inv-text min-h-[38px] ${buttonClassName}`}
       >
         <span className="truncate text-left">{selectedOption?.label || placeholder}</span>
-        <ChevronDown className={`text-shnoor-indigoMedium transition-transform duration-200 flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`} size={15} />
+        <ChevronDown className={`text-[#8F8FC4] transition-transform duration-200 flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`} size={15} />
       </button>
 
       {isOpen && (
@@ -101,7 +101,7 @@ const CustomDropdown = memo(({
           id={dropdownId}
           role="listbox"
           aria-label={placeholder}
-          className={`absolute top-full left-0 mt-1 w-full min-w-full max-w-[calc(100vw-32px)] bg-white border border-shnoor-mist rounded-xl shadow-xl z-50 py-1 overflow-hidden animate-in fade-in zoom-in-95 duration-100 max-h-60 overflow-y-auto ${menuClassName}`}
+          className={`absolute top-full left-0 mt-1 w-full min-w-full max-w-[calc(100vw-32px)] bg-theme-hdr border border-theme-stroke rounded-xl shadow-xl z-50 py-1 overflow-hidden animate-in fade-in zoom-in-95 duration-100 max-h-60 overflow-y-auto ${menuClassName}`}
         >
           {options.map((option) => (
             <button
@@ -115,9 +115,9 @@ const CustomDropdown = memo(({
               onMouseEnter={() => setActiveIndex(options.indexOf(option))}
               className={`w-full text-left px-3 py-2 text-xs sm:text-sm transition-colors flex items-center justify-between ${
                 String(value) === String(option.value)
-                  ? 'bg-shnoor-lavender text-shnoor-indigo font-bold'
-                  : 'text-shnoor-navy hover:bg-shnoor-lavender/50 font-medium'
-              } ${activeIndex === options.indexOf(option) ? 'ring-2 ring-inset ring-shnoor-indigo' : ''}`}
+                  ? 'bg-theme-accent text-white font-bold'
+                  : 'text-theme-inv-muted hover:bg-theme-accent/50 font-medium'
+              } ${activeIndex === options.indexOf(option) ? 'ring-2 ring-inset ring-theme-accent' : ''}`}
             >
               <span className="truncate">{option.label}</span>
             </button>
@@ -267,7 +267,7 @@ const ExamSearchFilter = memo(({
               <button
                 type="button"
                 onClick={clearFilters}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg font-medium bg-white text-shnoor-danger hover:bg-shnoor-dangerLight transition-all border border-shnoor-dangerLight shadow-sm flex-shrink-0"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg font-medium bg-theme-hdr text-shnoor-danger hover:bg-theme-accent transition-all border border-shnoor-danger shadow-sm flex-shrink-0"
                 title="Clear all filters"
               >
                 <X size={15} />
@@ -278,11 +278,11 @@ const ExamSearchFilter = memo(({
         </div>
 
         {activeFilterBadges.length > 0 && !showFilters && (
-          <div className="flex flex-wrap gap-2 mt-2 pt-2 border-t border-shnoor-mist">
+          <div className="flex flex-wrap gap-2 mt-2 pt-2 border-t border-theme-stroke">
             {activeFilterBadges.map((badge) => (
               <span
                 key={badge.key}
-                className="inline-flex items-center gap-1 px-2 py-1 bg-shnoor-lavender text-shnoor-indigo text-xs rounded-md font-bold"
+                className="inline-flex items-center gap-1 px-2 py-1 bg-theme-accent text-white text-xs rounded-md font-bold"
               >
                 {badge.label}
               </span>
@@ -291,7 +291,7 @@ const ExamSearchFilter = memo(({
         )}
 
         {showFilters && (
-          <div className="flex flex-wrap gap-2 pt-3 mt-3 border-t border-shnoor-mist animate-in slide-in-from-top-2 duration-200">
+          <div className="flex flex-wrap gap-2 pt-3 mt-3 border-t border-theme-stroke animate-in slide-in-from-top-2 duration-200">
             {showPublishedFilter && (
               <CustomDropdown
                 value={filters.published}
