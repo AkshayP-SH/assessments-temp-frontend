@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useClientAuth } from '../../contexts/ClientAuthContext';
 import { getApiUrl } from '../../config/api';
 import AdminHeader from '../../components/AdminHeader';
 import Button from '../../components/Button';
@@ -14,7 +15,8 @@ const ClientPayment = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  
+  const { clientUser } = useClientAuth();
+
   const [paymentMethod, setPaymentMethod] = useState('upi');
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState('');
@@ -40,16 +42,16 @@ const ClientPayment = () => {
     try {
       // Simulate payment processing delay
       await new Promise(resolve => setTimeout(resolve, 1500));
-      
+
       const token = localStorage.getItem('clientToken') || localStorage.getItem('adminToken');
-      
+
       if (!token) {
         throw new Error('Authentication token not found. Please login again.');
       }
-      
+
       const verifyResponse = await fetch(getApiUrl('api/settings/verify-payment'), {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
@@ -64,7 +66,7 @@ const ClientPayment = () => {
       });
 
       const verifyData = await verifyResponse.json();
-      
+
       if (verifyData.success) {
         const storedUser = JSON.parse(localStorage.getItem('clientUser') || '{}');
         storedUser.requiresPayment = false;
@@ -72,10 +74,10 @@ const ClientPayment = () => {
         storedUser.subscriptionActive = true;
         localStorage.setItem('clientUser', JSON.stringify(storedUser));
         localStorage.setItem('adminUser', JSON.stringify(storedUser));
-        
-        navigate('/client/dashboard', { 
-          replace: true, 
-          state: { message: 'Payment successful! Your subscription is now active.' } 
+
+        navigate('/client/dashboard', {
+          replace: true,
+          state: { message: 'Payment successful! Your subscription is now active.' }
         });
       } else {
         setError('Payment verification failed. Please contact support.');
@@ -90,7 +92,7 @@ const ClientPayment = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-shnoor-lavender via-white to-shnoor-lavender">
       <AdminHeader isClientPortal={true} />
-      
+
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <button
           onClick={() => navigate(-1)}
@@ -143,7 +145,7 @@ const ClientPayment = () => {
           {/* Right Column: Payment Form */}
           <div className="bg-white rounded-3xl shadow-xl p-8 border-2 border-shnoor-mist h-fit">
             <h1 className="text-3xl font-extrabold text-shnoor-navy mb-6 text-center">Complete Payment</h1>
-            
+
             {error && (
               <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-lg border border-red-200">
                 {error}
@@ -153,14 +155,13 @@ const ClientPayment = () => {
             <form onSubmit={handlePayment} className="space-y-8">
               <div className="space-y-4">
                 <label className="text-lg font-bold text-shnoor-navy block">Select Payment Method</label>
-                
+
                 <div className="grid grid-cols-1 gap-4">
-                  <label 
-                    className={`flex items-center gap-4 p-4 border-2 rounded-xl cursor-pointer transition-all ${
-                      paymentMethod === 'upi' 
-                        ? 'border-shnoor-indigo bg-indigo-50 shadow-md' 
+                  <label
+                    className={`flex items-center gap-4 p-4 border-2 rounded-xl cursor-pointer transition-all ${paymentMethod === 'upi'
+                        ? 'border-shnoor-indigo bg-indigo-50 shadow-md'
                         : 'border-gray-200 hover:border-shnoor-indigo hover:bg-gray-50'
-                    }`}
+                      }`}
                   >
                     <input
                       type="radio"
@@ -174,12 +175,11 @@ const ClientPayment = () => {
                     <span className={`font-semibold text-lg ${paymentMethod === 'upi' ? 'text-shnoor-indigo' : 'text-gray-700'}`}>UPI</span>
                   </label>
 
-                  <label 
-                    className={`flex items-center gap-4 p-4 border-2 rounded-xl cursor-pointer transition-all ${
-                      paymentMethod === 'card' 
-                        ? 'border-shnoor-indigo bg-indigo-50 shadow-md' 
+                  <label
+                    className={`flex items-center gap-4 p-4 border-2 rounded-xl cursor-pointer transition-all ${paymentMethod === 'card'
+                        ? 'border-shnoor-indigo bg-indigo-50 shadow-md'
                         : 'border-gray-200 hover:border-shnoor-indigo hover:bg-gray-50'
-                    }`}
+                      }`}
                   >
                     <input
                       type="radio"
@@ -198,9 +198,8 @@ const ClientPayment = () => {
               <Button
                 type="submit"
                 disabled={processing}
-                className={`w-full h-14 flex items-center justify-center gap-2 text-lg font-bold shadow-lg transition-all duration-300 ${
-                  processing ? 'opacity-75 cursor-not-allowed' : 'hover:shadow-xl hover:scale-105'
-                }`}
+                className={`w-full h-14 flex items-center justify-center gap-2 text-lg font-bold shadow-lg transition-all duration-300 ${processing ? 'opacity-75 cursor-not-allowed' : 'hover:shadow-xl hover:scale-105'
+                  }`}
               >
                 {processing ? (
                   <>

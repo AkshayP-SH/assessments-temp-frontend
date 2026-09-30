@@ -91,7 +91,7 @@ const ClientDashboard = () => {
       });
 
       if (Array.isArray(studentsData)) setStudents(studentsData);
-    } catch {
+    } catch (err) {
       setError('Failed to load dashboard data. Please refresh.');
     } finally {
       setLoading(false);
@@ -169,7 +169,7 @@ const ClientDashboard = () => {
             } else {
               alert(verifyData.message || 'Payment verification failed');
             }
-          } catch {
+          } catch (err) {
             alert('Error verifying payment');
           }
         },
@@ -187,7 +187,7 @@ const ClientDashboard = () => {
         alert(response.error.description);
       });
       rzp.open();
-    } catch {
+    } catch (err) {
       alert('Error purchasing subscription');
     }
   };
