@@ -410,6 +410,8 @@ const ExamsTab = ({
               )}
             </>
           )}
+        </>
+      )}
 
 {/* Delete Confirmation Modal */ }
 {
