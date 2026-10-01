@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Upload, FileText, Plus, Save, Trash2, ArrowLeft, CheckCircle, AlertCircle, Loader2, Pencil, X, Eye, AlignLeft, List, Code } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import { apiFetch } from '../../config/api';
 import CodingQuestionSelector from './CodingQuestionSelector';
 import MCQBankSelector from './MCQBankSelector';
@@ -627,6 +628,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                         endDateTime: convertISTToUTC(endDateTime),
                         status: 'draft', // Save as draft initially
                         questions: questionData,
+                        codingQuestionsCount: codingQuestions.length,
                         ...(clientId ? { client_id: clientId } : {})
                     })
                 });
@@ -677,6 +679,51 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
         } finally {
             setIsUploading(false);
         }
+    };
+
+    // Mirrors the backend bulk-upload row parsing (routes/upload.js buildBulkQuestionInsert)
+    const parseQuestionsFile = async (file) => {
+        const workbook = XLSX.read(await file.arrayBuffer(), { type: 'array' });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const rows = sheet ? XLSX.utils.sheet_to_json(sheet) : [];
+
+        return rows
+            .map((row, idx) => {
+                const getVal = (...keys) => {
+                    for (const key of keys) {
+                        const normalizedKey = key.toLowerCase().replace(/\s+/g, '');
+                        for (const k of Object.keys(row)) {
+                            if (k.toLowerCase().replace(/\s+/g, '') === normalizedKey) return row[k];
+                        }
+                    }
+                    return undefined;
+                };
+
+                const text = getVal('question');
+                const options = [
+                    getVal('optiona', 'option1'),
+                    getVal('optionb', 'option2'),
+                    getVal('optionc', 'option3'),
+                    getVal('optiond', 'option4')
+                ].map((opt) => (opt === undefined || opt === null ? '' : String(opt)));
+                const rawCorrect = String(getVal('correctoption') ?? '').trim().toUpperCase();
+                const correctOption = /^[1-4]$/.test(rawCorrect)
+                    ? parseInt(rawCorrect, 10) - 1
+                    : 'ABCD'.indexOf(rawCorrect.replace(/[^A-D]/g, '').charAt(0));
+
+                if (!text || !options[0] || !options[1] || correctOption < 0) return null;
+
+                return {
+                    id: Date.now() + idx + Math.random(),
+                    fromUpload: true,
+                    text: String(text),
+                    options,
+                    correctOption,
+                    marks: parseInt(getVal('marks'), 10) || 1,
+                    format: 'paragraph'
+                };
+            })
+            .filter(Boolean);
     };
 
     const handleBulkUpload = async (e) => {
@@ -786,74 +833,17 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                     alert(data.message || 'Failed to upload questions');
                 }
             } else {
-                // Create mode: Create new test
-                const formData = new FormData();
-                formData.append('file', file);
-                formData.append('testName', testTitle);
-                formData.append('jobRoles', JSON.stringify(jobRoles));
-                formData.append('testDescription', jobRoles[0]?.job_description || '');
-                formData.append('duration', duration);
-                formData.append('maxAttempts', maxAttempts);
-                formData.append('passingPercentage', passingPercentage);
-                formData.append('startDateTime', convertISTToUTC(startDateTime) || '');
-                formData.append('endDateTime', convertISTToUTC(endDateTime) || '');
-                formData.append('status', 'draft');
-                if (clientId) formData.append('client_id', clientId);
+                // Create mode: parse the file locally and add its questions to the list.
+                // The test itself is created later by the Save button (handleManualSubmit).
+                const parsed = await parseQuestionsFile(file);
 
-                // FIX: Use native fetch instead of apiFetch
-                const response = await fetch(`${cleanBaseUrl}/api/upload/questions`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                        // DO NOT put Content-Type here!
-                    },
-                    body: formData
-                });
-
-                // Catch HTML error pages
-                const contentType = response.headers.get("content-type");
-                if (contentType && contentType.indexOf("application/json") === -1) {
-                    throw new Error("Server returned HTML. The endpoint /api/upload/questions might be incorrect or missing on the backend.");
+                if (parsed.length === 0) {
+                    alert('No valid questions found in the file. Each row needs Question, OptionA, OptionB and CorrectOption.');
+                    return;
                 }
 
-                const data = await response.json();
-
-                if (response.ok && data.success) {
-                    const testId = data.testId;
-
-                    // CODE EXECUTION FEATURE 
-                    if (ENABLE_CODE_EXECUTION) {
-                        // Save coding questions after bulk upload
-                        console.log('[BULK UPLOAD] Saving coding questions:', codingQuestions.length);
-                        console.log('[BULK UPLOAD] Coding questions data:', JSON.stringify(codingQuestions, null, 2));
-                        
-                        const codingResponse = await apiFetch(`api/coding-questions/test/${testId}`, {
-                            method: 'POST',
-                            headers: {
-                                'Authorization': `Bearer ${token}`,
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                codingQuestions: codingQuestions
-                            })
-                        });
-                    
-                        const codingData = await codingResponse.json();
-                        if (!codingResponse.ok || !codingData.success) {
-                            console.error('[BULK UPLOAD] Failed to save coding questions:', codingData);
-                            alert('Test created but failed to save coding questions: ' + codingData.message);
-                            setIsUploading(false);
-                            return;
-                        }
-                        console.log('[BULK UPLOAD] Coding questions saved successfully');
-                    }
-
-                    setUploadedTestId(testId);
-                    setUploadedTestName(testTitle);
-                    setStep('success');
-                } else {
-                    alert(data.message || 'Failed to upload test');
-                }
+                setQuestions((prev) => [...prev, ...parsed]);
+                setStep('init');
             }
         } catch (error) {
             console.error('Upload error:', error);
@@ -914,8 +904,8 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
 
     return (
         <div className="space-y-6">
-            {/* Step 1: Initialization */}
-            {step === 'init' && (
+            {/* Step 1: Initialization (stays mounted under the Manual Entry / Bulk Upload modals) */}
+            {(step === 'init' || step === 'manual' || step === 'bulk') && (
                 <div className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-light p-8 max-w-3xl mx-auto">
                     <div className="flex items-center justify-between mb-6">
                         <h2 className="text-2xl font-bold text-shnoor-navy">{isEditMode ? (viewMode ? 'View Assessment' : 'Edit Assessment') : 'Create New Assessment'}</h2>
@@ -1135,8 +1125,8 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                             </div>
                         )} 
 
-                        {/* Coding Questions List */}
-                         {codingQuestions.length > 0 && (
+                        {/* Coding Questions List (edit mode; create mode renders the combined list below the entry options) */}
+                         {isEditMode && codingQuestions.length > 0 && (
                             <div className="pt-4 space-y-3">
                                 <h4 className="font-semibold text-shnoor-navy mb-3">Coding Questions ({codingQuestions.length})</h4>
                                 {codingQuestions.map((q, idx) => (
@@ -1315,29 +1305,137 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                                 </button>
                             </div>
                         )}
+
+                        {/* Questions List + Save (create mode) */}
+                        {!isEditMode && (
+                            <div className="pt-4">
+                                <h4 className="font-semibold text-shnoor-navy mb-3">Questions ({questions.length + codingQuestions.length})</h4>
+                                {questions.length + codingQuestions.length === 0 ? (
+                                    <div className="text-center py-8 text-shnoor-navy border-2 border-dashed border-shnoor-mist rounded-lg">
+                                        <FileText className="mx-auto h-10 w-10 mb-2 opacity-50" />
+                                        <p>No questions added yet</p>
+                                    </div>
+                                ) : (
+                                    <div className="max-h-96 overflow-y-auto space-y-3 pr-1">
+                                        {codingQuestions.map((q, idx) => (
+                                            <div key={q.id} className="bg-white border-2 border-shnoor-mist rounded-lg p-4 hover:border-shnoor-mist transition-colors">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center space-x-3">
+                                                        <div className="w-10 h-10 bg-shnoor-lavender rounded-lg flex items-center justify-center">
+                                                            <Code className="w-5 h-5 text-shnoor-navy" />
+                                                        </div>
+                                                        <div>
+                                                            <h4 className="font-semibold text-shnoor-navy">Coding Question {idx + 1}</h4>
+                                                            <p className="text-sm text-shnoor-navy">{q.title}</p>
+                                                            <p className="text-xs text-shnoor-indigo mt-1">Marks: {q.marks || 10}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center space-x-2">
+                                                        <button
+                                                            onClick={() => handleViewCodingQuestion(q)}
+                                                            className="p-2 bg-shnoor-lavender hover:bg-shnoor-lavender text-shnoor-navy rounded-lg transition-colors"
+                                                            title="View question"
+                                                        >
+                                                            <Eye size={18} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleEditCodingQuestion(q)}
+                                                            className="p-2 bg-shnoor-lavender hover:bg-shnoor-lavender text-shnoor-indigo rounded-lg transition-colors"
+                                                            title="Edit question"
+                                                        >
+                                                            <Pencil size={18} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleRemoveCodingQuestion(q.id)}
+                                                            className="p-2 bg-shnoor-dangerLight hover:bg-shnoor-dangerLight text-shnoor-danger rounded-lg transition-colors"
+                                                            title="Delete question"
+                                                        >
+                                                            <Trash2 size={18} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        {questions.map((q, idx) => (
+                                            <div key={q.id} className="bg-white border-2 border-shnoor-mist rounded-lg p-4 hover:border-shnoor-mist transition-colors">
+                                                <div className="flex items-center justify-between gap-3">
+                                                    <div className="flex items-center space-x-3 min-w-0">
+                                                        <div className="w-10 h-10 bg-shnoor-lavender rounded-lg flex items-center justify-center flex-shrink-0">
+                                                            <FileText className="w-5 h-5 text-shnoor-navy" />
+                                                        </div>
+                                                        <div className="min-w-0">
+                                                            <div className="flex flex-wrap items-center gap-1.5">
+                                                                <h4 className="font-semibold text-shnoor-navy">MCQ Question {idx + 1}</h4>
+                                                                {q.fromBank && (
+                                                                    <span className="text-xs text-shnoor-indigo bg-shnoor-lavender px-2 py-0.5 rounded">Bank</span>
+                                                                )}
+                                                            </div>
+                                                            <p className="text-sm text-shnoor-navy line-clamp-1">{q.text}</p>
+                                                            <p className="text-xs text-shnoor-indigo mt-1">Marks: {q.marks || 1}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center space-x-2 flex-shrink-0">
+                                                        <button
+                                                            onClick={() => handleRemoveQuestion(q.id)}
+                                                            className="p-2 bg-shnoor-dangerLight hover:bg-shnoor-dangerLight text-shnoor-danger rounded-lg transition-colors"
+                                                            title="Delete question"
+                                                        >
+                                                            <Trash2 size={18} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* Sticky Save button */}
+                                <div className="sticky bottom-0 z-10 bg-white pt-4 pb-2 mt-2">
+                                    <button
+                                        onClick={handleManualSubmit}
+                                        disabled={questions.length + codingQuestions.length === 0 || isUploading || !testTitle.trim() || nameAvailability.available === false}
+                                        className="w-full py-4 bg-shnoor-indigo hover:bg-shnoor-indigo text-white font-bold rounded-lg transition-colors shadow-sm flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        {isUploading ? (
+                                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                                        ) : (
+                                            <>
+                                                <Save size={20} />
+                                                <span>Save ({questions.length + codingQuestions.length} Questions)</span>
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}
 
-            {/* Step 2: Manual Entry */}
+            {/* Manual Entry Modal */}
             {step === 'manual' && (
-                <div className="bg-white rounded-xl shadow-sm border border-shnoor-mist p-6">
-                    <div className="flex items-center justify-between mb-6 pb-6 border-b border-shnoor-mist">
-                        <div className="flex items-center space-x-4">
-                            <button onClick={() => setStep('init')} className="p-2 hover:bg-shnoor-lavender rounded-full transition-colors">
-                                <ArrowLeft size={20} className="text-shnoor-navy" />
-                            </button>
-                            <div>
-                                <h2 className="text-xl font-bold text-shnoor-navy">{testTitle}</h2>
-                                <p className="text-sm text-shnoor-navy">Adding questions manually</p>
-                            </div>
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+                    <div className="bg-white rounded-xl shadow-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+                    <div className="sticky top-0 z-10 bg-white border-b border-shnoor-mist p-6 flex items-center justify-between">
+                        <div>
+                            <h3 className="text-xl font-bold text-shnoor-navy">{testTitle}</h3>
+                            <p className="text-sm text-shnoor-navy">Adding questions manually</p>
                         </div>
-                        <div className="flex items-center space-x-2 bg-shnoor-lavender px-4 py-2 rounded-lg">
-                            <span className="text-shnoor-indigo font-bold">{questions.length}</span>
-                            <span className="text-shnoor-indigo text-sm">Questions Added</span>
+                        <div className="flex items-center space-x-3">
+                            <div className="flex items-center space-x-2 bg-shnoor-lavender px-4 py-2 rounded-lg">
+                                <span className="text-shnoor-indigo font-bold">{questions.length}</span>
+                                <span className="text-shnoor-indigo text-sm">Questions Added</span>
+                            </div>
+                            <button
+                                onClick={() => setStep('init')}
+                                className="p-2 hover:bg-shnoor-lavender rounded-lg transition-colors"
+                            >
+                                <X size={20} className="text-shnoor-navy" />
+                            </button>
                         </div>
                     </div>
 
+                    <div className="p-6">
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         {/* Form Side */}
                         <div className="lg:col-span-2 space-y-6">
@@ -1474,7 +1572,8 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                             <div className="pt-6 border-t border-shnoor-mist">
                                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-3">
                                     <button
-                                        onClick={handleManualSubmit}
+                                        // Create mode: return to the Create New Assessment page; the test is saved from there
+                                        onClick={isEditMode ? handleManualSubmit : () => setStep('init')}
                                         disabled={questions.length === 0 || isUploading}
                                         className={`flex-1 py-4 bg-shnoor-indigo hover:bg-shnoor-indigo text-white font-bold rounded-lg transition-colors shadow-sm flex items-center justify-center space-x-2 ${questions.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     >
@@ -1546,22 +1645,29 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                             )}
                         </div>
                     </div>
+                    </div>
+                    </div>
                 </div>
             )}
 
-            {/* Step 2: Bulk Upload */}
+            {/* Bulk Upload Modal */}
             {step === 'bulk' && (
-                <div className="bg-white rounded-xl shadow-sm border border-shnoor-mist p-6 max-w-2xl mx-auto">
-                    <div className="flex items-center space-x-4 mb-6 pb-6 border-b border-shnoor-mist">
-                        <button onClick={() => setStep('init')} className="p-2 hover:bg-shnoor-lavender rounded-full transition-colors">
-                            <ArrowLeft size={20} className="text-shnoor-navy" />
-                        </button>
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+                    <div className="bg-white rounded-xl shadow-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+                    <div className="sticky top-0 z-10 bg-white border-b border-shnoor-mist p-6 flex items-center justify-between">
                         <div>
-                            <h2 className="text-xl font-bold text-shnoor-navy">{testTitle}</h2>
+                            <h3 className="text-xl font-bold text-shnoor-navy">{testTitle}</h3>
                             <p className="text-sm text-shnoor-navy">Bulk Upload via Excel/CSV</p>
                         </div>
+                        <button
+                            onClick={() => setStep('init')}
+                            className="p-2 hover:bg-shnoor-lavender rounded-lg transition-colors"
+                        >
+                            <X size={20} className="text-shnoor-navy" />
+                        </button>
                     </div>
 
+                    <div className="p-6">
                     <div className="border-2 border-dashed border-shnoor-mist rounded-lg p-12 text-center hover:border-shnoor-indigo transition-colors relative">
                         {isUploading && (
                             <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10">
@@ -1596,6 +1702,8 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                             <p className="font-bold mb-1">CSV Template Format:</p>
                             <p>Question, Option1, Option2, Option3, Option4, CorrectOption(1-4), Marks, Tags</p>
                         </div>
+                    </div>
+                    </div>
                     </div>
                 </div>
             )}
