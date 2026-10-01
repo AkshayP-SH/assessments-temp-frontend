@@ -1,6 +1,51 @@
 import { apiFetch } from '../config/api';
 
 class CodeExecutionAPI {
+  async resolveExecutionResponse(response, failureMessage) {
+    const payload = await response.json();
+
+    if (!response.ok) {
+      throw new Error(payload.error || payload.message || failureMessage);
+    }
+
+    if (payload.jobId) {
+      return this.waitForQueuedResult(payload.jobId);
+    }
+
+    return payload.data;
+  }
+
+  async waitForQueuedResult(jobId) {
+    const deadline = Date.now() + 240000;
+    const token = localStorage.getItem('studentAuthToken');
+
+    while (Date.now() < deadline) {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      const response = await apiFetch(`api/code/status/${encodeURIComponent(jobId)}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        skipGlobalErrorRedirect: true
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload.error || payload.message || 'Failed to check code execution status');
+      }
+
+      if (payload.status === 'completed') {
+        return payload.result;
+      }
+
+      if (payload.status === 'failed' || payload.status === 'not_found') {
+        throw new Error(payload.error || `Code execution job ${payload.status}`);
+      }
+    }
+
+    throw new Error('Code execution timed out while waiting for the queued job');
+  }
+
   /**
    * Execute code without input
    * @param {string} code - The code to execute
@@ -22,13 +67,7 @@ class CodeExecutionAPI {
         skipGlobalErrorRedirect: true
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Code execution failed');
-      }
-
-      const data = await response.json();
-      return data.data; // Return the execution result
+      return await this.resolveExecutionResponse(response, 'Code execution failed');
     } catch (error) {
       console.error('Code execution error:', error);
       return {
@@ -63,13 +102,7 @@ class CodeExecutionAPI {
         skipGlobalErrorRedirect: true
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Code execution failed');
-      }
-
-      const data = await response.json();
-      return data.data;
+      return await this.resolveExecutionResponse(response, 'Code execution failed');
     } catch (error) {
       console.error('Code execution with input error:', error);
       return {
@@ -104,13 +137,7 @@ class CodeExecutionAPI {
         skipGlobalErrorRedirect: true
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Code evaluation failed');
-      }
-
-      const data = await response.json();
-      return data.data;
+      return await this.resolveExecutionResponse(response, 'Code evaluation failed');
     } catch (error) {
       console.error('Code evaluation error:', error);
       return {
