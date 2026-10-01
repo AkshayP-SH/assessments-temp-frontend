@@ -6,7 +6,6 @@ import {
 } from 'lucide-react';
 
 const ExamSearchFilter = lazy(() => import('../../components/ExamSearchFilter'));
-import Pagination from '../../components/Pagination';
 
 const ExamsTab = ({
   loading,
@@ -27,6 +26,7 @@ const ExamsTab = ({
   setOpenMenuId,
   handlePreviewQuestions,
   handleViewTestHistory,
+  handleViewJob,
   handleOpenCloneModal,
   handleViewTestDetails,
   setShowCreateTest,
@@ -37,8 +37,7 @@ const ExamsTab = ({
   examCurrentPage,
   setExamCurrentPage,
   examTotalPages,
-  examItemsPerPage,
-  setExamItemsPerPage
+  examItemsPerPage = 9,
 }) => {
   const [testToDelete, setTestToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -396,16 +395,47 @@ const ExamsTab = ({
               })}
               </div>
 
-              {filteredTests.length > 0 && (
-                <div className="mt-6">
-                  <Pagination
-                    currentPage={examCurrentPage}
-                    totalPages={examTotalPages}
-                    onPageChange={setExamCurrentPage}
-                    itemsPerPage={examItemsPerPage}
-                    onItemsPerPageChange={setExamItemsPerPage}
-                    totalItems={filteredTests.length}
-                  />
+              {/* Pagination */}
+              {examTotalPages > 1 && (
+                <div className="flex items-center justify-between mt-6 px-2 py-3">
+                  <span className="text-xs font-semibold text-slate-500">
+                    Showing {filteredTests.length === 0 ? 0 : (examCurrentPage - 1) * examItemsPerPage + 1} – {Math.min(examCurrentPage * examItemsPerPage, filteredTests.length)} of {filteredTests.length} exams
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setExamCurrentPage(p => Math.max(1, p - 1))}
+                      disabled={examCurrentPage === 1}
+                      className="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#1E1E38] hover:bg-slate-50 dark:hover:bg-[#25254A] text-slate-700 dark:text-slate-200 flex items-center justify-center text-xs font-bold disabled:opacity-40 cursor-pointer transition-colors"
+                      title="Previous Page"
+                    >
+                      <ChevronLeft size={14} />
+                    </button>
+
+                    {Array.from({ length: examTotalPages }, (_, i) => i + 1).map((pageNum) => (
+                      <button
+                        key={pageNum}
+                        type="button"
+                        onClick={() => setExamCurrentPage(pageNum)}
+                        className={`w-8 h-8 rounded-lg border text-xs font-bold cursor-pointer transition-all ${examCurrentPage === pageNum
+                          ? 'bg-[#403f75] dark:bg-indigo-600 text-white border-[#403f75] dark:border-indigo-600 shadow-xs'
+                          : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-[#1E1E38] hover:bg-slate-50 dark:hover:bg-[#25254A] text-slate-700 dark:text-slate-200'
+                          }`}
+                      >
+                        {pageNum}
+                      </button>
+                    ))}
+
+                    <button
+                      type="button"
+                      onClick={() => setExamCurrentPage(p => Math.min(examTotalPages, p + 1))}
+                      disabled={examCurrentPage === examTotalPages}
+                      className="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#1E1E38] hover:bg-slate-50 dark:hover:bg-[#25254A] text-slate-700 dark:text-slate-200 flex items-center justify-center text-xs font-bold disabled:opacity-40 cursor-pointer transition-colors"
+                      title="Next Page"
+                    >
+                      <ChevronRight size={14} />
+                    </button>
+                  </div>
                 </div>
               )}
             </>
@@ -413,71 +443,69 @@ const ExamsTab = ({
         </>
       )}
 
-{/* Delete Confirmation Modal */ }
-{
-  testToDelete && (
-    <div
-      className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in duration-150"
-      onClick={() => {
-        if (!isDeleting) setTestToDelete(null);
-      }}
-    >
-      <div
-        className="bg-white dark:bg-[#1E1E38] rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 dark:border-slate-700 animate-in zoom-in-95 duration-150"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="p-6">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400 flex items-center justify-center flex-shrink-0 border border-red-100 dark:border-red-900/60 shadow-xs">
-              <AlertCircle size={24} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="text-lg font-extrabold text-slate-900 dark:text-white leading-tight">
-                Delete Exam
-              </h3>
-              <p className="text-sm text-slate-600 dark:text-slate-300 mt-2 leading-relaxed">
-                Are you sure you want to delete <span className="font-bold text-slate-900 dark:text-white break-words">"{testToDelete.name}"</span>?
-              </p>
-              <p className="text-xs text-rose-600 dark:text-rose-400 font-medium mt-3 bg-rose-50 dark:bg-rose-950/50 p-2.5 rounded-xl border border-rose-100 dark:border-rose-900/60 leading-relaxed">
-                This action cannot be undone. All questions, student attempts, and results for this exam will be permanently removed.
-              </p>
-            </div>
-          </div>
+      {/* Delete Confirmation Modal */}
+      {testToDelete && (
+        <div
+          className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in duration-150"
+          onClick={() => {
+            if (!isDeleting) setTestToDelete(null);
+          }}
+        >
+          <div
+            className="bg-white dark:bg-[#1E1E38] rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 dark:border-slate-700 animate-in zoom-in-95 duration-150"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400 flex items-center justify-center flex-shrink-0 border border-red-100 dark:border-red-900/60 shadow-xs">
+                  <AlertCircle size={24} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg font-extrabold text-slate-900 dark:text-white leading-tight">
+                    Delete Exam
+                  </h3>
+                  <p className="text-sm text-slate-600 dark:text-slate-300 mt-2 leading-relaxed">
+                    Are you sure you want to delete <span className="font-bold text-slate-900 dark:text-white break-words">"{testToDelete.name}"</span>?
+                  </p>
+                  <p className="text-xs text-rose-600 dark:text-rose-400 font-medium mt-3 bg-rose-50 dark:bg-rose-950/50 p-2.5 rounded-xl border border-rose-100 dark:border-rose-900/60 leading-relaxed">
+                    This action cannot be undone. All questions, student attempts, and results for this exam will be permanently removed.
+                  </p>
+                </div>
+              </div>
 
-          <div className="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
-            <button
-              type="button"
-              onClick={() => setTestToDelete(null)}
-              disabled={isDeleting}
-              className="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-slate-800 dark:text-slate-300 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer disabled:opacity-50"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={confirmDeleteTest}
-              disabled={isDeleting}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 active:scale-98 text-white text-sm font-bold rounded-xl transition-all shadow-sm shadow-red-500/20 cursor-pointer disabled:opacity-50 min-w-[120px]"
-            >
-              {isDeleting ? (
-                <>
-                  <Loader2 size={16} className="animate-spin" />
-                  <span>Deleting...</span>
-                </>
-              ) : (
-                <>
-                  <Trash2 size={16} />
-                  <span>Delete Exam</span>
-                </>
-              )}
-            </button>
+              <div className="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setTestToDelete(null)}
+                  disabled={isDeleting}
+                  className="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-slate-800 dark:text-slate-300 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmDeleteTest}
+                  disabled={isDeleting}
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 active:scale-98 text-white text-sm font-bold rounded-xl transition-all shadow-sm shadow-red-500/20 cursor-pointer disabled:opacity-50 min-w-[120px]"
+                >
+                  {isDeleting ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      <span>Deleting...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 size={16} />
+                      <span>Delete Exam</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
-  )
-}
-    </div >
   );
 };
 
