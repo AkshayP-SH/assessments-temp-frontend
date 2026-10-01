@@ -160,35 +160,6 @@ const AdminHeader = ({ viewAsControl, title }) => {
                 <div className="h-5 w-[1px] bg-slate-300/80 dark:bg-slate-700 mx-1" />
 
                 <button
-                  className={`h-9 px-3.5 text-xs sm:text-sm font-bold rounded-lg transition-all flex items-center justify-center relative ${location.pathname.includes('student-messages')
-                    ? 'bg-white dark:bg-[#2A2A4E] text-[#403f75] dark:text-indigo-300 shadow-xs'
-                    : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/70 dark:hover:bg-slate-700/60'
-                    }`}
-                  onClick={() => navigate(`${basePath}/student-messages`)}
-                >
-                  <MessageSquare size={15} className="mr-2 text-current" />
-                  <span>Messages</span>
-                  {unreadCount > 0 && (
-                    <span className="ml-1.5 px-1.5 py-0.2 bg-red-500 text-white text-[10px] font-black rounded-full">
-                      {unreadCount > 99 ? '99+' : unreadCount}
-                    </span>
-                  )}
-                </button>
-
-                {!isClientAdmin && (
-                  <button
-                    className={`h-9 px-3.5 text-xs sm:text-sm font-bold rounded-lg transition-all flex items-center justify-center relative ${location.pathname.includes('clients')
-                      ? 'bg-white dark:bg-[#2A2A4E] text-[#403f75] dark:text-indigo-300 shadow-xs'
-                      : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/70 dark:hover:bg-slate-700/60'
-                      }`}
-                    onClick={() => navigate('/admin/clients')}
-                  >
-                    <Building2 size={15} className="mr-2 text-current" />
-                    <span>Clients</span>
-                  </button>
-                )}
-
-                <button
                   className={`h-9 px-3.5 text-xs sm:text-sm font-bold rounded-lg transition-all flex items-center justify-center relative ${location.pathname.includes('live-proctoring')
                     ? 'bg-white dark:bg-[#2A2A4E] text-[#403f75] dark:text-indigo-300 shadow-xs'
                     : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/70 dark:hover:bg-slate-700/60'
@@ -197,17 +168,6 @@ const AdminHeader = ({ viewAsControl, title }) => {
                 >
                   <Video size={15} className="mr-2 text-current" />
                   <span>Live Proctoring</span>
-                </button>
-
-                <button
-                  className={`h-9 px-3.5 text-xs sm:text-sm font-bold rounded-lg transition-all flex items-center justify-center relative ${location.pathname.includes('settings')
-                    ? 'bg-white dark:bg-[#2A2A4E] text-[#403f75] dark:text-indigo-300 shadow-xs'
-                    : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/70 dark:hover:bg-slate-700/60'
-                    }`}
-                  onClick={() => navigate(`${basePath}/settings`)}
-                >
-                  <Settings size={15} className="mr-2 text-current" />
-                  <span>Settings</span>
                 </button>
               </div>
 
@@ -230,9 +190,6 @@ const AdminHeader = ({ viewAsControl, title }) => {
                   className="admin-header-menu-btn"
                 >
                   {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
-                  {!mobileMenuOpen && unreadCount > 0 && (
-                    <span className="admin-header-dot"></span>
-                  )}
                 </button>
               </div>
             </div>
@@ -249,57 +206,12 @@ const AdminHeader = ({ viewAsControl, title }) => {
                   type="button"
                   className="admin-header-mobile-btn"
                   onClick={() => {
-                    navigate(`${basePath}/student-messages`);
-                    setMobileMenuOpen(false);
-                  }}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <MessageSquare size={16} />
-                    <span>Messages</span>
-                  </div>
-                  {unreadCount > 0 && (
-                    <span className="bg-red-500 text-white px-2 py-0.5 text-xs font-bold rounded-full">
-                      {unreadCount > 99 ? '99+' : unreadCount}
-                    </span>
-                  )}
-                </button>
-
-                {!isClientAdmin && (
-                  <button
-                    type="button"
-                    className="admin-header-mobile-btn"
-                    onClick={() => {
-                      navigate('/admin/clients');
-                      setMobileMenuOpen(false);
-                    }}
-                  >
-                    <Building2 size={16} />
-                    <span>Clients</span>
-                  </button>
-                )}
-
-                <button
-                  type="button"
-                  className="admin-header-mobile-btn"
-                  onClick={() => {
                     navigate(`${basePath}/live-proctoring`);
                     setMobileMenuOpen(false);
                   }}
                 >
                   <Video size={16} />
                   <span>Live Proctoring</span>
-                </button>
-
-                <button
-                  type="button"
-                  className="admin-header-mobile-btn"
-                  onClick={() => {
-                    navigate(`${basePath}/settings`);
-                    setMobileMenuOpen(false);
-                  }}
-                >
-                  <Settings size={16} />
-                  <span>Settings</span>
                 </button>
 
                 <button

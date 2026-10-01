@@ -73,7 +73,7 @@ export default function StudentHeader({
             {showBackButton && (
               <button
                 onClick={handleBack}
-                className="h-9 sm:h-10 px-3 sm:px-4 text-xs sm:text-sm font-bold text-[#403f75] dark:text-indigo-300 bg-[#F1F3FB] dark:bg-[#1E1E38] hover:bg-slate-200/80 dark:hover:bg-slate-700/80 border border-slate-200/80 dark:border-slate-700/80 rounded-xl transition-all flex items-center justify-center shadow-2xs active:scale-98"
+                className="student-header-back h-9 sm:h-10 px-3 sm:px-4 text-xs sm:text-sm font-bold text-[#403f75] dark:text-indigo-300 bg-[#F1F3FB] dark:bg-[#1E1E38] hover:bg-slate-200/80 dark:hover:bg-slate-700/80 border border-slate-200/80 dark:border-slate-700/80 rounded-xl transition-all flex items-center justify-center shadow-2xs active:scale-98"
                 title={backLabel}
               >
                 <ArrowLeft size={15} className="mr-1.5" />
@@ -85,18 +85,23 @@ export default function StudentHeader({
 
             {/* Student info */}
             {studentName && (
-              <div className="hidden sm:flex flex-col text-right mr-1">
-                <span className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 leading-tight">
-                  Welcome, {studentName}
-                </span>
-                <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
-                  {capitalizeInstitute(institute)} {studentId ? `• ID: ${studentId}` : ''}
-                </span>
+              <div className="hidden sm:flex items-center gap-2.5 mr-1">
+                <div className="flex flex-col text-right">
+                  <span className="student-header-user-name text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 leading-tight">
+                    {studentName}
+                  </span>
+                  <span className="student-header-user-sub text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                    {capitalizeInstitute(institute)} {studentId ? `• ID: ${studentId}` : ''}
+                  </span>
+                </div>
+                <div className="student-header-avatar w-9 h-9 rounded-xl bg-gradient-to-br from-[#403F75] to-[#6868AC] text-white font-black text-xs flex items-center justify-center shadow-xs uppercase flex-shrink-0">
+                  {studentName.split(' ').map(n => n[0]).slice(0, 2).join('') || 'ST'}
+                </div>
               </div>
             )}
 
             {/* Theme toggle */}
-            <div className="flex items-center bg-slate-100/90 dark:bg-[#1E1E38] p-1 rounded-xl border border-slate-200/90 dark:border-slate-700/80 shadow-2xs gap-0.5">
+            <div className="student-header-theme-shell flex items-center bg-slate-100/90 dark:bg-[#1E1E38] p-1 rounded-xl border border-slate-200/90 dark:border-slate-700/80 shadow-2xs gap-0.5">
               <ThemeSelector
                 variant="light"
                 className="!rounded-lg !w-9 !h-9 !p-0 !border-0 !shadow-none !bg-transparent hover:bg-white/80 dark:hover:bg-slate-750 transition-all text-slate-600 dark:text-slate-300"
@@ -106,7 +111,7 @@ export default function StudentHeader({
             {/* Logout button */}
             <button
               onClick={handleLogout}
-              className="h-10 px-4 text-xs sm:text-sm font-bold text-rose-600 dark:text-rose-400 bg-rose-50/90 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 border border-rose-200/80 dark:border-rose-800/60 rounded-xl transition-all flex items-center justify-center shadow-2xs cursor-pointer ml-1 sm:ml-2 flex-shrink-0 active:scale-98 whitespace-nowrap"
+              className="student-header-logout h-10 px-4 text-xs sm:text-sm font-bold text-rose-600 dark:text-rose-400 bg-rose-50/90 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 border border-rose-200/80 dark:border-rose-800/60 rounded-xl transition-all flex items-center justify-center shadow-2xs cursor-pointer ml-1 sm:ml-2 flex-shrink-0 active:scale-98 whitespace-nowrap"
               title="Logout"
             >
               <LogOut size={15} className="mr-1.5 text-rose-600 dark:text-rose-400" />

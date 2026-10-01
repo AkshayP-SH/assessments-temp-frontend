@@ -286,11 +286,6 @@ const Login = () => {
 
       {/* ── LEFT PANEL ──────────────────────────────────────────────────── */}
       <div className="auth-left-panel hidden lg:flex lg:w-[45%] flex-col justify-between h-full bg-shnoor-navy px-12 xl:px-16 py-12 relative overflow-hidden">
-        {/* Dynamic Gradient Lighting */}
-        <div className="absolute top-[-60px] left-[-60px] w-80 h-80 rounded-full bg-theme-accent opacity-25 blur-[100px] pointer-events-none" />
-        <div className="absolute bottom-[-40px] right-[-40px] w-72 h-72 rounded-full bg-theme-auth-acc opacity-20 blur-[100px] pointer-events-none" />
-        <div className="absolute top-1/2 left-1/4 w-96 h-96 rounded-full bg-theme-accent opacity-10 blur-[120px] pointer-events-none transform -translate-y-1/2" />
-
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-12">
             <div className="site-header-logo flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-sm p-1.5 flex-shrink-0">

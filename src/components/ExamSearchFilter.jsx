@@ -114,8 +114,8 @@ const CustomDropdown = memo(({
               onClick={() => selectOption(option)}
               onMouseEnter={() => setActiveIndex(options.indexOf(option))}
               className={`w-full text-left px-3 py-2 text-xs sm:text-sm transition-colors flex items-center justify-between ${String(value) === String(option.value)
-                  ? 'bg-shnoor-lavender text-shnoor-indigo font-bold'
-                  : 'text-shnoor-navy hover:bg-shnoor-lavender/50 font-medium'
+                ? 'bg-shnoor-lavender text-shnoor-indigo font-bold'
+                : 'text-shnoor-navy hover:bg-shnoor-lavender/50 font-medium'
                 } ${activeIndex === options.indexOf(option) ? 'ring-2 ring-inset ring-shnoor-indigo' : ''}`}
             >
               <span className="truncate">{option.label}</span>
@@ -252,8 +252,8 @@ const ExamSearchFilter = memo(({
               type="button"
               onClick={() => setShowFilters(!showFilters)}
               className={`h-11 px-4 rounded-xl border text-sm font-bold flex items-center gap-2 transition-all cursor-pointer ${showFilters
-                  ? 'bg-[#403f75] text-white border-[#403f75] shadow-xs'
-                  : 'bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border-slate-200/80 dark:border-slate-700'
+                ? 'bg-[#403f75] text-white border-[#403f75] shadow-xs'
+                : 'bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border-slate-200/80 dark:border-slate-700'
                 }`}
             >
               <Filter size={16} />

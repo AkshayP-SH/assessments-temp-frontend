@@ -276,7 +276,7 @@ export default function JobBoard({ isEmbedded = false }) {
 
                 {/* Error state */}
                 {!loading && error && (
-                    <div className="text-center py-16">
+                    <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-light p-12 text-center">
                         <p className="text-red-600 font-medium mb-4">{error}</p>
                         <button onClick={fetchJobsAndEnrollments} className="flex items-center space-x-2 mx-auto px-5 py-2.5 bg-shnoor-indigo text-white rounded-xl text-sm font-semibold">
                             <RefreshCw size={16} /><span>Retry</span>
@@ -286,12 +286,14 @@ export default function JobBoard({ isEmbedded = false }) {
 
                 {/* Empty state */}
                 {!loading && !error && filtered.length === 0 && (
-                    <div className="text-center py-20 text-shnoor-indigoMedium">
-                        <Briefcase size={48} className="mx-auto mb-4 opacity-30" />
-                        <p className="font-semibold text-lg">
-                            {search ? 'No results match your search.' : 'No active job openings right now.'}
+                    <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-light p-12 text-center">
+                        <Briefcase className="mx-auto h-16 w-16 text-shnoor-mist mb-4" />
+                        <h3 className="text-xl font-bold text-shnoor-navy mb-2">
+                            {search ? 'No Matching Jobs Found' : 'No Active Job Openings'}
+                        </h3>
+                        <p className="text-shnoor-indigoMedium">
+                            {search ? 'Try adjusting your search criteria or clear your search query.' : 'Check back soon — new opportunities are posted regularly.'}
                         </p>
-                        <p className="text-sm mt-1 opacity-70">Check back soon — new opportunities are posted regularly.</p>
                     </div>
                 )}
 
