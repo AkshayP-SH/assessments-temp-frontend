@@ -9,6 +9,7 @@ import ClientProtectedRoute from './components/ClientProtectedRoute';
 import GlobalThemeSelector from './components/GlobalThemeSelector';
 import { applyTheme, getSavedTheme } from './utils/theme';
 import UpgradeRequiredModal from './components/UpgradeRequiredModal';
+import { Toaster } from 'react-hot-toast';
 
 // Eagerly load Loading Spinner to show while chunks are fetched
 const LoadingFallback = () => (
@@ -46,6 +47,7 @@ const AdminClients = React.lazy(() => import('./pages/admin/AdminClients'));
 const OrganisationSignup = React.lazy(() => import('./pages/OrganisationSignup'));
 const ClientSubscriptionPlans = React.lazy(() => import('./pages/client/ClientSubscriptionPlans'));
 
+
 // Protected Route wrappers
 const StudentRoute = ({ children }) => {
   const token = localStorage.getItem('studentAuthToken');
@@ -78,6 +80,7 @@ const AppRoutes = () => {
 
   return (
     <>
+      <Toaster position="top-right" />
       <GlobalThemeSelector />
       <UpgradeRequiredModal
         isOpen={showUpgradeModal}
@@ -126,6 +129,7 @@ const AppRoutes = () => {
         {/* Client Portal Routes (multi-tenant, admin UI parity) */}
         <Route path="/client/login" element={<Navigate to="/login?portal=org" replace />} />
         <Route path="/client/subscription-plans" element={<ClientProtectedRoute><Suspense fallback={<LoadingFallback />}><ClientSubscriptionPlans /></Suspense></ClientProtectedRoute>} />
+
         <Route path="/client/dashboard" element={<ClientProtectedRoute><Suspense fallback={<LoadingFallback />}><AdminDashboard /></Suspense></ClientProtectedRoute>} />
         <Route path="/client/reports" element={<ClientProtectedRoute><Suspense fallback={<LoadingFallback />}><AdminReports /></Suspense></ClientProtectedRoute>} />
         <Route path="/client/live-proctoring" element={<ClientProtectedRoute><Suspense fallback={<LoadingFallback />}><LiveProctoring /></Suspense></ClientProtectedRoute>} />

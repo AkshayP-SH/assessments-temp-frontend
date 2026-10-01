@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 import {
   FileSpreadsheet, ArrowLeft, Users, AlertCircle, Video, Loader2, Building2, Briefcase, Landmark, FileText, X,
   BarChart3, UploadCloud, ShieldAlert, CreditCard, MessageSquare, Settings, ChevronLeft, ChevronRight, ChevronDown
@@ -121,10 +122,10 @@ const AdminDashboard = () => {
   const [sortBy, setSortBy] = useState('latest');
 
   const [examCurrentPage, setExamCurrentPage] = useState(1);
-  const examItemsPerPage = 9;
+  const [examItemsPerPage, setExamItemsPerPage] = useState(9);
 
   const [instituteCurrentPage, setInstituteCurrentPage] = useState(1);
-  const instituteItemsPerPage = 10;
+  const [instituteItemsPerPage, setInstituteItemsPerPage] = useState(9);
 
   const [resultsCurrentPage, setResultsCurrentPage] = useState(1);
   const [resultsRowsPerPage, setResultsRowsPerPage] = useState(40);
@@ -177,6 +178,7 @@ const AdminDashboard = () => {
     return sessionStorage.getItem('superAdminSelectedClientId') || '';
   });
   const [quota, setQuota] = useState(null); // plan quota for client admin
+
   const isSuperAdmin = (() => {
     try {
       const u = JSON.parse(localStorage.getItem('adminUser') || '{}');
@@ -438,7 +440,7 @@ const AdminDashboard = () => {
   const paginatedTests = useMemo(() => {
     const startIndex = (examCurrentPage - 1) * examItemsPerPage;
     return filteredTests.slice(startIndex, startIndex + examItemsPerPage);
-  }, [filteredTests, examCurrentPage]);
+  }, [filteredTests, examCurrentPage, examItemsPerPage]);
   const examTotalPages = Math.ceil(filteredTests.length / examItemsPerPage);
 
   const filteredInstitutes = useMemo(() => {
@@ -451,7 +453,7 @@ const AdminDashboard = () => {
   const paginatedInstitutes = useMemo(() => {
     const startIndex = (instituteCurrentPage - 1) * instituteItemsPerPage;
     return filteredInstitutes.slice(startIndex, startIndex + instituteItemsPerPage);
-  }, [filteredInstitutes, instituteCurrentPage]);
+  }, [filteredInstitutes, instituteCurrentPage, instituteItemsPerPage]);
   const instituteTotalPages = Math.ceil(filteredInstitutes.length / instituteItemsPerPage);
 
   useEffect(() => {
@@ -1226,7 +1228,7 @@ const AdminDashboard = () => {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        alert(data.message || 'Institute added successfully');
+        toast.success(data.message || 'Institute added successfully');
         setNewInstituteName('');
         setAllInstitutes(prevInstitutes => [
           {
@@ -1237,11 +1239,11 @@ const AdminDashboard = () => {
           ...prevInstitutes.filter(institute => institute.id !== data.institute.id)
         ]);
       } else {
-        alert(data.message || 'Failed to add institute');
+        toast.error(data.message || 'Failed to add institute');
       }
     } catch (error) {
       console.error('Error adding institute:', error);
-      alert('Failed to add institute');
+      toast.error('Failed to add institute');
     } finally {
       setIsAddingInstitute(false);
     }
@@ -1698,11 +1700,11 @@ const AdminDashboard = () => {
         handleManageStudents(selectedInstituteForStudents);
         fetchAllInstitutes();
       } else {
-        alert(data.message || 'Failed to add student');
+        toast.error(data.message || 'Failed to add student');
       }
     } catch (error) {
       console.error('Error adding student:', error);
-      alert('Failed to add student');
+      toast.error('Failed to add student');
     } finally {
       setIsAddingStudent(false);
     }
@@ -2213,6 +2215,7 @@ const AdminDashboard = () => {
                         : `Your subscription will expire in ${daysRemaining} day${daysRemaining === 1 ? '' : 's'}. Renew now to avoid interruption.`
                       }
                     </p>
+
                   </div>
                 </div>
                 <button
@@ -2452,6 +2455,7 @@ const AdminDashboard = () => {
                     setExamCurrentPage={setExamCurrentPage}
                     examTotalPages={examTotalPages}
                     examItemsPerPage={examItemsPerPage}
+                    setExamItemsPerPage={setExamItemsPerPage}
                   />
                 )}
 
@@ -2484,8 +2488,11 @@ const AdminDashboard = () => {
                     setShowRegistrationControlModal={setShowRegistrationControlModal}
                     handleDeleteInstitute={handleDeleteInstitute}
                     instituteTotalPages={instituteTotalPages}
+                    instituteTotalItems={filteredInstitutes.length}
                     instituteCurrentPage={instituteCurrentPage}
                     setInstituteCurrentPage={setInstituteCurrentPage}
+                    instituteItemsPerPage={instituteItemsPerPage}
+                    setInstituteItemsPerPage={setInstituteItemsPerPage}
                   />
                 )}
 
@@ -2732,10 +2739,13 @@ const AdminDashboard = () => {
                 }}
               />
             )}
-          </div>
-        </div>
-      </div>
-    </Suspense>
+
+
+
+          </div >
+        </div >
+      </div >
+    </Suspense >
   );
 };
 

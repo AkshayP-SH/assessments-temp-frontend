@@ -44,7 +44,8 @@ export const apiFetch = async (endpoint, options = {}) => {
 
   // Don't apply tight timeouts to upload routes or report generations
   const isLongRequest = endpoint.includes('/upload') || endpoint.includes('/export') || endpoint.includes('/predict');
-  const timeoutDuration = isLongRequest ? 120000 : API_TIMEOUT;
+  let timeoutDuration = isLongRequest ? 120000 : API_TIMEOUT;
+  if (endpoint.includes('coding-questions/submit')) timeoutDuration = 300000;
 
   // If external signal provided, listen to it and abort our controller
   if (options.signal) {
@@ -112,4 +113,3 @@ export const apiFetch = async (endpoint, options = {}) => {
     clearTimeout(timeoutId);
   }
 };
-

@@ -4,6 +4,7 @@ import {
   ChevronDown, UserCheck, Users, Calendar, Trash2,
   ChevronLeft, ChevronRight
 } from 'lucide-react';
+import Pagination from '../../components/Pagination';
 
 const InstitutesTab = ({
   instituteSearchTerm,
@@ -32,8 +33,11 @@ const InstitutesTab = ({
   setShowRegistrationControlModal,
   handleDeleteInstitute,
   instituteTotalPages,
+  instituteTotalItems,
   instituteCurrentPage,
   setInstituteCurrentPage,
+  instituteItemsPerPage,
+  setInstituteItemsPerPage
 }) => {
   return (
     <div className="space-y-6">
@@ -373,25 +377,16 @@ const InstitutesTab = ({
             </div>
           )}
 
-          {instituteTotalPages > 1 && allInstitutes.length > 0 && (
-            <div className="flex justify-center items-center space-x-4 mt-8">
-              <button
-                onClick={() => setInstituteCurrentPage(p => Math.max(1, p - 1))}
-                disabled={instituteCurrentPage === 1}
-                className="p-2 bg-white dark:bg-[#1E1E38] border border-slate-200 dark:border-slate-700 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-[#25254A] text-[#403f75] dark:text-indigo-300 transition-colors cursor-pointer"
-              >
-                <ChevronLeft size={20} />
-              </button>
-              <span className="text-sm text-slate-800 dark:text-slate-200 font-bold">
-                Page {instituteCurrentPage} of {instituteTotalPages}
-              </span>
-              <button
-                onClick={() => setInstituteCurrentPage(p => Math.min(instituteTotalPages, p + 1))}
-                disabled={instituteCurrentPage === instituteTotalPages}
-                className="p-2 bg-white dark:bg-[#1E1E38] border border-slate-200 dark:border-slate-700 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-[#25254A] text-[#403f75] dark:text-indigo-300 transition-colors cursor-pointer"
-              >
-                <ChevronRight size={20} />
-              </button>
+          {allInstitutes.length > 0 && (
+            <div className="mt-8">
+              <Pagination 
+                currentPage={instituteCurrentPage}
+                totalPages={instituteTotalPages}
+                onPageChange={setInstituteCurrentPage}
+                itemsPerPage={instituteItemsPerPage}
+                onItemsPerPageChange={setInstituteItemsPerPage}
+                totalItems={instituteTotalItems}
+              />
             </div>
           )}
         </div>

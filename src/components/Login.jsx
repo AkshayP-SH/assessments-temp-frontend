@@ -103,8 +103,8 @@ const Login = () => {
     : 'student';
 
   const [portal, setPortal] = useState(initialPortal);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('admin@example.com');
+  const [password, setPassword] = useState('admin321');
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState('');
@@ -115,8 +115,8 @@ const Login = () => {
   // Reset form when switching portals
   const handlePortalChange = (next) => {
     setPortal(next);
-    setEmail('');
-    setPassword('');
+    setEmail('admin@example.com');
+    setPassword('admin321');
     setErrors({});
     setApiError('');
     setSuccessMessage('');
@@ -183,8 +183,13 @@ const Login = () => {
       } else {
         setApiError(result.message || 'Invalid credentials. Please try again.');
       }
-    } catch {
-      setApiError('Login failed. Please check your credentials.');
+    } catch (error) {
+      console.error('Org login error:', error);
+      if (error.name === 'TypeError' || error.message.includes('fetch')) {
+        setApiError('Cannot connect to the server. Please ensure the backend is running.');
+      } else {
+        setApiError('Login failed. Please check your credentials.');
+      }
     } finally {
       setIsLoading(false);
       submitLockRef.current = false;
