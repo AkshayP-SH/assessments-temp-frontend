@@ -108,7 +108,7 @@ const AdminReports = () => {
                             </label>
                             <Select
                                 isMulti
-                                options={institutes}
+                                options={institutes.filter(inst => !selectedInstitutes.find(s => s.value === inst.value))}
                                 value={selectedInstitutes}
                                 onChange={setSelectedInstitutes}
                                 className="basic-multi-select"
@@ -117,7 +117,7 @@ const AdminReports = () => {
                                 isDisabled={isLoading}
                                 isSearchable={true}
                                 isClearable={true}
-                                closeMenuOnSelect={false}
+                                closeMenuOnSelect={true}
                                 menuPosition="fixed"
                                 menuPlacement="auto"
                                 filterOption={(option, inputValue) => {

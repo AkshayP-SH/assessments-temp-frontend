@@ -23,7 +23,7 @@ const ClientSubscriptionPlans = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const { clientUser, logout } = useClientAuth();
+  const { clientUser, logout, setClientUser } = useClientAuth();
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -37,7 +37,21 @@ const ClientSubscriptionPlans = () => {
       const response = await apiFetch('api/subscription-plans');
       const data = await response.json();
       if (data.success) {
-        setPlans(data.plans);
+        const fetchedPlans = data.plans || [];
+        const trialPlan = {
+          id: 'trial',
+          plan_id: 'trial',
+          name: '7-Day Trial',
+          description: 'Try out our platform with full features for 7 days',
+          price_monthly: 0,
+          features: [
+            '1 Institute',
+            '1 Test',
+            'Up to 50 Students',
+            '7 Days Validity'
+          ]
+        };
+        setPlans([trialPlan, ...fetchedPlans]);
       } else {
         setError('Failed to load subscription plans');
       }
@@ -57,6 +71,43 @@ const ClientSubscriptionPlans = () => {
     setError('');
 
     try {
+      const token = localStorage.getItem('clientToken') || localStorage.getItem('adminToken');
+      if (!token) {
+        throw new Error('Authentication token not found. Please login again.');
+      }
+
+      if (planId === 'trial') {
+        const response = await fetch(getApiUrl('api/settings/activate-trial'), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          const storedUser = JSON.parse(localStorage.getItem('clientUser') || '{}');
+          storedUser.requiresPayment = false;
+          storedUser.clientStatus = 'active';
+          storedUser.subscriptionActive = true;
+          localStorage.setItem('clientUser', JSON.stringify(storedUser));
+          localStorage.setItem('adminUser', JSON.stringify(storedUser));
+          if (setClientUser) setClientUser(storedUser);
+
+          navigate('/client/dashboard', {
+            replace: true,
+            state: { message: '7-Day Trial activated successfully!' }
+          });
+        } else {
+          setError(data.message || 'Failed to activate trial.');
+        }
+        setProcessingPlan(null);
+        return;
+      }
+
+
       // Use the configured payment mode
       const isDummyMode = DUMMY_PAYMENT_MODE;
 
@@ -64,13 +115,6 @@ const ClientSubscriptionPlans = () => {
         // Simulate payment processing delay
         await new Promise(resolve => setTimeout(resolve, 1500));
 
-        // Get the token from localStorage
-        const token = localStorage.getItem('clientToken') || localStorage.getItem('adminToken');
-
-        if (!token) {
-          throw new Error('Authentication token not found. Please login again.');
-        }
-        
         // Directly call verify payment with dummy data
         const verifyResponse = await fetch(getApiUrl('api/settings/verify-payment'), {
           method: 'POST',
@@ -97,6 +141,7 @@ const ClientSubscriptionPlans = () => {
           storedUser.subscriptionActive = true;
           localStorage.setItem('clientUser', JSON.stringify(storedUser));
           localStorage.setItem('adminUser', JSON.stringify(storedUser)); // Mirror for shared pages
+          if (setClientUser) setClientUser(storedUser);
 
           // Payment successful, navigate to dashboard
           navigate('/client/dashboard', {
@@ -104,7 +149,7 @@ const ClientSubscriptionPlans = () => {
             state: { message: 'Payment successful! Your subscription is now active.' }
           });
         } else {
-          setError('Payment verification failed. Please contact support.');
+          setError(verifyData.message || 'Failed to activate subscription.');
         }
         setProcessingPlan(null);
         return;
@@ -114,7 +159,10 @@ const ClientSubscriptionPlans = () => {
       // Create Razorpay order
       const orderResponse = await apiFetch('api/settings/purchase-subscription', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ plan_id: planId }),
       });
 
@@ -155,6 +203,15 @@ const ClientSubscriptionPlans = () => {
               const verifyData = await verifyResponse.json();
 
               if (verifyData.success) {
+                // Update local storage to reflect active subscription
+                const storedUser = JSON.parse(localStorage.getItem('clientUser') || '{}');
+                storedUser.requiresPayment = false;
+                storedUser.clientStatus = 'active';
+                storedUser.subscriptionActive = true;
+                localStorage.setItem('clientUser', JSON.stringify(storedUser));
+                localStorage.setItem('adminUser', JSON.stringify(storedUser)); // Mirror for shared pages
+                if (setClientUser) setClientUser(storedUser);
+
                 // Payment successful, navigate to dashboard
                 navigate('/client/dashboard', {
                   replace: true,
@@ -191,6 +248,7 @@ const ClientSubscriptionPlans = () => {
         setError('Failed to load payment gateway. Please try again.');
         setProcessingPlan(null);
       };
+
     } catch (err) {
       setError(err.message || 'Failed to initiate payment');
       setProcessingPlan(null);
@@ -231,25 +289,6 @@ const ClientSubscriptionPlans = () => {
             </button>
           </div>
         )}
-        {/* Test Mode Banner - Only show in dummy mode */}
-        {DUMMY_PAYMENT_MODE && (
-          <div className="mb-8 bg-gradient-to-r from-blue-50 to-blue-100 border-2 border-blue-400 rounded-2xl p-5 shadow-lg animate-fade-in">
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0 w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <h3 className="text-base font-extrabold text-blue-900 mb-1">Test Mode Active</h3>
-                <p className="text-sm text-blue-800 leading-relaxed">
-                  This is a dummy payment system for testing. No actual payment will be processed. Click any "Select Plan" button to simulate successful payment and activate your account instantly.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
         {requiresPayment && !subscriptionExpired && (
           <div className="mb-8 bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-400 rounded-2xl p-6 shadow-lg animate-fade-in">
             <div className="flex items-start gap-4">
@@ -320,7 +359,7 @@ const ClientSubscriptionPlans = () => {
           {plans.map((plan, index) => (
             <div
               key={plan.id}
-              className="group relative bg-white rounded-3xl shadow-xl border-2 border-shnoor-mist hover:border-shnoor-indigo transition-all duration-300 overflow-hidden animate-slide-up hover:shadow-2xl hover:scale-105"
+              className="group relative bg-white rounded-3xl shadow-xl border-2 border-shnoor-mist hover:border-shnoor-indigo transition-all duration-300 overflow-hidden animate-slide-up hover:shadow-2xl hover:scale-105 flex flex-col h-full"
               style={{ animationDelay: `${index * 100}ms` }}
             >
               <div className="p-8 flex-1">
@@ -358,16 +397,16 @@ const ClientSubscriptionPlans = () => {
                 </div>
               </div>
 
-              <div className="p-8 pt-0">
+              <div className="p-8 pt-0 mt-auto">
                 <Button
-                  onClick={() => handleSelectPlan(plan.plan_id)}
+                  onClick={() => handleSelectPlan(plan.plan_id || plan.id)}
                   disabled={processingPlan !== null}
-                  className={`w-full h-14 flex items-center justify-center gap-2 text-base font-bold shadow-lg transition-all duration-300 ${processingPlan === plan.plan_id
-                      ? 'opacity-50 cursor-not-allowed'
-                      : 'hover:shadow-xl hover:scale-105'
+                  className={`w-full h-14 flex items-center justify-center gap-2 text-base font-bold shadow-lg transition-all duration-300 ${processingPlan === (plan.plan_id || plan.id)
+                    ? 'opacity-50 cursor-not-allowed'
+                    : 'hover:shadow-xl hover:scale-105'
                     }`}
                 >
-                  {processingPlan === plan.plan_id ? (
+                  {processingPlan === (plan.plan_id || plan.id) ? (
                     <>
                       <div className="w-5 h-5 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
                       Processing Payment...
@@ -377,7 +416,7 @@ const ClientSubscriptionPlans = () => {
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                       </svg>
-                      {DUMMY_PAYMENT_MODE ? 'Select Plan (Test Mode)' : 'Select Plan'}
+                      Select Plan
                     </>
                   )}
                 </Button>

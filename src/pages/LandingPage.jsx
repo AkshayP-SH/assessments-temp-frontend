@@ -1,11 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, Phone, MapPin, FileText, ShieldCheck } from 'lucide-react';
-import Button from '../components/Button';
-import Card from '../components/Card';
-import shnoorLogo from '../assets/shnoor-logo.png';
-import linkedinIcon from '../assets/linkedin.png';
-import whatsappIcon from '../assets/whatsapp.png';
+import shnoorLogo from '../assets/shnoor-logo.webp';
 import ThemeSelector from '../components/ThemeSelector';
 import { useSEO } from '../hooks/useSEO';
 import { getApiUrl } from '../config/api';
@@ -41,6 +36,8 @@ const ICON_GLOBAL = 'M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3
 const ICON_ONBOARD = 'M13 10V3L4 14h7v7l9-11h-7z';
 const ICON_DELIVERY = 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10';
 const ICON_CODE = 'M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4';
+const ICON_MAIL = 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z';
+const ICON_PIN = 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z';
 
 /* ─── Nav links (smooth-scroll) ───────────────────────────────────────────── */
 const NAV_LINKS = [
@@ -61,6 +58,30 @@ const FEATURES = [
   { icon: SAVE, title: 'Auto-Save & Resume', desc: 'Candidate answers save automatically during exams. Resume seamlessly after disconnections.' },
   { icon: SCREEN, title: 'Secure Fullscreen Mode', desc: 'Exams run in locked fullscreen with tab-switch detection. Violations are logged and configurable.' },
   { icon: ICON_GLOBAL, title: 'Remote & Scalable', desc: 'Conduct secure assessments for distributed candidates anywhere with a modern browser-based platform.' },
+];
+
+const DEFAULT_PLANS = [
+  {
+    id: 1,
+    name: 'Starter',
+    description: 'Essential assessment tools for growing teams',
+    price_monthly: '4,999',
+    features: ['Up to 50 candidates/mo', 'Custom test builder', 'Automated scoring', 'Basic analytics'],
+  },
+  {
+    id: 2,
+    name: 'Premium',
+    description: 'Advanced proctoring & analytics for scaling teams',
+    price_monthly: '14,999',
+    features: ['Up to 250 candidates/mo', 'AI proctoring & webcam', 'Coding + MCQ tests', 'Priority support', 'Leaderboards'],
+  },
+  {
+    id: 3,
+    name: 'Super Enterprise',
+    description: 'Custom solutions for high-volume hiring',
+    price_monthly: 'Custom',
+    features: ['Unlimited candidates', 'Dedicated account manager', 'Custom integrations', 'Full proctoring suite', 'SLA guarantee'],
+  },
 ];
 
 /* ─── Main Component ──────────────────────────────────────────────────────── */
@@ -102,21 +123,32 @@ const LandingPage = () => {
   const prefetchLogin = usePrefetch(() => import('../components/Login'));
   const prefetchRegister = usePrefetch(() => import('../components/Register'));
 
-  const [plans, setPlans] = useState([]);
-  const [plansLoading, setPlansLoading] = useState(true);
+  const [plans, setPlans] = useState(DEFAULT_PLANS);
+  const [plansLoading, setPlansLoading] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const navRef = useRef(null);
 
-  // Fetch pricing plans
+  // Fetch live pricing plans during idle time
   useEffect(() => {
-    fetch(getApiUrl('api/subscription-plans'))
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) setPlans(data.plans.filter(p => p.is_active));
-      })
-      .catch(err => console.error('Error fetching plans:', err))
-      .finally(() => setPlansLoading(false));
+    const fetchPlans = () => {
+      fetch(getApiUrl('api/subscription-plans'))
+        .then(res => res.json())
+        .then(data => {
+          if (data?.success && Array.isArray(data?.plans) && data.plans.length > 0) {
+            setPlans(data.plans.filter(p => p.is_active));
+          }
+        })
+        .catch(() => {});
+    };
+
+    if ('requestIdleCallback' in window) {
+      const id = window.requestIdleCallback(fetchPlans, { timeout: 3000 });
+      return () => window.cancelIdleCallback(id);
+    } else {
+      const timer = setTimeout(fetchPlans, 2000);
+      return () => clearTimeout(timer);
+    }
   }, []);
 
   // Navbar scroll shadow
@@ -176,35 +208,35 @@ const LandingPage = () => {
           </div>
 
           {/* Right Actions */}
-          <div className="flex items-center gap-1.5 sm:gap-3 lg:gap-4 flex-shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 flex-shrink-0">
             <ThemeSelector variant="light" />
-            <Link to="/login" onMouseEnter={prefetchLogin} className="hidden sm:inline-flex text-sm font-semibold text-theme-text hover:text-theme-accent transition-colors px-3 py-2">
+            <Link to="/login" onMouseEnter={prefetchLogin} className="hidden sm:inline-flex min-h-[44px] items-center text-sm font-semibold text-theme-text hover:text-theme-accent transition-colors px-3.5 py-2 rounded-lg">
               Log In
             </Link>
-            <Link to="/register" onMouseEnter={prefetchRegister} className="inline-flex">
-              <button className="bg-theme-accent hover:bg-theme-accent2 text-white text-[11px] sm:text-sm font-bold px-3 py-2 sm:px-5 sm:py-2.5 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 whitespace-nowrap cursor-pointer">
+            <Link to="/register" onMouseEnter={prefetchRegister} className="inline-flex min-h-[44px] items-center">
+              <button className="bg-theme-accent hover:bg-theme-accent2 text-white text-xs sm:text-sm font-bold min-h-[40px] px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 whitespace-nowrap cursor-pointer">
                 Get Started
               </button>
             </Link>
             {/* Mobile hamburger */}
-            <button className="lg:hidden flex flex-col justify-center items-center gap-1 sm:gap-1.5 p-1.5 sm:p-2 flex-shrink-0 rounded-lg hover:bg-theme-panel transition-colors text-theme-text" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
-              <span className={`block w-5 h-0.5 bg-current transition-transform duration-300 ${mobileMenuOpen ? 'rotate-45 translate-y-1.5 sm:translate-y-2' : ''}`} />
+            <button className="lg:hidden flex flex-col justify-center items-center gap-1.5 min-w-[44px] min-h-[44px] p-2 flex-shrink-0 rounded-xl hover:bg-theme-panel transition-colors text-theme-text" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
+              <span className={`block w-5 h-0.5 bg-current transition-transform duration-300 ${mobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`} />
               <span className={`block w-5 h-0.5 bg-current transition-opacity duration-300 ${mobileMenuOpen ? 'opacity-0' : ''}`} />
-              <span className={`block w-5 h-0.5 bg-current transition-transform duration-300 ${mobileMenuOpen ? '-rotate-45 -translate-y-1.5 sm:-translate-y-2' : ''}`} />
+              <span className={`block w-5 h-0.5 bg-current transition-transform duration-300 ${mobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
             </button>
           </div>
         </div>
 
         {/* Mobile dropdown */}
         {mobileMenuOpen && (
-          <div className="lg:hidden bg-theme-card border-t border-theme-border/60 px-4 pb-4 animate-fadeIn">
+          <div className="lg:hidden bg-theme-card border-t border-theme-border/60 px-4 py-2 animate-fadeIn flex flex-col gap-1">
             {NAV_LINKS.map(link => (
               <a key={link.href} href={link.href} onClick={(e) => scrollToSection(e, link.href)}
-                className="block px-4 py-3 text-sm font-semibold text-theme-muted hover:text-theme-text hover:bg-theme-panel rounded-lg transition-colors">
+                className="flex items-center px-4 py-3 min-h-[44px] text-sm font-semibold text-theme-muted hover:text-theme-text hover:bg-theme-panel rounded-xl transition-colors">
                 {link.label}
               </a>
             ))}
-            <Link to="/login" className="block px-4 py-3 text-sm font-semibold text-theme-text sm:hidden">Log In</Link>
+            <Link to="/login" className="flex items-center px-4 py-3 min-h-[44px] text-sm font-semibold text-theme-text hover:bg-theme-panel rounded-xl sm:hidden">Log In</Link>
           </div>
         )}
       </nav>
@@ -220,7 +252,7 @@ const LandingPage = () => {
           {/* Left — Text */}
           <div className="flex flex-col gap-6 items-center lg:items-start text-center lg:text-left">
             <div className="inline-flex items-center gap-2 bg-theme-panel text-theme-accent text-xs sm:text-sm font-bold px-4 py-2 rounded-full w-fit border border-theme-border shadow-xs">
-              <span className="w-2 h-2 bg-theme-accent rounded-full animate-pulse" />
+              <span className="w-2 h-2 bg-theme-accent rounded-full opacity-90" />
               NEXT-GEN ASSESSMENT PLATFORM
             </div>
 
@@ -269,7 +301,7 @@ const LandingPage = () => {
               <div className="px-6 pt-6 pb-4">
                 <p className="text-xs font-bold text-theme-auth-acc uppercase tracking-[0.2em] mb-2">LIVE PLATFORM VIEW</p>
                 <div className="flex items-start justify-between">
-                  <h2 className="text-xl font-extrabold text-white leading-snug pr-4">
+<h2 className="text-xl font-extrabold text-white leading-snug pr-4">
                     Secure assessments, real-time proctoring, and actionable results
                   </h2>
                   <div className="flex-shrink-0 bg-white/10 border border-white/15 rounded-xl px-3 py-2 text-center">
@@ -694,7 +726,7 @@ const LandingPage = () => {
               </div>
               <p className="text-slate-300 mb-6 leading-relaxed text-sm">Secure assessment platform for campus recruitment drives and enterprise hiring.</p>
               <div className="flex items-center gap-2 mb-2 justify-center md:justify-start">
-                <MapPin className="w-4 h-4 text-theme-auth-acc flex-shrink-0" />
+                <Icon d={ICON_PIN} cls="w-4 h-4 text-theme-auth-acc flex-shrink-0" />
                 <p className="text-xs font-extrabold text-white uppercase tracking-widest">Location</p>
               </div>
               <p className="text-slate-300 text-sm leading-relaxed">10009 Mount Tabor Road,<br />Odessa Missouri, United States.</p>
@@ -703,26 +735,34 @@ const LandingPage = () => {
               <p className="text-xs font-extrabold text-theme-auth-acc uppercase tracking-widest mb-5">Contacts</p>
               <ul className="flex flex-col gap-1 text-slate-300 text-sm">
                 <li>
-                  <a href="mailto:info@shnoor.com" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start py-2">
+<a href="mailto:info@shnoor.com" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start py-2">
                     <Mail className="w-4 h-4 text-theme-auth-acc flex-shrink-0" />
+                    <span>info@shnoor.com (General)</span>
+                  </a>
                     <span>info@shnoor.com (General)</span>
                   </a>
                 </li>
                 <li>
-                  <a href="mailto:proc@shnoor.com" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start py-2">
+<a href="mailto:proc@shnoor.com" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start py-2">
                     <Mail className="w-4 h-4 text-theme-auth-acc flex-shrink-0" />
+                    <span>proc@shnoor.com (Sales)</span>
+                  </a>
                     <span>proc@shnoor.com (Sales)</span>
                   </a>
                 </li>
                 <li>
-                  <a href="tel:+919429694298" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start py-2">
+<a href="tel:+919429694298" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start py-2">
                     <Phone className="w-4 h-4 text-theme-auth-acc flex-shrink-0" />
+                    <span>+91-9429694298</span>
+                  </a>
                     <span>+91-9429694298</span>
                   </a>
                 </li>
                 <li>
-                  <a href="tel:+919041914601" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start py-2">
+<a href="tel:+919041914601" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start py-2">
                     <Phone className="w-4 h-4 text-theme-auth-acc flex-shrink-0" />
+                    <span>+91-9041914601</span>
+                  </a>
                     <span>+91-9041914601</span>
                   </a>
                 </li>
@@ -730,22 +770,35 @@ const LandingPage = () => {
             </div>
             <div>
               <p className="text-xs font-extrabold text-theme-auth-acc uppercase tracking-widest mb-5">Useful Links</p>
-              <ul className="flex flex-col gap-1 text-slate-300 text-sm">
+<ul className="flex flex-col gap-1 text-slate-300 text-sm">
                 <li>
                   <a href="https://www.linkedin.com/company/shnoor-international/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start group py-2">
                     <img src={linkedinIcon} alt="LinkedIn" className="w-4 h-4 rounded-xs object-contain flex-shrink-0 group-hover:scale-110 transition-transform" />
                     <span>We are Social</span>
                   </a>
                 </li>
+                    <span>We are Social</span>
+                  </a>
+                </li>
+                <li>
+<ul className="flex flex-col gap-1 text-slate-300 text-sm">
                 <li>
                   <a href="https://api.whatsapp.com/qr/D6I7XIACKIKVD1?autoload=1&app_absent=0" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start group py-2">
                     <img src={whatsappIcon} alt="WhatsApp" className="w-4 h-4 rounded-xs object-contain flex-shrink-0 group-hover:scale-110 transition-transform" />
                     <span>Let's Connect</span>
                   </a>
                 </li>
+                    <span>Let's Connect</span>
+                  </a>
+                </li>
+                <li>
+<ul className="flex flex-col gap-1 text-slate-300 text-sm">
                 <li>
                   <a href="/company-profile.pdf" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start group py-2">
                     <FileText className="w-4 h-4 text-theme-auth-acc flex-shrink-0 group-hover:scale-110 transition-transform" />
+                    <span>Company Profile</span>
+                  </a>
+                </li>
                     <span>Company Profile</span>
                   </a>
                 </li>
@@ -755,15 +808,17 @@ const LandingPage = () => {
           <div className="border-t border-white/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="flex flex-col sm:flex-row items-center gap-2 text-sm text-slate-300">
               <p>© Copyrights 2025. All Rights Reserved. SHNOOR INTERNATIONAL LLC</p>
-              <div className="hidden sm:flex items-center gap-2">
+<div className="hidden sm:flex items-center gap-2">
                 <span className="text-slate-500">•</span>
                 <Link to="/privacy-policy" className="hover:text-white transition-colors py-2 px-1">Privacy Policy</Link>
                 <span className="text-slate-500">•</span>
                 <Link to="/terms-and-conditions" className="hover:text-white transition-colors py-2 px-1">Terms &amp; Conditions</Link>
               </div>
+                <Link to="/terms-and-conditions" className="hover:text-white transition-colors py-2 px-1">Terms &amp; Conditions</Link>
+              </div>
             </div>
             <div className="text-slate-300 flex items-center gap-2 text-sm font-semibold">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <Icon d={SHIELD} cls="w-4 h-4 text-emerald-400" />
               Secure Environment
             </div>
           </div>

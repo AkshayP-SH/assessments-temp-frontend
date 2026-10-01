@@ -113,7 +113,7 @@ const CustomDropdown = memo(({
               tabIndex={-1}
               onClick={() => selectOption(option)}
               onMouseEnter={() => setActiveIndex(options.indexOf(option))}
-              className={`w-full text-left px-3 py-2 text-xs sm:text-sm transition-colors flex items-center justify-between ${
+className={`w-full text-left px-3 py-2 text-xs sm:text-sm transition-colors flex items-center justify-between ${
                 String(value) === String(option.value)
                   ? 'bg-theme-accent text-white font-bold'
                   : 'text-theme-inv-muted hover:bg-theme-accent/50 font-medium'
@@ -222,42 +222,45 @@ const ExamSearchFilter = memo(({
   ];
 
   return (
-    <>
-      <div className="admin-search-filter-bar">
+    <div className="w-full">
+      <div className="bg-white/95 dark:bg-[#1E1E38] p-2.5 sm:p-3 rounded-2xl border border-slate-200/90 dark:border-slate-700/80 shadow-2xs">
         {/* Main Controls Row */}
-        <div className="admin-search-filter-row">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
           {/* Search Bar */}
-          <div className="admin-search-input-wrapper">
-            <Search size={18} className="admin-search-icon" />
+          <div className="flex-1 relative">
+            <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
-              placeholder="Search exams..."
+              placeholder="Search exams by title, topic..."
               value={searchTerm}
               onChange={handleSearchChange}
-              className="admin-search-input"
+              className="w-full h-11 pl-11 pr-4 bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 rounded-xl text-sm font-medium text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-all"
             />
           </div>
 
           {/* Controls */}
-          <div className="admin-filter-controls">
+          <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
             {/* Custom Sort Dropdown */}
             <CustomDropdown
               value={sortBy}
               onChange={handleSortChange}
               options={sortOptions}
               placeholder="Sort"
-              buttonClassName="admin-dropdown-btn"
+              buttonClassName="!h-11 !px-4 !rounded-xl !bg-slate-50 dark:!bg-slate-800 !border-slate-200/80 dark:!border-slate-700 !text-slate-700 dark:!text-slate-200 !text-sm font-bold hover:!bg-slate-100 dark:hover:!bg-slate-700 transition-all"
             />
 
             <button
               type="button"
               onClick={() => setShowFilters(!showFilters)}
-              className={`admin-filter-btn ${showFilters ? 'admin-filter-btn-active' : ''}`}
+              className={`h-11 px-4 rounded-xl border text-sm font-bold flex items-center gap-2 transition-all cursor-pointer ${showFilters
+                  ? 'bg-[#403f75] text-white border-[#403f75] shadow-xs'
+                  : 'bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border-slate-200/80 dark:border-slate-700'
+                }`}
             >
               <Filter size={16} />
               <span>Filter</span>
               {activeFilterBadges.length > 0 && !showFilters && (
-                <span className="ml-1 px-1.5 py-0.5 bg-shnoor-lavender text-shnoor-indigo text-xs rounded-full font-bold">
+                <span className="ml-0.5 px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900 text-[#403f75] dark:text-indigo-200 text-xs rounded-full font-bold">
                   {activeFilterBadges.length}
                 </span>
               )}
@@ -267,7 +270,7 @@ const ExamSearchFilter = memo(({
               <button
                 type="button"
                 onClick={clearFilters}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg font-medium bg-theme-hdr text-shnoor-danger hover:bg-theme-accent transition-all border border-shnoor-danger shadow-sm flex-shrink-0"
+className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg font-medium bg-theme-hdr text-shnoor-danger hover:bg-theme-accent transition-all border border-shnoor-danger shadow-sm flex-shrink-0"
                 title="Clear all filters"
               >
                 <X size={15} />
@@ -278,7 +281,7 @@ const ExamSearchFilter = memo(({
         </div>
 
         {activeFilterBadges.length > 0 && !showFilters && (
-          <div className="flex flex-wrap gap-2 mt-2 pt-2 border-t border-theme-stroke">
+<div className="flex flex-wrap gap-2 mt-2 pt-2 border-t border-theme-stroke">
             {activeFilterBadges.map((badge) => (
               <span
                 key={badge.key}
@@ -291,14 +294,14 @@ const ExamSearchFilter = memo(({
         )}
 
         {showFilters && (
-          <div className="flex flex-wrap gap-2 pt-3 mt-3 border-t border-theme-stroke animate-in slide-in-from-top-2 duration-200">
+<div className="flex flex-wrap gap-2 pt-3 mt-3 border-t border-theme-stroke animate-in slide-in-from-top-2 duration-200">
             {showPublishedFilter && (
               <CustomDropdown
                 value={filters.published}
                 onChange={(val) => handleFilterChange('published', val)}
                 options={publishedOptions}
                 placeholder="Status"
-                buttonClassName="admin-dropdown-btn"
+                buttonClassName="!h-10 !px-3.5 !rounded-xl !bg-slate-50 dark:!bg-slate-800 !border-slate-200/80 dark:!border-slate-700 !text-slate-700 dark:!text-slate-200 !text-xs sm:!text-sm font-semibold"
               />
             )}
 
@@ -308,7 +311,7 @@ const ExamSearchFilter = memo(({
                 onChange={(val) => handleFilterChange('attempted', val)}
                 options={attemptedOptions}
                 placeholder="Attempts"
-                buttonClassName="admin-dropdown-btn"
+                buttonClassName="!h-10 !px-3.5 !rounded-xl !bg-slate-50 dark:!bg-slate-800 !border-slate-200/80 dark:!border-slate-700 !text-slate-700 dark:!text-slate-200 !text-xs sm:!text-sm font-semibold"
               />
             )}
 
@@ -318,23 +321,12 @@ const ExamSearchFilter = memo(({
               onChange={(val) => handleFilterChange('dateRange', val)}
               options={dateRangeOptions}
               placeholder="Date Range"
-              buttonClassName="admin-dropdown-btn"
+              buttonClassName="!h-10 !px-3.5 !rounded-xl !bg-slate-50 dark:!bg-slate-800 !border-slate-200/80 dark:!border-slate-700 !text-slate-700 dark:!text-slate-200 !text-xs sm:!text-sm font-semibold"
             />
           </div>
         )}
       </div>
-
-      {resultCount !== undefined && (
-        <div className="admin-exams-count-row">
-          <span className="admin-exams-count-text">
-            Showing {resultCount} {resultCount === 1 ? 'exam' : 'exams'}
-          </span>
-          <span className="admin-exams-sort-text">
-            Sorted by {sortOptions.find(opt => opt.value === sortBy)?.label?.toLowerCase() || 'latest created'}
-          </span>
-        </div>
-      )}
-    </>
+    </div>
   );
 });
 

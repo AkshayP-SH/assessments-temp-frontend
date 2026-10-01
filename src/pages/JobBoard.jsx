@@ -5,6 +5,7 @@ import { LogOut, Briefcase, Building2, Clock, ArrowLeft, Loader2, RefreshCw, Sea
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiFetch } from '../config/api';
 import ThemeSelector from '../components/ThemeSelector';
+import StudentHeader from '../components/StudentHeader';
 import { clearStorageKeepTheme } from '../utils/theme';
 import shnoorLogo from '../assets/shnoor-logo.png';
 import { useSEO } from '../hooks/useSEO';
@@ -210,49 +211,15 @@ export default function JobBoard({ isEmbedded = false }) {
     return (
         <div className={isEmbedded ? "w-full font-sans" : "min-h-screen bg-[#F8F8FB] font-sans"}>
             {!isEmbedded && (
-                <header className="bg-shnoor-navy shadow-sm h-[72px] flex items-center sticky top-0 z-10 w-full">
-                    <div className="w-full max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="flex justify-between items-center h-16">
-                            <div className="flex items-center space-x-3 sm:space-x-4">
-                                <div className="site-header-logo w-10 h-10 sm:w-12 sm:h-12 rounded-xl overflow-hidden shadow-sm flex-shrink-0 bg-white p-1 flex items-center justify-center">
-                                    <img
-                                        src={shnoorLogo}
-                                        alt="Shnoor Logo"
-                                        className="w-full h-full object-contain"
-                                    />
-                                </div>
-                                <div>
-                                    <h1 className="text-white font-bold text-base sm:text-lg leading-tight uppercase tracking-wide">SHNOOR Assessments</h1>
-                                    <p className="site-header-subtitle text-shnoor-light opacity-80 text-[10px] sm:text-xs uppercase tracking-widest font-semibold">Job Board</p>
-                                </div>
-                            </div>
-
-                            <div className="flex items-center space-x-3 sm:space-x-6">
-                                <div className="text-right hidden sm:block">
-                                    <p className="text-sm font-medium text-white">Welcome, {studentName}</p>
-                                    <p className="text-xs text-shnoor-soft">{capitalizeInstitute(institute)} &bull; ID: {studentId}</p>
-                                </div>
-                                <button
-                                    onClick={() => navigate('/dashboard')}
-                                    className="flex items-center justify-center space-x-2 px-3 sm:px-5 py-2 text-white bg-shnoor-indigo border border-shnoor-indigo hover:bg-[#4d4d9c] rounded-lg transition-colors text-sm font-semibold w-10 sm:w-auto"
-                                    title="Back to Dashboard"
-                                >
-                                    <ArrowLeft size={16} />
-                                    <span className="hidden sm:inline">Back to Dashboard</span>
-                                </button>
-                                <button
-                                    onClick={handleLogout}
-                                    className="flex items-center justify-center space-x-2 px-3 sm:px-5 py-2 text-white bg-transparent border border-white/20 hover:bg-white/10 rounded-lg transition-colors text-sm font-medium w-10 sm:w-auto"
-                                    title="Logout"
-                                >
-                                    <LogOut size={16} />
-                                    <span className="hidden sm:inline">Logout</span>
-                                </button>
-                                <ThemeSelector variant="dark" />
-                            </div>
-                        </div>
-                    </div>
-                </header>
+                <StudentHeader
+                    studentName={studentName}
+                    studentId={studentId}
+                    institute={institute}
+                    subtitle="Job Board"
+                    showBackButton={true}
+                    backTo="/dashboard"
+                    onLogout={handleLogout}
+                />
             )}
 
             <main className={isEmbedded ? "" : "w-full max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 py-8"}>

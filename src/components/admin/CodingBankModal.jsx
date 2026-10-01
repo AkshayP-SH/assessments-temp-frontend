@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { X, Plus, Trash2 } from 'lucide-react';
 import { apiFetch } from '../../config/api';
 
-const CodingBankModal = ({ question, onClose, onSave, categories, tags }) => {
+const CodingBankModal = ({ question, onClose, onSave, categories = [], tags = [] }) => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -25,7 +25,7 @@ const CodingBankModal = ({ question, onClose, onSave, categories, tags }) => {
 
   const fetchQuestionDetails = async (id) => {
     try {
-      const token = localStorage.getItem('adminToken');
+      const token = localStorage.getItem('adminToken') || localStorage.getItem('token') || localStorage.getItem('clientToken') || '';
       const response = await apiFetch(`api/question-bank/coding/${id}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -85,7 +85,7 @@ const CodingBankModal = ({ question, onClose, onSave, categories, tags }) => {
     setSaving(true);
 
     try {
-      const token = localStorage.getItem('adminToken');
+      const token = localStorage.getItem('adminToken') || localStorage.getItem('token') || localStorage.getItem('clientToken') || '';
       const url = question 
         ? `api/question-bank/coding/${question.id}`
         : 'api/question-bank/coding';
@@ -271,7 +271,7 @@ const CodingBankModal = ({ question, onClose, onSave, categories, tags }) => {
                 placeholder="e.g., algorithms"
               />
               <datalist id="categories">
-                {categories.map(cat => (
+                {(categories || []).map(cat => (
                   <option key={cat} value={cat} />
                 ))}
               </datalist>
@@ -300,7 +300,7 @@ const CodingBankModal = ({ question, onClose, onSave, categories, tags }) => {
                 </button>
               </div>
               <datalist id="tags">
-                {tags.map(tag => (
+                {(tags || []).map(tag => (
                   <option key={tag} value={tag} />
                 ))}
               </datalist>

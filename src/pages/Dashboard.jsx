@@ -7,6 +7,8 @@ import JobBoard from './JobBoard';
 import MyApplications from './MyApplications';
 import StudentSupportChatbot from '../components/chatbot/StudentSupportChatbot';
 import ThemeSelector from '../components/ThemeSelector';
+import StudentHeader from '../components/StudentHeader';
+import StudentSidebar from '../components/StudentSidebar';
 import { clearStorageKeepTheme } from '../utils/theme';
 import { apiFetch } from '../config/api';
 import shnoorLogo from '../assets/shnoor-logo.png';
@@ -220,67 +222,81 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-[#F8F8FB]">
       {showJobModal && selectedTest && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-mist max-w-3xl w-full max-h-[90vh] overflow-y-auto my-4">
-            <div className="bg-shnoor-indigo px-4 sm:px-6 py-4 flex justify-between items-start sm:items-center gap-4 sticky top-0 z-10">
-              <div className="flex-1 pr-4">
-                <h3 className="text-lg sm:text-xl font-bold text-white leading-tight">{selectedTest.title}</h3>
-                <p className="text-white/80 text-xs sm:text-sm mt-1">Job Role & Description</p>
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4 animate-fade-in">
+          <div className="bg-white dark:bg-[#1E1E38] rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden">
+            {/* Modal Header */}
+            <div className="bg-[#403f75] dark:bg-indigo-600 text-white px-6 py-4 flex justify-between items-center flex-shrink-0">
+              <div className="flex-1 pr-4 min-w-0">
+                <h3 className="text-lg sm:text-xl font-bold text-white leading-tight capitalize truncate">
+                  {selectedTest.title}
+                </h3>
+                <p className="text-white/80 text-xs mt-0.5 font-medium">
+                  Job Role & Description
+                </p>
               </div>
               <button
                 onClick={() => setShowJobModal(false)}
-                className="text-white hover:bg-white/20 rounded-full p-2 transition-colors flex-shrink-0"
+                className="text-white/80 hover:text-white hover:bg-white/15 rounded-xl p-1.5 transition-all flex-shrink-0 cursor-pointer"
+                title="Close"
               >
-                <X size={24} className="w-5 h-5 sm:w-6 sm:h-6" />
+                <X size={20} />
               </button>
             </div>
 
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
+            {/* Modal Content */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-5">
               {selectedTest.jobRoles && selectedTest.jobRoles.length > 0 ? (
                 <>
-                  {/* Always show dropdown if jobRoles exist */}
-                  <div className="mb-6">
-                    <label className="block text-sm font-bold text-shnoor-navy mb-2">
-                      Select Job Role {selectedTest.jobRoles.length > 1 && `(${selectedTest.jobRoles.length} available)`}
-                    </label>
-                    <select
-                      value={selectedJobRoleIndex}
-                      onChange={(e) => setSelectedJobRoleIndex(parseInt(e.target.value))}
-                      className="w-full px-4 py-3 border-2 border-shnoor-mist rounded-lg focus:ring-2 focus:ring-shnoor-indigo focus:border-shnoor-indigo bg-white text-shnoor-navy font-medium"
-                      disabled={selectedTest.jobRoles.length === 1}
-                    >
-                      {selectedTest.jobRoles.map((role, index) => (
-                        <option key={index} value={index}>
-                          {role.jobRole}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="mb-6">
-                    <div className="flex items-center mb-3">
-                      <div className="w-10 h-10 bg-shnoor-lavender rounded-lg flex items-center justify-center mr-3">
-                        <FileText className="w-5 h-5 text-shnoor-indigo" />
-                      </div>
-                      <h4 className="text-lg font-bold text-shnoor-navy">Job Role</h4>
+                  {/* Job role selector */}
+                  {selectedTest.jobRoles.length > 1 && (
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
+                        Select Job Role ({selectedTest.jobRoles.length} available)
+                      </label>
+                      <select
+                        value={selectedJobRoleIndex}
+                        onChange={(e) => setSelectedJobRoleIndex(parseInt(e.target.value))}
+                        className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-[#403f75] bg-white dark:bg-[#1A1A30] text-slate-800 dark:text-slate-100 font-medium text-sm"
+                      >
+                        {selectedTest.jobRoles.map((role, index) => (
+                          <option key={index} value={index}>
+                            {role.jobRole}
+                          </option>
+                        ))}
+                      </select>
                     </div>
-                    <div className="bg-shnoor-lavender/50 border-l-4 border-shnoor-indigo p-5 rounded-r-lg">
-                      <p className="text-shnoor-navy font-bold text-xl">
+                  )}
+
+                  {/* Job Role Display */}
+                  <div>
+                    <div className="flex items-center mb-2">
+                      <div className="w-8 h-8 bg-indigo-50 dark:bg-indigo-950/60 rounded-lg flex items-center justify-center mr-2.5">
+                        <FileText className="w-4 h-4 text-[#403f75] dark:text-indigo-400" />
+                      </div>
+                      <h4 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+                        Job Role
+                      </h4>
+                    </div>
+                    <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 p-4 rounded-xl">
+                      <p className="text-slate-800 dark:text-slate-100 font-bold text-base sm:text-lg">
                         {selectedTest.jobRoles[selectedJobRoleIndex]?.jobRole || 'Not specified'}
                       </p>
                     </div>
                   </div>
 
+                  {/* Job Description */}
                   {selectedTest.jobRoles[selectedJobRoleIndex]?.jobDescription && (
                     <div>
-                      <div className="flex items-center mb-3">
-                        <div className="w-10 h-10 bg-shnoor-successLight rounded-lg flex items-center justify-center mr-3">
-                          <BookOpen className="w-5 h-5 text-shnoor-success" />
+                      <div className="flex items-center mb-2">
+                        <div className="w-8 h-8 bg-emerald-50 dark:bg-emerald-950/60 rounded-lg flex items-center justify-center mr-2.5">
+                          <BookOpen className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                         </div>
-                        <h4 className="text-lg font-bold text-shnoor-navy">Job Description</h4>
+                        <h4 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+                          Job Description
+                        </h4>
                       </div>
-                      <div className="bg-white p-5 rounded-lg border border-shnoor-mist shadow-sm">
-                        <p className="text-shnoor-indigoMedium whitespace-pre-wrap leading-relaxed text-base">
+                      <div className="bg-white dark:bg-[#1A1A30] p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xs">
+                        <p className="text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed text-sm">
                           {selectedTest.jobRoles[selectedJobRoleIndex].jobDescription}
                         </p>
                       </div>
@@ -289,44 +305,53 @@ const Dashboard = () => {
                 </>
               ) : selectedTest.jobRole ? (
                 <>
-                  <div className="mb-6">
-                    <div className="flex items-center mb-3">
-                      <div className="w-10 h-10 bg-shnoor-lavender rounded-lg flex items-center justify-center mr-3">
-                        <FileText className="w-5 h-5 text-shnoor-indigo" />
+                  <div>
+                    <div className="flex items-center mb-2">
+                      <div className="w-8 h-8 bg-indigo-50 dark:bg-indigo-950/60 rounded-lg flex items-center justify-center mr-2.5">
+                        <FileText className="w-4 h-4 text-[#403f75] dark:text-indigo-400" />
                       </div>
-                      <h4 className="text-lg font-bold text-shnoor-navy">Job Role</h4>
+                      <h4 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+                        Job Role
+                      </h4>
                     </div>
-                    <div className="bg-shnoor-lavender/50 border-l-4 border-shnoor-indigo p-5 rounded-r-lg">
-                      <p className="text-shnoor-navy font-bold text-xl">{selectedTest.jobRole}</p>
+                    <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 p-4 rounded-xl">
+                      <p className="text-slate-800 dark:text-slate-100 font-bold text-base sm:text-lg">
+                        {selectedTest.jobRole}
+                      </p>
                     </div>
                   </div>
 
                   {selectedTest.description && (
                     <div>
-                      <div className="flex items-center mb-3">
-                        <div className="w-10 h-10 bg-shnoor-successLight rounded-lg flex items-center justify-center mr-3">
-                          <BookOpen className="w-5 h-5 text-shnoor-success" />
+                      <div className="flex items-center mb-2">
+                        <div className="w-8 h-8 bg-emerald-50 dark:bg-emerald-950/60 rounded-lg flex items-center justify-center mr-2.5">
+                          <BookOpen className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                         </div>
-                        <h4 className="text-lg font-bold text-shnoor-navy">Job Description</h4>
+                        <h4 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+                          Job Description
+                        </h4>
                       </div>
-                      <div className="bg-white p-5 rounded-lg border border-shnoor-mist shadow-sm">
-                        <p className="text-shnoor-indigoMedium whitespace-pre-wrap leading-relaxed text-base">{selectedTest.description}</p>
+                      <div className="bg-white dark:bg-[#1A1A30] p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xs">
+                        <p className="text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed text-sm">
+                          {selectedTest.description}
+                        </p>
                       </div>
                     </div>
                   )}
                 </>
               ) : (
-                <div className="text-center py-8 text-shnoor-navy">
-                  <FileText className="mx-auto h-12 w-12 mb-3 opacity-50" />
-                  <p>No job description available for this test</p>
+                <div className="text-center py-8 text-slate-500 dark:text-slate-400">
+                  <FileText className="mx-auto h-10 w-10 mb-2 opacity-40" />
+                  <p className="text-sm font-medium">No job description available for this test</p>
                 </div>
               )}
             </div>
 
-            <div className="bg-shnoor-lavender px-6 py-4 flex justify-end border-t border-shnoor-mist">
+            {/* Modal Footer */}
+            <div className="px-6 py-3.5 bg-slate-50 dark:bg-[#18182E] border-t border-slate-200 dark:border-slate-800 flex justify-end flex-shrink-0">
               <button
                 onClick={() => setShowJobModal(false)}
-                className="px-6 py-2 bg-white border border-shnoor-mist hover:bg-shnoor-mist/30 text-shnoor-navy font-semibold rounded-lg transition-colors shadow-sm"
+                className="px-5 py-2 bg-white dark:bg-[#1E1E38] border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 font-bold rounded-xl text-sm transition-all shadow-2xs cursor-pointer"
               >
                 Close
               </button>
@@ -335,98 +360,36 @@ const Dashboard = () => {
         </div>
       )}
 
-      <header className="bg-shnoor-navy shadow-sm h-auto sm:h-[72px] flex items-center sticky top-0 z-10 w-full py-3 sm:py-0">
-        <div className="w-full max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center border-white/10 sm:border-transparent sm:h-16">
-            <div className="flex items-center space-x-3 sm:space-x-4">
-              <div className="site-header-logo w-10 h-10 sm:w-12 sm:h-12 rounded-xl overflow-hidden shadow-sm flex-shrink-0 bg-white p-1 flex items-center justify-center">
-                <img
-                  src={shnoorLogo}
-                  alt="Shnoor Logo"
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              <div>
-                <h1 className="text-white font-bold text-base sm:text-lg leading-tight uppercase tracking-wide">SHNOOR Assessments</h1>
-                <p className="site-header-subtitle text-white/75 text-[10px] sm:text-xs uppercase tracking-widest font-semibold">Student Dashboard</p>
-              </div>
-            </div>
+      <StudentHeader
+        studentName={studentName}
+        studentId={studentId}
+        institute={institute}
+        onLogout={handleLogout}
+      />
 
-            <div className="flex items-center space-x-2 sm:space-x-4">
-              <div className="text-right hidden sm:block">
-                <p className="text-sm font-medium text-white">Welcome, {studentName}</p>
-                <p className="text-xs text-white/60">{capitalizeInstitute(institute)} • ID: {studentId}</p>
-              </div>
-              <ThemeSelector variant="dark" />
-              <button
-                onClick={handleLogout}
-                className="admin-logout-btn flex items-center justify-center space-x-2 px-4 sm:px-6 py-2.5 sm:py-3 !h-9 sm:!h-10 bg-shnoor-indigo text-white hover:bg-shnoor-indigo/90 rounded-xl transition-all text-sm sm:text-base font-medium"
-              >
-                <LogOut size={18} className="hidden sm:block" />
-                <LogOut size={16} className="sm:hidden" />
-                <span className="hidden sm:inline">Logout</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* Collapsible Sidebar Rail + Mobile Tabs */}
+      <StudentSidebar
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+      />
 
-      {/* Main Content */}
-      <main className="w-full max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Tab Navigation - COMMENTED OUT */}
-
-        <div className="mb-6 sm:mb-8 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:pb-0 scrollbar-hide">
-          <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-mist p-2 inline-flex w-max space-x-2 !max-w-none">
-            <button
-              onClick={() => setActiveTab('tests')}
-              className={`flex items-center space-x-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-medium transition-all text-sm sm:text-base ${activeTab === 'tests'
-                ? 'bg-shnoor-indigo text-white'
-                : 'bg-white text-shnoor-indigoMedium hover:text-shnoor-navy hover:bg-shnoor-lavender'
-                }`}
-            >
-              <BookOpen size={18} className="sm:w-5 sm:h-5 flex-shrink-0" />
-              <span>My Tests</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('interviews')}
-              className={`flex items-center space-x-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-medium transition-all text-sm sm:text-base ${activeTab === 'interviews'
-                ? 'bg-shnoor-indigo text-white'
-                : 'bg-white text-shnoor-indigoMedium hover:text-shnoor-navy hover:bg-shnoor-lavender'
-                }`}
-            >
-              <Video size={18} className="sm:w-5 sm:h-5 flex-shrink-0" />
-              <span>Interviews</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('job-board')}
-              className={`flex items-center space-x-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-medium transition-all text-sm sm:text-base ${activeTab === 'job-board'
-                ? 'bg-shnoor-indigo text-white'
-                : 'bg-white text-shnoor-indigoMedium hover:text-shnoor-navy hover:bg-shnoor-lavender'
-                }`}
-            >
-              <Briefcase size={18} className="sm:w-5 sm:h-5 flex-shrink-0" />
-              <span>Job Board</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('my-applications')}
-              className={`flex items-center space-x-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-medium transition-all text-sm sm:text-base ${activeTab === 'my-applications'
-                ? 'bg-shnoor-indigo text-white'
-                : 'bg-white text-shnoor-indigoMedium hover:text-shnoor-navy hover:bg-shnoor-lavender'
-                }`}
-            >
-              <FileText size={18} className="sm:w-5 sm:h-5 flex-shrink-0" />
-              <span>My Applications</span>
-            </button>
-          </div>
-        </div>
+      {/* Main Content with offset for desktop sidebar rail */}
+      <main className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:pr-8 lg:pl-[96px] py-6 sm:py-8 transition-all">
 
         {/* Tests Tab */}
         {activeTab === 'tests' && (
           <>
-            {/* <div className="mb-8">
-              <h2 className="text-2xl font-bold text-shnoor-navy mb-2">Available Examinations</h2>
-              <p className="text-shnoor-indigoMedium">Select a test to begin your assessment</p>
-            </div> */}
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <div>
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                  My Tests
+                </h2>
+                <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 mt-1 font-medium">
+                  View and take your assigned tests and assessments
+                </p>
+              </div>
+            </div>
 
             {loading && (
               <div className="flex justify-center items-center h-64">
@@ -447,158 +410,176 @@ const Dashboard = () => {
 
             {!loading && availableTests.length > 0 && (
               <>
-                <ExamSearchFilter
-                  onSearchChange={setSearchTerm}
-                  onFilterChange={setFilters}
-                  onSortChange={setSortBy}
-                  showPublishedFilter={false}
-                  showAttemptedFilter={true}
-                  resultCount={filteredTests.length}
-                  sortOptions={[
-                    { value: 'latest', label: 'Latest Available' },
-                    { value: 'oldest', label: 'Oldest Available' },
-                    { value: 'duration-asc', label: 'Shortest Duration' },
-                    { value: 'duration-desc', label: 'Longest Duration' }
-                  ]}
-                />
+                {/* Search & Filter Bar with generous bottom spacing */}
+                <div className="mb-8 sm:mb-10">
+                  <ExamSearchFilter
+                    onSearchChange={setSearchTerm}
+                    onFilterChange={setFilters}
+                    onSortChange={setSortBy}
+                    showPublishedFilter={false}
+                    showAttemptedFilter={true}
+                    resultCount={filteredTests.length}
+                    sortOptions={[
+                      { value: 'latest', label: 'Latest Available' },
+                      { value: 'oldest', label: 'Oldest Available' },
+                      { value: 'duration-asc', label: 'Shortest Duration' },
+                      { value: 'duration-desc', label: 'Longest Duration' }
+                    ]}
+                  />
+                </div>
 
                 {filteredTests.length === 0 ? (
-                  <div className="text-center py-8 sm:py-12 bg-white rounded-xl border border-shnoor-mist shadow-[0_8px_30px_rgba(14,14,39,0.06)] px-4">
-                    <BookOpen className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-shnoor-mist mb-4" />
-                    <h3 className="text-base sm:text-lg font-bold text-shnoor-navy">No Tests Match Your Filters</h3>
-                    <p className="text-sm sm:text-base text-shnoor-indigoMedium mt-2">Try adjusting your search or filters to see more tests.</p>
+                  <div className="text-center py-8 sm:py-12 bg-white dark:bg-[#1E1E38] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm px-4">
+                    <BookOpen className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-slate-400 mb-4" />
+                    <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">No Tests Match Your Filters</h3>
+                    <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 mt-2">Try adjusting your search or filters to see more tests.</p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 sm:gap-8">
                     {filteredTests.map((test) => {
-                      // Determine card styling based on test status
-                      let cardBgColor = 'bg-white';
-                      let cardBorderColor = 'border-shnoor-indigo';
-                      let cardOpacity = 'opacity-100';
+                      const isCompleted = test.alreadyTaken || test.testStatus === 'expired';
+                      const isInProgress = test.isAvailable && !test.alreadyTaken && testsWithProgress.has(test.id);
+
+                      // Card styling with high visibility and contrast
+                      let cardBorder = 'border-2 border-slate-200 dark:border-slate-700 hover:border-[#403f75] dark:hover:border-indigo-500 shadow-sm hover:shadow-md';
+                      let cardBg = 'bg-white dark:bg-[#1E1E38]';
 
                       if (test.isMockTest) {
-                        cardBgColor = 'bg-shnoor-successLight';
-                        cardBorderColor = 'border-shnoor-success';
-                      } else if (test.testStatus === 'expired' || test.alreadyTaken) {
-                        cardBgColor = 'bg-shnoor-lavender';
-                        cardBorderColor = 'border-shnoor-mist';
-                        cardOpacity = 'opacity-75';
+                        cardBg = 'bg-[#F2FAF6] dark:bg-[#0d2a20]';
+                        cardBorder = 'border-2 border-emerald-300 dark:border-emerald-700 shadow-sm';
+                      } else if (isCompleted) {
+                        cardBg = 'bg-white dark:bg-[#1E1E38]';
+                        cardBorder = 'border-2 border-slate-300 dark:border-slate-700 shadow-sm';
                       } else if (test.testStatus === 'upcoming') {
-                        cardBgColor = 'bg-shnoor-warningLight';
-                        cardBorderColor = 'border-shnoor-warningLight';
+                        cardBg = 'bg-amber-50/40 dark:bg-amber-950/20';
+                        cardBorder = 'border-2 border-amber-300 dark:border-amber-700 shadow-sm';
                       }
 
                       return (
                         <div
                           key={test.id}
-                          className={`${cardBgColor} border-2 ${cardBorderColor} rounded-xl p-6 ${cardOpacity} ${test.isAvailable && !test.alreadyTaken ? 'hover:shadow-[0_8px_30px_rgba(14,14,39,0.08)] hover:border-shnoor-indigo' : ''} transition-all duration-200`}
+                          className={`${cardBg} ${cardBorder} ${test.isMockTest ? 'col-span-full' : ''} rounded-2xl p-6 sm:p-7 flex flex-col justify-between transition-all duration-200`}
                         >
-                          <div className="flex justify-between items-start mb-4 gap-3">
-                            <div className="flex-1">
-                              <div className="flex flex-wrap items-center gap-2 mb-2">
-                                <span className={`inline-block px-3 py-1 ${test.isMockTest
-                                  ? 'bg-shnoor-successLight text-shnoor-success'
-                                  : test.testStatus === 'expired' || test.alreadyTaken
-                                    ? 'bg-shnoor-mist text-shnoor-navy'
-                                    : test.testStatus === 'upcoming'
-                                      ? 'bg-shnoor-warningLight text-shnoor-warning'
-                                      : 'bg-shnoor-lavender text-shnoor-indigo'
-                                  } rounded-full text-xs font-semibold`}>
-                                  {test.subject}
+                          <div>
+                            {/* Card Top Header: Badges and Icon */}
+                            <div className="flex justify-between items-start mb-4 gap-3">
+                              <div className="flex flex-wrap items-center gap-2">
+                                {/* Subject Tag */}
+                                <span className="px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-300/80 dark:border-slate-700">
+                                  {test.subject || 'General'}
                                 </span>
+
+                                {/* Status Tags */}
                                 {test.isMockTest && (
-                                  <span className="inline-block px-3 py-1 bg-shnoor-successLight text-shnoor-success rounded-full text-xs font-bold border border-shnoor-successLight">
+                                  <span className="px-3 py-1 rounded-lg text-xs font-bold bg-indigo-50 dark:bg-indigo-950/60 text-[#403f75] dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/60">
                                     🎯 Mock Test
                                   </span>
                                 )}
+
+                                {isCompleted && (
+                                  <span className="px-3 py-1 rounded-lg text-xs font-bold bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800/60">
+                                    All Attempts Used ({test.attemptsTaken}/{test.maxAttempts})
+                                  </span>
+                                )}
+
+                                {!isCompleted && !test.isMockTest && test.isAvailable && (
+                                  <span className="px-3 py-1 rounded-lg text-xs font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60">
+                                    Available
+                                  </span>
+                                )}
+
+                                {isInProgress && (
+                                  <span className="px-3 py-1 rounded-lg text-xs font-bold bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-400 border border-teal-200 dark:border-teal-800/60">
+                                    ⏸ In Progress
+                                  </span>
+                                )}
+
+                                {test.testStatus === 'upcoming' && !test.alreadyTaken && (
+                                  <span className="px-3 py-1 rounded-lg text-xs font-bold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800/60">
+                                    🕐 Upcoming
+                                  </span>
+                                )}
                               </div>
-                              <h3 className="text-lg font-bold text-shnoor-navy break-words">{test.title}</h3>
-                              {test.isMockTest && (
-                                <p className="text-xs text-shnoor-success mt-1">Practice test to get familiar with the platform</p>
+
+                              <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 flex-shrink-0">
+                                <BookOpen size={16} />
+                              </div>
+                            </div>
+
+                            {/* Title */}
+                            <h3 className="text-xl font-extrabold text-slate-900 dark:text-white capitalize tracking-tight mt-2 mb-1 break-words leading-tight">
+                              {test.title}
+                            </h3>
+
+                            {test.isMockTest && (
+                              <p className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold mb-2">
+                                Practice test to get familiar with the platform
+                              </p>
+                            )}
+
+                            {/* Details List */}
+                            <div className="space-y-2.5 mt-4 mb-6 text-sm text-slate-700 dark:text-slate-300 font-medium">
+                              <div className="flex items-center">
+                                <Clock size={16} className="mr-2.5 text-slate-500 flex-shrink-0" />
+                                <span>Duration: <strong className="text-slate-900 dark:text-white font-bold">{test.duration} minutes</strong></span>
+                              </div>
+                              <div className="flex items-center">
+                                <AlertCircle size={16} className="mr-2.5 text-slate-500 flex-shrink-0" />
+                                <span><strong className="text-slate-900 dark:text-white font-bold">{test.questions}</strong> Questions • <span className="capitalize">{test.difficulty}</span> Level</span>
+                              </div>
+                              <div className="flex items-center">
+                                <BookOpen size={16} className="mr-2.5 text-slate-500 flex-shrink-0" />
+                                <span>Attempts: <strong className="text-slate-900 dark:text-white font-bold">{test.attemptsTaken}/{test.maxAttempts}</strong> ({test.attemptsRemaining} remaining)</span>
+                              </div>
+                              {test.startDateTime && (
+                                <div className="flex items-center">
+                                  <Clock size={16} className="mr-2.5 text-slate-500 flex-shrink-0" />
+                                  <span>Available from: <strong className="text-slate-800 dark:text-slate-200">{new Date(test.startDateTime).toLocaleString()}</strong></span>
+                                </div>
                               )}
-                              {test.alreadyTaken && (
-                                <span className="inline-block mt-2 px-3 py-1 bg-shnoor-dangerLight text-shnoor-danger rounded-full text-xs font-semibold">
-                                  All Attempts Used ({test.attemptsTaken}/{test.maxAttempts})
-                                </span>
-                              )}
-                              {test.testStatus === 'upcoming' && !test.alreadyTaken && (
-                                <span className="inline-block mt-2 px-3 py-1 bg-shnoor-warningLight text-shnoor-warning rounded-full text-xs font-semibold">
-                                  🕐 Upcoming
-                                </span>
-                              )}
-                              {test.testStatus === 'expired' && !test.alreadyTaken && (
-                                <span className="inline-block mt-2 px-3 py-1 bg-shnoor-lavender text-shnoor-navy rounded-full text-xs font-semibold">
-                                  ⏰ Deadline Passed
-                                </span>
-                              )}
-                              {test.isAvailable && !test.alreadyTaken && testsWithProgress.has(test.id) && (
-                                <span className="inline-block mt-2 px-3 py-1 bg-shnoor-successLight text-shnoor-success rounded-full text-xs font-semibold">
-                                  ⏸ In Progress
-                                </span>
+                              {test.endDateTime && (
+                                <div className="flex items-center">
+                                  <Clock size={16} className="mr-2.5 text-slate-500 flex-shrink-0" />
+                                  <span>Available until: <strong className="text-slate-800 dark:text-slate-200">{new Date(test.endDateTime).toLocaleString()}</strong></span>
+                                </div>
                               )}
                             </div>
-                            <BookOpen className={`flex-shrink-0 mt-1 ${test.alreadyTaken || !test.isAvailable ? 'text-shnoor-mist' : test.testStatus === 'upcoming' ? 'text-shnoor-warning' : 'text-shnoor-indigo'}`} size={24} />
                           </div>
 
-                          <div className="space-y-2 mb-6">
-                            <div className="flex items-center text-sm text-shnoor-indigoMedium">
-                              <Clock size={16} className="mr-2" />
-                              <span>Duration: {test.duration} minutes</span>
-                            </div>
-                            <div className="flex items-center text-sm text-shnoor-indigoMedium">
-                              <AlertCircle size={16} className="mr-2" />
-                              <span>{test.questions} Questions • {test.difficulty} Level</span>
-                            </div>
-                            <div className="flex items-center text-sm text-shnoor-indigoMedium">
-                              <BookOpen size={16} className="mr-2" />
-                              <span>Attempts: {test.attemptsTaken}/{test.maxAttempts} ({test.attemptsRemaining} remaining)</span>
-                            </div>
-                            {test.startDateTime && (
-                              <div className="flex items-center text-sm text-shnoor-indigoMedium">
-                                <Clock size={16} className="mr-2" />
-                                <span>Available from: {new Date(test.startDateTime).toLocaleString()}</span>
-                              </div>
-                            )}
-                            {test.endDateTime && (
-                              <div className="flex items-center text-sm text-shnoor-indigoMedium">
-                                <Clock size={16} className="mr-2" />
-                                <span>Available until: {new Date(test.endDateTime).toLocaleString()}</span>
-                              </div>
-                            )}
-                          </div>
-
-                          <div className="space-y-3">
+                          {/* Action Buttons */}
+                          <div className="space-y-3 pt-2">
                             <button
                               onClick={() => handleViewJobDescription(test)}
-                              className="w-full py-2.5 px-4 bg-shnoor-mist/20 hover:bg-shnoor-mist/40 text-shnoor-navy font-medium rounded-lg transition-colors flex items-center justify-center space-x-2 border border-shnoor-mist"
+                              className="w-full h-11 px-4 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold rounded-xl border border-slate-300 dark:border-slate-600 transition-all text-sm flex items-center justify-center gap-2 cursor-pointer shadow-2xs"
                             >
-                              <FileText size={18} />
+                              <FileText size={16} />
                               <span>View Job Description</span>
                             </button>
 
                             <button
                               onClick={() => test.isAvailable && !test.alreadyTaken && handleTakeTest(test.id)}
                               disabled={!test.isAvailable || test.alreadyTaken}
-                              className={`w-full py-3 px-4 font-semibold rounded-lg transition-colors shadow-sm min-h-[44px] touch-manipulation ${test.alreadyTaken
-                                ? 'bg-shnoor-mist/50 text-shnoor-navy cursor-not-allowed border border-shnoor-mist'
-                                : test.testStatus === 'upcoming'
-                                  ? 'bg-shnoor-warning text-white cursor-not-allowed'
+                              className={`w-full h-11 px-4 font-bold rounded-xl transition-all shadow-sm text-sm flex items-center justify-center ${
+                                test.alreadyTaken
+                                  ? 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold border border-slate-300 dark:border-slate-600 cursor-not-allowed'
+                                  : test.testStatus === 'upcoming'
+                                  ? 'bg-amber-500 text-white cursor-not-allowed'
                                   : test.testStatus === 'expired'
-                                    ? 'bg-shnoor-mist/50 text-shnoor-navy cursor-not-allowed border border-shnoor-mist'
-                                    : testsWithProgress.has(test.id)
-                                      ? 'bg-shnoor-success hover:bg-shnoor-success text-white'
-                                      : 'bg-shnoor-indigo hover:bg-[#4d4d9c] text-white'
-                                }`}
+                                  ? 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold border border-slate-300 dark:border-slate-600 cursor-not-allowed'
+                                  : isInProgress || test.isMockTest
+                                  ? 'bg-emerald-600 hover:bg-emerald-700 active:scale-99 text-white cursor-pointer'
+                                  : 'bg-[#403f75] hover:bg-[#2d2c55] active:scale-99 text-white cursor-pointer'
+                              }`}
                             >
                               {test.alreadyTaken
                                 ? `Completed (${test.attemptsTaken}/${test.maxAttempts} attempts used)`
                                 : test.testStatus === 'upcoming'
-                                  ? `🕐 Available from ${new Date(test.startDateTime).toLocaleString()}`
-                                  : test.testStatus === 'expired'
-                                    ? `⏰ Expired on ${new Date(test.endDateTime).toLocaleString()}`
-                                    : testsWithProgress.has(test.id)
-                                      ? '▶ Resume Test'
-                                      : `Take Test (${test.attemptsRemaining} attempts left)`}
+                                ? `🕐 Available from ${new Date(test.startDateTime).toLocaleString()}`
+                                : test.testStatus === 'expired'
+                                ? `⏰ Expired on ${new Date(test.endDateTime).toLocaleString()}`
+                                : isInProgress
+                                ? '▶ Resume Test'
+                                : `Take Test (${test.attemptsRemaining} attempts left)`}
                             </button>
                           </div>
                         </div>

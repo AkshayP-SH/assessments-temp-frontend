@@ -222,6 +222,7 @@ export const AdminAuthProvider = ({ children }) => {
       // Clear local state and storage
       localStorage.removeItem('adminToken');
       localStorage.removeItem('adminUser');
+      sessionStorage.removeItem('superAdminSelectedClientId');
       setAdminSession(null);
     }
   };

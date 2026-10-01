@@ -17,7 +17,8 @@
   height: 4.5rem;
   border-bottom: 1px solid #E2E8F0;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  position: relative;
+  position: sticky;
+  top: 0;
   z-index: 50;
 }
 
@@ -267,29 +268,13 @@
 
 /* Admin Dashboard - Root Layout */
 .admin-dashboard-root {
-  background-color: #F8F7FF;
+  background-color: #F4F6FB;
   min-height: 100vh;
   width: 100%;
 }
 
 .admin-dashboard-content {
   width: 100%;
-  max-width: 80rem;
-  margin-left: auto;
-  margin-right: auto;
-  padding: 1.5rem 1rem;
-}
-
-@media (min-width: 640px) {
-  .admin-dashboard-content {
-    padding: 2rem 1.5rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  .admin-dashboard-content {
-    padding: 2rem 2rem;
-  }
 }
 
 /* Admin Dashboard - Welcome Banner */
@@ -395,6 +380,7 @@
 }
 
 @media (min-width: 640px) {
+
   .section-header,
   .admin-exams-header {
     flex-direction: row;
@@ -1665,7 +1651,7 @@ body {
   --theme-panel: 224 224 239;
   --theme-panel-strong: 240 240 248;
   --theme-text: 14 14 39;
-  --theme-text-muted: 104 104 172;
+  --theme-text-muted: 70 70 120;
   --theme-border: 209 209 230;
   --theme-shell-stroke: 209 209 230;
   --theme-accent: 68 68 142;
@@ -1702,7 +1688,7 @@ body {
   --theme-landing-footer: 14 14 39;
   --theme-landing-cta: 68 68 142;
   --theme-landing-text: 14 14 39;
-  --theme-landing-muted: 104 104 172;
+  --theme-landing-muted: 70 70 120;
 }
 
 html[data-theme='dark'] {
@@ -1759,7 +1745,7 @@ html[data-theme='leaf'] {
   --theme-panel: 242 247 240;
   --theme-panel-strong: 231 239 229;
   --theme-text: 20 42 28;
-  --theme-text-muted: 75 100 82;
+  --theme-text-muted: 55 80 62;
   --theme-border: 226 233 224;
   --theme-shell-stroke: 123 156 105;
   --theme-accent: 123 156 105;
@@ -1796,7 +1782,7 @@ html[data-theme='leaf'] {
   --theme-landing-footer: 22 36 24;
   --theme-landing-cta: 123 156 105;
   --theme-landing-text: 20 42 28;
-  --theme-landing-muted: 75 100 82;
+  --theme-landing-muted: 55 80 62;
 }
 
 body {
@@ -2081,7 +2067,7 @@ html[data-theme='dark'] .admin-status-pill.is-closed {
   border-bottom-color: rgb(var(--theme-header-border)) !important;
 }
 
-:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) body :is(.bg-shnoor-indigo, button.bg-shnoor-indigo, .\!bg-shnoor-indigo, .bg-\[\#44448E\], .bg-\[\#44448e\]) {
+:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) body :is(.bg-shnoor-indigo, button.bg-shnoor-indigo, .\!bg-shnoor-indigo, .bg-\[\#44448E\], .bg-\[\#44448e\], .bg-\[\#403f75\], .bg-\[\#2d2c55\], .bg-\[\#4C4B82\]) {
   background-color: rgb(var(--theme-accent)) !important;
   color: #fff !important;
 }
@@ -2094,11 +2080,11 @@ html[data-theme='dark'] .admin-status-pill.is-closed {
   color: rgb(var(--theme-text-muted)) !important;
 }
 
-:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) body .text-shnoor-indigo {
+:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) body :is(.text-shnoor-indigo, .text-\[\#403f75\], .text-\[\#44448E\]) {
   color: rgb(var(--theme-accent)) !important;
 }
 
-:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) body :is(.border-shnoor-mist, .border-shnoor-light, .border-gray-200, .border-gray-300) {
+:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) body :is(.border-shnoor-mist, .border-shnoor-light, .border-gray-200, .border-gray-300, .border-shnoor-indigo, .border-\[\#403f75\]) {
   border-color: rgb(var(--theme-border)) !important;
 }
 
@@ -2435,26 +2421,26 @@ html[data-theme='dark'] option {
   color: rgb(var(--theme-accent)) !important;
 }
 
-:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) .admin-exam-card .relative > div {
+:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) .admin-exam-card .relative>div {
   background-color: rgb(var(--theme-card)) !important;
   border-color: rgb(var(--theme-border)) !important;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
 }
 
-:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) .admin-exam-card .relative > div button {
+:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) .admin-exam-card .relative>div button {
   color: rgb(var(--theme-text)) !important;
 }
 
-:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) .admin-exam-card .relative > div button:hover {
+:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) .admin-exam-card .relative>div button:hover {
   background-color: rgb(var(--theme-panel)) !important;
   color: rgb(var(--theme-accent-strong)) !important;
 }
 
-:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) .admin-exam-card .relative > div button svg {
+:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) .admin-exam-card .relative>div button svg {
   color: rgb(var(--theme-text-muted)) !important;
 }
 
-:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) .admin-exam-card .relative > div button:hover svg {
+:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) .admin-exam-card .relative>div button:hover svg {
   color: rgb(var(--theme-accent)) !important;
 }
 
