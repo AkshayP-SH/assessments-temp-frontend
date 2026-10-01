@@ -59,6 +59,11 @@ const OrganisationSignup = () => {
       return;
     }
 
+    if (formData.email.toLowerCase().includes('gmail')) {
+      setError('Please use a valid company or organisation email. Gmail addresses are not allowed.');
+      return;
+    }
+
     setLoading(true);
 
     try {
