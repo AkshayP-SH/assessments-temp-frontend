@@ -65,7 +65,7 @@ fs.writeFileSync('c:/assessment/frontend/src/pages/admin/AdminDashboard.jsx', da
 // Fix InterviewsList.jsx Select styles
 let interviews = fs.readFileSync('c:/assessment/frontend/src/pages/admin/InterviewsList.jsx', 'utf8');
 // For InterviewsList, the indentation is slightly different but we can just use the same string for styles since it's an AST-like replacement (well, string replacement). We just need to make sure we don't break JSX.
-const reactSelectStylesInterviews = reactSelectStyles.replace(/                        styles/g, '                styles');
+const reactSelectStylesInterviews = reactSelectStyles.replace(/ {24}styles/g, '                styles');
 interviews = interviews.replace(/styles=\{\{[\s\S]*?\}\}\s*\/>/m, reactSelectStylesInterviews + '\n              />');
 fs.writeFileSync('c:/assessment/frontend/src/pages/admin/InterviewsList.jsx', interviews);
 

@@ -18,10 +18,10 @@ const ClientProtectedRoute = ({ children }) => {
   }
 
   const requiresPayment = clientUser?.requiresPayment || clientUser?.clientStatus === 'awaiting_payment';
-  const isOnSubscriptionPage = location.pathname === '/client/subscription-plans';
-  
-  if (requiresPayment && !isOnSubscriptionPage) {
-    return <Navigate to="/client/subscription-plans" replace state={{ 
+  const isAllowedPaymentPage = location.pathname === '/client/subscription-plans' || location.pathname === '/client/payment';
+
+  if (requiresPayment && !isAllowedPaymentPage) {
+    return <Navigate to="/client/subscription-plans" replace state={{
       requiresPayment: true,
       subscriptionExpired: clientUser?.subscriptionExpired
     }} />;

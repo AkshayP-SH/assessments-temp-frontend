@@ -80,7 +80,7 @@ export default function AdminJobApplicants() {
 
     useEffect(() => {
         fetchData();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+         
     }, [jobId, statusFilter]);
 
     const getAppStatusBadge = (status) => {
