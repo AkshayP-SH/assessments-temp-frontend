@@ -6,7 +6,6 @@ import { useSupportSocket } from '../hooks/useSupportSocket';
 import { API_URL } from '../config/api';
 import shnoorLogo from '../assets/shnoor-logo.png';
 import ThemeSelector from './ThemeSelector';
-import toast from 'react-hot-toast';
 
 const AdminHeader = ({ viewAsControl, title }) => {
   const navigate = useNavigate();
@@ -25,19 +24,8 @@ const AdminHeader = ({ viewAsControl, title }) => {
 
   const [toastNotification, setToastNotification] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [clientPlanId, setClientPlanId] = useState(null);
   const shownNotificationsRef = useRef(new Set());
   const socketCountReceivedRef = useRef(false);
-
-  useEffect(() => {
-    if (!isClientAdmin) return;
-    const token = localStorage.getItem('adminToken') || localStorage.getItem('clientToken');
-    if (!token) return;
-    fetch(`${API_URL}/api/client/auth/me`, { headers: { 'Authorization': `Bearer ${token}` } })
-      .then(r => r.ok ? r.json() : null)
-      .then(d => { if (d?.success && d.admin) setClientPlanId(d.admin.plan_id); })
-      .catch(() => { });
-  }, [isClientAdmin]);
 
   // Use support socket for real-time notifications with browser notifications enabled
   const {

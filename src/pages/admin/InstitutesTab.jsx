@@ -33,6 +33,7 @@ const InstitutesTab = ({
   setShowRegistrationControlModal,
   handleDeleteInstitute,
   instituteTotalPages,
+  instituteTotalItems,
   instituteCurrentPage,
   setInstituteCurrentPage,
   instituteItemsPerPage,
@@ -384,7 +385,7 @@ const InstitutesTab = ({
                 onPageChange={setInstituteCurrentPage}
                 itemsPerPage={instituteItemsPerPage}
                 onItemsPerPageChange={setInstituteItemsPerPage}
-                totalItems={allInstitutes.length}
+                totalItems={instituteTotalItems}
               />
             </div>
           )}

@@ -125,7 +125,7 @@ const AdminDashboard = () => {
   const [examItemsPerPage, setExamItemsPerPage] = useState(9);
 
   const [instituteCurrentPage, setInstituteCurrentPage] = useState(1);
-  const [instituteItemsPerPage, setInstituteItemsPerPage] = useState(10);
+  const [instituteItemsPerPage, setInstituteItemsPerPage] = useState(9);
 
   const [resultsCurrentPage, setResultsCurrentPage] = useState(1);
   const [resultsRowsPerPage, setResultsRowsPerPage] = useState(40);
@@ -2381,6 +2381,7 @@ const AdminDashboard = () => {
                     setShowRegistrationControlModal={setShowRegistrationControlModal}
                     handleDeleteInstitute={handleDeleteInstitute}
                     instituteTotalPages={instituteTotalPages}
+                    instituteTotalItems={filteredInstitutes.length}
                     instituteCurrentPage={instituteCurrentPage}
                     setInstituteCurrentPage={setInstituteCurrentPage}
                     instituteItemsPerPage={instituteItemsPerPage}
