@@ -512,7 +512,7 @@ const StudentMessages = () => {
     <AdminLayout title="Student Support">
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold text-shnoor-navyLight">Student Support</h1>
+          <h1 className="text-2xl font-bold text-theme-text">Student Support</h1>
           {unreadCount > 0 && (
             <span className="px-2 py-0.5 bg-red-100 text-red-600 rounded-full text-xs font-medium">
               {unreadCount} unread
@@ -521,7 +521,7 @@ const StudentMessages = () => {
         </div>
         <button
           onClick={() => navigate('/admin/dashboard')}
-          className="flex items-center gap-2 text-[#9A9AC9] hover:text-shnoor-navyLight transition-colors text-sm font-medium"
+          className="flex items-center gap-2 text-theme-muted hover:text-theme-text transition-colors text-sm font-semibold cursor-pointer"
         >
           <ArrowLeft size={16} />
           Back to Dashboard
@@ -529,42 +529,42 @@ const StudentMessages = () => {
       </div>
 
       {/* Filters and Actions */}
-      <div className="bg-white rounded-xl border border-shnoor-mist p-3 mb-6 flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-theme-card rounded-xl border border-theme-border p-3 mb-6 flex flex-wrap items-center justify-between gap-4 shadow-sm">
         {/* Left: Filters */}
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-2">
-            <Filter size={16} className="text-[#9A9AC9]" />
-            <span className="text-sm font-medium text-shnoor-navyLight dark:text-gray-900">Filter:</span>
+            <Filter size={16} className="text-theme-muted" />
+            <span className="text-sm font-semibold text-theme-text">Filter:</span>
           </div>
           <div className="flex gap-2">
             {[{ key: 'all', label: 'All Messages' }, { key: 'unread', label: 'Unread' }].map(({ key, label }) => (
               <button
                 key={key}
                 onClick={() => { setFilter(key); setPagination(prev => ({ ...prev, page: 1 })); }}
-                className={`px-3 py-1.5 text-sm rounded-lg transition-colors flex items-center gap-1.5 ${
+                className={`px-3 py-1.5 text-sm rounded-lg transition-all flex items-center gap-1.5 font-semibold cursor-pointer ${
                   filter === key 
-                    ? 'bg-[#9A9AC9] text-gray-900 dark:text-gray-900 font-medium' 
-                    : 'bg-[#D1D1E6] text-gray-900 dark:text-gray-900 hover:bg-[#B7B7D9]'
+                    ? 'bg-theme-accent text-white shadow-xs' 
+                    : 'bg-theme-panel text-theme-text hover:bg-theme-panelx border border-theme-border'
                 }`}
               >
                 {label}
                 {key === 'unread' && unreadCount > 0 && (
-                  <span className={`px-1.5 py-0.5 rounded-full text-xs font-semibold ${
-                    filter === 'unread' ? 'bg-white text-shnoor-navyLight' : 'bg-red-500 text-white'
+                  <span className={`px-1.5 py-0.5 rounded-full text-xs font-bold ${
+                    filter === 'unread' ? 'bg-white text-theme-accent' : 'bg-red-500 text-white'
                   }`}>{unreadCount}</span>
                 )}
               </button>
             ))}
           </div>
-          <div className="flex items-center gap-2 border border-[#D1D1E6] rounded-lg px-3 py-1.5 bg-white ml-2">
-            <Building size={14} className="text-[#9A9AC9]" />
+          <div className="flex items-center gap-2 border border-theme-border rounded-lg px-3 py-1.5 bg-theme-card ml-2">
+            <Building size={14} className="text-theme-muted" />
             <select
               value={selectedCollege}
               onChange={(e) => { setSelectedCollege(e.target.value); setPagination(prev => ({ ...prev, page: 1 })); }}
-              className="text-sm text-shnoor-navyLight focus:outline-none bg-transparent min-w-[150px]"
+              className="text-sm text-theme-text focus:outline-none bg-transparent min-w-[150px] cursor-pointer"
             >
-              <option value="">All Colleges</option>
-              {colleges.map(college => <option key={college} value={college}>{college}</option>)}
+              <option value="" className="bg-theme-card text-theme-text">All Colleges</option>
+              {colleges.map(college => <option key={college} value={college} className="bg-theme-card text-theme-text">{college}</option>)}
             </select>
           </div>
         </div>
@@ -573,9 +573,9 @@ const StudentMessages = () => {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setShowAnalytics(!showAnalytics)}
-            className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-colors ${showAnalytics
-              ? 'bg-[#9A9AC9] dark:bg-[#403f75] text-shnoor-navyLight dark:text-white font-medium'
-              : 'bg-[#D1D1E6] dark:bg-gray-800 text-shnoor-navyLight dark:text-gray-300 hover:bg-[#B7B7D9] dark:hover:bg-gray-700'
+            className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-all font-semibold cursor-pointer border ${showAnalytics
+              ? 'bg-theme-accent text-white border-theme-accent shadow-xs'
+              : 'bg-theme-panel text-theme-text hover:bg-theme-panelx border-theme-border'
               }`}
           >
             <BarChart3 size={14} />
@@ -586,9 +586,9 @@ const StudentMessages = () => {
               setBulkDeleteMode(!bulkDeleteMode);
               setSelectedConversations(new Set());
             }}
-            className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-colors ${bulkDeleteMode
-              ? 'bg-red-600 text-white font-medium'
-              : 'bg-[#D1D1E6] dark:bg-gray-800 text-shnoor-navyLight dark:text-gray-300 hover:bg-[#B7B7D9] dark:hover:bg-gray-700'
+            className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-all font-semibold cursor-pointer border ${bulkDeleteMode
+              ? 'bg-red-600 text-white border-red-600'
+              : 'bg-theme-panel text-theme-text hover:bg-theme-panelx border-theme-border'
               }`}
           >
             <Trash2 size={14} />
@@ -596,7 +596,7 @@ const StudentMessages = () => {
           </button>
           <button
             onClick={fetchMessages}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm bg-[#D1D1E6] dark:bg-gray-800 text-shnoor-navyLight dark:text-gray-300 rounded-lg hover:bg-[#B7B7D9] dark:hover:bg-gray-700 transition-colors"
+            className="flex items-center gap-2 px-3 py-1.5 text-sm bg-theme-panel text-theme-text hover:bg-theme-panelx border border-theme-border rounded-lg transition-all font-semibold cursor-pointer"
           >
             <RefreshCw size={14} />
             Refresh
@@ -604,7 +604,7 @@ const StudentMessages = () => {
           {unreadCount > 0 && (
             <button
               onClick={markAllAsRead}
-              className="flex items-center gap-2 px-3 py-1.5 text-sm bg-[#9A9AC9] text-shnoor-navyLight rounded-lg hover:bg-shnoor-navyLight hover:text-white transition-colors"
+              className="flex items-center gap-2 px-3 py-1.5 text-sm bg-theme-accent text-white hover:bg-theme-accent2 rounded-lg transition-all font-semibold cursor-pointer shadow-xs"
             >
               <CheckCheck size={14} />
               Mark All Read
@@ -615,15 +615,15 @@ const StudentMessages = () => {
 
       {/* Analytics Section */}
       {showAnalytics && (
-        <div className="bg-white rounded-xl border border-shnoor-mist p-6 mb-6">
+        <div className="bg-theme-card rounded-xl border border-theme-border p-6 mb-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-shnoor-navy flex items-center gap-2">
+            <h2 className="text-xl font-bold text-theme-text flex items-center gap-2">
               <TrendingUp size={24} />
               Feedback Analytics
             </h2>
             <button
               onClick={() => setShowAnalytics(false)}
-              className="text-shnoor-soft hover:text-shnoor-navy"
+              className="text-theme-muted hover:text-theme-text"
             >
               <X size={20} />
             </button>
@@ -631,47 +631,47 @@ const StudentMessages = () => {
 
           {loadingAnalytics ? (
             <div className="flex items-center justify-center py-12">
-              <div className="w-8 h-8 border-2 border-shnoor-indigo/30 border-t-shnoor-indigo rounded-full animate-spin"></div>
+              <div className="w-8 h-8 border-2 border-theme-accent/30 border-t-theme-accent rounded-full animate-spin"></div>
             </div>
           ) : analytics ? (
             <div className="space-y-6">
               {/* Overview Stats */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="bg-[#f0f7ff] rounded-xl p-5 border-0">
+                <div className="bg-theme-panel rounded-xl p-5 border border-theme-border">
                   <div className="flex items-center gap-2 mb-3">
-                    <MessageCircle size={18} className="text-blue-500" />
-                    <p className="text-sm text-blue-500 font-medium">Closed Conversations</p>
+                    <MessageCircle size={18} className="text-theme-accent" />
+                    <p className="text-sm text-theme-muted font-medium">Closed Conversations</p>
                   </div>
-                  <p className="text-2xl font-bold text-[#1e3a8a]">{analytics.overview.totalClosedConversations}</p>
+                  <p className="text-2xl font-bold text-theme-text">{analytics.overview.totalClosedConversations}</p>
                 </div>
-                <div className="bg-[#effdf4] rounded-xl p-5 border-0">
+                <div className="bg-theme-panel rounded-xl p-5 border border-theme-border">
                   <div className="flex items-center gap-2 mb-3">
                     <CheckCircle size={18} className="text-green-500" />
-                    <p className="text-sm text-green-500 font-medium">Feedback Received</p>
+                    <p className="text-sm text-theme-muted font-medium">Feedback Received</p>
                   </div>
-                  <p className="text-2xl font-bold text-[#14532d]">{analytics.overview.conversationsWithFeedback}</p>
+                  <p className="text-2xl font-bold text-theme-text">{analytics.overview.conversationsWithFeedback}</p>
                   <p className="text-xs text-green-500 mt-1 font-medium">{analytics.overview.feedbackResponseRate}% response rate</p>
                 </div>
-                <div className="bg-[#fefce8] rounded-xl p-5 border-0">
+                <div className="bg-theme-panel rounded-xl p-5 border border-theme-border">
                   <div className="flex items-center gap-2 mb-3">
                     <Star size={18} className="text-yellow-500" />
-                    <p className="text-sm text-yellow-500 font-medium">Average Rating</p>
+                    <p className="text-sm text-theme-muted font-medium">Average Rating</p>
                   </div>
-                  <p className="text-2xl font-bold text-[#713f12]">{analytics.overview.averageRating.toFixed(1)} / 5.0</p>
+                  <p className="text-2xl font-bold text-theme-text">{analytics.overview.averageRating.toFixed(1)} / 5.0</p>
                 </div>
-                <div className="bg-[#faf5ff] rounded-xl p-5 border-0">
+                <div className="bg-theme-panel rounded-xl p-5 border border-theme-border">
                   <div className="flex items-center gap-2 mb-3">
-                    <ThumbsUp size={18} className="text-purple-500" />
-                    <p className="text-sm text-purple-500 font-medium">Helpful</p>
+                    <ThumbsUp size={18} className="text-theme-accent" />
+                    <p className="text-sm text-theme-muted font-medium">Helpful</p>
                   </div>
-                  <p className="text-2xl font-bold text-[#581c87]">{analytics.overview.helpfulCount}</p>
-                  <p className="text-xs text-purple-500 mt-1 font-medium">{analytics.overview.notHelpfulCount} not helpful</p>
+                  <p className="text-2xl font-bold text-theme-text">{analytics.overview.helpfulCount}</p>
+                  <p className="text-xs text-theme-muted mt-1 font-medium">{analytics.overview.notHelpfulCount} not helpful</p>
                 </div>
               </div>
 
               {/* Rating Distribution */}
               <div className="mt-8">
-                <h3 className="font-semibold text-gray-800 mb-4 text-sm">Rating Distribution</h3>
+                <h3 className="font-semibold text-theme-text mb-4 text-sm">Rating Distribution</h3>
                 <div className="space-y-3">
                   {[
                     { stars: 5, count: analytics.ratingDistribution.fiveStar, color: 'bg-[#22c55e]', defaultWidth: 100 },
@@ -687,15 +687,15 @@ const StudentMessages = () => {
                       <div key={stars} className="flex items-center gap-4">
                         <div className="flex items-center gap-1.5 w-10">
                           <Star size={14} className="text-yellow-400 fill-yellow-400" />
-                          <span className="text-sm font-medium text-gray-700">{stars}</span>
+                          <span className="text-sm font-medium text-theme-text">{stars}</span>
                         </div>
-                        <div className="flex-1 bg-gray-200 rounded-full h-4 overflow-hidden">
+                        <div className="flex-1 bg-theme-panel rounded-full h-4 overflow-hidden border border-theme-border">
                           <div
                             className={`${color} h-full transition-all`}
                             style={{ width: `${barWidth}%` }}
                           />
                         </div>
-                        <span className="text-sm text-gray-500 w-8 text-right">{actualPercentage.toFixed(0)}%</span>
+                        <span className="text-sm text-theme-muted w-8 text-right">{actualPercentage.toFixed(0)}%</span>
                       </div>
                     );
                   })}
@@ -704,16 +704,16 @@ const StudentMessages = () => {
 
               {/* Response Time Distribution */}
               {analytics.responseTimeDistribution.length > 0 && (
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <h3 className="font-semibold text-shnoor-navy mb-4 flex items-center gap-2">
+                <div className="bg-theme-panel rounded-lg p-4 border border-theme-border">
+                  <h3 className="font-semibold text-theme-text mb-4 flex items-center gap-2">
                     <Clock size={18} />
                     Response Time Feedback
                   </h3>
                   <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                     {analytics.responseTimeDistribution.map(({ feedback_response_time, count }) => (
-                      <div key={feedback_response_time} className="bg-white rounded-lg p-3 border border-shnoor-mist text-center">
-                        <p className="text-2xl font-bold text-shnoor-navy">{count}</p>
-                        <p className="text-xs text-shnoor-soft capitalize mt-1">
+                      <div key={feedback_response_time} className="bg-theme-card rounded-lg p-3 border border-theme-border text-center">
+                        <p className="text-2xl font-bold text-theme-text">{count}</p>
+                        <p className="text-xs text-theme-muted capitalize mt-1">
                           {feedback_response_time.replace('_', ' ')}
                         </p>
                       </div>
@@ -724,16 +724,16 @@ const StudentMessages = () => {
 
               {/* Recent Feedback */}
               {analytics.recentFeedback.length > 0 && (
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <h3 className="font-semibold text-shnoor-navy mb-4">Recent Feedback</h3>
+                <div className="bg-theme-panel rounded-lg p-4 border border-theme-border">
+                  <h3 className="font-semibold text-theme-text mb-4">Recent Feedback</h3>
                   <div className="space-y-3 max-h-96 overflow-y-auto">
                     {analytics.recentFeedback.map((feedback, idx) => (
-                      <div key={idx} className="bg-white rounded-lg p-4 border border-shnoor-mist">
+                      <div key={idx} className="bg-theme-card rounded-lg p-4 border border-theme-border">
                         <div className="flex items-start justify-between mb-2">
                           <div>
-                            <p className="font-medium text-shnoor-navy">{feedback.name}</p>
+                            <p className="font-medium text-theme-text">{feedback.name}</p>
                             {feedback.college && (
-                              <p className="text-xs text-shnoor-soft flex items-center gap-1">
+                              <p className="text-xs text-theme-muted flex items-center gap-1">
                                 <Building size={10} />
                                 {feedback.college}
                               </p>
@@ -749,7 +749,7 @@ const StudentMessages = () => {
                             ))}
                           </div>
                         </div>
-                        <div className="flex items-center gap-4 text-xs text-shnoor-soft mb-2">
+                        <div className="flex items-center gap-4 text-xs text-theme-muted mb-2">
                           <span className="flex items-center gap-1">
                             {feedback.feedback_helpful ? <ThumbsUp size={12} /> : <ThumbsDown size={12} />}
                             {feedback.feedback_helpful ? 'Helpful' : 'Not Helpful'}
@@ -762,9 +762,9 @@ const StudentMessages = () => {
                           )}
                         </div>
                         {feedback.feedback_comments && (
-                          <p className="text-sm text-gray-700 italic">"{feedback.feedback_comments}"</p>
+                          <p className="text-sm text-theme-text italic">"{feedback.feedback_comments}"</p>
                         )}
-                        <p className="text-xs text-shnoor-soft mt-2">
+                        <p className="text-xs text-theme-muted mt-2">
                           Submitted {new Date(feedback.feedback_submitted_at).toLocaleDateString()}
                         </p>
                       </div>
@@ -774,7 +774,7 @@ const StudentMessages = () => {
               )}
             </div>
           ) : (
-            <div className="text-center py-12 text-shnoor-soft">
+            <div className="text-center py-12 text-theme-muted">
               <BarChart3 size={48} className="mx-auto mb-4 opacity-30" />
               <p>No analytics data available</p>
             </div>
@@ -785,22 +785,22 @@ const StudentMessages = () => {
       {/* Messages List */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Messages sidebar */}
-        <div className="lg:col-span-1 bg-white rounded-xl border border-shnoor-mist overflow-hidden flex flex-col" style={{ height: '700px' }}>
-          <div className="p-4 bg-[#9A9AC9]">
+        <div className="lg:col-span-1 bg-theme-card rounded-xl border border-theme-border overflow-hidden flex flex-col shadow-sm" style={{ height: '700px' }}>
+          <div className="p-4 bg-theme-accent text-white">
             <div className="flex items-center justify-between">
-              <h2 className="font-semibold text-gray-900 dark:text-gray-900">Messages ({pagination.total})</h2>
+              <h2 className="font-bold text-white">Messages ({pagination.total})</h2>
               {bulkDeleteMode && (
                 <div className="flex items-center gap-2">
                   <button
                     onClick={selectAllConversations}
-                    className="text-xs px-2 py-1 bg-shnoor-indigo text-white rounded hover:bg-shnoor-navy"
+                    className="text-xs px-2 py-1 bg-white/20 hover:bg-white/30 text-white rounded font-medium"
                   >
                     {selectedConversations.size === messages.length ? 'Deselect All' : 'Select All'}
                   </button>
                   {selectedConversations.size > 0 && (
                     <button
                       onClick={handleBulkDelete}
-                      className="text-xs px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                      className="text-xs px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 font-medium"
                     >
                       Delete ({selectedConversations.size})
                     </button>
@@ -809,11 +809,11 @@ const StudentMessages = () => {
               )}
             </div>
           </div>
-          <div className="flex-1 flex flex-col divide-y divide-shnoor-mist overflow-y-auto">
+          <div className="flex-1 flex flex-col divide-y divide-theme-border overflow-y-auto">
             {loading ? (
               <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-                <div className="w-8 h-8 border-2 border-shnoor-indigo/30 border-t-shnoor-indigo rounded-full animate-spin mx-auto mb-2"></div>
-                <p className="text-sm text-shnoor-soft">Loading messages...</p>
+                <div className="w-8 h-8 border-2 border-theme-accent/30 border-t-theme-accent rounded-full animate-spin mx-auto mb-2"></div>
+                <p className="text-sm text-theme-muted">Loading messages...</p>
               </div>
             ) : error ? (
               <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
@@ -822,15 +822,15 @@ const StudentMessages = () => {
               </div>
             ) : messages.length === 0 ? (
               <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-                <Mail size={40} strokeWidth={1.5} className="text-[#B7B7D9] mx-auto mb-3" />
-                <p className="text-[#9A9AC9] font-medium">No messages found</p>
+                <Mail size={40} strokeWidth={1.5} className="text-theme-muted/50 mx-auto mb-3" />
+                <p className="text-theme-muted font-medium">No messages found</p>
               </div>
             ) : (
               messages.map(msg => (
                 <div
                   key={msg.id}
-                  className={`p-4 cursor-pointer hover:bg-shnoor-lavender/50 dark:hover:bg-[#2a2a4a] transition-colors ${selectedMessage?.id === msg.id ? 'bg-shnoor-lavender dark:bg-[#403f75]' : ''
-                    } ${msg.unread_count > 0 ? 'bg-shnoor-indigo/5 dark:bg-shnoor-indigo/20' : ''}`}
+                  className={`p-4 cursor-pointer hover:bg-theme-panel transition-colors ${selectedMessage?.id === msg.id ? 'bg-theme-panel border-l-4 border-theme-accent' : ''
+                    } ${msg.unread_count > 0 ? 'bg-theme-accent/5' : ''}`}
                 >
                   <div className="flex items-start gap-3 min-w-0">
                     {bulkDeleteMode && msg.student_id && (
@@ -841,7 +841,7 @@ const StudentMessages = () => {
                           e.stopPropagation();
                           toggleConversationSelection(msg.student_id);
                         }}
-                        className="mt-1 w-4 h-4 text-shnoor-indigo rounded focus:ring-shnoor-indigo shrink-0"
+                        className="mt-1 w-4 h-4 text-theme-accent rounded focus:ring-theme-accent shrink-0"
                       />
                     )}
                     <div
@@ -849,31 +849,31 @@ const StudentMessages = () => {
                       className="flex items-start gap-3 flex-1 min-w-0"
                     >
                       <div className="relative shrink-0">
-                        <div className={`p-2 rounded-lg ${msg.unread_count > 0 ? 'bg-shnoor-indigo/10 dark:bg-shnoor-indigo/30' : 'bg-shnoor-mist dark:bg-gray-700'}`}>
-                          {msg.unread_count > 0 ? <Mail size={16} className="text-shnoor-indigo dark:text-indigo-400" /> : <MailOpen size={16} className="text-shnoor-soft dark:text-gray-400" />}
+                        <div className={`p-2 rounded-lg ${msg.unread_count > 0 ? 'bg-theme-accent/15 text-theme-accent' : 'bg-theme-panel text-theme-muted'}`}>
+                          {msg.unread_count > 0 ? <Mail size={16} className="text-theme-accent" /> : <MailOpen size={16} className="text-theme-muted" />}
                         </div>
                         {msg.unread_count > 0 && (
-                          <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-800" />
+                          <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-theme-card" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1">
-                          <p className={`text-sm truncate ${msg.unread_count > 0 ? 'font-semibold text-shnoor-navy dark:text-white' : 'text-shnoor-navy dark:text-gray-200'}`}>{msg.name}</p>
-                          <span className="text-xs text-shnoor-soft dark:text-gray-400 shrink-0 ml-2">{formatDate(msg.created_at)}</span>
+                          <p className={`text-sm truncate ${msg.unread_count > 0 ? 'font-bold text-theme-text' : 'text-theme-text'}`}>{msg.name}</p>
+                          <span className="text-xs text-theme-muted shrink-0 ml-2">{formatDate(msg.created_at)}</span>
                         </div>
                         {msg.college && (
-                          <p className="text-xs text-shnoor-indigo dark:text-indigo-300 mb-1 flex items-start gap-1"><Building size={10} className="shrink-0 mt-0.5" /><span className="break-words">{msg.college}</span></p>
+                          <p className="text-xs text-theme-accent mb-1 flex items-start gap-1 font-medium"><Building size={10} className="shrink-0 mt-0.5" /><span className="break-words">{msg.college}</span></p>
                         )}
-                        <p className="text-sm text-shnoor-soft dark:text-gray-300 break-words">{msg.message}</p>
+                        <p className="text-sm text-theme-muted break-words">{msg.message}</p>
                         {parseInt(msg.unread_count) > 0 && (
                           <div className="flex items-center gap-1 mt-1">
-                            <span className="px-1.5 py-0.5 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                            <span className="px-1.5 py-0.5 bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300 rounded-full text-xs font-semibold">
                               {parseInt(msg.unread_count)} new
                             </span>
                           </div>
                         )}
                         {msg.image_path && (
-                          <div className="flex items-center gap-1 mt-1 text-xs text-shnoor-indigo"><Image size={12} />Attachment</div>
+                          <div className="flex items-center gap-1 mt-1 text-xs text-theme-accent font-medium"><Image size={12} />Attachment</div>
                         )}
                       </div>
                     </div>
@@ -883,17 +883,17 @@ const StudentMessages = () => {
             )}
           </div>
           {pagination.pages > 1 && (
-            <div className="p-4 border-t border-shnoor-mist flex items-center justify-center gap-2 flex-shrink-0">
+            <div className="p-4 border-t border-theme-border flex items-center justify-center gap-2 flex-shrink-0 bg-theme-card">
               <button
                 onClick={() => setPagination(prev => ({ ...prev, page: Math.max(1, prev.page - 1) }))}
                 disabled={pagination.page === 1}
-                className="px-3 py-1 text-sm border border-shnoor-mist rounded hover:bg-shnoor-lavender disabled:opacity-50"
+                className="px-3 py-1 text-sm border border-theme-border rounded hover:bg-theme-panel disabled:opacity-50 text-theme-text"
               >Prev</button>
-              <span className="text-sm text-shnoor-soft">Page {pagination.page} of {pagination.pages}</span>
+              <span className="text-sm text-theme-muted">Page {pagination.page} of {pagination.pages}</span>
               <button
                 onClick={() => setPagination(prev => ({ ...prev, page: Math.min(prev.pages, prev.page + 1) }))}
                 disabled={pagination.page === pagination.pages}
-                className="px-3 py-1 text-sm border border-shnoor-mist rounded hover:bg-shnoor-lavender disabled:opacity-50"
+                className="px-3 py-1 text-sm border border-theme-border rounded hover:bg-theme-panel disabled:opacity-50 text-theme-text"
               >Next</button>
             </div>
           )}
@@ -901,19 +901,19 @@ const StudentMessages = () => {
 
 
         {/* Message detail / Conversation */}
-        <div className="lg:col-span-2 bg-white rounded-xl border border-shnoor-mist overflow-hidden flex flex-col" style={{ height: '700px' }}>
+        <div className="lg:col-span-2 bg-theme-card rounded-xl border border-theme-border overflow-hidden flex flex-col shadow-sm" style={{ height: '700px' }}>
           {selectedMessage ? (
             <>
               {/* Header */}
-              <div className="p-4 border-b border-shnoor-mist bg-shnoor-lavender flex items-center justify-between flex-shrink-0">
+              <div className="p-4 border-b border-theme-border bg-theme-panel flex items-center justify-between flex-shrink-0">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-shnoor-indigo/10 flex items-center justify-center">
-                    <User size={20} className="text-shnoor-indigo" />
+                  <div className="w-10 h-10 rounded-full bg-theme-accent/15 flex items-center justify-center text-theme-accent">
+                    <User size={20} className="text-theme-accent" />
                   </div>
                   <div>
-                    <h2 className="font-semibold text-shnoor-navy">{selectedMessage.name}</h2>
+                    <h2 className="font-bold text-theme-text">{selectedMessage.name}</h2>
                     {selectedMessage.college && (
-                      <p className="text-xs text-shnoor-soft flex items-center gap-1">
+                      <p className="text-xs text-theme-muted flex items-center gap-1">
                         <Building size={10} />{selectedMessage.college}
                       </p>
                     )}
@@ -924,7 +924,7 @@ const StudentMessages = () => {
                     <button
                       onClick={closeConversation}
                       disabled={closingConversation}
-                      className="p-2 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-50"
+                      className="p-2 text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-950/30 rounded-lg transition-colors disabled:opacity-50"
                       title="Close conversation and request feedback"
                     >
                       {closingConversation ? (
@@ -936,7 +936,7 @@ const StudentMessages = () => {
                   )}
                   <button
                     onClick={deleteConversation}
-                    className="p-2 text-shnoor-soft hover:text-red-600 hover:bg-white rounded-lg transition-colors"
+                    className="p-2 text-theme-muted hover:text-red-600 hover:bg-theme-card rounded-lg transition-colors"
                     title="Delete conversation"
                   >
                     <Trash2 size={16} />
@@ -948,7 +948,7 @@ const StudentMessages = () => {
                       setReplyMessage('');
                       removeImage();
                     }}
-                    className="p-2 text-shnoor-soft hover:text-shnoor-navy hover:bg-white rounded-lg transition-colors"
+                    className="p-2 text-theme-muted hover:text-theme-text hover:bg-theme-card rounded-lg transition-colors"
                     title="Close chat"
                   >
                     <X size={18} />
@@ -957,26 +957,26 @@ const StudentMessages = () => {
               </div>
 
               {/* Conversation Thread */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/50">
+              <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-theme-page">
                 {loadingThread ? (
                   <div className="flex items-center justify-center py-8">
-                    <div className="w-6 h-6 border-2 border-shnoor-indigo/30 border-t-shnoor-indigo rounded-full animate-spin"></div>
+                    <div className="w-6 h-6 border-2 border-theme-accent/30 border-t-theme-accent rounded-full animate-spin"></div>
                   </div>
                 ) : conversationThread.length === 0 ? (
                   <div className="flex justify-start">
                     <div className="max-w-[80%]">
-                      <div className="bg-white border border-shnoor-mist p-4 rounded-xl rounded-tl-none shadow-sm">
-                        <p className="text-shnoor-navy whitespace-pre-wrap">{selectedMessage.message}</p>
+                      <div className="bg-theme-card border border-theme-border p-4 rounded-xl rounded-tl-none shadow-sm">
+                        <p className="text-theme-text whitespace-pre-wrap">{selectedMessage.message}</p>
                         {selectedMessage.image_path && (
                           <img
                             src={`${API_URL}${selectedMessage.image_path}`}
                             alt="Attachment"
-                            className="mt-3 max-w-full rounded-lg cursor-pointer hover:opacity-90"
+                            className="mt-3 max-w-full rounded-lg cursor-pointer hover:opacity-90 border border-theme-border"
                             onClick={() => openImageModal(selectedMessage.image_path)}
                           />
                         )}
                       </div>
-                      <p className="text-xs text-shnoor-soft mt-1 ml-1">{formatTime(selectedMessage.created_at)}</p>
+                      <p className="text-xs text-theme-muted mt-1 ml-1">{formatTime(selectedMessage.created_at)}</p>
                     </div>
                   </div>
                 ) : (
@@ -985,21 +985,21 @@ const StudentMessages = () => {
                     return (
                       <div key={msg.id || index} className={`flex ${isAdmin ? 'justify-end' : 'justify-start'}`}>
                         <div className={`max-w-[80%] ${isAdmin ? 'order-2' : 'order-1'}`}>
-                          {!isAdmin && <p className="text-xs text-shnoor-navy font-medium mb-1 ml-1">{selectedMessage.name}</p>}
-                          {isAdmin && <p className="text-xs text-shnoor-indigo font-medium mb-1 mr-1 text-right">Admin</p>}
-                          <div className={`p-4 rounded-xl shadow-sm ${isAdmin ? 'bg-shnoor-indigo text-white rounded-tr-none' : 'bg-white border border-shnoor-mist text-shnoor-navy rounded-tl-none'
+                          {!isAdmin && <p className="text-xs text-theme-text font-medium mb-1 ml-1">{selectedMessage.name}</p>}
+                          {isAdmin && <p className="text-xs text-theme-accent font-semibold mb-1 mr-1 text-right">Admin</p>}
+                          <div className={`p-4 rounded-xl shadow-sm ${isAdmin ? 'bg-theme-accent text-white rounded-tr-none' : 'bg-theme-card border border-theme-border text-theme-text rounded-tl-none'
                             }`}>
                             <p className="whitespace-pre-wrap">{msg.message}</p>
                             {msg.image_path && (
                               <img
                                 src={`${API_URL}${msg.image_path}`}
                                 alt="Attachment"
-                                className="mt-3 max-w-full rounded-lg cursor-pointer hover:opacity-90"
+                                className="mt-3 max-w-full rounded-lg cursor-pointer hover:opacity-90 border border-theme-border"
                                 onClick={() => openImageModal(msg.image_path)}
                               />
                             )}
                           </div>
-                          <p className={`text-xs text-shnoor-soft mt-1 ${isAdmin ? 'text-right mr-1' : 'ml-1'}`}>
+                          <p className={`text-xs text-theme-muted mt-1 ${isAdmin ? 'text-right mr-1' : 'ml-1'}`}>
                             {formatTime(msg.created_at)}
                           </p>
                         </div>
@@ -1011,15 +1011,15 @@ const StudentMessages = () => {
               </div>
 
               {/* Reply Input */}
-              <div className="border-t border-shnoor-mist p-4 bg-white flex-shrink-0">
+              <div className="border-t border-theme-border p-4 bg-theme-card flex-shrink-0">
                 <form onSubmit={sendReply} className="space-y-3">
                   {imagePreview && (
                     <div className="relative inline-block">
-                      <img src={imagePreview} alt="Reply attachment preview" className="h-24 w-auto rounded-lg border border-shnoor-mist" />
+                      <img src={imagePreview} alt="Reply attachment preview" className="h-24 w-auto rounded-lg border border-theme-border" />
                       <button
                         type="button"
                         onClick={removeImage}
-                        className="absolute -top-2 -right-2 p-1 rounded-full bg-white border border-shnoor-mist text-shnoor-soft hover:text-red-600"
+                        className="absolute -top-2 -right-2 p-1 rounded-full bg-theme-card border border-theme-border text-theme-muted hover:text-red-600"
                         title="Remove attachment"
                       >
                         <X size={14} />
@@ -1031,20 +1031,20 @@ const StudentMessages = () => {
                       <button
                         type="button"
                         onClick={() => setShowEmojiPicker((prev) => !prev)}
-                        className="p-3 rounded-xl border border-shnoor-mist text-shnoor-soft hover:text-shnoor-indigo hover:border-shnoor-indigo transition-colors"
+                        className="p-3 rounded-xl border border-theme-border text-theme-muted hover:text-theme-accent hover:border-theme-accent transition-colors"
                         title="Add emoji"
                       >
                         <Smile size={18} />
                       </button>
                       {showEmojiPicker && (
-                        <div className="absolute bottom-14 left-0 bg-white border border-shnoor-mist rounded-xl p-2 shadow-lg w-80 max-h-56 overflow-y-auto z-20">
+                        <div className="absolute bottom-14 left-0 bg-theme-card border border-theme-border rounded-xl p-2 shadow-lg w-80 max-h-56 overflow-y-auto z-20">
                           <div className="grid grid-cols-8 gap-1">
                             {EMOJI_OPTIONS.map((emoji) => (
                               <button
                                 key={emoji}
                                 type="button"
                                 onClick={() => addEmoji(emoji)}
-                                className="h-8 w-8 rounded-md hover:bg-shnoor-lavender text-lg"
+                                className="h-8 w-8 rounded-md hover:bg-theme-panel text-lg"
                               >{emoji}</button>
                             ))}
                           </div>
@@ -1054,7 +1054,7 @@ const StudentMessages = () => {
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="p-3 rounded-xl border border-shnoor-mist text-shnoor-soft hover:text-shnoor-indigo hover:border-shnoor-indigo transition-colors"
+                      className="p-3 rounded-xl border border-theme-border text-theme-muted hover:text-theme-accent hover:border-theme-accent transition-colors"
                       title="Upload file or screenshot"
                     >
                       <Paperclip size={18} />
@@ -1071,7 +1071,7 @@ const StudentMessages = () => {
                         }}
                         placeholder="Type your reply..."
                         rows={2}
-                        className="w-full p-3 rounded-xl border border-shnoor-mist focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo outline-none text-sm resize-none"
+                        className="w-full p-3 rounded-xl border border-theme-border focus:border-theme-accent focus:ring-1 focus:ring-theme-accent outline-none text-sm resize-none bg-theme-card text-theme-text placeholder:text-theme-muted/70"
                         onKeyDown={(e) => {
                           if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendReply(e); }
                         }}
@@ -1080,7 +1080,7 @@ const StudentMessages = () => {
                     <button
                       type="submit"
                       disabled={sendingReply || (!replyMessage.trim() && !selectedImage)}
-                      className="p-3 rounded-xl bg-shnoor-indigo text-white hover:bg-shnoor-navy transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="p-3 rounded-xl bg-theme-accent text-white hover:bg-theme-accent2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xs cursor-pointer"
                     >
                       {sendingReply ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Send size={18} />}
                     </button>
@@ -1089,10 +1089,10 @@ const StudentMessages = () => {
               </div>
             </>
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center text-center">
-              <MessageCircle size={64} strokeWidth={1.5} className="text-[#D1D1E6] mx-auto mb-4" />
-              <p className="text-[#9A9AC9] text-lg font-medium">Select a message to view conversation</p>
-              <p className="text-[#B7B7D9] text-sm mt-1">Click on a message to view details and reply</p>
+            <div className="flex-1 flex flex-col items-center justify-center text-center p-8 bg-theme-card">
+              <MessageCircle size={64} strokeWidth={1.5} className="text-theme-muted/40 mx-auto mb-4" />
+              <p className="text-theme-text text-lg font-bold">Select a message to view conversation</p>
+              <p className="text-theme-muted text-sm mt-1">Click on a message to view details and reply</p>
             </div>
           )}
         </div>

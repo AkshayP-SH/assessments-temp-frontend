@@ -137,10 +137,6 @@ const ForgotPassword = () => {
       </div>
       {/* ── LEFT PANEL (dark) ─────────────────────────────── */}
       <div className="auth-left-panel hidden lg:flex lg:w-[45%] flex-col justify-between bg-shnoor-navy px-14 py-12 relative overflow-hidden">
-        {/* Decorative gradient orbs */}
-        <div className="absolute top-[-60px] left-[-60px] w-72 h-72 rounded-full bg-shnoor-indigo opacity-20 blur-3xl pointer-events-none" />
-        <div className="absolute bottom-[-40px] right-[-40px] w-56 h-56 rounded-full bg-[#6868AC] opacity-15 blur-3xl pointer-events-none" />
-
         {/* Brand */}
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-12">

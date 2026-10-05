@@ -118,9 +118,6 @@ const OrganisationSignup = () => {
 
       {/* ── LEFT PANEL ────────────────────────────────────── */}
       <div className="auth-left-panel hidden lg:flex lg:w-[38%] flex-col justify-between bg-shnoor-navy px-12 py-12 relative overflow-hidden">
-        <div className="absolute top-[-80px] right-[-60px] w-80 h-80 rounded-full bg-theme-accent opacity-25 blur-3xl pointer-events-none" />
-        <div className="absolute bottom-[-60px] left-[-40px] w-60 h-60 rounded-full bg-theme-auth-acc opacity-20 blur-3xl pointer-events-none" />
-
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-12">
             <div className="site-header-logo flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl bg-white p-1 shadow-xs">

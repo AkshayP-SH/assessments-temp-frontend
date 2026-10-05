@@ -355,8 +355,8 @@ const StudentInterviews = () => {
                         onClick={() => canJoin && joinInterview(interview.id)}
                         disabled={!canJoin}
                         className={`flex items-center justify-center w-full sm:w-auto space-x-2 px-6 py-3 rounded-xl font-semibold transition-colors shadow-[0_8px_30px_rgba(14,14,39,0.06)] ${canJoin
-                            ? 'bg-shnoor-indigo hover:bg-shnoor-navy text-white hover:shadow-[0_8px_30px_rgba(14,14,39,0.12)]'
-                            : 'bg-shnoor-mist/40 text-shnoor-indigoMedium cursor-not-allowed'
+                          ? 'bg-shnoor-indigo hover:bg-shnoor-navy text-white hover:shadow-[0_8px_30px_rgba(14,14,39,0.12)]'
+                          : 'bg-shnoor-mist/40 text-shnoor-indigoMedium cursor-not-allowed'
                           }`}
                       >
                         <Video size={20} />
