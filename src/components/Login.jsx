@@ -235,6 +235,10 @@ const Login = () => {
         method: 'POST',
         skipGlobalErrorRedirect: true,
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
+        body: JSON.stringify({
+          email: email.trim(),
+          firebase_uid: userCredential.user.uid
+        })
       });
 
       const data = await response.json();
