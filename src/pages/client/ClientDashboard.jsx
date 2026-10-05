@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useClientAuth } from '../../contexts/ClientAuthContext';
-import { apiFetch, API_URL } from '../../config/api';
+import { apiFetch } from '../../config/api';
 import shnoorLogo from '../../assets/shnoor-logo.png';
 
 /* ─── helpers ─────────────────────────────────────────────────────────────── */
@@ -59,6 +59,7 @@ const ClientDashboard = () => {
     setLoading(true);
     setError('');
     try {
+      await Promise.resolve();
       const headers = authHeaders();
 
       const [testsRes, institutesRes, studentsRes, plansRes, profileRes] = await Promise.all([
@@ -136,7 +137,7 @@ const ClientDashboard = () => {
         body: JSON.stringify({ plan_id: plan.plan_id }),
       });
       const orderData = await orderRes.json();
-      
+
       if (!orderData.success) {
         alert(orderData.message || 'Failed to initiate purchase');
         return;
@@ -196,9 +197,14 @@ const ClientDashboard = () => {
       {/* ── Sidebar ─────────────────────────────────────────────────────────── */}
       <aside className="w-64 bg-white border-r border-shnoor-mist flex flex-col shadow-sm flex-shrink-0">
         {/* Logo */}
-        <div className="px-6 py-5 border-b border-shnoor-mist">
-          <img src={shnoorLogo} alt="Shnoor" className="h-8" />
-          <p className="text-xs text-shnoor-soft mt-1 font-medium">Client Portal</p>
+        <div className="px-6 py-5 border-b border-shnoor-mist flex items-center gap-3">
+          <div className="site-header-logo flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white shadow-xs p-1 flex-shrink-0">
+            <img src={shnoorLogo} alt="Shnoor" className="h-full w-full object-contain" />
+          </div>
+          <div>
+            <p className="font-extrabold text-theme-text text-sm leading-tight tracking-tight uppercase">SHNOOR</p>
+            <p className="text-[10px] text-theme-muted font-semibold tracking-wider uppercase">Client Portal</p>
+          </div>
         </div>
 
         {/* User info */}
@@ -216,11 +222,10 @@ const ClientDashboard = () => {
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left ${
-                activeTab === item.id
-                  ? 'bg-shnoor-indigo text-white shadow-sm'
-                  : 'text-shnoor-navy hover:bg-shnoor-lavender'
-              }`}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left ${activeTab === item.id
+                ? 'bg-shnoor-indigo text-white shadow-sm'
+                : 'text-shnoor-navy hover:bg-shnoor-lavender'
+                }`}
             >
               <span>{item.icon}</span>
               {item.label}
@@ -321,11 +326,10 @@ const ClientDashboard = () => {
                               <tr key={test.id} className="border-b border-shnoor-mist/50 hover:bg-shnoor-lavender/50 transition-colors">
                                 <td className="py-3 px-3 font-medium text-shnoor-navy">{test.title}</td>
                                 <td className="py-3 px-3">
-                                  <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
-                                    test.status === 'published' ? 'bg-emerald-100 text-emerald-700' :
+                                  <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${test.status === 'published' ? 'bg-emerald-100 text-emerald-700' :
                                     test.status === 'draft' ? 'bg-amber-100 text-amber-700' :
-                                    'bg-gray-100 text-gray-600'
-                                  }`}>
+                                      'bg-gray-100 text-gray-600'
+                                    }`}>
                                     {test.status}
                                   </span>
                                 </td>
@@ -367,11 +371,10 @@ const ClientDashboard = () => {
                             <tr key={test.id} className="border-b border-shnoor-mist/50 hover:bg-shnoor-lavender/30 transition-colors">
                               <td className="py-3 px-4 font-medium text-shnoor-navy">{test.title}</td>
                               <td className="py-3 px-4">
-                                <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
-                                  test.status === 'published' ? 'bg-emerald-100 text-emerald-700' :
+                                <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${test.status === 'published' ? 'bg-emerald-100 text-emerald-700' :
                                   test.status === 'draft' ? 'bg-amber-100 text-amber-700' :
-                                  'bg-gray-100 text-gray-600'
-                                }`}>
+                                    'bg-gray-100 text-gray-600'
+                                  }`}>
                                   {test.status}
                                 </span>
                               </td>
@@ -416,16 +419,14 @@ const ClientDashboard = () => {
                               <td className="py-3 px-4 text-shnoor-soft">{inst.student_count || 0}</td>
                               <td className="py-3 px-4 text-shnoor-soft">{inst.assigned_tests_count || 0}</td>
                               <td className="py-3 px-4">
-                                <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
-                                  inst.is_registration_open ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-600'
-                                }`}>
+                                <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${inst.is_registration_open ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-600'
+                                  }`}>
                                   {inst.is_registration_open ? 'Open' : 'Closed'}
                                 </span>
                               </td>
                               <td className="py-3 px-4">
-                                <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
-                                  inst.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600'
-                                }`}>
+                                <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${inst.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600'
+                                  }`}>
                                   {inst.is_active ? 'Active' : 'Inactive'}
                                 </span>
                               </td>
@@ -486,7 +487,7 @@ const ClientDashboard = () => {
                   <p className="text-sm text-shnoor-soft mb-6">
                     Activate or renew your organization's subscription to enable test creation and other premium features.
                   </p>
-                  
+
                   <div className="grid md:grid-cols-3 gap-6">
                     {subscriptionPlans.map(plan => {
                       const isCurrentPlan = plan.plan_id === currentPlanId;
@@ -513,11 +514,10 @@ const ClientDashboard = () => {
                           <button
                             onClick={() => handlePurchaseSubscription(plan)}
                             disabled={isCurrentPlan}
-                            className={`w-full px-4 py-3 font-bold rounded-xl transition-colors shadow-sm ${
-                              isCurrentPlan 
-                                ? 'bg-shnoor-lavender text-shnoor-indigo cursor-not-allowed' 
-                                : 'bg-shnoor-indigo text-white hover:bg-shnoor-navy'
-                            }`}
+                            className={`w-full px-4 py-3 font-bold rounded-xl transition-colors shadow-sm ${isCurrentPlan
+                              ? 'bg-shnoor-lavender text-shnoor-indigo cursor-not-allowed'
+                              : 'bg-shnoor-indigo text-white hover:bg-shnoor-navy'
+                              }`}
                           >
                             {isCurrentPlan ? 'Active' : `Purchase ${plan.name}`}
                           </button>

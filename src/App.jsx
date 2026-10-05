@@ -9,6 +9,7 @@ import ClientProtectedRoute from './components/ClientProtectedRoute';
 import GlobalThemeSelector from './components/GlobalThemeSelector';
 import { applyTheme, getSavedTheme } from './utils/theme';
 import UpgradeRequiredModal from './components/UpgradeRequiredModal';
+import { Toaster } from 'react-hot-toast';
 
 // Eagerly load Loading Spinner to show while chunks are fetched
 const LoadingFallback = () => (
@@ -17,8 +18,7 @@ const LoadingFallback = () => (
   </div>
 );
 
-// All routes are lazy-loaded — LandingPage included (it was the only eager one)
-const LandingPage = React.lazy(() => import('./pages/LandingPage'));
+import LandingPage from './pages/LandingPage';
 const Login = React.lazy(() => import('./components/Login'));
 const Register = React.lazy(() => import('./components/Register'));
 const ForgotPassword = React.lazy(() => import('./components/ForgotPassword'));
@@ -46,6 +46,7 @@ const MyApplications = React.lazy(() => import('./pages/MyApplications'));
 const AdminClients = React.lazy(() => import('./pages/admin/AdminClients'));
 const OrganisationSignup = React.lazy(() => import('./pages/OrganisationSignup'));
 const ClientSubscriptionPlans = React.lazy(() => import('./pages/client/ClientSubscriptionPlans'));
+
 
 // Protected Route wrappers
 const StudentRoute = ({ children }) => {
@@ -79,20 +80,19 @@ const AppRoutes = () => {
 
   return (
     <>
+      <Toaster position="top-right" />
       <GlobalThemeSelector />
-      <UpgradeRequiredModal 
-        isOpen={showUpgradeModal} 
-        onClose={() => setShowUpgradeModal(false)} 
-        quotaInfo={quotaInfo} 
+      <UpgradeRequiredModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        quotaInfo={quotaInfo}
       />
       <Routes>
         {/* Public Routes — each group has its own Suspense so a failure in one
             section doesn't block the rest of the app from rendering */}
         <Route path="/" element={
           <ErrorBoundary>
-            <Suspense fallback={<LoadingFallback />}>
-              <LandingPage />
-            </Suspense>
+            <LandingPage />
           </ErrorBoundary>
         } />
         <Route path="/privacy-policy" element={<Suspense fallback={<LoadingFallback />}><PrivacyPolicy /></Suspense>} />
@@ -129,6 +129,7 @@ const AppRoutes = () => {
         {/* Client Portal Routes (multi-tenant, admin UI parity) */}
         <Route path="/client/login" element={<Navigate to="/login?portal=org" replace />} />
         <Route path="/client/subscription-plans" element={<ClientProtectedRoute><Suspense fallback={<LoadingFallback />}><ClientSubscriptionPlans /></Suspense></ClientProtectedRoute>} />
+
         <Route path="/client/dashboard" element={<ClientProtectedRoute><Suspense fallback={<LoadingFallback />}><AdminDashboard /></Suspense></ClientProtectedRoute>} />
         <Route path="/client/reports" element={<ClientProtectedRoute><Suspense fallback={<LoadingFallback />}><AdminReports /></Suspense></ClientProtectedRoute>} />
         <Route path="/client/live-proctoring" element={<ClientProtectedRoute><Suspense fallback={<LoadingFallback />}><LiveProctoring /></Suspense></ClientProtectedRoute>} />

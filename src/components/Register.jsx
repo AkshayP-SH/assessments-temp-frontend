@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { apiFetch } from '../config/api';
 import Button from './Button';
 import InputField from './InputField';
@@ -58,25 +59,25 @@ const STEP_META = [
 const TOTAL_STEPS = STEP_META.length; // 4
 /* ─── Reusable Review Row ────────────────────────────────────────────────────── */
 const ReviewRow = ({ label, value, hidden }) => (
-  <div className="flex items-start justify-between py-2.5 border-b border-shnoor-mist/50 last:border-0 gap-4">
-    <span className="text-xs text-shnoor-soft font-medium flex-shrink-0 w-28">{label}</span>
-    <span className={`text-sm text-shnoor-navy font-semibold text-right leading-snug ${hidden ? 'tracking-widest' : ''}`}>
-      {hidden ? '••••••••' : (value || <span className="text-shnoor-soft italic font-normal">Not provided</span>)}
+  <div className="flex items-start justify-between py-2.5 border-b border-theme-border/40 last:border-0 gap-4">
+    <span className="text-xs text-theme-muted font-medium flex-shrink-0 w-28">{label}</span>
+    <span className={`text-sm text-theme-text font-semibold text-right leading-snug ${hidden ? 'tracking-widest' : ''}`}>
+      {hidden ? '••••••••' : (value || <span className="text-theme-muted italic font-normal">Not provided</span>)}
     </span>
   </div>
 );
 
 /* ─── Resume Link Row with text display ────────────────────────────────────── */
 const ResumeLinkRow = ({ label, value }) => (
-  <div className="flex items-start justify-between py-2.5 border-b border-shnoor-mist/50 last:border-0 gap-4">
-    <span className="text-xs text-shnoor-soft font-medium flex-shrink-0 w-28">{label}</span>
-    <span className="text-sm text-shnoor-navy font-semibold text-right leading-snug">
+  <div className="flex items-start justify-between py-2.5 border-b border-theme-border/40 last:border-0 gap-4">
+    <span className="text-xs text-theme-muted font-medium flex-shrink-0 w-28">{label}</span>
+    <span className="text-sm text-theme-text font-semibold text-right leading-snug">
       {value ? (
-        <span className="text-xs break-all">
+        <span className="text-xs break-all text-theme-text">
           {value.length > 40 ? value.slice(0, 40) + '…' : value}
         </span>
       ) : (
-        <span className="text-shnoor-soft italic font-normal">Not provided</span>
+        <span className="text-theme-muted italic font-normal">Not provided</span>
       )}
     </span>
   </div>
@@ -84,21 +85,21 @@ const ResumeLinkRow = ({ label, value }) => (
 
 /* ─── Review Section Card ────────────────────────────────────────────────────── */
 const ReviewSection = ({ title, stepIndex, onEdit, children }) => (
-  <div className="bg-white border border-shnoor-mist rounded-xl overflow-hidden shadow-sm">
-    <div className="flex items-center justify-between px-5 py-3 bg-shnoor-lavender border-b border-shnoor-mist">
-      <p className="text-xs font-extrabold text-shnoor-indigo uppercase tracking-widest">{title}</p>
-      <Button
+  <div className="bg-theme-card border border-theme-border rounded-xl overflow-hidden shadow-xs">
+    <div className="flex items-center justify-between px-5 py-3 bg-theme-panel border-b border-theme-border">
+      <p className="text-xs font-bold text-theme-text uppercase tracking-widest">{title}</p>
+      <button
         type="button"
         onClick={() => onEdit(stepIndex)}
-        className="flex items-center gap-1.5 text-xs font-bold text-shnoor-indigo hover:text-shnoor-navy transition-colors group"
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-theme-accent hover:text-white bg-theme-accent/10 hover:bg-theme-accent border border-theme-accent/30 hover:border-theme-accent rounded-lg transition-all duration-150 group cursor-pointer"
       >
         <svg className="w-3.5 h-3.5 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
         </svg>
-        Edit
-      </Button>
+        <span>Edit</span>
+      </button>
     </div>
-    <div className="px-5 py-1">{children}</div>
+    <div className="px-5 py-1 bg-theme-card">{children}</div>
   </div>
 );
 
@@ -148,7 +149,9 @@ const Register = () => {
         const res = await apiFetch(url, { method: 'GET' });
         const data = await res.json();
         if (data.success && data.institutes) setInstitutes(data.institutes);
-      } catch { }
+      } catch {
+        // Public institute loading is optional for the initial render.
+      }
     })();
 
     // Validate clientToken and fetch client info for display
@@ -163,7 +166,9 @@ const Register = () => {
           if (data.success) {
             setClientInfo(data.client);
           }
-        } catch { }
+        } catch {
+          // Invalid client tokens are handled by the normal registration flow.
+        }
       })();
     }
   }, [clientToken]);
@@ -488,12 +493,12 @@ const Register = () => {
               </span>
               <div className="flex items-center gap-2">
                 {formData.institute && (
-                  <Button type="Button" onClick={e => { e.stopPropagation(); setFormData(p => ({ ...p, institute: '' })); }}
-                    className="text-shnoor-soft hover:text-shnoor-danger transition-colors">
+                  <button type="button" onClick={e => { e.stopPropagation(); setFormData(p => ({ ...p, institute: '' })); }}
+                    className="p-1 text-shnoor-soft hover:text-shnoor-danger transition-colors rounded">
                     <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
                       <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zM5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293 5.354 4.646z" />
                     </svg>
-                  </Button>
+                  </button>
                 )}
                 <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"
                   className={`text-shnoor-soft transition-transform duration-200 ${showInstituteDropdown ? 'rotate-180' : ''}`}>
@@ -719,15 +724,15 @@ const Register = () => {
       <div className="absolute top-4 right-4 sm:top-6 sm:right-6 lg:top-8 lg:right-8 z-[100]">
         <ThemeSelector variant="light" />
       </div>
-    {/* ── LEFT PANEL ────────────────────────────────────── */}
+      {/* ── LEFT PANEL ────────────────────────────────────── */}
       <div className="auth-left-panel hidden lg:flex lg:w-[38%] flex-col justify-between bg-shnoor-navy px-12 py-12 relative overflow-hidden">
         <div className="absolute top-[-80px] right-[-60px] w-80 h-80 rounded-full bg-shnoor-indigo opacity-20 blur-3xl pointer-events-none" />
         <div className="absolute bottom-[-60px] left-[-40px] w-60 h-60 rounded-full bg-[#6868AC] opacity-15 blur-3xl pointer-events-none" />
 
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-12">
-            <div className="site-header-logo flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl bg-white">
-              <img src={shnoorLogo} alt="Shnoor" className="h-11 w-11 object-contain" width="44" height="44" loading="eager" fetchPriority="high" />
+            <div className="site-header-logo flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl bg-white p-1 shadow-xs">
+              <img src={shnoorLogo} alt="Shnoor" className="h-full w-full object-contain" width="44" height="44" loading="eager" fetchPriority="high" />
             </div>
             <div>
               <p className="font-extrabold text-white text-lg leading-tight">SHNOOR Assessments</p>
@@ -748,7 +753,7 @@ const Register = () => {
               const isDone = i < step;
               const isActive = i === step;
               return (
-                <div key={i} className={`flex items-start gap-4 transition-all duration-300 ${isActive ? 'opacity-100' : isDone ? 'opacity-75' : 'opacity-30'}`}>
+                <div key={i} className={`flex items-start gap-4 transition-all duration-300 ${isActive ? 'opacity-100' : isDone ? 'opacity-90' : 'opacity-60'}`}>
                   <div className={`auth-step-badge w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300 ${isDone ? 'is-complete' : isActive ? 'is-active' : 'is-pending'}`}>
                     {isDone ? (
                       <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
@@ -782,9 +787,29 @@ const Register = () => {
       {/* ── RIGHT PANEL ───────────────────────────────────── */}
       <div className="auth-right-panel flex-1 bg-white flex items-center justify-center px-6 py-10 overflow-auto">
         <div className="w-full max-w-[500px]">
+          {/* Back navigation */}
+          <div className="mb-5">
+            <button
+              type="button"
+              onClick={() => {
+                if (step > 0) {
+                  setStep(s => s - 1);
+                } else {
+                  navigate('/');
+                }
+              }}
+              className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-shnoor-soft hover:text-shnoor-indigo transition-colors group cursor-pointer"
+            >
+              <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+              <span>{step > 0 ? 'Back to previous step' : 'Back to home'}</span>
+            </button>
+          </div>
+
           {/* Mobile brand */}
           <div className="flex items-center gap-3 mb-6 lg:hidden">
-            <img src={shnoorLogo} alt="Shnoor" className="h-9 w-9 object-contain" width="36" height="36" loading="lazy" decoding="async" />
+            <div className="site-header-logo flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-white shadow-xs p-1 flex-shrink-0">
+              <img src={shnoorLogo} alt="Shnoor" className="h-full w-full object-contain" width="36" height="36" loading="lazy" decoding="async" />
+            </div>
             <div>
               <p className="font-extrabold text-shnoor-navy text-base">SHNOOR Assessments</p>
               <p className="text-[10px] text-shnoor-soft uppercase tracking-widest">Secure Examination Portal</p>

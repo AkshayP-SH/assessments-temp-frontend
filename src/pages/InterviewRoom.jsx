@@ -73,57 +73,7 @@ const InterviewRoom = () => {
     }
   };
 
-  // Enhanced helper function to ensure video plays
-  const ensureVideoPlays = async (videoElement, streamType) => {
-    if (!videoElement || !videoElement.srcObject) {
-      console.log(`${streamType} video: No element or stream`);
-      return false;
-    }
 
-    try {
-      if (!videoElement.paused) {
-        videoElement.pause();
-      }
-
-      // Mobile-specific video properties
-      videoElement.muted = streamType === 'Local' || streamType === 'Local-PIP';
-      videoElement.playsInline = true;
-      videoElement.autoplay = true;
-      videoElement.controls = false;
-
-      // Additional properties for remote video
-      if (streamType === 'Remote') {
-        videoElement.style.objectFit = 'cover';
-        // For mobile browsers, ensure video is not muted for remote streams
-        videoElement.muted = false;
-      }
-
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      if (videoElement.srcObject) {
-        await videoElement.play();
-        console.log(`${streamType} video playing successfully`);
-        console.log(`${streamType} video dimensions: ${videoElement.videoWidth}x${videoElement.videoHeight}`);
-        return true;
-      }
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        console.log(`${streamType} video play aborted (stream changed)`);
-        return false;
-      }
-      console.error(`${streamType} video play error:`, error);
-
-      // Mobile fallback - try to play without waiting
-      if (streamType === 'Remote' && videoElement.srcObject) {
-        try {
-          videoElement.play();
-        } catch (e) {
-          console.error('Mobile fallback play failed:', e);
-        }
-      }
-      return false;
-    }
-  };
   useEffect(() => {
     let isMounted = true;
 
@@ -380,12 +330,12 @@ const InterviewRoom = () => {
       // Initialize PeerJS pointing to our own backend signaling server
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       const isSecure = apiUrl.startsWith('https');
-      
+
       let backendHost = 'localhost';
       // PeerJS runs on a dedicated port (see backend PEER_PORT) — not the main API port
       let backendPort = parseInt(import.meta.env.VITE_PEER_PORT || '5002', 10);
       let peerPath = '/peerjs';
-      
+
       try {
         const parsedUrl = new URL(apiUrl);
         backendHost = parsedUrl.hostname;
@@ -898,10 +848,10 @@ const InterviewRoom = () => {
     console.log('Sending chat message:', message);
 
     socketRef.current.emit('interview:send-chat', message);
-    
+
     // Local fix: Append message immediately so sender sees their own message
     setChatMessages(prev => [...prev, message]);
-    
+
     setChatInput('');
   };
 
@@ -1115,7 +1065,7 @@ const InterviewRoom = () => {
                     });
                   }
                 }}
-                onCanPlay={() => remoteVideoRef.current?.play().catch(() => {})}
+                onCanPlay={() => remoteVideoRef.current?.play().catch(() => { })}
                 onPlay={() => {
                   console.log('Remote video started playing');
                 }}
@@ -1132,7 +1082,7 @@ const InterviewRoom = () => {
                 autoPlay
                 playsInline
                 muted={true}
-                onCanPlay={() => localVideoRef.current?.play().catch(() => {})}
+                onCanPlay={() => localVideoRef.current?.play().catch(() => { })}
                 className="w-full h-full object-cover"
               />
             )}
@@ -1292,8 +1242,8 @@ const InterviewRoom = () => {
                     <button
                       onClick={toggleVideo}
                       className={`p-3 rounded-full ${isVideoOn
-                          ? 'bg-gray-700 hover:bg-gray-600'
-                          : 'bg-red-600 hover:bg-red-700'
+                        ? 'bg-gray-700 hover:bg-gray-600'
+                        : 'bg-red-600 hover:bg-red-700'
                         } text-white`}
                     >
                       {isVideoOn ? <Video size={20} /> : <VideoOff size={20} />}
@@ -1302,8 +1252,8 @@ const InterviewRoom = () => {
                     <button
                       onClick={toggleAudio}
                       className={`p-3 rounded-full ${isAudioOn
-                          ? 'bg-gray-700 hover:bg-gray-600'
-                          : 'bg-red-600 hover:bg-red-700'
+                        ? 'bg-gray-700 hover:bg-gray-600'
+                        : 'bg-red-600 hover:bg-red-700'
                         } text-white`}
                     >
                       {isAudioOn ? <Mic size={20} /> : <MicOff size={20} />}
@@ -1312,8 +1262,8 @@ const InterviewRoom = () => {
                     <button
                       onClick={toggleScreenShare}
                       className={`p-3 rounded-full ${isScreenSharing
-                          ? 'bg-blue-600 hover:bg-blue-700'
-                          : 'bg-gray-700 hover:bg-gray-600'
+                        ? 'bg-blue-600 hover:bg-blue-700'
+                        : 'bg-gray-700 hover:bg-gray-600'
                         } text-white`}
                     >
                       {isScreenSharing ? <MonitorOff size={20} /> : <Monitor size={20} />}
@@ -1364,14 +1314,14 @@ const InterviewRoom = () => {
                   <div
                     key={index}
                     className={`flex flex-col ${(isAdmin && msg.sender === 'admin') || (isStudent && msg.sender === 'student')
-                        ? 'items-end'
-                        : 'items-start'
+                      ? 'items-end'
+                      : 'items-start'
                       }`}
                   >
                     <div
                       className={`max-w-[85%] rounded-lg px-3 py-2 ${(isAdmin && msg.sender === 'admin') || (isStudent && msg.sender === 'student')
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-700 text-white'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-700 text-white'
                         }`}
                     >
                       <p className="text-xs font-semibold mb-1 opacity-80">

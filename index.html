@@ -1,98 +1,87 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/favicon.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SHNOOR Assessments - Secure Examination Portal</title>
-    <meta name="description" content="AI-powered secure examination portal. Conduct and manage online assessments with live proctoring, coding challenges, and real-time analytics." />
 
-    <!-- Mobile browser chrome color -->
-    <meta name="theme-color" content="#4f46e5" />
-    <meta name="color-scheme" content="light dark" />
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SHNOOR Assessments - Secure Examination Portal</title>
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem('app-theme') || localStorage.getItem('shnoor-theme') || 'default';
+        var theme = saved === 'leaf' ? 'green' : saved;
+        if (theme && theme !== 'default') {
+          document.documentElement.setAttribute('data-theme', theme);
+        }
+      } catch (e) { }
+    })();
+  </script>
+  <meta name="description"
+    content="AI-powered secure examination portal. Conduct and manage online assessments with live proctoring, coding challenges, and real-time analytics." />
 
-    <!-- Open Graph — base tags (per-page tags are injected by useSEO hook) -->
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="SHNOOR Assessments" />
-    <meta property="og:title" content="SHNOOR Assessments - Secure Examination Portal" />
-    <meta property="og:description" content="AI-powered secure examination portal. Conduct and manage online assessments with live proctoring, coding challenges, and real-time analytics." />
-    <meta property="og:image" content="/og-image.png" />
+  <!-- Mobile browser chrome color -->
+  <meta name="theme-color" content="#4f46e5" />
+  <meta name="color-scheme" content="light dark" />
 
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="SHNOOR Assessments - Secure Examination Portal" />
-    <meta name="twitter:description" content="AI-powered secure examination portal with live proctoring." />
-    <meta name="twitter:image" content="/og-image.png" />
+  <!-- Open Graph — base tags (per-page tags are injected by useSEO hook) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="SHNOOR Assessments" />
+  <meta property="og:title" content="SHNOOR Assessments - Secure Examination Portal" />
+  <meta property="og:description"
+    content="AI-powered secure examination portal. Conduct and manage online assessments with live proctoring, coding challenges, and real-time analytics." />
+  <meta property="og:image" content="/og-image.png" />
 
-    <!-- Robots -->
-    <meta name="robots" content="index, follow" />
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="SHNOOR Assessments - Secure Examination Portal" />
+  <meta name="twitter:description" content="AI-powered secure examination portal with live proctoring." />
+  <meta name="twitter:image" content="/og-image.png" />
 
-    <!-- DNS prefetch for external domains -->
-    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
-    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
-    <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
+  <!-- Robots -->
+  <meta name="robots" content="index, follow" />
 
-    <!-- Preconnect to external domains for faster loading -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://identitytoolkit.googleapis.com">
+  <!-- DNS prefetch for external domains -->
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com">
 
-    <!-- Load font stylesheet without blocking initial render -->
-    <link
-      rel="preload"
-      as="style"
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
-      onload="this.onload=null;this.rel='stylesheet'"
-    >
-    <noscript>
-      <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
-      >
-    </noscript>
+  <!-- Preconnect to external domains for faster loading -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    <!-- Critical CSS to prevent flash of unstyled content -->
-    <style>
-      body {
-        font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        margin: 0;
-        padding: 0;
-        min-height: 100vh;
-      }
+  <!-- Google Font -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&display=swap">
 
-      /* Prevent layout shift by reserving space for images */
-      img {
-        max-width: 100%;
-        height: auto;
-      }
+  <!-- Critical CSS to prevent flash of unstyled content -->
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+    }
 
-      /* Loading state */
-      #root {
-        min-height: 100vh;
-      }
+    img {
+      max-width: 100%;
+      height: auto;
+    }
 
-      /* Prevent flash of unstyled content */
-      .loading {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 100vh;
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        color: #374151;
-      }
-    </style>
-  </head>
-  <body>
-    <!-- Global polyfill for simple-peer compatibility -->
-    <script>
-      if (typeof global === 'undefined') {
-        var global = globalThis;
-      }
-    </script>
-    
-    <main id="root">
-      <div class="loading">Loading...</div>
-    </main>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+    #root {
+      min-height: 100vh;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Global polyfill for simple-peer compatibility -->
+  <script>
+    if (typeof global === 'undefined') {
+      var global = globalThis;
+    }
+  </script>
+
+  <main id="root"></main>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+
 </html>

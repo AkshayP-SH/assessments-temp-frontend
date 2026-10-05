@@ -145,7 +145,7 @@ export const AdminAuthProvider = ({ children }) => {
           checkAuthStatus({ silent: true });
         }
         return;
-      } catch (_error) {
+      } catch {
         localStorage.removeItem('adminUser');
       }
     }
@@ -222,6 +222,7 @@ export const AdminAuthProvider = ({ children }) => {
       // Clear local state and storage
       localStorage.removeItem('adminToken');
       localStorage.removeItem('adminUser');
+      sessionStorage.removeItem('superAdminSelectedClientId');
       setAdminSession(null);
     }
   };

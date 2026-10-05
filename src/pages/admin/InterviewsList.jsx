@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Video, Calendar, Clock, Users, Trash2, Edit2 } from 'lucide-react';
+import Select from 'react-select';
 import { apiFetch } from '../../config/api';
+import Card from '../../components/Card';
+import Button from '../../components/Button';
 
 const InterviewsList = () => {
   const navigate = useNavigate();
@@ -155,157 +158,233 @@ const InterviewsList = () => {
 
   const getStatusColor = (status) => {
     const colors = {
-      scheduled: 'bg-blue-100 text-blue-800',
+      scheduled: 'bg-shnoor-indigo/10 text-shnoor-indigo',
       in_progress: 'bg-green-100 text-green-800',
-      completed: 'bg-gray-100 text-gray-800',
+      completed: 'bg-shnoor-lavender text-shnoor-navy',
       cancelled: 'bg-red-100 text-red-800'
     };
-    return colors[status] || 'bg-gray-100 text-gray-800';
+    return colors[status] || 'bg-shnoor-lavender text-shnoor-soft';
   };
-
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-shnoor-indigo"></div>
+        <span className="ml-3 text-shnoor-indigoMedium font-medium">Loading interviews...</span>
       </div>
     );
   }
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800 mb-4">Interviews</h1>
-        
-        <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0 md:items-end">
-          <div className="w-full md:w-auto">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
-            <input
-              type="date"
-              value={filter.date}
-              onChange={(e) => setFilter({ ...filter, date: e.target.value })}
-              disabled={showAllDates}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-            />
+    <div className="space-y-6">
+      <Card noPadding>
+        <div className="p-4 sm:p-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 pb-4 sm:pb-6 border-b border-shnoor-light">
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-bold text-shnoor-navy mb-2 flex items-center">
+                <Video className="mr-2 sm:mr-3 text-shnoor-indigo h-6 w-6 sm:h-8 sm:w-8" />
+                Interviews
+              </h2>
+              <p className="text-sm sm:text-base text-shnoor-indigoMedium ml-8 sm:ml-11">Manage and join scheduled interviews</p>
+            </div>
           </div>
           
-          <div className="w-full md:w-auto">
-            <button
-              onClick={() => setShowAllDates(!showAllDates)}
-              className={`w-full px-4 py-2 rounded-lg font-medium transition-colors ${
-                showAllDates
-                  ? 'bg-blue-600 text-white hover:bg-blue-700'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              {showAllDates ? 'Show Today Only' : 'Show All Dates'}
-            </button>
-          </div>
-          
-          <div className="w-full md:w-auto">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-            <select
-              value={filter.status}
-              onChange={(e) => setFilter({ ...filter, status: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">All</option>
-              <option value="scheduled">Scheduled</option>
-              <option value="in_progress">In Progress</option>
-              <option value="completed">Completed</option>
-            </select>
+          <div className="flex flex-col md:flex-row gap-4 md:items-end">
+            <div className="w-full md:w-auto flex-1">
+              <label className="block text-sm font-bold text-shnoor-navy mb-2">Date</label>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <input
+                  type="date"
+                  value={filter.date}
+                  onChange={(e) => setFilter({ ...filter, date: e.target.value })}
+                  disabled={showAllDates}
+                  className="w-full sm:w-auto flex-1 px-4 py-3 border border-shnoor-light rounded-xl focus:outline-none focus:ring-4 focus:ring-shnoor-lavender focus:border-shnoor-indigo bg-white text-shnoor-navy font-medium disabled:bg-shnoor-lavender disabled:cursor-not-allowed transition-all"
+                />
+                <Button
+                  onClick={() => setShowAllDates(!showAllDates)}
+                  variant={showAllDates ? "primary" : "outline"}
+                  className="w-full sm:w-auto !rounded-xl !h-[50px]"
+                >
+                  {showAllDates ? 'Show Today Only' : 'Show All Dates'}
+                </Button>
+              </div>
+            </div>
+            
+            <div className="w-full md:w-64">
+              <label className="block text-sm font-bold text-shnoor-navy mb-2">Status</label>
+              <Select
+                value={[{ value: '', label: 'All' }, { value: 'scheduled', label: 'Scheduled' }, { value: 'in_progress', label: 'In Progress' }, { value: 'completed', label: 'Completed' }].find(opt => opt.value === filter.status) || { value: '', label: 'All' }}
+                onChange={(selectedOption) => setFilter({ ...filter, status: selectedOption ? selectedOption.value : '' })}
+                options={[
+                  { value: '', label: 'All' },
+                  { value: 'scheduled', label: 'Scheduled' },
+                  { value: 'in_progress', label: 'In Progress' },
+                  { value: 'completed', label: 'Completed' }
+                ]}
+                className="basic-single"
+                classNamePrefix="select"
+                isSearchable={false}
+                menuPosition="fixed"
+                menuPlacement="auto"
+                styles={{
+                    control: (base) => ({
+                        ...base,
+                        padding: '4px',
+                        borderRadius: '1rem',
+                        backgroundColor: 'rgb(var(--theme-card))',
+                        borderColor: 'rgb(var(--theme-shell-stroke))',
+                        boxShadow: 'none',
+                        '&:hover': {
+                            borderColor: 'rgb(var(--theme-accent))'
+                        }
+                    }),
+                    singleValue: (base) => ({
+                        ...base,
+                        color: 'rgb(var(--theme-text))'
+                    }),
+                    input: (base) => ({
+                        ...base,
+                        color: 'rgb(var(--theme-text))'
+                    }),
+                    placeholder: (base) => ({
+                        ...base,
+                        color: 'rgb(var(--theme-text-muted))'
+                    }),
+                    menu: (base) => ({
+                        ...base,
+                        maxHeight: '300px',
+                        backgroundColor: 'rgb(var(--theme-card))',
+                        border: '1px solid rgb(var(--theme-border))',
+                        zIndex: 9999,
+                    }),
+                    menuList: (base) => ({
+                        ...base,
+                        maxHeight: '300px',
+                        overflowY: 'auto',
+                        '::-webkit-scrollbar': {
+                            width: '8px',
+                        },
+                        '::-webkit-scrollbar-track': {
+                            background: 'rgb(var(--theme-panel))',
+                            borderRadius: '10px',
+                        },
+                        '::-webkit-scrollbar-thumb': {
+                            background: 'rgb(var(--theme-border))',
+                            borderRadius: '10px',
+                        },
+                        '::-webkit-scrollbar-thumb:hover': {
+                            background: 'rgb(var(--theme-accent))',
+                        },
+                    }),
+                    option: (base, state) => ({
+                        ...base,
+                        backgroundColor: state.isSelected
+                            ? 'rgb(var(--theme-accent))'
+                            : state.isFocused
+                                ? 'rgb(var(--theme-panel))'
+                                : 'rgb(var(--theme-card))',
+                        color: state.isSelected ? 'white' : 'rgb(var(--theme-text))',
+                        cursor: 'pointer',
+                        padding: '10px 12px',
+                    }),
+                }}
+              />
+            </div>
           </div>
         </div>
-      </div>
+      </Card>
 
       {interviews.length === 0 ? (
-        <div className="text-center py-12 bg-gray-50 rounded-lg">
-          <Calendar className="mx-auto h-12 w-12 text-gray-400 mb-3" />
-          <p className="text-gray-600">No interviews scheduled for this date</p>
-        </div>
+        <Card>
+          <div className="text-center py-12 bg-shnoor-lavender rounded-xl border border-shnoor-light">
+            <Calendar className="mx-auto h-12 w-12 text-shnoor-indigoMedium mb-3" />
+            <p className="text-shnoor-navy font-medium">No interviews scheduled for this date</p>
+          </div>
+        </Card>
       ) : (
         <div className="grid gap-4">
           {interviews.map((interview) => (
-            <div
-              key={interview.id}
-              className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-            >
-              <div className="flex flex-col sm:flex-row justify-between sm:items-start space-y-4 sm:space-y-0">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-3 mb-2 flex-wrap gap-y-2">
-                    <h3 className="text-lg font-semibold text-gray-800 break-words">
-                      {interview.student_name}
-                    </h3>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium shrink-0 ${getStatusColor(interview.status)}`}>
-                      {interview.status.replace('_', ' ').toUpperCase()}
-                    </span>
+            <Card key={interview.id} className="hover:shadow-[0_8px_30px_rgba(14,14,39,0.12)] transition-shadow cursor-default" noPadding>
+              <div className="p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row justify-between sm:items-start space-y-4 sm:space-y-0">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-3 mb-3 flex-wrap gap-y-2">
+                      <h3 className="text-lg font-bold text-shnoor-navy break-words">
+                        {interview.student_name}
+                      </h3>
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold shrink-0 ${getStatusColor(interview.status)}`}>
+                        {interview.status.replace('_', ' ').toUpperCase()}
+                      </span>
+                    </div>
+                    
+                    <div className="space-y-2 text-sm text-shnoor-indigoMedium font-medium">
+                      <p className="flex items-center">
+                        <Users className="w-4 h-4 mr-2 shrink-0 text-shnoor-indigo" />
+                        <span className="truncate">{interview.institute_name || 'No Institute'}</span>
+                      </p>
+                      <p className="flex items-center">
+                        <Clock className="w-4 h-4 mr-2 shrink-0 text-shnoor-indigo" />
+                        {formatDateTime(interview.scheduled_time)} ({interview.duration} min)
+                      </p>
+                      <p className="text-shnoor-soft truncate">{interview.student_email}</p>
+                    </div>
                   </div>
-                  
-                  <div className="space-y-1 text-sm text-gray-600">
-                    <p className="flex items-center">
-                      <Users className="w-4 h-4 mr-2 shrink-0" />
-                      <span className="truncate">{interview.institute_name || 'No Institute'}</span>
-                    </p>
-                    <p className="flex items-center">
-                      <Clock className="w-4 h-4 mr-2 shrink-0" />
-                      {formatDateTime(interview.scheduled_time)} ({interview.duration} min)
-                    </p>
-                    <p className="text-gray-500 truncate">{interview.student_email}</p>
-                  </div>
-                </div>
 
-                <div className="flex items-center sm:justify-end space-x-2 w-full sm:w-auto mt-4 sm:mt-0">
-                  {(interview.status === 'scheduled' || interview.status === 'in_progress') && (
+                  <div className="flex items-center sm:justify-end space-x-3 w-full sm:w-auto mt-4 sm:mt-0">
+                    {(interview.status === 'scheduled' || interview.status === 'in_progress') && (
+                      <Button
+                        onClick={() => joinInterview(interview.id)}
+                        variant="primary"
+                        className="flex-1 sm:flex-none flex items-center justify-center space-x-2 !rounded-xl"
+                      >
+                        <Video size={18} />
+                        <span className="whitespace-nowrap">{interview.status === 'in_progress' ? 'Resume Call' : 'Call'}</span>
+                      </Button>
+                    )}
+                    
                     <button
-                      onClick={() => joinInterview(interview.id)}
-                      className="flex-1 sm:flex-none flex items-center justify-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                      onClick={() => openEditModal(interview)}
+                      className="p-3 flex items-center justify-center text-shnoor-indigo hover:bg-shnoor-lavender rounded-xl transition-colors shrink-0"
+                      title="Edit schedule"
                     >
-                      <Video size={18} />
-                      <span className="whitespace-nowrap">{interview.status === 'in_progress' ? 'Resume Call' : 'Call'}</span>
+                      <Edit2 size={18} />
                     </button>
-                  )}
-                  
-                  <button
-                    onClick={() => openEditModal(interview)}
-                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors shrink-0"
-                    title="Edit schedule"
-                  >
-                    <Edit2 size={18} />
-                  </button>
-                  
-                  <button
-                    onClick={() => deleteInterview(interview.id, interview.student_name)}
-                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors shrink-0"
-                    title="Delete interview"
-                  >
-                    <Trash2 size={18} />
-                  </button>
+                    
+                    <button
+                      onClick={() => deleteInterview(interview.id, interview.student_name)}
+                      className="p-3 flex items-center justify-center text-red-500 hover:bg-red-50 rounded-xl transition-colors shrink-0"
+                      title="Delete interview"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
+            </Card>
           ))}
         </div>
       )}
 
       {editing && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">
-              Reschedule Interview • {editing.student_name}
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 animate-fadeIn">
+          <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 w-full max-w-md m-4 border border-shnoor-light">
+            <h2 className="text-xl font-bold text-shnoor-navy mb-6">
+              Reschedule Interview
+              <span className="block text-sm font-medium text-shnoor-indigoMedium mt-1">{editing.student_name}</span>
             </h2>
-            <div className="space-y-4">
+            <div className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-bold text-shnoor-navy mb-2">
                   Interview Date &amp; Time
                 </label>
                 <input
                   type="datetime-local"
                   value={editing.scheduled_time || ''}
                   onChange={(e) => handleEditChange('scheduled_time', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 border border-shnoor-light rounded-xl focus:outline-none focus:ring-4 focus:ring-shnoor-lavender focus:border-shnoor-indigo font-medium text-shnoor-navy bg-white transition-all"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-bold text-shnoor-navy mb-2">
                   Duration (minutes)
                 </label>
                 <input
@@ -314,23 +393,23 @@ const InterviewsList = () => {
                   step="5"
                   value={editing.duration}
                   onChange={(e) => handleEditChange('duration', parseInt(e.target.value, 10) || 60)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 border border-shnoor-light rounded-xl focus:outline-none focus:ring-4 focus:ring-shnoor-lavender focus:border-shnoor-indigo font-medium text-shnoor-navy bg-white transition-all"
                 />
               </div>
             </div>
-            <div className="mt-6 flex justify-end space-x-3">
-              <button
+            <div className="mt-8 flex justify-end gap-3">
+              <Button
                 onClick={() => setEditing(null)}
-                className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
+                variant="outline"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={saveSchedule}
-                className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+                variant="primary"
               >
-                Save
-              </button>
+                Save Changes
+              </Button>
             </div>
           </div>
         </div>

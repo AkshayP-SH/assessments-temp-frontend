@@ -52,7 +52,7 @@ export const ClientAuthProvider = ({ children }) => {
       setClientUser(data.user);
       setIsAuthenticated(true);
       return { success: true, user: data.user };
-    } catch (err) {
+    } catch {
       return { success: false, message: 'Network error. Please try again.' };
     }
   }, []);
@@ -67,7 +67,7 @@ export const ClientAuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <ClientAuthContext.Provider value={{ clientUser, loading, isAuthenticated, login, logout }}>
+    <ClientAuthContext.Provider value={{ clientUser, loading, isAuthenticated, login, logout, setClientUser }}>
       {children}
     </ClientAuthContext.Provider>
   );

@@ -4,6 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import { LogOut, Briefcase, Building2, Clock, ArrowLeft, Loader2, RefreshCw, Search, CheckCircle2, CheckCircle, X } from 'lucide-react';
 import { apiFetch } from '../config/api';
 import ThemeSelector from '../components/ThemeSelector';
+import StudentHeader from '../components/StudentHeader';
+import { clearStorageKeepTheme } from '../utils/theme';
+import shnoorLogo from '../assets/shnoor-logo.png';
 import { useSEO } from '../hooks/useSEO';
 import { useDebounce } from '../hooks/useDebounce';
 
@@ -97,7 +100,7 @@ export default function JobBoard({ isEmbedded = false }) {
                     const enrolledData = await enrolledRes.json();
 
                     if (enrolledRes.status === 401) {
-                        localStorage.clear();
+                        clearStorageKeepTheme();
                         navigate('/login');
                         return;
                     }
@@ -145,7 +148,7 @@ export default function JobBoard({ isEmbedded = false }) {
     }, []);
 
     const handleLogout = () => {
-        localStorage.clear();
+        clearStorageKeepTheme();
         navigate('/login');
     };
 
@@ -227,45 +230,15 @@ export default function JobBoard({ isEmbedded = false }) {
     return (
         <div className={isEmbedded ? "w-full font-sans" : "min-h-screen bg-[#F8F8FB] font-sans"}>
             {!isEmbedded && (
-                <header className="bg-shnoor-navy shadow-sm h-[72px] flex items-center sticky top-0 z-10 w-full">
-                    <div className="w-full max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="flex justify-between items-center h-16">
-                            <div className="flex items-center space-x-4">
-                                <div className="w-12 h-12 bg-shnoor-lavender rounded-xl flex items-center justify-center shadow-sm">
-                                    <span className="text-shnoor-indigo font-bold text-xl">A</span>
-                                </div>
-                                <div>
-                                    <h1 className="text-white font-bold text-lg leading-tight">Assessment Portal</h1>
-                                    <p className="text-shnoor-light opacity-80 text-xs">Job Board</p>
-                                </div>
-                            </div>
-
-                            <div className="flex items-center space-x-3 sm:space-x-6">
-                                <div className="text-right hidden sm:block">
-                                    <p className="text-sm font-medium text-white">Welcome, {studentName}</p>
-                                    <p className="text-xs text-shnoor-soft">{capitalizeInstitute(institute)} &bull; ID: {studentId}</p>
-                                </div>
-                                <button
-                                    onClick={() => navigate('/dashboard')}
-                                    className="flex items-center justify-center space-x-2 px-3 sm:px-5 py-2 text-white bg-shnoor-indigo border border-shnoor-indigo hover:bg-[#4d4d9c] rounded-lg transition-colors text-sm font-semibold w-10 sm:w-auto"
-                                    title="Back to Dashboard"
-                                >
-                                    <ArrowLeft size={16} />
-                                    <span className="hidden sm:inline">Back to Dashboard</span>
-                                </button>
-                                <button
-                                    onClick={handleLogout}
-                                    className="flex items-center justify-center space-x-2 px-3 sm:px-5 py-2 text-white bg-transparent border border-white/20 hover:bg-white/10 rounded-lg transition-colors text-sm font-medium w-10 sm:w-auto"
-                                    title="Logout"
-                                >
-                                    <LogOut size={16} />
-                                    <span className="hidden sm:inline">Logout</span>
-                                </button>
-                                <ThemeSelector variant="dark" />
-                            </div>
-                        </div>
-                    </div>
-                </header>
+                <StudentHeader
+                    studentName={studentName}
+                    studentId={studentId}
+                    institute={institute}
+                    subtitle="Job Board"
+                    showBackButton={true}
+                    backTo="/dashboard"
+                    onLogout={handleLogout}
+                />
             )}
 
             <main className={isEmbedded ? "" : "w-full max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 py-8"}>

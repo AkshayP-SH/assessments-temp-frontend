@@ -48,7 +48,14 @@ const CodingQuestionSelector = ({ onClose, onSelect, selectedQuestionIds = [], s
       });
       const data = await response.json();
       if (data.success) {
-        setQuestions(data.questions);
+        const seen = new Set();
+        const uniqueQuestions = (data.questions || []).filter((q) => {
+          const key = (q.title || '').trim().toLowerCase();
+          if (!key || seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+        setQuestions(uniqueQuestions);
       }
     } catch (error) {
       console.error('Error fetching coding questions:', error);
@@ -60,7 +67,6 @@ const CodingQuestionSelector = ({ onClose, onSelect, selectedQuestionIds = [], s
   const filterQuestions = () => {
     let filtered = [...questions];
 
-    // Search filter
     if (searchTerm) {
       filtered = filtered.filter(q =>
         q.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -68,23 +74,19 @@ const CodingQuestionSelector = ({ onClose, onSelect, selectedQuestionIds = [], s
       );
     }
 
-    // Difficulty filter
     if (selectedDifficulty) {
       filtered = filtered.filter(q => q.difficulty === selectedDifficulty);
     }
 
-    // Category filter
     if (selectedCategory) {
       filtered = filtered.filter(q => q.category === selectedCategory);
     }
 
-    // Role-based recommendation (sort by relevance)
     if (selectedRoles && selectedRoles.length > 0) {
       filtered = filtered.map(q => {
         const roleKeywords = selectedRoles.map(r => r.job_role.toLowerCase()).join(' ');
         const questionText = `${q.title} ${q.description} ${q.category} ${(q.tags || []).join(' ')}`.toLowerCase();
         
-        // Calculate relevance score
         let relevanceScore = 0;
         const keywords = roleKeywords.split(/\s+/);
         keywords.forEach(keyword => {
@@ -143,10 +145,9 @@ const CodingQuestionSelector = ({ onClose, onSelect, selectedQuestionIds = [], s
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+    <div className="fixed inset-0 bg-black/50 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div className="bg-white w-full h-full sm:h-auto sm:max-h-[90vh] sm:rounded-2xl shadow-2xl sm:max-w-6xl flex flex-col animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200">
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 sticky top-0 bg-white z-10 flex-shrink-0">
           <div>
             <h2 className="text-2xl font-bold text-gray-900">Select Coding Questions</h2>
             <p className="text-sm text-gray-600 mt-1">
@@ -161,8 +162,7 @@ const CodingQuestionSelector = ({ onClose, onSelect, selectedQuestionIds = [], s
           </button>
         </div>
 
-        {/* Filters */}
-        <div className="p-6 border-b border-gray-200 bg-gray-50">
+        <div className="p-4 sm:p-6 border-b border-gray-200 bg-gray-50 flex-shrink-0">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -206,8 +206,7 @@ const CodingQuestionSelector = ({ onClose, onSelect, selectedQuestionIds = [], s
           )}
         </div>
 
-        {/* Questions List */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
           {loading ? (
             <div className="text-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
@@ -286,30 +285,28 @@ const CodingQuestionSelector = ({ onClose, onSelect, selectedQuestionIds = [], s
           )}
         </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 sm:p-6 border-t border-gray-200 bg-gray-50 sticky bottom-0 z-10 flex-shrink-0">
           <button
             onClick={onClose}
-            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors font-medium"
+            className="w-full sm:w-auto px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors font-medium"
           >
             Cancel
           </button>
           <button
             onClick={handleConfirmSelection}
             disabled={selectedQuestions.size === 0}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full sm:w-auto px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Add {selectedQuestions.size} Question{selectedQuestions.size !== 1 ? 's' : ''}
           </button>
         </div>
       </div>
 
-      {/* Preview Modal */}
       {showPreview && previewQuestion && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <h3 className="text-xl font-bold text-gray-900">Question Preview</h3>
+        <div className="fixed inset-0 bg-black/50 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div className="bg-white w-full h-full sm:h-auto sm:max-h-[90vh] sm:rounded-2xl shadow-2xl sm:max-w-4xl flex flex-col animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200">
+            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 sticky top-0 bg-white z-10 flex-shrink-0">
+              <h2 className="text-xl font-bold text-gray-900">Question Preview</h2>
               <button
                 onClick={() => setShowPreview(false)}
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -318,9 +315,8 @@ const CodingQuestionSelector = ({ onClose, onSelect, selectedQuestionIds = [], s
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6">
               <div className="space-y-6">
-                {/* Title and Metadata */}
                 <div>
                   <h2 className="text-2xl font-bold text-gray-900 mb-3">{previewQuestion.title}</h2>
                   <div className="flex flex-wrap gap-2 mb-4">
@@ -342,13 +338,11 @@ const CodingQuestionSelector = ({ onClose, onSelect, selectedQuestionIds = [], s
                   </div>
                 </div>
 
-                {/* Description */}
                 <div>
                   <h4 className="font-semibold text-gray-900 mb-2">Description</h4>
                   <p className="text-gray-700 whitespace-pre-wrap">{previewQuestion.description}</p>
                 </div>
 
-                {/* Test Cases */}
                 {previewQuestion.testCases && previewQuestion.testCases.length > 0 && (
                   <div>
                     <h4 className="font-semibold text-gray-900 mb-3">Test Cases</h4>
@@ -385,7 +379,6 @@ const CodingQuestionSelector = ({ onClose, onSelect, selectedQuestionIds = [], s
                   </div>
                 )}
 
-                {/* Tags */}
                 {previewQuestion.tags && previewQuestion.tags.length > 0 && (
                   <div>
                     <h4 className="font-semibold text-gray-900 mb-2">Tags</h4>
@@ -401,7 +394,7 @@ const CodingQuestionSelector = ({ onClose, onSelect, selectedQuestionIds = [], s
               </div>
             </div>
 
-            <div className="p-6 border-t border-gray-200 bg-gray-50">
+            <div className="p-4 sm:p-6 border-t border-gray-200 bg-gray-50 sticky bottom-0 z-10 flex-shrink-0">
               <button
                 onClick={() => setShowPreview(false)}
                 className="w-full px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"

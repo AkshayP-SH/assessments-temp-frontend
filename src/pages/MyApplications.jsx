@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { LogOut, ArrowLeft, Briefcase, Loader2, RefreshCw, CheckCircle, Clock, FileText, AlertTriangle, XCircle, Trophy, PlayCircle, Award, ChevronDown } from 'lucide-react';
 import { apiFetch } from '../config/api';
 import ThemeSelector from '../components/ThemeSelector';
+import StudentHeader from '../components/StudentHeader';
+import { clearStorageKeepTheme } from '../utils/theme';
+import shnoorLogo from '../assets/shnoor-logo.png';
 
 const STATUS_CONFIG = {
     submitted: { label: 'Submitted', color: 'blue', icon: FileText },
@@ -107,7 +110,7 @@ export default function MyApplications({ isEmbedded = false }) {
             });
 
             if (res.status === 401) {
-                localStorage.clear();
+                clearStorageKeepTheme();
                 navigate('/login');
                 return;
             }
@@ -166,7 +169,7 @@ export default function MyApplications({ isEmbedded = false }) {
     }, []);
 
     const handleLogout = () => {
-        localStorage.clear();
+        clearStorageKeepTheme();
         navigate('/login');
     };
 
@@ -187,45 +190,15 @@ export default function MyApplications({ isEmbedded = false }) {
     return (
         <div className={isEmbedded ? "w-full font-sans" : "min-h-screen bg-[#F8F8FB] font-sans"}>
             {!isEmbedded && (
-                <header className="bg-shnoor-navy shadow-sm h-auto sm:h-[72px] flex flex-col sm:flex-row items-center sticky top-0 z-10 w-full py-3 sm:py-0">
-                    <div className="w-full max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="flex justify-between items-center sm:h-16">
-                            <div className="flex items-center space-x-3 sm:space-x-4">
-                                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-shnoor-lavender rounded-xl flex items-center justify-center shadow-sm">
-                                    <span className="text-shnoor-indigo font-bold text-lg sm:text-xl">A</span>
-                                </div>
-                                <div>
-                                    <h1 className="text-white font-bold text-base sm:text-lg leading-tight">Assessment Portal</h1>
-                                    <p className="text-shnoor-light opacity-80 text-[10px] sm:text-xs">My Applications</p>
-                                </div>
-                            </div>
-
-                            <div className="flex items-center space-x-3 sm:space-x-6">
-                                <div className="text-right hidden sm:block">
-                                    <p className="text-sm font-medium text-white">Welcome, {studentName}</p>
-                                    <p className="text-xs text-shnoor-soft">{capitalizeInstitute(institute)} • ID: {studentId}</p>
-                                </div>
-                                <button
-                                    onClick={() => navigate('/dashboard')}
-                                    className="flex items-center justify-center space-x-2 px-3 sm:px-5 py-2 !h-10 w-10 sm:w-auto text-white bg-shnoor-indigo border border-shnoor-indigo hover:bg-[#4d4d9c] rounded-lg transition-colors text-sm font-semibold"
-                                    title="Back to Dashboard"
-                                >
-                                    <ArrowLeft size={16} />
-                                    <span className="hidden sm:inline">Back to Dashboard</span>
-                                </button>
-                                <button
-                                    onClick={handleLogout}
-                                    className="flex items-center justify-center space-x-2 px-3 sm:px-5 py-2 !h-10 w-10 sm:w-auto text-white bg-transparent border border-white/20 hover:bg-white/10 rounded-lg transition-colors text-sm font-medium"
-                                    title="Logout"
-                                >
-                                    <LogOut size={16} />
-                                    <span className="hidden sm:inline">Logout</span>
-                                </button>
-                                <ThemeSelector variant="dark" />
-                            </div>
-                        </div>
-                    </div>
-                </header>
+                <StudentHeader
+                    studentName={studentName}
+                    studentId={studentId}
+                    institute={institute}
+                    subtitle="My Applications"
+                    showBackButton={true}
+                    backTo="/dashboard"
+                    onLogout={handleLogout}
+                />
             )}
 
             <main className={isEmbedded ? "" : "w-full max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 py-8"}>
@@ -408,8 +381,8 @@ export default function MyApplications({ isEmbedded = false }) {
                                                                         <div
                                                                             key={test.test_id}
                                                                             className={`border rounded-lg p-4 transition-all ${test.is_completed
-                                                                                    ? 'border-shnoor-success bg-shnoor-successLight'
-                                                                                    : 'border-shnoor-mist bg-white hover:shadow-md'
+                                                                                ? 'border-shnoor-success bg-shnoor-successLight'
+                                                                                : 'border-shnoor-mist bg-white hover:shadow-md'
                                                                                 }`}
                                                                         >
                                                                             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">

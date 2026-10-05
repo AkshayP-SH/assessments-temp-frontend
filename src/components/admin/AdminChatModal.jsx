@@ -42,8 +42,6 @@ const AdminChatModal = ({
     if (!socket || !isOpen) return;
 
     const handleMessageDelivered = (data) => {
-      console.log('[AdminChat] Message delivered event:', data);
-      // Use loose equality to handle string/number mismatch
       if (String(data.studentId) === String(student.studentId)) {
         setDeliveryStatus({ type: 'success', message: 'Message delivered successfully!' });
         setMessageHistory(prev => [...prev, {
@@ -59,8 +57,6 @@ const AdminChatModal = ({
     };
 
     const handleMessageFailed = (data) => {
-      console.log('[AdminChat] Message failed event:', data);
-      // Use loose equality to handle string/number mismatch
       if (String(data.studentId) === String(student.studentId)) {
         setDeliveryStatus({ type: 'error', message: `Failed to send: ${data.error}` });
         setIsSending(false);
@@ -104,10 +100,6 @@ const AdminChatModal = ({
   const handleSendMessage = () => {
     if (!message.trim() || !socket || isSending) return;
 
-    console.log('[AdminChat] Sending message to student:', student.studentId);
-    console.log('[AdminChat] Socket connected:', socket.connected);
-
-    // Check if socket is connected
     if (!socket.connected) {
       setDeliveryStatus({ type: 'error', message: 'Socket not connected. Please refresh the page.' });
       return;
@@ -125,7 +117,6 @@ const AdminChatModal = ({
       testId: student.testId
     };
 
-    console.log('[AdminChat] Emitting admin:send-message with payload:', messagePayload);
     socket.emit('admin:send-message', messagePayload);
 
     // Timeout handler - reset sending state if no response after 10 seconds

@@ -17,12 +17,11 @@ const ClientProtectedRoute = ({ children }) => {
     return <Navigate to="/login?portal=org" replace />;
   }
 
-  // Check if payment is required and user is not on subscription plans page
   const requiresPayment = clientUser?.requiresPayment || clientUser?.clientStatus === 'awaiting_payment';
-  const isOnSubscriptionPage = location.pathname === '/client/subscription-plans';
-  
-  if (requiresPayment && !isOnSubscriptionPage) {
-    return <Navigate to="/client/subscription-plans" replace state={{ 
+  const isAllowedPaymentPage = location.pathname === '/client/subscription-plans' || location.pathname === '/client/payment';
+
+  if (requiresPayment && !isAllowedPaymentPage) {
+    return <Navigate to="/client/subscription-plans" replace state={{
       requiresPayment: true,
       subscriptionExpired: clientUser?.subscriptionExpired
     }} />;

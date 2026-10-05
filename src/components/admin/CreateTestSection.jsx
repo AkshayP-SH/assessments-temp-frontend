@@ -3,15 +3,25 @@ import { Upload, FileText, Plus, Save, Trash2, ArrowLeft, CheckCircle, AlertCirc
 import * as XLSX from 'xlsx';
 import { apiFetch } from '../../config/api';
 import CodingQuestionSelector from './CodingQuestionSelector';
-import MCQBankSelector from './MCQBankSelector';
+import TestInitStep from './TestInitStep';
+import TestManualStep from './TestManualStep';
+import TestBulkStep from './TestBulkStep';
+import TestSuccessStep from './TestSuccessStep';
+import CodingQuestionModal from './CodingQuestionModal';
+import CodingViewModal from './CodingViewModal';
 
-// DISABLED: Code execution feature
 const ENABLE_CODE_EXECUTION = true;
 
 const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
     const FALLBACK_DEFAULT_JOB_ROLE = 'General Assessment Candidate';
     const FALLBACK_DEFAULT_JOB_DESCRIPTION = 'This assessment evaluates candidate readiness across core technical and problem-solving skills relevant to the role.';
-    const [step, setStep] = useState('init'); // init, manual, bulk, success
+    const [step, setStep] = useState('init'); // init, manual, bulk, success\n
+    const [toastMessage, setToastMessage] = useState('');
+
+    const showToast = (msg) => {
+        alert(msg);
+    };
+
     const [testTitle, setTestTitle] = useState('');
     const [jobRoles, setJobRoles] = useState([{ job_role: '', job_description: '' }]);
     const [defaultJobConfig, setDefaultJobConfig] = useState({
@@ -24,15 +34,14 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
     const [startDateTime, setStartDateTime] = useState('');
     const [endDateTime, setEndDateTime] = useState('');
     const [questions, setQuestions] = useState([]);
-    // DISABLED: Coding questions feature
     const [codingQuestions, setCodingQuestions] = useState([]);
     const [isUploading, setIsUploading] = useState(false);
     const [uploadedTestId, setUploadedTestId] = useState(null);
     const [uploadedTestName, setUploadedTestName] = useState('');
     const [isPublishing, setIsPublishing] = useState(false);
-    const [isLoadingTest, setIsLoadingTest] = useState(false);
+    const [, setIsLoadingTest] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
-    const [viewMode, setViewMode] = useState(false); // New state for view mode
+    const [viewMode, setViewMode] = useState(false);
 
     // Name availability checker state
     const [nameAvailability, setNameAvailability] = useState({
@@ -49,7 +58,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
         format: 'paragraph' // 'paragraph', 'line', 'code'
     });
 
-    // DISABLED: Coding Question Logic
+    // Coding Question Logic
     const [showCodingModal, setShowCodingModal] = useState(false);
     const [showCodingViewModal, setShowCodingViewModal] = useState(false);
     const [showCodingSelector, setShowCodingSelector] = useState(false);
@@ -90,7 +99,6 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
 
                     setDefaultJobConfig(nextDefaults);
 
-                    // In create mode, prefill first role so admin can edit directly at creation time.
                     if (!editingTest) {
                         setJobRoles((prev) => {
                             if (!Array.isArray(prev) || prev.length !== 1) return prev;
@@ -104,7 +112,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                         });
                     }
                 }
-            } catch (error) {
+            } catch {
                 // Keep fallback defaults silently.
             }
         };
@@ -119,7 +127,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
             }
 
             setIsEditMode(true);
-            setViewMode(true); // Start in view mode when editing
+            setViewMode(true);
             setIsLoadingTest(true);
 
             try {
@@ -139,10 +147,8 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                     setMaxAttempts(test.max_attempts || 1);
                     setPassingPercentage(test.passing_percentage || 50);
 
-                    // Format datetime for input (convert to Asia/Kolkata timezone)
                     if (test.start_datetime) {
                         const date = new Date(test.start_datetime);
-                        // Convert to Asia/Kolkata timezone
                         const istDate = new Date(date.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
                         const year = istDate.getFullYear();
                         const month = String(istDate.getMonth() + 1).padStart(2, '0');
@@ -156,7 +162,6 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
 
                     if (test.end_datetime) {
                         const date = new Date(test.end_datetime);
-                        // Convert to Asia/Kolkata timezone
                         const istDate = new Date(date.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
                         const year = istDate.getFullYear();
                         const month = String(istDate.getMonth() + 1).padStart(2, '0');
@@ -168,7 +173,6 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                         setEndDateTime('');
                     }
 
-                    // Load job roles
                     if (test.jobRoles && test.jobRoles.length > 0) {
                         setJobRoles(test.jobRoles.map(r => ({
                             job_role: r.job_role,
@@ -181,44 +185,57 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                         }]);
                     }
 
-                    // Load questions
                     if (test.questions && test.questions.length > 0) {
-                        const loadedQuestions = test.questions.map((q, idx) => ({
-                            id: q.id || Date.now() + idx,
-                            text: q.question_text,
-                            options: [q.option_a, q.option_b, q.option_c || '', q.option_d || ''],
-                            correctOption: q.correct_option.charCodeAt(0) - 65 // Convert 'A', 'B', 'C', 'D' to 0, 1, 2, 3
-                        }));
+                        const loadedQuestions = test.questions.map((q, idx) => {
+                            let correctOpt = 0;
+                            if (typeof q.correct_option === 'number') {
+                                correctOpt = q.correct_option;
+                            } else if (typeof q.correct_option === 'string' && q.correct_option.trim()) {
+                                const trimmed = q.correct_option.trim().toUpperCase();
+                                if (['A', 'B', 'C', 'D'].includes(trimmed)) {
+                                    correctOpt = trimmed.charCodeAt(0) - 65;
+                                } else if (!isNaN(parseInt(trimmed, 10))) {
+                                    correctOpt = parseInt(trimmed, 10);
+                                }
+                            }
+                            return {
+                                id: q.id || Date.now() + idx,
+                                text: q.question_text || '',
+                                options: [q.option_a || '', q.option_b || '', q.option_c || '', q.option_d || ''],
+                                correctOption: correctOpt
+                            };
+                        });
                         setQuestions(loadedQuestions);
                     }
 
-                    // DISABLED: Load coding questions
                     if (test.codingQuestions && test.codingQuestions.length > 0) {
                         const loadedCodingQuestions = test.codingQuestions.map((q, idx) => ({
                             id: q.id || Date.now() + idx,
-                            title: q.title,
-                            description: q.description,
-                            timeLimit: q.timeLimit || 2,
-                            memoryLimit: q.memoryLimit || 256,
-                            marks: q.marks || 10,
-                            publicTestCases: q.publicTestCases || [{ input: '', output: '', explanation: '' }],
-                            hiddenTestCases: q.hiddenTestCases || [{ input: '', output: '' }]
+                            title: q.title || '',
+                            description: q.description || '',
+                            timeLimit: parseFloat(q.timeLimit || q.time_limit) || 2,
+                            memoryLimit: parseInt(q.memoryLimit || q.memory_limit, 10) || 256,
+                            marks: parseInt(q.marks, 10) || 10,
+                            publicTestCases: (q.publicTestCases && q.publicTestCases.length > 0)
+                                ? q.publicTestCases
+                                : [{ input: '', output: '', explanation: '' }],
+                            hiddenTestCases: (q.hiddenTestCases && q.hiddenTestCases.length > 0)
+                                ? q.hiddenTestCases
+                                : [{ input: '', output: '' }]
                         }));
                         setCodingQuestions(loadedCodingQuestions);
                     }
 
                     setUploadedTestId(test.id);
                     setNameAvailability({ checking: false, available: true, message: 'Current test name' });
-
-                    // Stay on init step to allow editing test details first
                     setStep('init');
                 } else {
-                    alert(data.message || 'Failed to load test data');
+                    showToast(data.message || 'Failed to load test data');
                     if (onComplete) onComplete();
                 }
             } catch (error) {
                 console.error('Error loading test:', error);
-                alert('Failed to load test data');
+                showToast('Failed to load test data');
                 if (onComplete) onComplete();
             } finally {
                 setIsLoadingTest(false);
@@ -228,7 +245,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
         loadTestData();
     }, [editingTest]);
 
-    // Check name availability when title changes (skip if editing and name hasn't changed)
+    // Check name availability when title changes
     useEffect(() => {
         const checkNameAvailability = async () => {
             if (!testTitle.trim()) {
@@ -236,7 +253,6 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                 return;
             }
 
-            // Skip check if editing and name hasn't changed
             if (isEditMode && editingTest && testTitle === editingTest.name) {
                 setNameAvailability({ checking: false, available: true, message: 'Current test name' });
                 return;
@@ -267,18 +283,17 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
             }
         };
 
-        // Debounce the API call
         const timeoutId = setTimeout(checkNameAvailability, 500);
         return () => clearTimeout(timeoutId);
     }, [testTitle, isEditMode, editingTest]);
 
     const handleStart = (mode) => {
         if (!testTitle.trim()) {
-            alert('Please enter a test title first');
+            showToast('Please enter a test title first');
             return;
         }
         if (nameAvailability.available === false) {
-            alert('This test name is already taken. Please choose a different name.');
+            showToast('This test name is already taken. Please choose a different name.');
             return;
         }
         setStep(mode);
@@ -301,14 +316,22 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
 
     const handleAddQuestion = () => {
         if (!currentQuestion.text || currentQuestion.options.some(opt => !opt) || currentQuestion.correctOption === null) {
-            alert('Please fill in all fields and select a correct answer');
+            showToast('Please fill in all fields and select a correct answer');
+            return;
+        }
+        const isDuplicate = questions.some(
+            q => q.text && q.text.trim().toLowerCase() === currentQuestion.text.trim().toLowerCase()
+        );
+        if (isDuplicate) {
+            showToast('A question with this text is already added to the test.');
             return;
         }
         setQuestions([...questions, { ...currentQuestion, id: Date.now() }]);
         setCurrentQuestion({
             text: '',
             options: ['', '', '', ''],
-            correctOption: null
+            correctOption: null,
+            format: 'paragraph'
         });
     };
 
@@ -317,9 +340,15 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
     };
 
     const handleSelectMcqFromBank = (selectedBankQuestions) => {
-        const existingBankIds = new Set(questions.filter((q) => q.bankId).map((q) => q.bankId));
         const converted = selectedBankQuestions
-            .filter((q) => !existingBankIds.has(q.id))
+            .filter((q) => {
+                const isDuplicate = questions.some(
+                    (existing) =>
+                        (existing.bankId && existing.bankId === q.id) ||
+                        (existing.text && q.question_text && existing.text.trim().toLowerCase() === q.question_text.trim().toLowerCase())
+                );
+                return !isDuplicate;
+            })
             .map((q) => {
                 const correctLetter = (q.correct_option || 'A').toUpperCase();
                 const correctIdx = Math.max(0, 'ABCD'.indexOf(correctLetter));
@@ -336,20 +365,19 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
             });
 
         if (converted.length === 0) {
-            alert('These questions are already in your test list (see panel on the right).');
+            showToast('Selected questions are already added to this test.');
             return;
         }
 
-        setQuestions([...questions, ...converted]);
+        setQuestions((prevQuestions) => [...prevQuestions, ...converted]);
         setBankSelectorKey((k) => k + 1);
 
         if (converted.length < selectedBankQuestions.length) {
-            alert(`Added ${converted.length} question(s) to the list. ${selectedBankQuestions.length - converted.length} duplicate(s) skipped.`);
+            showToast(`Added ${converted.length} question(s) to the list. ${selectedBankQuestions.length - converted.length} duplicate(s) skipped.`);
         }
     };
 
     // Coding Question Handlers
-
     const handleAddPublicTestCase = () => {
         setCurrentCodingQuestion({
             ...currentCodingQuestion,
@@ -380,29 +408,36 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
         });
     };
 
-    // DISABLED: Coding question handlers
     const handleSaveCodingQuestion = () => {
         if (!currentCodingQuestion.title || !currentCodingQuestion.description) {
-            alert('Please fill in title and description');
+            showToast('Please fill in title and description');
             return;
         }
         if (currentCodingQuestion.publicTestCases.some(tc => !tc.input || !tc.output)) {
-            alert('Please fill in all public test cases');
+            showToast('Please fill in all public test cases');
             return;
         }
         if (currentCodingQuestion.hiddenTestCases.some(tc => !tc.input || !tc.output)) {
-            alert('Please fill in all hidden test cases');
+            showToast('Please fill in all hidden test cases');
+            return;
+        }
+
+        // Duplicate check for coding questions
+        const isDuplicate = codingQuestions.some(
+            q => (!editingCodingQuestionId || q.id !== editingCodingQuestionId) &&
+                 q.title && q.title.trim().toLowerCase() === currentCodingQuestion.title.trim().toLowerCase()
+        );
+        if (isDuplicate) {
+            showToast('A coding question with this title is already added to this test.');
             return;
         }
 
         if (editingCodingQuestionId) {
-            // Update existing question
-            setCodingQuestions(codingQuestions.map(q => 
+            setCodingQuestions(codingQuestions.map(q =>
                 q.id === editingCodingQuestionId ? { ...currentCodingQuestion, id: editingCodingQuestionId } : q
             ));
             setEditingCodingQuestionId(null);
         } else {
-            // Add new question
             setCodingQuestions([...codingQuestions, { ...currentCodingQuestion, id: Date.now() }]);
         }
 
@@ -442,19 +477,24 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
     };
 
     const handleSelectFromBank = (selectedQuestions) => {
-        const existingBankIds = new Set(codingQuestions.filter((q) => q.bankId).map((q) => q.bankId));
-        const newSelections = selectedQuestions.filter((q) => !existingBankIds.has(q.id));
+        const newSelections = selectedQuestions.filter((q) => {
+            const isDuplicate = codingQuestions.some(
+                (existing) =>
+                    (existing.bankId && existing.bankId === q.id) ||
+                    (existing.title && q.title && existing.title.trim().toLowerCase() === q.title.trim().toLowerCase())
+            );
+            return !isDuplicate;
+        });
 
         if (newSelections.length === 0) {
-            alert('Selected questions are already added to this test.');
+            showToast('Selected questions are already added to this test.');
             return;
         }
 
         if (newSelections.length < selectedQuestions.length) {
-            alert(`${selectedQuestions.length - newSelections.length} duplicate question(s) were skipped.`);
+            showToast(`${selectedQuestions.length - newSelections.length} duplicate question(s) were skipped.`);
         }
 
-        // Fetch full details including test cases for each question
         const fetchQuestionDetails = async () => {
             try {
                 const token = localStorage.getItem('adminToken');
@@ -472,7 +512,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                                     output: tc.output,
                                     explanation: tc.explanation || ''
                                 }));
-                            
+
                             const hiddenTestCases = data.question.testCases
                                 .filter(tc => tc.is_hidden)
                                 .map(tc => ({
@@ -498,36 +538,35 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                 );
 
                 const validQuestions = detailedQuestions.filter(q => q !== null);
-                setCodingQuestions([...codingQuestions, ...validQuestions]);
+                setCodingQuestions((prev) => {
+                    const uniqueNew = validQuestions.filter(vq => !prev.some(
+                        p => (p.bankId && p.bankId === vq.bankId) ||
+                             (p.title && vq.title && p.title.trim().toLowerCase() === vq.title.trim().toLowerCase())
+                    ));
+                    return [...prev, ...uniqueNew];
+                });
             } catch (error) {
                 console.error('Error fetching question details:', error);
-                alert('Failed to load some question details');
+                showToast('Failed to load some question details');
             }
         };
 
         fetchQuestionDetails();
     };
 
-
     const convertISTToUTC = (dateTimeString) => {
         if (!dateTimeString) return null;
-        // Parse the datetime-local value as IST and convert to UTC
         const [datePart, timePart] = dateTimeString.split('T');
         const [year, month, day] = datePart.split('-');
         const [hours, minutes] = timePart.split(':');
-
-        // Create date string in IST format
         const istDateString = `${year}-${month}-${day}T${hours}:${minutes}:00+05:30`;
         const date = new Date(istDateString);
-
         return date.toISOString();
     };
 
     const handleManualSubmit = async () => {
-        // DISABLED: Coding questions check
         if (questions.length === 0 && codingQuestions.length === 0) {
-        // if (questions.length === 0) {
-            alert('Please add at least one question');
+            showToast('Please add at least one question');
             return;
         }
 
@@ -535,8 +574,6 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
 
         try {
             const token = localStorage.getItem('adminToken');
-
-            // Prepare question data
             const questionData = questions.map(q => ({
                 question_text: q.text,
                 options: q.options,
@@ -554,7 +591,6 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
             let response, data;
 
             if (isEditMode && uploadedTestId) {
-                // Update existing test
                 response = await apiFetch(`api/tests/${uploadedTestId}`, {
                     method: 'PUT',
                     headers: {
@@ -576,12 +612,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                 data = await response.json();
 
                 if (response.ok && data.success) {
-                    // CODE EXECUTION FEATURE - TEMPORARILY DISABLED
                     if (ENABLE_CODE_EXECUTION) {
-                        // ALWAYS save coding questions (even if empty, to clear old ones)
-                        console.log('[UPDATE TEST] Saving coding questions:', codingQuestions.length);
-                        console.log('[UPDATE TEST] Coding questions data:', JSON.stringify(codingQuestions, null, 2));
-                        
                         const codingResponse = await apiFetch(`api/coding-questions/test/${uploadedTestId}`, {
                             method: 'POST',
                             headers: {
@@ -592,26 +623,25 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                                 codingQuestions: codingQuestions
                             })
                         });
-                    
+
                         const codingData = await codingResponse.json();
                         if (!codingResponse.ok || !codingData.success) {
                             console.error('[UPDATE TEST] Failed to save coding questions:', codingData);
-                            alert('Test updated but failed to save coding questions: ' + codingData.message);
+                            showToast('Test updated but failed to save coding questions: ' + codingData.message);
                             setIsUploading(false);
                             return;
                         }
-                        console.log('[UPDATE TEST] Coding questions saved successfully');
                     }
 
-                    alert('Test updated successfully!');
-                    // Go back to view mode instead of dashboard
+                    showToast('Test updated successfully!');
                     setViewMode(true);
                     setStep('init');
+                    if (onSaved) onSaved();
+                    if (onComplete) onComplete(data.test);
                 } else {
-                    alert(data.message || 'Failed to update test');
+                    showToast(data.message || 'Failed to update test');
                 }
             } else {
-                // Create new test
                 response = await apiFetch('api/upload/manual', {
                     method: 'POST',
                     headers: {
@@ -626,7 +656,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                         passingPercentage: passingPercentage,
                         startDateTime: convertISTToUTC(startDateTime),
                         endDateTime: convertISTToUTC(endDateTime),
-                        status: 'draft', // Save as draft initially
+                        status: 'draft',
                         questions: questionData,
                         codingQuestionsCount: codingQuestions.length,
                         ...(clientId ? { client_id: clientId } : {})
@@ -638,12 +668,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                 if (response.ok && data.success) {
                     const testId = data.testId;
 
-                    // CODE EXECUTION FEATURE Enabled
                     if (ENABLE_CODE_EXECUTION) {
-                        // ALWAYS save coding questions (even if empty, to ensure consistency)
-                        console.log('[CREATE TEST] Saving coding questions for new test:', codingQuestions.length);
-                        console.log('[CREATE TEST] Coding questions data:', JSON.stringify(codingQuestions, null, 2));
-                        
                         const codingResponse = await apiFetch(`api/coding-questions/test/${testId}`, {
                             method: 'POST',
                             headers: {
@@ -654,15 +679,14 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                                 codingQuestions: codingQuestions
                             })
                         });
-                    
+
                         const codingData = await codingResponse.json();
                         if (!codingResponse.ok || !codingData.success) {
                             console.error('[CREATE TEST] Failed to save coding questions:', codingData);
-                            alert('Test created but failed to save coding questions: ' + codingData.message);
+                            showToast('Test created but failed to save coding questions: ' + codingData.message);
                             setIsUploading(false);
                             return;
                         }
-                        console.log('[CREATE TEST] Coding questions saved successfully');
                     }
 
                     setUploadedTestId(testId);
@@ -670,12 +694,12 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                     if (onSaved) onSaved();
                     setStep('success');
                 } else {
-                    alert(data.message || 'Failed to create test');
+                    showToast(data.message || 'Failed to create test');
                 }
             }
         } catch (error) {
             console.error('Submit error:', error);
-            alert('Failed to save test. Please try again.');
+            showToast('Failed to save test. Please try again.');
         } finally {
             setIsUploading(false);
         }
@@ -730,13 +754,12 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
         const file = e.target.files[0];
         if (!file) return;
 
-        // Confirm replacement if in edit mode
         if (isEditMode && questions.length > 0) {
             const confirmed = confirm(
                 `⚠️ Warning: This will delete all ${questions.length} existing question${questions.length !== 1 ? 's' : ''} and replace them with the questions from the uploaded file.\n\nAre you sure you want to continue?`
             );
             if (!confirmed) {
-                e.target.value = ''; // Reset file input
+                e.target.value = '';
                 return;
             }
         }
@@ -750,7 +773,6 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                 : import.meta.env.VITE_API_URL;
 
             if (isEditMode && uploadedTestId) {
-                // Edit mode: Update existing test with new questions from file
                 const formData = new FormData();
                 formData.append('file', file);
                 formData.append('testName', testTitle);
@@ -764,17 +786,14 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                 formData.append('testId', uploadedTestId);
                 if (clientId) formData.append('client_id', clientId);
 
-                // FIX: Use native fetch instead of apiFetch to preserve FormData boundaries
                 const response = await fetch(`${cleanBaseUrl}/api/upload/questions/${uploadedTestId}`, {
                     method: 'PUT',
                     headers: {
                         'Authorization': `Bearer ${token}`
-                        // DO NOT put Content-Type here!
                     },
                     body: formData
                 });
 
-                // Catch HTML error pages from CloudFront/Express before they break JSON parsing
                 const contentType = response.headers.get("content-type");
                 if (contentType && contentType.indexOf("application/json") === -1) {
                     throw new Error("Server returned HTML. The endpoint /api/upload/questions might be incorrect or missing on the backend.");
@@ -783,12 +802,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                 const data = await response.json();
 
                 if (response.ok && data.success) {
-                    // CODE EXECUTION FEATURE 
                     if (ENABLE_CODE_EXECUTION) {
-                        // Save coding questions after bulk upload in edit mode
-                        console.log('[BULK UPLOAD EDIT] Saving coding questions:', codingQuestions.length);
-                        console.log('[BULK UPLOAD EDIT] Coding questions data:', JSON.stringify(codingQuestions, null, 2));
-                        
                         const codingResponse = await apiFetch(`api/coding-questions/test/${uploadedTestId}`, {
                             method: 'POST',
                             headers: {
@@ -799,20 +813,18 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                                 codingQuestions: codingQuestions
                             })
                         });
-                    
+
                         const codingData = await codingResponse.json();
                         if (!codingResponse.ok || !codingData.success) {
                             console.error('[BULK UPLOAD EDIT] Failed to save coding questions:', codingData);
-                            alert('Questions uploaded but failed to save coding questions: ' + codingData.message);
+                            showToast('Questions uploaded but failed to save coding questions: ' + codingData.message);
                             setIsUploading(false);
                             return;
                         }
-                        console.log('[BULK UPLOAD EDIT] Coding questions saved successfully');
                     }
 
-                    alert(`Questions uploaded successfully! ${data.questionsCount} questions added. Click "Save Changes" to save.`);
+                    showToast(`Questions uploaded successfully! ${data.questionsCount} questions added. Click "Save Changes" to save.`);
 
-                    // Reload test data to show new questions (Use native fetch here too to be safe)
                     const testResponse = await fetch(`${cleanBaseUrl}/api/tests/${uploadedTestId}`, {
                         headers: {
                             'Authorization': `Bearer ${token}`
@@ -830,7 +842,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                     }
                     setStep('init');
                 } else {
-                    alert(data.message || 'Failed to upload questions');
+                    showToast(data.message || 'Failed to upload questions');
                 }
             } else {
                 // Create mode: parse the file locally and add its questions to the list.
@@ -847,7 +859,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
             }
         } catch (error) {
             console.error('Upload error:', error);
-            alert(error.message || 'Failed to upload test. Please try again.');
+            showToast(error.message || 'Failed to upload test. Please try again.');
         } finally {
             setIsUploading(false);
             e.target.value = '';
@@ -870,15 +882,15 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
             const data = await response.json();
 
             if (response.ok && data.success) {
-                alert(`Test "${uploadedTestName}" published successfully! Students can now see it.`);
+                showToast(`Test "${uploadedTestName}" published successfully! Students can now see it.`);
                 resetForm();
                 if (onComplete) onComplete(data.test);
             } else {
-                alert(data.message || 'Failed to publish test');
+                showToast(data.message || 'Failed to publish test');
             }
         } catch (error) {
             console.error('Publish error:', error);
-            alert('Failed to publish test. Please try again.');
+            showToast('Failed to publish test. Please try again.');
         } finally {
             setIsPublishing(false);
         }
@@ -1710,393 +1722,36 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
 
             {/* Step 3: Success Screen */}
             {step === 'success' && (
-                <div className="bg-white rounded-xl shadow-sm border border-shnoor-mist p-8 max-w-2xl mx-auto">
-                    <div className="text-center">
-                        {/* Success Icon */}
-                        <div className="w-20 h-20 bg-shnoor-successLight rounded-full flex items-center justify-center mx-auto mb-6">
-                            <CheckCircle className="w-12 h-12 text-shnoor-success" />
-                        </div>
-
-                        {/* Success Message */}
-                        <h2 className="text-3xl font-bold text-shnoor-navy mb-3">Test Saved as Draft!</h2>
-                        <p className="text-lg text-shnoor-navy mb-2">"{uploadedTestName}"</p>
-                        <p className="text-sm text-shnoor-navy mb-8">Your test has been saved as a draft. You can publish it now or later from the dashboard.</p>
-
-                        {/* Action Buttons */}
-                        <div className="space-y-3">
-                            <button
-                                onClick={handlePublish}
-                                disabled={isPublishing}
-                                className="w-full py-4 bg-shnoor-indigo hover:bg-shnoor-indigo text-white font-bold rounded-lg transition-colors shadow-md flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                {isPublishing ? (
-                                    <>
-                                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                                        <span>Publishing...</span>
-                                    </>
-                                ) : (
-                                    <>
-                                        <Upload size={20} />
-                                        <span>Publish Test Now</span>
-                                    </>
-                                )}
-                            </button>
-
-                            <button
-                                onClick={() => {
-                                    resetForm();
-                                    if (onComplete) onComplete();
-                                }}
-                                className="w-full py-4 bg-shnoor-lavender hover:bg-shnoor-lavender text-shnoor-navy font-semibold rounded-lg transition-colors flex items-center justify-center space-x-2"
-                            >
-                                <ArrowLeft size={20} />
-                                <span>Save as Draft & Return to Dashboard</span>
-                            </button>
-                        </div>
-
-                        {/* Info Box */}
-                        <div className="mt-8 bg-shnoor-lavender p-4 rounded-lg text-left">
-                            <div className="flex items-start space-x-3">
-                                <div className="flex-shrink-0 mt-0.5">
-                                    <FileText className="h-5 w-5 text-shnoor-indigo" />
-                                </div>
-                                <div className="text-sm text-shnoor-indigo">
-                                    <p className="font-bold mb-1">What's the difference?</p>
-                                    <ul className="text-shnoor-indigo space-y-1 list-disc list-inside">
-                                        <li><span className="font-semibold">Draft:</span> Test is saved but not visible to students</li>
-                                        <li><span className="font-semibold">Published:</span> Students can immediately see and take the test</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <TestSuccessStep
+                    uploadedTestName={uploadedTestName}
+                    handlePublish={handlePublish}
+                    isPublishing={isPublishing}
+                    resetForm={resetForm}
+                    onComplete={onComplete}
+                />
             )}
 
-            {/* Coding Question Modal */}
+            {/* Coding Question Creation/Edit Modal */}
             {showCodingModal && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-                    <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-                        <div className="sticky top-0 bg-white border-b border-shnoor-mist p-6 flex items-center justify-between">
-                            <h3 className="text-xl font-bold text-shnoor-navy">
-                                {editingCodingQuestionId ? 'Edit Coding Question' : 'Add Coding Question'}
-                            </h3>
-                            <button
-                                onClick={() => setShowCodingModal(false)}
-                                className="p-2 hover:bg-shnoor-lavender rounded-lg transition-colors"
-                            >
-                                <X size={20} className="text-shnoor-navy" />
-                            </button>
-                        </div>
-
-                        <div className="p-6 space-y-6">
-                            {/* Title */}
-                            <div>
-                                <label className="block text-sm font-medium text-shnoor-navy mb-2">Question Title *</label>
-                                <input
-                                    type="text"
-                                    value={currentCodingQuestion.title}
-                                    onChange={(e) => setCurrentCodingQuestion({ ...currentCodingQuestion, title: e.target.value })}
-                                    className="w-full px-4 py-3 border border-shnoor-mist rounded-lg focus:ring-2 focus:ring-shnoor-navyLight focus:border-transparent"
-                                    placeholder="e.g., Two Sum Problem"
-                                />
-                            </div>
-
-                            {/* Description */}
-                            <div>
-                                <label className="block text-sm font-medium text-shnoor-navy mb-2">Problem Description *</label>
-                                <textarea
-                                    value={currentCodingQuestion.description}
-                                    onChange={(e) => setCurrentCodingQuestion({ ...currentCodingQuestion, description: e.target.value })}
-                                    rows={6}
-                                    className="w-full px-4 py-3 border border-shnoor-mist rounded-lg focus:ring-2 focus:ring-shnoor-navyLight focus:border-transparent resize-y"
-                                    placeholder="Describe the problem, constraints, and requirements..."
-                                />
-                            </div>
-
-                            {/* Marks, Time Limit, Memory Limit */}
-                            <div className="grid grid-cols-3 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-shnoor-navy mb-2">Marks *</label>
-                                    <input
-                                        type="number"
-                                        value={currentCodingQuestion.marks}
-                                        onChange={(e) => setCurrentCodingQuestion({ ...currentCodingQuestion, marks: parseInt(e.target.value) || 10 })}
-                                        min="1"
-                                        className="w-full px-4 py-3 border border-shnoor-mist rounded-lg focus:ring-2 focus:ring-shnoor-navyLight focus:border-transparent"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-shnoor-navy mb-2">Time Limit (sec) *</label>
-                                    <input
-                                        type="number"
-                                        value={currentCodingQuestion.timeLimit}
-                                        onChange={(e) => setCurrentCodingQuestion({ ...currentCodingQuestion, timeLimit: parseFloat(e.target.value) || 2 })}
-                                        step="0.1"
-                                        min="0.1"
-                                        className="w-full px-4 py-3 border border-shnoor-mist rounded-lg focus:ring-2 focus:ring-shnoor-navyLight focus:border-transparent"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-shnoor-navy mb-2">Memory Limit (MB) *</label>
-                                    <input
-                                        type="number"
-                                        value={currentCodingQuestion.memoryLimit}
-                                        onChange={(e) => setCurrentCodingQuestion({ ...currentCodingQuestion, memoryLimit: parseInt(e.target.value) || 256 })}
-                                        min="1"
-                                        className="w-full px-4 py-3 border border-shnoor-mist rounded-lg focus:ring-2 focus:ring-shnoor-navyLight focus:border-transparent"
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Public Test Cases */}
-                            <div>
-                                <div className="flex items-center justify-between mb-3">
-                                    <label className="block text-sm font-medium text-shnoor-navy">Public Test Cases *</label>
-                                    <button
-                                        onClick={handleAddPublicTestCase}
-                                        className="flex items-center space-x-1 px-3 py-1.5 bg-shnoor-lavender text-shnoor-indigo rounded-lg hover:bg-shnoor-indigo hover:text-white transition-colors text-sm font-medium"
-                                    >
-                                        <Plus size={16} />
-                                        <span>Add Test Case</span>
-                                    </button>
-                                </div>
-                                <div className="space-y-3">
-                                    {currentCodingQuestion.publicTestCases.map((tc, idx) => (
-                                        <div key={idx} className="p-4 border border-shnoor-mist rounded-lg space-y-3">
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-sm font-medium text-shnoor-navy">Test Case {idx + 1}</span>
-                                                {currentCodingQuestion.publicTestCases.length > 1 && (
-                                                    <button
-                                                        onClick={() => handleRemovePublicTestCase(idx)}
-                                                        className="text-shnoor-danger hover:text-shnoor-danger p-1"
-                                                    >
-                                                        <Trash2 size={16} />
-                                                    </button>
-                                                )}
-                                            </div>
-                                            <div className="grid grid-cols-2 gap-3">
-                                                <div>
-                                                    <label className="block text-xs text-shnoor-navy mb-1">Input</label>
-                                                    <textarea
-                                                        value={tc.input}
-                                                        onChange={(e) => {
-                                                            const newTestCases = [...currentCodingQuestion.publicTestCases];
-                                                            newTestCases[idx].input = e.target.value;
-                                                            setCurrentCodingQuestion({ ...currentCodingQuestion, publicTestCases: newTestCases });
-                                                        }}
-                                                        rows={2}
-                                                        className="w-full px-3 py-2 border border-shnoor-mist rounded-lg text-sm focus:ring-2 focus:ring-shnoor-navyLight focus:border-transparent resize-y"
-                                                        placeholder="Input data"
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <label className="block text-xs text-shnoor-navy mb-1">Expected Output</label>
-                                                    <textarea
-                                                        value={tc.output}
-                                                        onChange={(e) => {
-                                                            const newTestCases = [...currentCodingQuestion.publicTestCases];
-                                                            newTestCases[idx].output = e.target.value;
-                                                            setCurrentCodingQuestion({ ...currentCodingQuestion, publicTestCases: newTestCases });
-                                                        }}
-                                                        rows={2}
-                                                        className="w-full px-3 py-2 border border-shnoor-mist rounded-lg text-sm focus:ring-2 focus:ring-shnoor-navyLight focus:border-transparent resize-y"
-                                                        placeholder="Expected output"
-                                                    />
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <label className="block text-xs text-shnoor-navy mb-1">Explanation (Optional)</label>
-                                                <input
-                                                    type="text"
-                                                    value={tc.explanation}
-                                                    onChange={(e) => {
-                                                        const newTestCases = [...currentCodingQuestion.publicTestCases];
-                                                        newTestCases[idx].explanation = e.target.value;
-                                                        setCurrentCodingQuestion({ ...currentCodingQuestion, publicTestCases: newTestCases });
-                                                    }}
-                                                    className="w-full px-3 py-2 border border-shnoor-mist rounded-lg text-sm focus:ring-2 focus:ring-shnoor-navyLight focus:border-transparent"
-                                                    placeholder="Explain this test case"
-                                                />
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Hidden Test Cases */}
-                            <div>
-                                <div className="flex items-center justify-between mb-3">
-                                    <label className="block text-sm font-medium text-shnoor-navy">Hidden Test Cases *</label>
-                                    <button
-                                        onClick={handleAddHiddenTestCase}
-                                        className="flex items-center space-x-1 px-3 py-1.5 bg-shnoor-lavender text-shnoor-indigo rounded-lg hover:bg-shnoor-indigo hover:text-white transition-colors text-sm font-medium"
-                                    >
-                                        <Plus size={16} />
-                                        <span>Add Test Case</span>
-                                    </button>
-                                </div>
-                                <div className="space-y-3">
-                                    {currentCodingQuestion.hiddenTestCases.map((tc, idx) => (
-                                        <div key={idx} className="p-4 border border-shnoor-mist rounded-lg space-y-3 bg-shnoor-lavender/30">
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-sm font-medium text-shnoor-navy">Hidden Test Case {idx + 1}</span>
-                                                {currentCodingQuestion.hiddenTestCases.length > 1 && (
-                                                    <button
-                                                        onClick={() => handleRemoveHiddenTestCase(idx)}
-                                                        className="text-shnoor-danger hover:text-shnoor-danger p-1"
-                                                    >
-                                                        <Trash2 size={16} />
-                                                    </button>
-                                                )}
-                                            </div>
-                                            <div className="grid grid-cols-2 gap-3">
-                                                <div>
-                                                    <label className="block text-xs text-shnoor-navy mb-1">Input</label>
-                                                    <textarea
-                                                        value={tc.input}
-                                                        onChange={(e) => {
-                                                            const newTestCases = [...currentCodingQuestion.hiddenTestCases];
-                                                            newTestCases[idx].input = e.target.value;
-                                                            setCurrentCodingQuestion({ ...currentCodingQuestion, hiddenTestCases: newTestCases });
-                                                        }}
-                                                        rows={2}
-                                                        className="w-full px-3 py-2 border border-shnoor-mist rounded-lg text-sm focus:ring-2 focus:ring-shnoor-navyLight focus:border-transparent resize-y"
-                                                        placeholder="Input data"
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <label className="block text-xs text-shnoor-navy mb-1">Expected Output</label>
-                                                    <textarea
-                                                        value={tc.output}
-                                                        onChange={(e) => {
-                                                            const newTestCases = [...currentCodingQuestion.hiddenTestCases];
-                                                            newTestCases[idx].output = e.target.value;
-                                                            setCurrentCodingQuestion({ ...currentCodingQuestion, hiddenTestCases: newTestCases });
-                                                        }}
-                                                        rows={2}
-                                                        className="w-full px-3 py-2 border border-shnoor-mist rounded-lg text-sm focus:ring-2 focus:ring-shnoor-navyLight focus:border-transparent resize-y"
-                                                        placeholder="Expected output"
-                                                    />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Action Buttons */}
-                            <div className="flex items-center justify-end space-x-3 pt-4 border-t border-shnoor-mist">
-                                <button
-                                    onClick={() => setShowCodingModal(false)}
-                                    className="px-6 py-3 bg-shnoor-lavender text-shnoor-navy font-semibold rounded-lg hover:bg-shnoor-mist transition-colors"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={handleSaveCodingQuestion}
-                                    className="px-6 py-3 bg-shnoor-indigo text-white font-semibold rounded-lg hover:bg-shnoor-navy transition-colors flex items-center space-x-2"
-                                >
-                                    <Save size={18} />
-                                    <span>{editingCodingQuestionId ? 'Update Question' : 'Add Question'}</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <CodingQuestionModal
+                    editingCodingQuestionId={editingCodingQuestionId}
+                    currentCodingQuestion={currentCodingQuestion}
+                    setCurrentCodingQuestion={setCurrentCodingQuestion}
+                    handleAddPublicTestCase={handleAddPublicTestCase}
+                    handleRemovePublicTestCase={handleRemovePublicTestCase}
+                    handleAddHiddenTestCase={handleAddHiddenTestCase}
+                    handleRemoveHiddenTestCase={handleRemoveHiddenTestCase}
+                    handleSaveCodingQuestion={handleSaveCodingQuestion}
+                    onClose={() => setShowCodingModal(false)}
+                />
             )}
 
             {/* Coding Question View Modal */}
             {showCodingViewModal && viewingCodingQuestion && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-                    <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-                        <div className="sticky top-0 bg-white border-b border-shnoor-mist p-6 flex items-center justify-between">
-                            <h3 className="text-xl font-bold text-shnoor-navy">View Coding Question</h3>
-                            <button
-                                onClick={() => setShowCodingViewModal(false)}
-                                className="p-2 hover:bg-shnoor-lavender rounded-lg transition-colors"
-                            >
-                                <X size={20} className="text-shnoor-navy" />
-                            </button>
-                        </div>
-
-                        <div className="p-6 space-y-6">
-                            <div>
-                                <h4 className="text-lg font-bold text-shnoor-navy mb-2">{viewingCodingQuestion.title}</h4>
-                                <p className="text-shnoor-navy whitespace-pre-wrap">{viewingCodingQuestion.description}</p>
-                            </div>
-
-                            <div className="grid grid-cols-3 gap-4 p-4 bg-shnoor-lavender rounded-lg">
-                                <div>
-                                    <span className="text-sm text-shnoor-navy">Marks:</span>
-                                    <p className="font-semibold text-shnoor-navy">{viewingCodingQuestion.marks}</p>
-                                </div>
-                                <div>
-                                    <span className="text-sm text-shnoor-navy">Time Limit:</span>
-                                    <p className="font-semibold text-shnoor-navy">{viewingCodingQuestion.timeLimit}s</p>
-                                </div>
-                                <div>
-                                    <span className="text-sm text-shnoor-navy">Memory Limit:</span>
-                                    <p className="font-semibold text-shnoor-navy">{viewingCodingQuestion.memoryLimit}MB</p>
-                                </div>
-                            </div>
-
-                            <div>
-                                <h5 className="font-semibold text-shnoor-navy mb-3">Public Test Cases</h5>
-                                <div className="space-y-3">
-                                    {viewingCodingQuestion.publicTestCases.map((tc, idx) => (
-                                        <div key={idx} className="p-4 border border-shnoor-mist rounded-lg">
-                                            <p className="text-sm font-medium text-shnoor-navy mb-2">Test Case {idx + 1}</p>
-                                            <div className="grid grid-cols-2 gap-3 text-sm">
-                                                <div>
-                                                    <span className="text-shnoor-navy font-medium">Input:</span>
-                                                    <pre className="mt-1 p-2 bg-shnoor-lavender rounded text-shnoor-navy">{tc.input}</pre>
-                                                </div>
-                                                <div>
-                                                    <span className="text-shnoor-navy font-medium">Output:</span>
-                                                    <pre className="mt-1 p-2 bg-shnoor-lavender rounded text-shnoor-navy">{tc.output}</pre>
-                                                </div>
-                                            </div>
-                                            {tc.explanation && (
-                                                <p className="mt-2 text-sm text-shnoor-navy"><strong>Explanation:</strong> {tc.explanation}</p>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div>
-                                <h5 className="font-semibold text-shnoor-navy mb-3">Hidden Test Cases</h5>
-                                <div className="space-y-3">
-                                    {viewingCodingQuestion.hiddenTestCases.map((tc, idx) => (
-                                        <div key={idx} className="p-4 border border-shnoor-mist rounded-lg bg-shnoor-lavender/30">
-                                            <p className="text-sm font-medium text-shnoor-navy mb-2">Hidden Test Case {idx + 1}</p>
-                                            <div className="grid grid-cols-2 gap-3 text-sm">
-                                                <div>
-                                                    <span className="text-shnoor-navy font-medium">Input:</span>
-                                                    <pre className="mt-1 p-2 bg-white rounded text-shnoor-navy">{tc.input}</pre>
-                                                </div>
-                                                <div>
-                                                    <span className="text-shnoor-navy font-medium">Output:</span>
-                                                    <pre className="mt-1 p-2 bg-white rounded text-shnoor-navy">{tc.output}</pre>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div className="flex items-center justify-end pt-4 border-t border-shnoor-mist">
-                                <button
-                                    onClick={() => setShowCodingViewModal(false)}
-                                    className="px-6 py-3 bg-shnoor-indigo text-white font-semibold rounded-lg hover:bg-shnoor-navy transition-colors"
-                                >
-                                    Close
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <CodingViewModal
+                    viewingCodingQuestion={viewingCodingQuestion}
+                    onClose={() => setShowCodingViewModal(false)}
+                />
             )}
 
             {/* Coding Question Selector Modal */}
@@ -2108,7 +1763,6 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                     selectedRoles={jobRoles}
                 />
             )}
-
         </div>
     );
 };

@@ -1,6 +1,5 @@
 const FullscreenWarning = ({ onEnterFullscreen }) => {
-    return (
-        <div className="fixed inset-0 bg-shnoor-navy/80 backdrop-blur-sm flex items-center justify-center z-50">
+    return <div className="fixed inset-0 bg-shnoor-navy/80 backdrop-blur-sm flex items-center justify-center z-50">
             <div className="bg-white rounded-xl shadow-2xl p-8 max-w-md mx-4 border border-shnoor-mist">
                 <div className="text-center">
                     <div className="w-16 h-16 bg-shnoor-dangerLight rounded-full flex items-center justify-center mx-auto mb-4">
@@ -29,8 +28,7 @@ const FullscreenWarning = ({ onEnterFullscreen }) => {
                     </p>
                 </div>
             </div>
-        </div>
-    );
+        </div>;
 };
 
 export default FullscreenWarning;

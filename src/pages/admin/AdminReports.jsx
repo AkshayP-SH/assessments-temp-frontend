@@ -108,7 +108,7 @@ const AdminReports = () => {
                             </label>
                             <Select
                                 isMulti
-                                options={institutes}
+                                options={institutes.filter(inst => !selectedInstitutes.find(s => s.value === inst.value))}
                                 value={selectedInstitutes}
                                 onChange={setSelectedInstitutes}
                                 className="basic-multi-select"
@@ -117,7 +117,7 @@ const AdminReports = () => {
                                 isDisabled={isLoading}
                                 isSearchable={true}
                                 isClearable={true}
-                                closeMenuOnSelect={false}
+                                closeMenuOnSelect={true}
                                 menuPosition="fixed"
                                 menuPlacement="auto"
                                 filterOption={(option, inputValue) => {
@@ -224,7 +224,7 @@ const AdminReports = () => {
                                 onClick={handleDownload}
                                 disabled={isDownloading || isLoading}
                                 variant="primary"
-                                className="w-full sm:w-auto min-w-[200px]"
+                                className="w-full sm:w-auto min-w-[200px] flex items-center justify-center gap-2"
                             >
                                 {isDownloading ? (
                                     <>

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Download } from 'lucide-react';
 import Button from '../Button';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -12,7 +13,6 @@ function BulkStudentUpload({ clientId }) {
     const handleFileChange = (e) => {
         const selectedFile = e.target.files[0];
         if (selectedFile) {
-            // Validate file type
             const validTypes = ['text/csv', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
             const isValid = validTypes.includes(selectedFile.type) ||
                 selectedFile.name.endsWith('.csv') ||
@@ -40,26 +40,21 @@ function BulkStudentUpload({ clientId }) {
         try {
             const formData = new FormData();
             formData.append('file', file);
-            // Pass client_id so super admin uploads land in the right tenant
             if (clientId) {
                 formData.append('client_id', clientId);
             }
 
             const token = localStorage.getItem('adminToken');
-            
-            // Fix: Safely clean the base URL to prevent double slashes (//)
             const cleanBaseUrl = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
 
             const response = await fetch(`${cleanBaseUrl}/api/upload/students`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`
-                    // Do NOT set Content-Type here; browser sets it automatically for FormData
                 },
                 body: formData
             });
 
-            // Catch HTML error pages from CloudFront/Express before they break JSON parsing
             const contentType = response.headers.get("content-type");
             if (contentType && contentType.indexOf("application/json") === -1) {
                 throw new Error("Server returned HTML instead of JSON. The API endpoint route might be incorrect.");
@@ -78,7 +73,6 @@ function BulkStudentUpload({ clientId }) {
             document.getElementById('fileInput').value = '';
 
         } catch (error) {
-            console.error('Upload error:', error);
             alert(error.message || 'Failed to upload students. Please try again.');
         } finally {
             setUploading(false);
@@ -101,49 +95,56 @@ Robert Johnson,robert.johnson@example.com,5551234567,Harvard University`;
     };
 
     return (
-        <div className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] p-8 border border-shnoor-light">
-            <h2 className="text-2xl font-bold mb-4 text-shnoor-navy">Bulk Student Upload</h2>
+        <div className="space-y-6">
+            {/* Section Header */}
+            <div className="section-header">
+                <div className="section-header-left">
+                    <h2 className="section-title">Bulk Upload</h2>
+                    <p className="section-subtitle">Upload spreadsheets to import and enroll students in batches</p>
+                </div>
 
-            {/* Instructions */}
-            <div className="bg-shnoor-lavender border-l-4 border-shnoor-indigo p-4 mb-6 rounded-r-lg">
-                <h3 className="font-semibold text-shnoor-navy mb-2">Instructions:</h3>
-                <ul className="text-sm text-shnoor-indigoMedium space-y-1 list-disc list-inside">
-                    <li>Upload a CSV or Excel file with student details</li>
-                    <li>Required columns: <strong>fullname, email, institute</strong></li>
-                    <li>Optional column: <strong>contact</strong></li>
-                    <li>Password format: <strong>firstname@2026</strong> (automatically generated)</li>
-                    <li>Students will receive an email with their credentials</li>
-                </ul>
-            </div>
-
-            {/* Sample CSV Download */}
-            <div className="mb-6">
-                <Button
+                <button
+                    type="button"
                     onClick={downloadSampleCSV}
-                    className="text-white hover:bg-shnoor-navy underline text-sm font-medium"
+                    className="btn-secondary"
                 >
-                    📥 Download Sample CSV Template
-                </Button>
+                    <Download size={15} />
+                    <span>Download Sample CSV</span>
+                </button>
             </div>
+
+            {/* Main Card */}
+            <div className="surface-card">
+                {/* Instructions */}
+                <div className="bg-shnoor-lavender border-l-4 border-shnoor-indigo p-4 mb-6 rounded-r-lg">
+                    <h3 className="font-semibold text-shnoor-navy mb-2">Instructions:</h3>
+                    <ul className="text-sm text-shnoor-indigoMedium space-y-1 list-disc list-inside">
+                        <li>Upload a CSV or Excel file with student details</li>
+                        <li>Required columns: <strong>fullname, email, institute</strong></li>
+                        <li>Optional column: <strong>contact</strong></li>
+                        <li>Password format: <strong>firstname@2026</strong> (automatically generated)</li>
+                        <li>Students will receive an email with their credentials</li>
+                    </ul>
+                </div>
 
             {/* File Upload Section */}
-            <div className="mb-8 p-6 bg-white border border-shnoor-light rounded-xl shadow-sm">
+            <div className="mb-8 p-6 bg-theme-card border border-shnoor-light rounded-xl shadow-sm">
                 <label className="block text-sm font-bold text-shnoor-navy mb-3">
                     Select CSV or Excel File
                 </label>
                 <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+                    <label 
+                        htmlFor="fileInput"
+                        className="py-2.5 px-5 rounded-xl border-0 text-sm font-semibold bg-theme-panel text-theme-text hover:bg-theme-accent cursor-pointer transition-colors inline-block"
+                    >
+                        Choose File
+                    </label>
                     <input
                         id="fileInput"
                         type="file"
                         accept=".csv,.xlsx,.xls"
                         onChange={handleFileChange}
-                        className="block w-full text-sm text-shnoor-navy font-medium
-                            file:mr-4 file:py-2.5 file:px-5
-                            file:rounded-xl file:border-0
-                            file:text-sm file:font-semibold
-                            file:bg-shnoor-lavender file:text-shnoor-indigo
-                            hover:file:bg-[#e0e0ef] file:cursor-pointer file:transition-colors
-                            cursor-pointer"
+                        className="hidden"
                     />
                 </div>
                 {file && (
@@ -190,7 +191,7 @@ Robert Johnson,robert.johnson@example.com,5551234567,Harvard University`;
 
                     {/* Summary */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                        <div className="bg-white border border-shnoor-light p-4 rounded-xl text-center">
+                        <div className="bg-theme-card border border-shnoor-light p-4 rounded-xl text-center">
                             <p className="text-3xl font-bold text-shnoor-navy">{result.results.total}</p>
                             <p className="text-sm text-shnoor-indigoMedium font-medium mt-1">Total Rows</p>
                         </div>
@@ -264,6 +265,7 @@ Robert Johnson,robert.johnson@example.com,5551234567,Harvard University`;
                     )}
                 </div>
             )}
+            </div>
         </div>
     );
 }

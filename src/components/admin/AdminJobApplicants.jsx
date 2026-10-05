@@ -4,7 +4,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import AdminLayout from '../AdminLayout';
 import {
     ArrowLeft, Users, Loader2, RefreshCw,
-    CheckCircle, XCircle, AlertCircle, Trophy,
     UserCheck, ClipboardList, Download
 } from 'lucide-react';
 import { apiFetch } from '../../config/api';
@@ -29,13 +28,13 @@ const adminHeaders = () => ({
 export default function AdminJobApplicants() {
     const { jobId } = useParams();
     const navigate = useNavigate();
-    const [allTestResults, setAllTestResults] = useState([]); // unfiltered, for enrolled tab
+    const [allTestResults, setAllTestResults] = useState([]);
     const [testResults, setTestResults] = useState([]);
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState('');
     const [error, setError] = useState('');
-    const [activeTab, setActiveTab] = useState('enrolled'); // 'enrolled' | 'results'
+    const [activeTab, setActiveTab] = useState('enrolled');
     const [showInterviewModal, setShowInterviewModal] = useState(false);
     const [selectedInterviewCandidate, setSelectedInterviewCandidate] = useState(null);
 
@@ -48,7 +47,6 @@ export default function AdminJobApplicants() {
             });
             const data = await res.json();
             if (data.success) {
-                // Always store the full unfiltered list for enrolled tab
                 setAllTestResults(data.data);
 
                 let filtered = data.data;
@@ -57,7 +55,6 @@ export default function AdminJobApplicants() {
                 } else if (statusFilter === 'failed') {
                     filtered = data.data.filter(i => i.passed === false);
                 } else if (statusFilter === 'assessment_assigned') {
-                    // Also catch legacy statuses that map to "Test Assigned"
                     filtered = data.data.filter(i =>
                         ['assessment_assigned', 'submitted', 'screening', 'assessment_completed'].includes(i.status)
                     );
@@ -83,7 +80,7 @@ export default function AdminJobApplicants() {
 
     useEffect(() => {
         fetchData();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+         
     }, [jobId, statusFilter]);
 
     const getAppStatusBadge = (status) => {
@@ -161,11 +158,9 @@ export default function AdminJobApplicants() {
             'Status': STATUS_CONFIG[normalizeStatus(r.status)]?.label || r.status
         }));
 
-        // Create workbook and worksheet
         const wb = XLSX.utils.book_new();
         const ws = XLSX.utils.json_to_sheet(exportData);
 
-        // Set column widths
         ws['!cols'] = [
             { wch: 15 }, // Student ID
             { wch: 25 }, // Name
@@ -173,18 +168,14 @@ export default function AdminJobApplicants() {
             { wch: 20 }  // Status
         ];
 
-        // Add worksheet to workbook
         XLSX.utils.book_append_sheet(wb, ws, 'Enrolled Students');
 
-        // Generate file name with current date
         const fileName = `Enrolled_Students_${new Date().toISOString().split('T')[0]}.xlsx`;
 
-        // Save file
         XLSX.writeFile(wb, fileName);
     };
 
     const exportAssessmentResults = () => {
-        // Prepare assessment results data for export
         const exportData = testResultRows.map(r => {
             const totalViolations = Number(r.no_face_count || 0) + Number(r.multi_face_count || 0) + 
                                    Number(r.phone_count || 0) + Number(r.noise_count || 0) + Number(r.voice_count || 0);
@@ -208,11 +199,9 @@ export default function AdminJobApplicants() {
             };
         });
 
-        // Create workbook and worksheet
         const wb = XLSX.utils.book_new();
         const ws = XLSX.utils.json_to_sheet(exportData);
 
-        // Set column widths
         ws['!cols'] = [
             { wch: 15 }, // Student ID
             { wch: 25 }, // Student Name
@@ -231,18 +220,13 @@ export default function AdminJobApplicants() {
             { wch: 10 }  // Flagged
         ];
 
-        // Add worksheet to workbook
         XLSX.utils.book_append_sheet(wb, ws, 'Assessment Results');
 
-        // Generate file name with current date
         const fileName = `Assessment_Results_${new Date().toISOString().split('T')[0]}.xlsx`;
 
-        // Save file
         XLSX.writeFile(wb, fileName);
     };
 
-    // ── Derive the two data groups ──────────────────────────────────────────────
-    // Enrolled students always from UNFILTERED data — filter only affects Assessment Results tab
     const enrolledStudents = (() => {
         const seen = new Set();
         return allTestResults.filter(r => {
@@ -253,11 +237,8 @@ export default function AdminJobApplicants() {
         });
     })();
 
-    // Assessment results tab uses filtered data, only rows with actual attempts
     const testResultRows = testResults.filter(r => r.test_id !== null && r.submitted_at !== null);
 
-    // ── Tab config ──────────────────────────────────────────────────────────────
-    // Enrolled count always shows total (unfiltered), results count shows filtered
     const allTestResultRows = allTestResults.filter(r => r.test_id !== null && r.submitted_at !== null);
     const tabs = [
         {

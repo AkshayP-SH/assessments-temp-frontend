@@ -59,7 +59,14 @@ const MCQBankSelector = ({
       });
       const data = await response.json();
       if (data.success) {
-        setQuestions(data.questions);
+        const seen = new Set();
+        const uniqueQuestions = (data.questions || []).filter((q) => {
+          const key = (q.question_text || '').trim().toLowerCase();
+          if (!key || seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+        setQuestions(uniqueQuestions);
       }
     } catch (error) {
       console.error('Error fetching MCQ questions:', error);
@@ -70,7 +77,6 @@ const MCQBankSelector = ({
 
   const filterQuestions = () => {
     let filtered = [...questions];
-    console.log('[MCQBankSelector] Filtering questions, total:', questions.length);
 
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
@@ -104,8 +110,6 @@ const MCQBankSelector = ({
         .sort((a, b) => b.relevanceScore - a.relevanceScore);
     }
 
-    console.log('[MCQBankSelector] Filtered questions:', filtered.length);
-    console.log('[MCQBankSelector] First filtered question:', filtered[0]);
     setFilteredQuestions(filtered);
   };
 
@@ -165,7 +169,7 @@ const MCQBankSelector = ({
   const pickerContent = (
     <MotionlessPickerShell isInline={isInline}>
       {!isInline && onClose && (
-        <div className="border-b border-shnoor-mist px-6 py-4 flex justify-between items-center">
+        <div className="p-4 sm:p-6 border-b border-shnoor-mist flex justify-between items-center sticky top-0 bg-white z-10 flex-shrink-0">
           <MotionlessPickerTitle count={pendingCount} isInline={false} />
           <button type="button" onClick={onClose} className="text-shnoor-navy hover:text-shnoor-indigo" aria-label="Close">
             <X className="w-6 h-6" />
@@ -182,7 +186,7 @@ const MCQBankSelector = ({
         </div>
       )}
 
-      <div className={`${isInline ? 'mb-4' : 'border-b border-shnoor-mist px-6 py-4 bg-shnoor-lavender'}`}>
+      <div className={`${isInline ? 'mb-4' : 'p-4 sm:p-6 border-b border-shnoor-mist bg-shnoor-lavender flex-shrink-0'}`}>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-shnoor-navy w-4 h-4 opacity-50" />
@@ -219,7 +223,7 @@ const MCQBankSelector = ({
         </div>
       </div>
 
-      <div className={`overflow-y-auto ${isInline ? 'max-h-[420px] pr-1' : 'flex-1 px-6 py-4'}`}>
+      <div className={`overflow-y-auto ${isInline ? 'max-h-[420px] pr-1' : 'flex-1 p-4 sm:p-6'}`}>
         {loading ? (
           <div className="text-center py-12">
             <MotionlessSpinner />
@@ -260,12 +264,12 @@ const MCQBankSelector = ({
         )}
       </div>
 
-      <div className={`${isInline ? 'mt-4 pt-4 border-t border-shnoor-mist' : 'border-t border-shnoor-mist px-6 py-4'} flex justify-end gap-3`}>
+      <div className={`${isInline ? 'mt-4 pt-4 border-t border-shnoor-mist' : 'p-4 sm:p-6 border-t border-shnoor-mist bg-white flex flex-col sm:flex-row justify-end sticky bottom-0 z-10 flex-shrink-0'} gap-3`}>
         {!isInline && onClose && (
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2 border border-shnoor-mist text-shnoor-navy rounded-lg hover:bg-shnoor-lavender"
+            className="w-full sm:w-auto px-5 py-2 border border-shnoor-mist text-shnoor-navy rounded-lg hover:bg-shnoor-lavender text-center"
           >
             Cancel
           </button>
@@ -274,7 +278,7 @@ const MCQBankSelector = ({
           type="button"
           onClick={handleConfirmSelection}
           disabled={pendingCount === 0}
-          className="px-5 py-2 bg-shnoor-indigo hover:bg-shnoor-navy text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2 rounded-lg font-medium transition-colors bg-shnoor-indigo hover:bg-shnoor-navy text-white disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Plus size={18} />
           <span>
@@ -302,9 +306,9 @@ const MCQBankSelector = ({
 
   return (
     <>
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="fixed inset-0 bg-black/50 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose}>
         <div
-          className="bg-white rounded-xl shadow-2xl max-w-5xl w-full max-h-[90vh] flex flex-col"
+          className="bg-white w-full h-full sm:h-auto sm:max-h-[90vh] sm:rounded-2xl shadow-2xl max-w-5xl flex flex-col animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200"
           onClick={(e) => e.stopPropagation()}
         >
           {pickerContent}
@@ -344,10 +348,7 @@ function MotionlessSpinner() {
 }
 
 function MotionlessQuestionRow({ q, added, selected, selectedRoles, getDifficultyColor, onPreview }) {
-  console.log('[motionlessQuestionRow] Rendering question:', q);
-  
   if (!q || !q.question_text) {
-    console.error('[motionlessQuestionRow] Invalid question data:', q);
     return <div className="text-red-500">Invalid question data</div>;
   }
   
@@ -410,7 +411,7 @@ function PreviewModal({ question, onClose, getDifficultyColor }) {
 
 function MotionlessPreviewOverlay({ onClose, children }) {
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[60] p-4" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/60 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose}>
       {children}
     </div>
   );
@@ -418,14 +419,14 @@ function MotionlessPreviewOverlay({ onClose, children }) {
 
 function MotionlessPreviewBody({ onClose, question, options, getDifficultyColor }) {
   return (
-    <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-      <div className="sticky top-0 bg-white border-b border-shnoor-mist px-6 py-4 flex justify-between items-center">
+    <div className="bg-white w-full h-full sm:h-auto sm:max-h-[85vh] sm:rounded-2xl shadow-2xl max-w-2xl flex flex-col animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
+      <div className="sticky top-0 bg-white border-b border-shnoor-mist p-4 sm:p-6 flex justify-between items-center flex-shrink-0">
         <h3 className="text-lg font-bold text-shnoor-navy">Preview</h3>
         <button type="button" onClick={onClose}>
           <X className="w-5 h-5 text-shnoor-navy" />
         </button>
       </div>
-      <div className="p-6 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
         <div className="flex flex-wrap gap-2">
           <span className={`px-2 py-1 rounded text-xs font-medium ${getDifficultyColor(question.difficulty)}`}>
             {question.difficulty}
