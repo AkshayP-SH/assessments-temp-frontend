@@ -85,8 +85,6 @@ if (emailError) {
       setEmailError("Please use your organization's work email address.");
       return;
     }
-      return;
-    }
 
     setLoading(true);
 

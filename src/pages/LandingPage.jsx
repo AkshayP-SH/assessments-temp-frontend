@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import shnoorLogo from '../assets/shnoor-logo.webp';
+import linkedinIcon from '../assets/linkedin.png';
+import whatsappIcon from '../assets/whatsapp.png';
 import ThemeSelector from '../components/ThemeSelector';
 import { useSEO } from '../hooks/useSEO';
 import { getApiUrl } from '../config/api';
 import { usePrefetch } from '../hooks/usePrefetch';
 import { useJsonLd } from '../hooks/useJsonLd';
+import { Mail, Phone, FileText } from 'lucide-react';
 
 /* ─── SVG Icon helper ─────────────────────────────────────────────────────── */
 const Icon = ({ d, cls = 'w-6 h-6', stroke = 2, fill = 'none' }) => (
@@ -735,34 +738,26 @@ const LandingPage = () => {
               <p className="text-xs font-extrabold text-theme-auth-acc uppercase tracking-widest mb-5">Contacts</p>
               <ul className="flex flex-col gap-1 text-slate-300 text-sm">
                 <li>
-<a href="mailto:info@shnoor.com" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start py-2">
+                  <a href="mailto:info@shnoor.com" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start py-2">
                     <Mail className="w-4 h-4 text-theme-auth-acc flex-shrink-0" />
                     <span>info@shnoor.com (General)</span>
                   </a>
-                    <span>info@shnoor.com (General)</span>
-                  </a>
                 </li>
                 <li>
-<a href="mailto:proc@shnoor.com" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start py-2">
+                  <a href="mailto:proc@shnoor.com" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start py-2">
                     <Mail className="w-4 h-4 text-theme-auth-acc flex-shrink-0" />
                     <span>proc@shnoor.com (Sales)</span>
                   </a>
-                    <span>proc@shnoor.com (Sales)</span>
-                  </a>
                 </li>
                 <li>
-<a href="tel:+919429694298" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start py-2">
+                  <a href="tel:+919429694298" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start py-2">
                     <Phone className="w-4 h-4 text-theme-auth-acc flex-shrink-0" />
-                    <span>+91-9429694298</span>
-                  </a>
                     <span>+91-9429694298</span>
                   </a>
                 </li>
                 <li>
-<a href="tel:+919041914601" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start py-2">
+                  <a href="tel:+919041914601" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start py-2">
                     <Phone className="w-4 h-4 text-theme-auth-acc flex-shrink-0" />
-                    <span>+91-9041914601</span>
-                  </a>
                     <span>+91-9041914601</span>
                   </a>
                 </li>
@@ -770,35 +765,22 @@ const LandingPage = () => {
             </div>
             <div>
               <p className="text-xs font-extrabold text-theme-auth-acc uppercase tracking-widest mb-5">Useful Links</p>
-<ul className="flex flex-col gap-1 text-slate-300 text-sm">
+              <ul className="flex flex-col gap-1 text-slate-300 text-sm">
                 <li>
                   <a href="https://www.linkedin.com/company/shnoor-international/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start group py-2">
                     <img src={linkedinIcon} alt="LinkedIn" className="w-4 h-4 rounded-xs object-contain flex-shrink-0 group-hover:scale-110 transition-transform" />
                     <span>We are Social</span>
                   </a>
                 </li>
-                    <span>We are Social</span>
-                  </a>
-                </li>
-                <li>
-<ul className="flex flex-col gap-1 text-slate-300 text-sm">
                 <li>
                   <a href="https://api.whatsapp.com/qr/D6I7XIACKIKVD1?autoload=1&app_absent=0" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start group py-2">
                     <img src={whatsappIcon} alt="WhatsApp" className="w-4 h-4 rounded-xs object-contain flex-shrink-0 group-hover:scale-110 transition-transform" />
                     <span>Let's Connect</span>
                   </a>
                 </li>
-                    <span>Let's Connect</span>
-                  </a>
-                </li>
-                <li>
-<ul className="flex flex-col gap-1 text-slate-300 text-sm">
                 <li>
                   <a href="/company-profile.pdf" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start group py-2">
                     <FileText className="w-4 h-4 text-theme-auth-acc flex-shrink-0 group-hover:scale-110 transition-transform" />
-                    <span>Company Profile</span>
-                  </a>
-                </li>
                     <span>Company Profile</span>
                   </a>
                 </li>
@@ -808,12 +790,10 @@ const LandingPage = () => {
           <div className="border-t border-white/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="flex flex-col sm:flex-row items-center gap-2 text-sm text-slate-300">
               <p>© Copyrights 2025. All Rights Reserved. SHNOOR INTERNATIONAL LLC</p>
-<div className="hidden sm:flex items-center gap-2">
+              <div className="hidden sm:flex items-center gap-2">
                 <span className="text-slate-500">•</span>
                 <Link to="/privacy-policy" className="hover:text-white transition-colors py-2 px-1">Privacy Policy</Link>
                 <span className="text-slate-500">•</span>
-                <Link to="/terms-and-conditions" className="hover:text-white transition-colors py-2 px-1">Terms &amp; Conditions</Link>
-              </div>
                 <Link to="/terms-and-conditions" className="hover:text-white transition-colors py-2 px-1">Terms &amp; Conditions</Link>
               </div>
             </div>

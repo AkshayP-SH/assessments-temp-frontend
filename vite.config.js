@@ -43,10 +43,6 @@ export default defineConfig(({ mode }) => ({
       },
     },
   },
-  preview: {
-    port: 5173,
-    strictPort: true,
-  },
   define: {
     global: 'globalThis',
   },
