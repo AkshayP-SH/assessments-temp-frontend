@@ -4,7 +4,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import {
   FileSpreadsheet, Users, AlertCircle, Video, Loader2, Building2, Briefcase, Landmark, FileText, X,
-  BarChart3, UploadCloud, ShieldAlert, CreditCard, MessageSquare, Settings, ChevronLeft, ChevronRight, ChevronDown
+  BarChart3, UploadCloud, ShieldAlert, CreditCard, MessageSquare, Settings, ChevronLeft, ChevronRight, ChevronDown, User
 } from 'lucide-react';
 
 import { apiFetch } from '../../config/api';
@@ -22,6 +22,7 @@ const InterviewSchedule = lazy(() => import('./InterviewSchedule'));
 const AdminJobOpenings = lazy(() => import('../../components/admin/AdminJobOpenings'));
 const AdminReports = lazy(() => import('./AdminReports'));
 const SubscriptionPlansSettings = lazy(() => import('./SubscriptionPlansSettings'));
+const AdminProfile = lazy(() => import('./AdminProfile'));
 
 // Modular Admin Components
 import ExamsTab from './ExamsTab';
@@ -249,6 +250,7 @@ const AdminDashboard = () => {
     { id: 'messages', label: 'Messages', icon: MessageSquare, isRoute: true, path: `${basePath}/student-messages`, badge: unreadMessageCount },
     ...(!isClientAdmin ? [{ id: 'clients', label: 'Clients', icon: Building2, isRoute: true, path: '/admin/clients' }] : []),
     ...(isSuperAdmin ? [{ id: 'subscription-plans', label: 'Subscription Plans', icon: CreditCard }] : []),
+    { id: 'profile', label: 'My Profile', icon: User },
     { id: 'settings', label: 'Settings', icon: Settings, isRoute: true, path: `${basePath}/settings` }
   ], [basePath, isClientAdmin, isSuperAdmin, unreadMessageCount]);
 
@@ -2532,6 +2534,13 @@ const AdminDashboard = () => {
                 {activeTab === 'subscription-plans' && isSuperAdmin && (
                   <div className="space-y-6">
                     <SubscriptionPlansSettings />
+                  </div>
+                )}
+
+                {/* My Profile Tab */}
+                {activeTab === 'profile' && (
+                  <div className="animate-fade-in">
+                    <AdminProfile />
                   </div>
                 )}
               </>

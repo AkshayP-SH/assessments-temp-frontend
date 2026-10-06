@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Settings, User, BookOpen, CreditCard, ArrowLeft } from 'lucide-react';
+import { Settings, BookOpen, CreditCard, ArrowLeft } from 'lucide-react';
 import AdminLayout from '../../components/AdminLayout';
 import SystemSettingsTab from '../../components/admin/SystemSettingsTab';
-import ProfileTab from '../../components/admin/ProfileTab';
 import QuestionBankTab from '../../components/admin/QuestionBankTab';
 import MySubscriptionTab from './MySubscriptionTab';
 
@@ -14,7 +13,7 @@ const AdminSettings = () => {
     
     const [activeTab, setActiveTab] = useState(() => {
         const params = new URLSearchParams(location.search);
-        return params.get('tab') || 'profile';
+        return params.get('tab') || 'system';
     });
 
     React.useEffect(() => {
@@ -26,12 +25,6 @@ const AdminSettings = () => {
     }, [location.search]);
 
     const tabs = [
-        {
-            id: 'profile',
-            label: 'Profile',
-            icon: User,
-            component: ProfileTab
-        },
         {
             id: 'system',
             label: 'System Settings',
@@ -52,7 +45,7 @@ const AdminSettings = () => {
         }] : [])
     ];
 
-    const ActiveComponent = tabs.find(tab => tab.id === activeTab)?.component || ProfileTab;
+    const ActiveComponent = tabs.find(tab => tab.id === activeTab)?.component || SystemSettingsTab;
 
     return (
         <AdminLayout title="Settings">
