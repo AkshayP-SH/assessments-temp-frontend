@@ -126,36 +126,73 @@ const Dashboard = () => {
 
       const availableTests = data.tests || [];
 
-      // Check for saved progress for each test
-      const progressChecks = await Promise.all(
-        availableTests.map(async (test) => {
-          if (!test.isAvailable || test.alreadyTaken || !test.hasAttemptsLeft) {
-            return { testId: test.id, hasProgress: false };
-          }
-          try {
-            const progressResponse = await apiFetch(`api/student/test/${test.id}`, {
-              headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (progressResponse.ok) {
-              const progressData = await progressResponse.json();
-              return { testId: test.id, hasProgress: progressData.savedProgress !== null };
-            }
-          } catch (err) {
-            console.error(`Error checking progress for test ${test.id}:`, err);
-          }
-          return { testId: test.id, hasProgress: false };
-        })
-      );
+          // Check for saved progress for each test
+          const progressChecks = await Promise.all(
+            data.tests.map(async (test) => {
+              // Skip progress check if test is not available, already taken, or no attempts left
+              if (!test.isAvailable || test.alreadyTaken || !test.hasAttemptsLeft) {
+                return { testId: test.id, hasProgress: false };
+              }
 
-      const testsWithProgress = new Set(progressChecks.filter(p => p.hasProgress).map(p => p.testId));
-      
-      return { availableTests, testsWithProgress };
-    },
-    refetchInterval: 30000, // Poll every 30 s
-  });
+              try {
+                const progressResponse = await apiFetch(`api/student/test/${test.id}`, {
+                  headers: {
+                    'Authorization': `Bearer ${token}`
+                  }
+                });
 
-  const availableTests = dashboardData?.availableTests || [];
-  const testsWithProgress = dashboardData?.testsWithProgress || new Set();
+                if (progressResponse.ok) {
+                  const progressData = await progressResponse.json();
+                  return {
+                    testId: test.id,
+                    hasProgress: progressData.savedProgress !== null
+                  };
+                }
+              } catch (err) {
+                console.error(`Error checking progress for test ${test.id}:`, err);
+              }
+              return { testId: test.id, hasProgress: false };
+            })
+          );
+
+          const testsWithProgressSet = new Set(
+            progressChecks
+              .filter(p => p.hasProgress)
+              .map(p => p.testId)
+          );
+          setTestsWithProgress(testsWithProgressSet);
+        } else {
+          setError('Failed to load tests');
+        }
+      } catch (err) {
+        console.error('Error loading tests:', err);
+        setError('Connection error. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [navigate]);
+
+  // Poll every 30 s so newly-assigned tests appear without a manual refresh
+  useEffect(() => {
+    const refreshTests = async () => {
+      const token = localStorage.getItem('studentAuthToken');
+      if (!token) return;
+      try {
+        const res = await apiFetch('api/student/tests', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success) setAvailableTests(prev =>
+            JSON.stringify(data.tests) === JSON.stringify(prev) ? prev : data.tests
+          );
+        }
+      } catch { /* silent */ }
+    };
+    const id = setInterval(refreshTests, 30000);
+    return () => clearInterval(id);
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('studentDashboardTab', activeTab);
@@ -472,18 +509,27 @@ const Dashboard = () => {
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
                     {filteredTests.map((test) => {
-                      const isCompleted = test.alreadyTaken || test.testStatus === 'expired';
-                      const isInProgress = test.isAvailable && !test.alreadyTaken && testsWithProgress.has(test.id);
+                      // Determine card styling based on test status
+                      let cardBgColor = 'bg-white';
+                      let cardBorderColor = 'border-shnoor-indigo';
+                      let cardOpacity = 'opacity-100';
 
-                      // Uniform blue/indigo styling for cards
-                      const topAccentGradient = 'from-[#403f75] via-indigo-500 to-[#57569b]';
-                      const cardBorder = 'border border-indigo-100/90 dark:border-slate-800 hover:border-[#403f75]/60 dark:hover:border-indigo-500/50';
-                      const iconBoxClass = 'bg-indigo-50 dark:bg-indigo-950/60 text-[#403f75] dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-900/60';
+                      if (test.isMockTest) {
+                        cardBgColor = 'bg-shnoor-successLight';
+                        cardBorderColor = 'border-shnoor-success';
+                      } else if (test.testStatus === 'expired' || test.alreadyTaken) {
+                        cardBgColor = 'bg-shnoor-lavender';
+                        cardBorderColor = 'border-shnoor-mist';
+                        cardOpacity = 'opacity-75';
+                      } else if (test.testStatus === 'upcoming') {
+                        cardBgColor = 'bg-shnoor-warningLight';
+                        cardBorderColor = 'border-shnoor-warningLight';
+                      }
 
                       return (
                         <div
                           key={test.id}
-                          className={`bg-white dark:bg-[#1A1A32] ${cardBorder} ${test.isMockTest ? 'col-span-full' : ''} rounded-2xl flex flex-col justify-between transition-all duration-200 shadow-[0_2px_12px_rgba(14,14,39,0.04)] hover:shadow-[0_12px_28px_rgba(64,63,117,0.12)] min-h-[320px] h-full overflow-hidden group`}
+                          className={`${cardBgColor} border-2 ${cardBorderColor} rounded-xl p-6 ${cardOpacity} ${test.isAvailable && !test.alreadyTaken ? 'hover:shadow-[0_8px_30px_rgba(14,14,39,0.08)] hover:border-shnoor-indigo' : ''} transition-all duration-200`}
                         >
                           {/* Card top color accent bar (3-4px) */}
                           <div className={`h-[3.5px] w-full bg-gradient-to-r ${topAccentGradient}`} />
@@ -497,43 +543,35 @@ const Dashboard = () => {
                                   <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase tracking-wider bg-indigo-50/80 dark:bg-indigo-950/50 text-[#403f75] dark:text-indigo-300 border border-indigo-100 dark:border-indigo-900/60">
                                     {test.subject || 'General'}
                                   </span>
-
-                                  {/* Status Tags */}
-                                  {test.isMockTest && (
-                                    <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800/60">
-                                      Mock Test
-                                    </span>
-                                  )}
-
-                                  {isCompleted && (
-                                    <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400 border border-rose-200/80 dark:border-rose-800/60">
-                                      Attempts ({test.attemptsTaken}/{test.maxAttempts})
-                                    </span>
-                                  )}
-
-                                  {!isCompleted && !test.isMockTest && test.isAvailable && (
-                                    <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-800/60">
-                                      Available
-                                    </span>
-                                  )}
-
-                                  {isInProgress && (
-                                    <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-400 border border-teal-200/80 dark:border-teal-800/60">
-                                      In Progress
-                                    </span>
-                                  )}
-
-                                  {test.testStatus === 'upcoming' && !test.alreadyTaken && (
-                                    <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-200/80 dark:border-amber-800/60">
-                                      Upcoming
-                                    </span>
-                                  )}
-                                </div>
-
-                                <div className={`w-8 h-8 rounded-xl ${iconBoxClass} flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-105`}>
-                                  <BookOpen size={15} />
-                                </div>
+                                )}
                               </div>
+                              <h3 className="text-lg font-bold text-shnoor-navy break-words">{test.title}</h3>
+                              {test.isMockTest && (
+                                <p className="text-xs text-shnoor-success mt-1">Practice test to get familiar with the platform</p>
+                              )}
+                              {test.alreadyTaken && (
+                                <span className="inline-block mt-2 px-3 py-1 bg-shnoor-dangerLight text-shnoor-danger rounded-full text-xs font-semibold">
+                                  All Attempts Used ({test.attemptsTaken}/{test.maxAttempts})
+                                </span>
+                              )}
+                              {test.testStatus === 'upcoming' && !test.alreadyTaken && (
+                                <span className="inline-block mt-2 px-3 py-1 bg-shnoor-warningLight text-shnoor-warning rounded-full text-xs font-semibold">
+                                  🕐 Upcoming
+                                </span>
+                              )}
+                              {test.testStatus === 'expired' && !test.alreadyTaken && (
+                                <span className="inline-block mt-2 px-3 py-1 bg-shnoor-lavender text-shnoor-navy rounded-full text-xs font-semibold">
+                                  ⏰ Deadline Passed
+                                </span>
+                              )}
+                              {test.isAvailable && !test.alreadyTaken && testsWithProgress.has(test.id) && (
+                                <span className="inline-block mt-2 px-3 py-1 bg-shnoor-successLight text-shnoor-success rounded-full text-xs font-semibold">
+                                  ⏸ In Progress
+                                </span>
+                              )}
+                            </div>
+                            <BookOpen className={`flex-shrink-0 mt-1 ${test.alreadyTaken || !test.isAvailable ? 'text-shnoor-mist' : test.testStatus === 'upcoming' ? 'text-shnoor-warning' : 'text-shnoor-indigo'}`} size={24} />
+                          </div>
 
                               {/* Title */}
                               <h3 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white capitalize tracking-tight mt-1 mb-1 break-words leading-snug line-clamp-2 min-h-[2.5rem]" title={test.title}>
@@ -595,29 +633,30 @@ const Dashboard = () => {
                                 <span>View Job Description</span>
                               </button>
 
-                              <button
-                                onClick={() => test.isAvailable && !test.alreadyTaken && handleTakeTest(test.id)}
-                                disabled={!test.isAvailable || test.alreadyTaken}
-                                className={`w-full h-10 px-3.5 font-bold rounded-xl transition-all shadow-sm text-xs sm:text-sm flex items-center justify-center ${test.alreadyTaken
-                                  ? 'bg-slate-100 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 border border-slate-200/80 dark:border-slate-700/80 cursor-not-allowed'
-                                  : test.testStatus === 'upcoming'
-                                    ? 'bg-amber-500 text-white cursor-not-allowed'
-                                    : test.testStatus === 'expired'
-                                      ? 'bg-slate-100 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 border border-slate-200/80 dark:border-slate-700/80 cursor-not-allowed'
-                                      : 'bg-gradient-to-r from-[#403f75] to-[#57569b] hover:from-[#343360] hover:to-[#4a4988] text-white shadow-md shadow-[#403f75]/20 active:scale-[0.99] cursor-pointer'
-                                  }`}
-                              >
-                                {test.alreadyTaken
-                                  ? `Completed (${test.attemptsTaken}/${test.maxAttempts} attempts)`
-                                  : test.testStatus === 'upcoming'
-                                    ? `Available from ${new Date(test.startDateTime).toLocaleDateString()}`
-                                    : test.testStatus === 'expired'
-                                      ? `Expired on ${new Date(test.endDateTime).toLocaleDateString()}`
-                                      : isInProgress
-                                        ? 'Resume Test'
-                                        : `Take Test (${test.attemptsRemaining} attempts left)`}
-                              </button>
-                            </div>
+                            <button
+                              onClick={() => test.isAvailable && !test.alreadyTaken && handleTakeTest(test.id)}
+                              disabled={!test.isAvailable || test.alreadyTaken}
+                              className={`w-full py-3 px-4 font-semibold rounded-lg transition-colors shadow-sm min-h-[44px] touch-manipulation ${test.alreadyTaken
+                                ? 'bg-shnoor-mist/50 text-shnoor-navy cursor-not-allowed border border-shnoor-mist'
+                                : test.testStatus === 'upcoming'
+                                  ? 'bg-shnoor-warning text-white cursor-not-allowed'
+                                  : test.testStatus === 'expired'
+                                    ? 'bg-shnoor-mist/50 text-shnoor-navy cursor-not-allowed border border-shnoor-mist'
+                                    : testsWithProgress.has(test.id)
+                                      ? 'bg-shnoor-success hover:bg-shnoor-success text-white'
+                                      : 'bg-shnoor-indigo hover:bg-[#4d4d9c] text-white'
+                                }`}
+                            >
+                              {test.alreadyTaken
+                                ? `Completed (${test.attemptsTaken}/${test.maxAttempts} attempts used)`
+                                : test.testStatus === 'upcoming'
+                                  ? `🕐 Available from ${new Date(test.startDateTime).toLocaleString()}`
+                                  : test.testStatus === 'expired'
+                                    ? `⏰ Expired on ${new Date(test.endDateTime).toLocaleString()}`
+                                    : testsWithProgress.has(test.id)
+                                      ? '▶ Resume Test'
+                                      : `Take Test (${test.attemptsRemaining} attempts left)`}
+                            </button>
                           </div>
                         </div>
                       );
