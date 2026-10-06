@@ -89,12 +89,16 @@ const ClientSubscriptionPlans = () => {
 
         if (data.success) {
           const storedUser = JSON.parse(localStorage.getItem('clientUser') || '{}');
-          storedUser.requiresPayment = false;
-          storedUser.clientStatus = 'active';
-          storedUser.subscriptionActive = true;
-          localStorage.setItem('clientUser', JSON.stringify(storedUser));
-          localStorage.setItem('adminUser', JSON.stringify(storedUser));
-          if (setClientUser) setClientUser(storedUser);
+          const updatedUser = {
+            ...storedUser,
+            ...(data.user || {}),
+            requiresPayment: false,
+            clientStatus: 'active',
+            subscriptionActive: true,
+          };
+          localStorage.setItem('clientUser', JSON.stringify(updatedUser));
+          localStorage.setItem('adminUser', JSON.stringify(updatedUser));
+          if (setClientUser) setClientUser(updatedUser);
 
           navigate('/client/dashboard', {
             replace: true,
@@ -112,44 +116,23 @@ const ClientSubscriptionPlans = () => {
       const isDummyMode = DUMMY_PAYMENT_MODE;
 
       if (isDummyMode) {
-        // Simulate payment processing delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
-
-        // Directly call verify payment with dummy data
-        const verifyResponse = await fetch(getApiUrl('api/settings/verify-payment'), {
+        // Just select the plan without activating it
+        const selectResponse = await fetch(getApiUrl('api/settings/select-plan'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
           },
-          body: JSON.stringify({
-            razorpay_order_id: 'dummy_order_' + new Date().getTime(),
-            razorpay_payment_id: 'dummy_payment_' + new Date().getTime(),
-            razorpay_signature: 'dummy_signature',
-            plan_id: planId,
-            isDummyPayment: true,
-          }),
+          body: JSON.stringify({ plan_id: planId }),
         });
 
-        const verifyData = await verifyResponse.json();
+        const selectData = await selectResponse.json();
 
-        if (verifyData.success) {
-          // Update local storage to reflect active subscription
-          const storedUser = JSON.parse(localStorage.getItem('clientUser') || '{}');
-          storedUser.requiresPayment = false;
-          storedUser.clientStatus = 'active';
-          storedUser.subscriptionActive = true;
-          localStorage.setItem('clientUser', JSON.stringify(storedUser));
-          localStorage.setItem('adminUser', JSON.stringify(storedUser)); // Mirror for shared pages
-          if (setClientUser) setClientUser(storedUser);
-
-          // Payment successful, navigate to dashboard
-          navigate('/client/dashboard', {
-            replace: true,
-            state: { message: 'Payment successful! Your subscription is now active.' }
-          });
+        if (selectData.success) {
+          setError(null);
+          alert('Plan selected successfully! Please wait for an admin to activate your account or contact support.');
         } else {
-          setError(verifyData.message || 'Failed to activate subscription.');
+          setError(selectData.message || 'Failed to select plan.');
         }
         setProcessingPlan(null);
         return;
