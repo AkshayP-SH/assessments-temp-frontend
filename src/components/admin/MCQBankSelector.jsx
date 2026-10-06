@@ -148,7 +148,7 @@ const MCQBankSelector = ({
       case 'easy':
         return 'bg-green-100 text-green-800';
       case 'medium':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-amber-100 text-amber-800';
       case 'hard':
         return 'bg-red-100 text-red-800';
       default:
@@ -373,13 +373,13 @@ function MotionlessQuestionRow({ q, added, selected, selectedRoles, getDifficult
         </div>
         <div className="flex flex-wrap gap-2">
           {selectedRoles?.length > 0 && q.relevanceScore > 0 && (
-            <span className="px-2 py-1 rounded text-xs font-medium bg-purple-100 text-purple-800">Recommended</span>
+            <span className="px-2 py-1 rounded text-xs font-medium bg-shnoor-lavender text-shnoor-indigo">Recommended</span>
           )}
           {added && (
             <span className="px-2 py-1 rounded text-xs font-medium bg-shnoor-mist text-shnoor-navy">In test</span>
           )}
           <span className={`px-2 py-1 rounded text-xs font-medium ${getDifficultyColor(q.difficulty)}`}>{q.difficulty}</span>
-          <span className="px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">{q.category}</span>
+          <span className="px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-700">{q.category}</span>
           <span className="px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-800">{q.marks || 1} marks</span>
         </div>
       </div>
@@ -424,7 +424,7 @@ function MotionlessPreviewBody({ onClose, question, options, getDifficultyColor 
           <span className={`px-2 py-1 rounded text-xs font-medium ${getDifficultyColor(question.difficulty)}`}>
             {question.difficulty}
           </span>
-          <span className="px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">{question.category}</span>
+          <span className="px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-700">{question.category}</span>
         </div>
         <p className="text-shnoor-navy whitespace-pre-wrap">{question.question_text}</p>
         <div className="space-y-2">

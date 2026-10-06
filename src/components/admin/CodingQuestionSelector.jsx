@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Search, X, Eye, CheckCircle, Filter, Code } from 'lucide-react';
+import { Search, Eye, EyeOff, Check, Info, Code, List, Plus, Loader2 } from 'lucide-react';
 import { apiFetch } from '../../config/api';
 import PropTypes from 'prop-types';
+import ModalShell, { ModalButton, SectionTitle, modalInputClass } from './ModalShell';
 
 const CodingQuestionSelector = ({ onClose, onSelect, selectedQuestionIds = [], selectedRoles = [] }) => {
   const [questions, setQuestions] = useState([]);
@@ -137,48 +138,44 @@ const CodingQuestionSelector = ({ onClose, onSelect, selectedQuestionIds = [], s
 
   const getDifficultyColor = (difficulty) => {
     switch (difficulty?.toLowerCase()) {
-      case 'easy': return 'bg-green-100 text-green-800';
-      case 'medium': return 'bg-yellow-100 text-yellow-800';
-      case 'hard': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'easy': return 'bg-green-50 text-green-700 border border-green-200';
+      case 'medium': return 'bg-amber-50 text-amber-700 border border-amber-200';
+      case 'hard': return 'bg-red-50 text-red-700 border border-red-200';
+      default: return 'bg-gray-100 text-gray-700 border border-gray-200';
     }
   };
 
-  return (
-    <div className="fixed inset-0 bg-black/50 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div className="bg-white w-full h-full sm:h-auto sm:max-h-[90vh] sm:rounded-2xl shadow-2xl sm:max-w-6xl flex flex-col animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200">
-        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 sticky top-0 bg-white z-10 flex-shrink-0">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">Select Coding Questions</h2>
-            <p className="text-sm text-gray-600 mt-1">
-              {selectedQuestions.size} question{selectedQuestions.size !== 1 ? 's' : ''} selected
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <X className="w-6 h-6 text-gray-600" />
-          </button>
-        </div>
+  const tagClass = 'px-2 py-0.5 rounded-md text-xs font-medium';
+  const neutralTag = `${tagClass} bg-gray-100 text-gray-700 border border-gray-200`;
+  const selectedCount = selectedQuestions.size;
 
-        <div className="p-4 sm:p-6 border-b border-gray-200 bg-gray-50 flex-shrink-0">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+  return (
+    <ModalShell
+      icon={List}
+      title="Select Coding Questions"
+      subtitle={`${selectedCount} question${selectedCount !== 1 ? 's' : ''} selected`}
+      onClose={onClose}
+      size="lg"
+      fullHeight
+      zIndexClass="z-[60]"
+      toolbar={
+        <div className="space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <div className="relative sm:col-span-2">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="text"
                 placeholder="Search questions..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={`${modalInputClass} pl-9`}
               />
             </div>
 
             <select
               value={selectedDifficulty}
               onChange={(e) => setSelectedDifficulty(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className={modalInputClass}
             >
               <option value="">All Difficulties</option>
               <option value="easy">Easy</option>
@@ -189,7 +186,7 @@ const CodingQuestionSelector = ({ onClose, onSelect, selectedQuestionIds = [], s
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className={modalInputClass}
             >
               <option value="">All Categories</option>
               {categories.map(cat => (
@@ -199,213 +196,176 @@ const CodingQuestionSelector = ({ onClose, onSelect, selectedQuestionIds = [], s
           </div>
 
           {selectedRoles && selectedRoles.length > 0 && (
-            <div className="mt-3 flex items-center text-sm text-blue-600">
-              <Filter className="w-4 h-4 mr-2" />
-              <span>Questions are recommended based on selected roles: {selectedRoles.map(r => r.job_role).join(', ')}</span>
+            <div className="inline-flex items-center gap-1.5 max-w-full px-2.5 py-1 rounded-full bg-shnoor-lavender text-shnoor-indigo text-xs">
+              <Info className="w-3.5 h-3.5 flex-shrink-0" />
+              <span className="truncate">Recommended for selected roles: {selectedRoles.map(r => r.job_role).join(', ')}</span>
             </div>
           )}
         </div>
-
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
-          {loading ? (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            </div>
-          ) : filteredQuestions.length === 0 ? (
-            <div className="text-center py-12 text-gray-500">
-              <Code className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-              <p>No coding questions found matching your filters</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {filteredQuestions.map((q) => (
-                <div
-                  key={q.id}
-                  className={`border-2 rounded-lg p-4 transition-all cursor-pointer ${
-                    selectedQuestions.has(q.id)
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300 bg-white'
-                  }`}
-                  onClick={() => handleToggleQuestion(q.id)}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start space-x-3 flex-1">
-                      <div className="mt-1">
-                        {selectedQuestions.has(q.id) ? (
-                          <CheckCircle className="w-6 h-6 text-blue-600" />
-                        ) : (
-                          <div className="w-6 h-6 border-2 border-gray-300 rounded-full"></div>
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2 mb-2">
-                          <h3 className="text-lg font-semibold text-gray-900">{q.title}</h3>
-                          {q.relevanceScore > 0 && (
-                            <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">
-                              Recommended
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">{q.description}</p>
-                        <div className="flex flex-wrap gap-2">
-                          <span className={`px-2 py-1 rounded text-xs font-medium ${getDifficultyColor(q.difficulty)}`}>
-                            {q.difficulty}
-                          </span>
-                          <span className="px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                            {q.category}
-                          </span>
-                          <span className="px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-800">
-                            {q.marks} marks
-                          </span>
-                          <span className="px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800">
-                            {q.test_case_count} test cases
-                          </span>
-                          {q.tags && q.tags.map((tag, idx) => (
-                            <span key={idx} className="px-2 py-1 rounded text-xs font-medium bg-purple-100 text-purple-800">
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handlePreview(q.id);
-                      }}
-                      className="ml-4 p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                      title="Preview question"
-                    >
-                      <Eye className="w-5 h-5" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 sm:p-6 border-t border-gray-200 bg-gray-50 sticky bottom-0 z-10 flex-shrink-0">
-          <button
-            onClick={onClose}
-            className="w-full sm:w-auto px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors font-medium"
-          >
+      }
+      footerStart={`${selectedCount} selected`}
+      footerActions={
+        <>
+          <ModalButton variant="outline" onClick={onClose}>
             Cancel
-          </button>
-          <button
-            onClick={handleConfirmSelection}
-            disabled={selectedQuestions.size === 0}
-            className="w-full sm:w-auto px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Add {selectedQuestions.size} Question{selectedQuestions.size !== 1 ? 's' : ''}
-          </button>
+          </ModalButton>
+          <ModalButton icon={Plus} onClick={handleConfirmSelection} disabled={selectedCount === 0}>
+            Add {selectedCount} Question{selectedCount !== 1 ? 's' : ''}
+          </ModalButton>
+        </>
+      }
+    >
+      {loading ? (
+        <div className="flex justify-center py-16">
+          <Loader2 className="w-8 h-8 text-shnoor-indigo animate-spin" />
         </div>
-      </div>
-
-      {showPreview && previewQuestion && (
-        <div className="fixed inset-0 bg-black/50 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4">
-          <div className="bg-white w-full h-full sm:h-auto sm:max-h-[90vh] sm:rounded-2xl shadow-2xl sm:max-w-4xl flex flex-col animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200">
-            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 sticky top-0 bg-white z-10 flex-shrink-0">
-              <h2 className="text-xl font-bold text-gray-900">Question Preview</h2>
-              <button
-                onClick={() => setShowPreview(false)}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <X className="w-6 h-6 text-gray-600" />
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-4 sm:p-6">
-              <div className="space-y-6">
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-3">{previewQuestion.title}</h2>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    <span className={`px-3 py-1 rounded text-sm font-medium ${getDifficultyColor(previewQuestion.difficulty)}`}>
-                      {previewQuestion.difficulty}
-                    </span>
-                    <span className="px-3 py-1 rounded text-sm font-medium bg-blue-100 text-blue-800">
-                      {previewQuestion.category}
-                    </span>
-                    <span className="px-3 py-1 rounded text-sm font-medium bg-gray-100 text-gray-800">
-                      {previewQuestion.marks} marks
-                    </span>
-                    <span className="px-3 py-1 rounded text-sm font-medium bg-purple-100 text-purple-800">
-                      Time: {previewQuestion.time_limit}s
-                    </span>
-                    <span className="px-3 py-1 rounded text-sm font-medium bg-orange-100 text-orange-800">
-                      Memory: {previewQuestion.memory_limit}MB
-                    </span>
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Description</h4>
-                  <p className="text-gray-700 whitespace-pre-wrap">{previewQuestion.description}</p>
-                </div>
-
-                {previewQuestion.testCases && previewQuestion.testCases.length > 0 && (
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-3">Test Cases</h4>
-                    <div className="space-y-3">
-                      {previewQuestion.testCases.map((tc, idx) => (
-                        <div key={tc.id} className={`border rounded-lg p-4 ${tc.is_hidden ? 'bg-gray-50' : 'bg-white'}`}>
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="font-medium text-gray-900">Test Case {idx + 1}</span>
-                            {tc.is_hidden && (
-                              <span className="px-2 py-1 bg-gray-200 text-gray-700 text-xs font-medium rounded">
-                                Hidden
-                              </span>
-                            )}
-                          </div>
-                          <div className="space-y-2">
-                            <div>
-                              <span className="text-sm font-medium text-gray-700">Input:</span>
-                              <pre className="mt-1 p-2 bg-gray-100 rounded text-sm overflow-x-auto">{tc.input}</pre>
-                            </div>
-                            <div>
-                              <span className="text-sm font-medium text-gray-700">Expected Output:</span>
-                              <pre className="mt-1 p-2 bg-gray-100 rounded text-sm overflow-x-auto">{tc.output}</pre>
-                            </div>
-                            {tc.explanation && (
-                              <div>
-                                <span className="text-sm font-medium text-gray-700">Explanation:</span>
-                                <p className="mt-1 text-sm text-gray-600">{tc.explanation}</p>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {previewQuestion.tags && previewQuestion.tags.length > 0 && (
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">Tags</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {previewQuestion.tags.map((tag, idx) => (
-                        <span key={idx} className="px-3 py-1 bg-purple-100 text-purple-800 rounded text-sm">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="p-4 sm:p-6 border-t border-gray-200 bg-gray-50 sticky bottom-0 z-10 flex-shrink-0">
-              <button
-                onClick={() => setShowPreview(false)}
-                className="w-full px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-              >
-                Close Preview
-              </button>
-            </div>
+      ) : filteredQuestions.length === 0 ? (
+        <div className="text-center py-16">
+          <div className="w-12 h-12 rounded-xl bg-gray-100 text-gray-400 flex items-center justify-center mx-auto mb-3">
+            <Code className="w-6 h-6" />
           </div>
+          <p className="text-sm font-medium text-shnoor-navy">No questions found</p>
+          <p className="text-xs text-gray-500 mt-1">Try a different search or clear the filters.</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {filteredQuestions.map((q) => {
+            const isSelected = selectedQuestions.has(q.id);
+            return (
+              <div
+                key={q.id}
+                className={`group flex items-start gap-3 rounded-xl border p-4 cursor-pointer transition-colors ${
+                  isSelected
+                    ? 'border-shnoor-indigo bg-shnoor-lavender/40'
+                    : 'border-shnoor-mist bg-white hover:border-shnoor-light'
+                }`}
+                onClick={() => handleToggleQuestion(q.id)}
+              >
+                <span
+                  aria-hidden="true"
+                  className={`mt-0.5 w-[18px] h-[18px] rounded-[5px] border flex items-center justify-center flex-shrink-0 transition-colors ${
+                    isSelected ? 'bg-shnoor-indigo border-shnoor-indigo' : 'bg-white border-gray-300'
+                  }`}
+                >
+                  {isSelected && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
+                </span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="text-[15px] font-semibold text-shnoor-navy">{q.title}</h3>
+                    {q.relevanceScore > 0 && (
+                      <span className="px-2 py-0.5 rounded-full bg-shnoor-lavender text-shnoor-indigo text-[11px] font-medium">
+                        Recommended
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[13px] text-gray-600 mt-1 mb-3 line-clamp-2">{q.description}</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    <span className={`${tagClass} capitalize ${getDifficultyColor(q.difficulty)}`}>
+                      {q.difficulty}
+                    </span>
+                    <span className={neutralTag}>{q.category}</span>
+                    <span className={neutralTag}>{q.marks} marks</span>
+                    <span className={neutralTag}>{q.test_case_count} test cases</span>
+                    {q.tags && q.tags.map((tag, idx) => (
+                      <span key={idx} className={neutralTag}>{tag}</span>
+                    ))}
+                  </div>
+                </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handlePreview(q.id);
+                  }}
+                  className="p-2 -m-1 rounded-lg text-shnoor-indigo hover:bg-shnoor-lavender transition-all flex-shrink-0 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100"
+                  title="Preview question"
+                >
+                  <Eye className="w-[18px] h-[18px]" />
+                </button>
+              </div>
+            );
+          })}
         </div>
       )}
-    </div>
+
+      {showPreview && previewQuestion && (
+        <ModalShell
+          icon={Eye}
+          title={previewQuestion.title}
+          subtitle="Question preview"
+          onClose={() => setShowPreview(false)}
+          size="md"
+          zIndexClass="z-[70]"
+          footerActions={
+            <ModalButton onClick={() => setShowPreview(false)}>
+              Close Preview
+            </ModalButton>
+          }
+        >
+          <div className="flex flex-wrap gap-1.5">
+            <span className={`${tagClass} capitalize ${getDifficultyColor(previewQuestion.difficulty)}`}>
+              {previewQuestion.difficulty}
+            </span>
+            <span className={neutralTag}>{previewQuestion.category}</span>
+            <span className={neutralTag}>{previewQuestion.marks} marks</span>
+            <span className={neutralTag}>Time: {previewQuestion.time_limit}s</span>
+            <span className={neutralTag}>Memory: {previewQuestion.memory_limit}MB</span>
+          </div>
+
+          <section>
+            <SectionTitle>Description</SectionTitle>
+            <p className="text-sm text-shnoor-navy whitespace-pre-wrap">{previewQuestion.description}</p>
+          </section>
+
+          {previewQuestion.testCases && previewQuestion.testCases.length > 0 && (
+            <section>
+              <SectionTitle>Test Cases</SectionTitle>
+              <div className="space-y-3">
+                {previewQuestion.testCases.map((tc, idx) => (
+                  <div key={tc.id} className="rounded-xl border border-shnoor-mist p-3 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[13px] font-semibold text-shnoor-navy">Test case {idx + 1}</span>
+                      {tc.is_hidden && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-shnoor-lavender text-shnoor-indigo text-[11px] font-medium">
+                          <EyeOff size={11} />
+                          Hidden
+                        </span>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <span className="block text-xs font-medium text-gray-500 mb-1">Input</span>
+                        <pre className="p-2 rounded-lg bg-gray-50 border border-gray-200 text-[13px] font-mono overflow-x-auto">{tc.input}</pre>
+                      </div>
+                      <div>
+                        <span className="block text-xs font-medium text-gray-500 mb-1">Expected output</span>
+                        <pre className="p-2 rounded-lg bg-gray-50 border border-gray-200 text-[13px] font-mono overflow-x-auto">{tc.output}</pre>
+                      </div>
+                    </div>
+                    {tc.explanation && (
+                      <p className="text-xs text-gray-600">
+                        <span className="font-medium text-gray-500">Explanation: </span>
+                        {tc.explanation}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {previewQuestion.tags && previewQuestion.tags.length > 0 && (
+            <section>
+              <SectionTitle>Tags</SectionTitle>
+              <div className="flex flex-wrap gap-1.5">
+                {previewQuestion.tags.map((tag, idx) => (
+                  <span key={idx} className={neutralTag}>{tag}</span>
+                ))}
+              </div>
+            </section>
+          )}
+        </ModalShell>
+      )}
+    </ModalShell>
   );
 };
 

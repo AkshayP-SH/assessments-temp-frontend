@@ -133,7 +133,7 @@ const MySubscriptionTab = ({ quota: propQuota, user: propUser }) => {
               <p className="text-sm text-shnoor-indigoMedium mb-1">Active Tier</p>
               <div className="flex items-center">
                 <span className="text-2xl font-extrabold text-shnoor-indigo capitalize tracking-tight">
-                  {user?.subscriptionTier || 'Free'}
+                  {(user?.planId || user?.subscriptionTier || 'Free').replace('_', ' ')}
                 </span>
                 {user?.subscriptionActive && !isExpired && (
                   <span className="ml-3 bg-green-100 text-green-700 text-xs font-bold px-2.5 py-0.5 rounded-full flex items-center">

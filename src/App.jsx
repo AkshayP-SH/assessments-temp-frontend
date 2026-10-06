@@ -9,7 +9,6 @@ import ClientProtectedRoute from './components/ClientProtectedRoute';
 import GlobalThemeSelector from './components/GlobalThemeSelector';
 import { applyTheme, getSavedTheme } from './utils/theme';
 import UpgradeRequiredModal from './components/UpgradeRequiredModal';
-import { Toaster } from 'react-hot-toast';
 
 // Eagerly load Loading Spinner to show while chunks are fetched
 const LoadingFallback = () => (
@@ -81,7 +80,6 @@ const AppRoutes = () => {
 
   return (
     <>
-      <Toaster position="top-right" />
       <GlobalThemeSelector />
       <UpgradeRequiredModal
         isOpen={showUpgradeModal}
