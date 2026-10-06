@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react';
 import { X, Upload, FileText, Plus, Download } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { apiFetch } from '../../config/api';
+import DuplicateResolutionModal from './DuplicateResolutionModal';
 
 const MCQBankModal = ({ question, onClose, onSave, categories = [], tags = [] }) => {
   // Mode selection: 'manual' | 'bulk' (only selectable when creating new questions)
   const [uploadMode, setUploadMode] = useState('manual');
   const [isUploading, setIsUploading] = useState(false);
+  const [duplicateResolution, setDuplicateResolution] = useState(null);
 
   const [formData, setFormData] = useState({
     question_text: '',
@@ -62,9 +64,25 @@ const MCQBankModal = ({ question, onClose, onSave, categories = [], tags = [] })
 
       const data = await response.json();
       if (data.alreadyExists) {
-        alert(data.message || 'Question already exists in Question Bank');
-        onSave();
-        onClose();
+        setDuplicateResolution({
+          type: 'mcq',
+          duplicates: [{
+            existingQuestion: data.existingQuestion || {
+              id: data.questionId,
+              question_text: formData.question_text,
+              option_a: formData.option_a,
+              option_b: formData.option_b,
+              option_c: formData.option_c,
+              option_d: formData.option_d,
+              correct_option: formData.correct_option,
+              category: formData.category
+            },
+            newQuestion: formData
+          }],
+          isBulk: false,
+          insertedCount: 0
+        });
+        return;
       } else if (data.success) {
         alert(question ? 'Question updated successfully' : 'Question added successfully');
         onSave();
@@ -113,10 +131,14 @@ const MCQBankModal = ({ question, onClose, onSave, categories = [], tags = [] })
           });
 
           const data = await response.json();
-          if (data.alreadyExists) {
-            alert(data.message || 'Question(s) already exist in Question Bank');
-            onSave();
-            onClose();
+          if (data.alreadyExists && Array.isArray(data.duplicates) && data.duplicates.length > 0) {
+            setDuplicateResolution({
+              type: 'mcq',
+              duplicates: data.duplicates,
+              isBulk: true,
+              insertedCount: data.count || 0
+            });
+            return;
           } else if (data.success) {
             alert(data.message || `Successfully added ${data.count} question(s) to Question Bank!`);
             onSave();
@@ -137,6 +159,62 @@ const MCQBankModal = ({ question, onClose, onSave, categories = [], tags = [] })
       alert('Failed to upload file');
       setIsUploading(false);
     }
+  };
+
+  const handleResolveReplacements = async (selectedReplacements) => {
+    try {
+      const token = localStorage.getItem('adminToken') || localStorage.getItem('token') || localStorage.getItem('clientToken') || '';
+      
+      if (selectedReplacements.length === 1 && !duplicateResolution?.isBulk) {
+        // Single question replace via PUT
+        const target = selectedReplacements[0];
+        const res = await apiFetch(`api/question-bank/mcq/${target.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(target)
+        });
+        const resData = await res.json();
+        if (resData.success) {
+          alert('Question replaced successfully!');
+          setDuplicateResolution(null);
+          onSave();
+          onClose();
+        } else {
+          alert(resData.message || 'Failed to replace question');
+        }
+      } else {
+        // Batch replace via POST /mcq/batch-replace
+        const res = await apiFetch('api/question-bank/mcq/batch-replace', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ replacements: selectedReplacements })
+        });
+        const resData = await res.json();
+        if (resData.success) {
+          alert(`Successfully replaced ${selectedReplacements.length} question(s)!`);
+          setDuplicateResolution(null);
+          onSave();
+          onClose();
+        } else {
+          alert(resData.message || 'Failed to replace questions');
+        }
+      }
+    } catch (err) {
+      console.error('Error replacing questions:', err);
+      alert('Failed to replace questions');
+    }
+  };
+
+  const handleKeepExisting = () => {
+    setDuplicateResolution(null);
+    onSave();
+    onClose();
   };
 
   // Download Sample CSV
@@ -478,6 +556,19 @@ const MCQBankModal = ({ question, onClose, onSave, categories = [], tags = [] })
           </form>
         )}
       </div>
+
+      {/* Duplicate Resolution Modal */}
+      {duplicateResolution && (
+        <DuplicateResolutionModal
+          isOpen={Boolean(duplicateResolution)}
+          type="mcq"
+          duplicates={duplicateResolution.duplicates}
+          insertedCount={duplicateResolution.insertedCount}
+          onReplace={handleResolveReplacements}
+          onKeepExisting={handleKeepExisting}
+          onClose={() => setDuplicateResolution(null)}
+        />
+      )}
     </div>
   );
 };
