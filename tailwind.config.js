@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   darkMode: ['selector', '[data-theme="dark"]'],
   content: [
     "./index.html",

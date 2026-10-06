@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import {
-  FileSpreadsheet, ArrowLeft, Users, AlertCircle, Video, Loader2, Building2, Briefcase, Landmark, FileText, X,
+  FileSpreadsheet, Users, AlertCircle, Video, Loader2, Building2, Briefcase, Landmark, FileText, X,
   BarChart3, UploadCloud, ShieldAlert, CreditCard, MessageSquare, Settings, ChevronLeft, ChevronRight, ChevronDown
 } from 'lucide-react';
 
@@ -2362,25 +2362,16 @@ const AdminDashboard = () => {
 
             {/* Create test section */}
             {showCreateTest ? (
-              <div className="space-y-4 mb-6">
-                <div className="flex items-center justify-between">
-                  <button
-                    onClick={() => {
-                      setShowCreateTest(false);
-                      setEditingTest(null);
-                    }}
-                    className="btn-secondary"
-                    title={editingTest ? 'Cancel Editing' : 'Back to Exams'}
-                  >
-                    <ArrowLeft size={16} />
-                    <span>Back to Exams</span>
-                  </button>
-                </div>
+              <div className="space-y-4 mb-6 bg-[#F4F4F9] rounded-2xl">
                 <CreateTestSection
                   onComplete={handleCreateTestComplete}
                   onSaved={fetchTests}
                   editingTest={editingTest}
                   clientId={viewAsClientId || null}
+                  onBack={() => {
+                    setShowCreateTest(false);
+                    setEditingTest(null);
+                  }}
                 />
               </div>
             ) : selectedExamId ? (
