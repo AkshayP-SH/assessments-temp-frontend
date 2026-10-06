@@ -211,7 +211,7 @@ Robert Johnson,robert.johnson@example.com,5551234567,Harvard University`;
                             <h4 className="font-semibold text-shnoor-success mb-3">
                                 ✓ Successfully Created ({result.results.success.length})
                             </h4>
-                            <div className="bg-shnoor-successLight rounded-lg p-4 max-h-60 overflow-y-auto">
+                            <div className="bg-shnoor-successLight rounded-lg p-4 max-h-60 overflow-auto">
                                 <table className="min-w-full text-sm">
                                     <thead>
                                         <tr className="border-b border-shnoor-successLight">

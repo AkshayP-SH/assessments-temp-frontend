@@ -49,20 +49,17 @@ const AdminSettings = () => {
 
     return (
         <AdminLayout title="Settings">
-            <div className="mb-6">
-                <button
-                    onClick={() => navigate(-1)}
-                    className="flex items-center gap-2 h-10 px-4 border border-[#D1D1E6] bg-transparent text-[#9A9AC9] rounded-xl text-sm font-semibold hover:bg-white hover:border-gray-300 transition-colors w-fit"
-                >
-                    <ArrowLeft size={16} />
-                    Back
-                </button>
-            </div>
-
             {/* Tab Navigation */}
             <div className="bg-white shadow-sm rounded-2xl mb-6 overflow-hidden">
                 <div className="border-b border-gray-100">
                     <nav className="flex overflow-x-auto hide-scrollbar space-x-4 sm:space-x-8 px-4 sm:px-8 pt-4 sm:pt-6">
+                        <button
+                            onClick={() => navigate(-1)}
+                            className="self-start -mt-2.5 flex items-center gap-2 h-10 px-4 shrink-0 border border-[#D1D1E6] bg-transparent text-[#9A9AC9] rounded-xl text-sm font-semibold hover:bg-gray-50 hover:border-gray-300 transition-colors"
+                        >
+                            <ArrowLeft size={16} />
+                            Back
+                        </button>
                         {tabs.map((tab) => {
                             const Icon = tab.icon;
                             return (

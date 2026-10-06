@@ -27,7 +27,7 @@ const CodingViewModal = ({
             <p className="text-shnoor-navy whitespace-pre-wrap">{viewingCodingQuestion.description}</p>
           </div>
 
-          <div className="grid grid-cols-3 gap-4 p-4 bg-shnoor-lavender rounded-lg">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 bg-shnoor-lavender rounded-lg">
             <div>
               <span className="text-sm text-shnoor-navy">Marks:</span>
               <p className="font-semibold text-shnoor-navy">{viewingCodingQuestion.marks}</p>

@@ -691,7 +691,7 @@ const CreatedModal = ({ client, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="px-6 py-5 border-b border-shnoor-mist flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
             <CheckCircle size={20} className="text-emerald-600" />
@@ -828,7 +828,7 @@ const ClientDetailPanel = ({ client, onClose, onStatusChange, onDelete, onClient
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
             <h3 className="text-sm font-bold text-gray-900 dark:text-white tracking-wide mb-3">SUBSCRIPTION DETAILS</h3>
-            <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-sm">
+            <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-sm break-words">
               <div><span className="text-[#9A9AC9] block mb-0.5">Plan</span><p className="font-semibold text-gray-900">{subscriptionPlans.find(p => p.plan_id === client.plan_id)?.name || client.plan_id || 'Basic'}</p></div>
               <div><span className="text-[#9A9AC9] block mb-1">Duration</span><p className="font-semibold text-gray-900 capitalize">{client.subscription_duration?.toLowerCase().replace('_', ' ') || '30 days'}</p></div>
               <div>
@@ -954,7 +954,7 @@ const AdminClients = () => {
 
         {/* Page header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4 min-w-0">
             <button
               onClick={() => navigate(-1)}
               className="flex items-center gap-2 h-10 px-4 border border-[#D1D1E6] bg-transparent text-[#9A9AC9] rounded-xl text-sm font-semibold hover:bg-white hover:border-gray-300 transition-colors flex-shrink-0"
@@ -962,17 +962,17 @@ const AdminClients = () => {
               <ArrowLeft size={16} />
               Back
             </button>
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">Client Management</h2>
+            <div className="min-w-0">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Client Management</h2>
               <p className="text-sm text-[#9A9AC9] mt-0.5">{clients.length} total · {activeCount} active</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="grid grid-cols-2 gap-3 sm:flex sm:items-center">
             <button onClick={fetchClients} className="h-10 px-4 border border-[#D1D1E6] bg-transparent text-[#9A9AC9] rounded-xl text-sm font-semibold hover:bg-white hover:border-gray-300 transition-colors flex items-center gap-2">
               <RefreshCw size={16} /> Refresh
             </button>
             <button onClick={() => setShowCreate(true)}
-              className="flex items-center gap-2 h-10 px-5 bg-[#403f75] text-white rounded-xl text-sm font-semibold hover:bg-[#2d2d53] transition-colors shadow-sm">
+              className="flex items-center justify-center gap-2 h-10 px-5 bg-[#403f75] text-white rounded-xl text-sm font-semibold hover:bg-[#2d2d53] transition-colors shadow-sm">
               <Plus size={16} /> New Client
             </button>
           </div>

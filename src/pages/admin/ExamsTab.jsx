@@ -452,7 +452,7 @@ const ExamsTab = ({
           }}
         >
           <div
-            className="bg-white dark:bg-[#1E1E38] rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 dark:border-slate-700 animate-in zoom-in-95 duration-150"
+            className="bg-white dark:bg-[#1E1E38] rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto border border-slate-200 dark:border-slate-700 animate-in zoom-in-95 duration-150"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6">
