@@ -9,6 +9,7 @@ import TestBulkStep from './TestBulkStep';
 import TestSuccessStep from './TestSuccessStep';
 import CodingQuestionModal from './CodingQuestionModal';
 import CodingViewModal from './CodingViewModal';
+import MCQBankSelector from './MCQBankSelector';
 
 const ENABLE_CODE_EXECUTION = true;
 

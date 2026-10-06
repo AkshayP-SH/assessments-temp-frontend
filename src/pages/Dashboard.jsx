@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState, useMemo, useCallback } from 'react';
-import { LogOut, Clock, BookOpen, AlertCircle, FileText, X, Video, Briefcase } from 'lucide-react';
+import { LogOut, Clock, BookOpen, AlertCircle, FileText, X, Video, Briefcase, ArrowRight } from 'lucide-react';
 import ExamSearchFilter from '../components/ExamSearchFilter';
 import StudentInterviews from '../components/StudentInterviews';
 import JobBoard from './JobBoard';
@@ -14,7 +14,8 @@ import { clearStorageKeepTheme } from '../utils/theme';
 import { apiFetch } from '../config/api';
 import shnoorLogo from '../assets/shnoor-logo.png';
 import { useSEO } from '../hooks/useSEO';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { io } from 'socket.io-client';
 const STUDENT_DASHBOARD_TABS = ['tests', 'interviews', 'job-board', 'my-applications', 'profile'];
 
 const Dashboard = () => {
@@ -28,6 +29,30 @@ const Dashboard = () => {
   const [studentName, setStudentName] = useState('');
   const [studentId, setStudentId] = useState('');
   const [institute, setInstitute] = useState('');
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const studentId = localStorage.getItem('studentId');
+    if (!studentId) return;
+
+    const socketUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? window.location.origin : 'http://localhost:5000');
+    const socket = io(socketUrl, {
+      transports: ['polling', 'websocket'],
+    });
+
+    socket.on('connect', () => {
+      socket.emit('student:join-dashboard', { studentId });
+    });
+
+    socket.on('test:assigned', () => {
+      // Refresh the queries to get new tests
+      queryClient.invalidateQueries(['studentTests']);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [queryClient]);
 
   // Helper to capitalize institute name for display
   const capitalizeInstitute = (name) => {
@@ -221,7 +246,11 @@ const Dashboard = () => {
         break;
     }
 
-    return filtered;
+    // Always put Mock Tests at the end
+    const realTests = filtered.filter(t => !t.isMockTest);
+    const mockTests = filtered.filter(t => t.isMockTest);
+
+    return [...realTests, ...mockTests];
   }, [availableTests, searchTerm, filters, sortBy, testsWithProgress]);
 
   return (
@@ -664,25 +693,24 @@ const Dashboard = () => {
           <div className="mt-12 bg-white dark:bg-[#1E1E38] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-[0_2px_12px_rgba(14,14,39,0.04)] overflow-hidden">
             <div className="h-1 w-full bg-gradient-to-r from-[#403f75] via-indigo-500 to-[#6868AC]" />
             <div className="p-6 sm:p-7">
-              <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#403f75] dark:bg-indigo-400" />
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white mb-4">
                 Important Assessment Guidelines
               </h3>
               <ul className="space-y-2.5 text-xs sm:text-sm text-slate-600 dark:text-slate-300">
                 <li className="flex items-start">
-                  <span className="mr-2.5 text-[#403f75] dark:text-indigo-400 font-bold">•</span>
+                  <ArrowRight size={14} className="mr-2.5 text-[#403f75] dark:text-indigo-400 shrink-0 mt-0.5" />
                   <span><strong>Stable Connection:</strong> Ensure you have a stable internet connection before starting.</span>
                 </li>
                 <li className="flex items-start">
-                  <span className="mr-2.5 text-[#403f75] dark:text-indigo-400 font-bold">•</span>
+                  <ArrowRight size={14} className="mr-2.5 text-[#403f75] dark:text-indigo-400 shrink-0 mt-0.5" />
                   <span><strong>Fullscreen Mode:</strong> All tests require fullscreen mode and prohibit tab switching.</span>
                 </li>
                 <li className="flex items-start">
-                  <span className="mr-2.5 text-[#403f75] dark:text-indigo-400 font-bold">•</span>
+                  <ArrowRight size={14} className="mr-2.5 text-[#403f75] dark:text-indigo-400 shrink-0 mt-0.5" />
                   <span><strong>Strict Warnings:</strong> Three warnings for tab switching will result in automatic submission.</span>
                 </li>
                 <li className="flex items-start">
-                  <span className="mr-2.5 text-[#403f75] dark:text-indigo-400 font-bold">•</span>
+                  <ArrowRight size={14} className="mr-2.5 text-[#403f75] dark:text-indigo-400 shrink-0 mt-0.5" />
                   <span><strong>Auto-Saved Progress:</strong> Your progress is automatically saved — you can resume tests if interrupted.</span>
                 </li>
               </ul>

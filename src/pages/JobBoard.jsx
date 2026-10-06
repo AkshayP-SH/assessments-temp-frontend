@@ -113,6 +113,27 @@ export default function JobBoard({ isEmbedded = false }) {
                     });
                 }
             }
+            const MOCK_JOBS = [
+                { id: 'mock-1', company_name: 'TechCorp', job_role: 'Data Analytics', job_description: 'We are looking for a Data Analyst to join our team...', registration_deadline: new Date(Date.now() + 864000000).toISOString(), eligibility_criteria: 'B.Tech/B.E. in Computer Science or related field.' },
+                { id: 'mock-2', company_name: 'WebSolutions', job_role: 'React Developer', job_description: 'Seeking a frontend developer with strong React experience...', registration_deadline: new Date(Date.now() + 864000000).toISOString(), eligibility_criteria: '2+ years of experience in React.' },
+                { id: 'mock-3', company_name: 'DataSystems', job_role: 'Backend Developer', job_description: 'Backend developer needed to scale our Node.js microservices...', registration_deadline: new Date(Date.now() + 864000000).toISOString(), eligibility_criteria: 'Proficiency in Node.js and SQL.' },
+                { id: 'mock-4', company_name: 'AI Innovations', job_role: 'Data Scientist', job_description: 'Join our AI team to build predictive models...', registration_deadline: new Date(Date.now() + 864000000).toISOString(), eligibility_criteria: 'Experience with Python, Pandas, and Scikit-learn.' },
+                { id: 'mock-5', company_name: 'CloudNet', job_role: 'DevOps Engineer', job_description: 'Maintain and optimize our AWS infrastructure...', registration_deadline: new Date(Date.now() + 864000000).toISOString(), eligibility_criteria: 'AWS Certification preferred. Terraform knowledge.' },
+                { id: 'mock-6', company_name: 'CyberSec Systems', job_role: 'Security Analyst', job_description: 'Monitor and secure our enterprise network...', registration_deadline: new Date(Date.now() + 864000000).toISOString(), eligibility_criteria: 'CISSP or equivalent certification.' },
+                { id: 'mock-7', company_name: 'MobileFirst', job_role: 'iOS Developer', job_description: 'Build the next generation of our mobile app using Swift...', registration_deadline: new Date(Date.now() + 864000000).toISOString(), eligibility_criteria: '3+ years of iOS development experience.' },
+                { id: 'mock-8', company_name: 'FinTech Solutions', job_role: 'Java Developer', job_description: 'Develop high-performance financial systems...', registration_deadline: new Date(Date.now() + 864000000).toISOString(), eligibility_criteria: 'Strong knowledge of Java Spring Boot.' },
+                { id: 'mock-9', company_name: 'UX Studios', job_role: 'UI/UX Designer', job_description: 'Design intuitive and beautiful user interfaces...', registration_deadline: new Date(Date.now() + 864000000).toISOString(), eligibility_criteria: 'Portfolio demonstrating web and mobile design.' },
+                { id: 'mock-10', company_name: 'NextGen AI', job_role: 'Machine Learning Engineer', job_description: 'Deploy ML models into production...', registration_deadline: new Date(Date.now() + 864000000).toISOString(), eligibility_criteria: 'Experience with PyTorch or TensorFlow.' },
+                { id: 'mock-11', company_name: 'GameDev Corp', job_role: 'Unity Developer', job_description: 'Create engaging 3D games in Unity...', registration_deadline: new Date(Date.now() + 864000000).toISOString(), eligibility_criteria: 'Experience in C# and Unity3D.' },
+                { id: 'mock-12', company_name: 'Quantum Computing', job_role: 'Research Scientist', job_description: 'Research quantum algorithms and error correction...', registration_deadline: new Date(Date.now() + 864000000).toISOString(), eligibility_criteria: 'Ph.D. in Physics or Computer Science.' }
+            ];
+
+            MOCK_JOBS.forEach(mj => {
+                if (!allJobIds.has(mj.id)) {
+                    allJobs.push(mj);
+                    allJobIds.add(mj.id);
+                }
+            });
             
             return { jobs: allJobs, applications: applicationsMap };
         }
@@ -286,116 +307,134 @@ export default function JobBoard({ isEmbedded = false }) {
                             {search ? ` matching "${search}"` : ''}
                         </p>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-                            {filtered.map(job => (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+                            {filtered.map(job => {
+                                const cardBorder = 'border border-indigo-100/90 dark:border-slate-800 hover:border-[#403f75]/60 dark:hover:border-indigo-500/50';
+                                const topAccentGradient = 'from-[#403f75] via-indigo-500 to-[#57569b]';
+                                
+                                return (
                                 <div
                                     key={job.id}
-                                    className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border-2 border-shnoor-indigo overflow-hidden transition-all duration-200 hover:shadow-[0_8px_30px_rgba(14,14,39,0.08)]"
+                                    className={`bg-white dark:bg-[#1A1A32] ${cardBorder} rounded-2xl shadow-[0_2px_12px_rgba(14,14,39,0.04)] hover:shadow-[0_12px_28px_rgba(64,63,117,0.12)] transition-all duration-200 flex flex-col justify-between group relative min-h-[220px] h-full overflow-hidden`}
                                 >
-                                    {/* Card header */}
-                                    <div className="bg-shnoor-lavender/50 border-b border-shnoor-mist px-6 py-5">
-                                        <div className="flex flex-col sm:flex-row items-start sm:justify-between gap-3">
-                                            <div className="w-full sm:w-auto">
-                                                <h2 className="text-xl font-bold text-shnoor-navy break-words">{job.job_role}</h2>
-                                                <p className="flex items-center space-x-1.5 mt-1 text-shnoor-indigoMedium text-sm flex-wrap">
-                                                    <Building2 size={14} className="shrink-0" />
-                                                    <span className="break-words">{job.company_name}</span>
-                                                </p>
-                                            </div>
-                                            <div className="flex flex-wrap gap-2 shrink-0 w-full sm:w-auto mt-1 sm:mt-0">
-                                                {!applications.has(job.id) && isExpiringSoon(job.registration_deadline) && (
-                                                    <span className="bg-shnoor-warningLight text-shnoor-warning text-xs font-bold px-3 py-1 rounded-full border border-shnoor-warning whitespace-nowrap">
-                                                        ⚡ Closing Soon
-                                                    </span>
-                                                )}
-                                                {!applications.has(job.id) && isRegistrationClosed(job.registration_deadline) && (
-                                                    <span className="bg-gray-100 text-gray-600 text-xs font-bold px-3 py-1 rounded-full border border-gray-300 whitespace-nowrap">
-                                                        Registration Closed
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
+                                    {/* Top color accent strip (3-4px) */}
+                                    <div className={`h-[3.5px] w-full bg-gradient-to-r ${topAccentGradient}`} />
 
-                                    {/* Card body */}
-                                    <div className="px-6 py-5 space-y-4">
+                                    <div className="p-5 sm:p-6 flex flex-col flex-1 justify-between">
+                                        {/* Top Header Row */}
                                         <div>
-                                            <p className="text-xs font-bold uppercase tracking-wider text-shnoor-indigoMedium mb-1">Job Description</p>
-                                            <p className="text-sm text-shnoor-navy whitespace-pre-wrap leading-relaxed">{job.job_description}</p>
-                                        </div>
-
-                                        <div className="h-px bg-shnoor-mist" />
-
-                                        <div>
-                                            <p className="text-xs font-bold uppercase tracking-wider text-shnoor-indigoMedium mb-1">Eligibility Criteria</p>
-                                            <p className="text-sm text-shnoor-navy whitespace-pre-wrap leading-relaxed">{job.eligibility_criteria}</p>
-                                        </div>
-
-                                        {/* Deadline banner - only show if not enrolled */}
-                                        {!applications.has(job.id) && (
-                                            <div className={`flex items-center space-x-2 px-4 py-3 rounded-lg text-sm font-semibold
-                                            ${isRegistrationClosed(job.registration_deadline)
-                                                    ? 'bg-gray-100 border border-gray-300 text-gray-600'
-                                                    : isExpiringSoon(job.registration_deadline)
-                                                        ? 'bg-shnoor-warningLight border border-shnoor-warningLight text-shnoor-warning'
-                                                        : 'bg-shnoor-lavender border border-shnoor-mist text-shnoor-indigo'
-                                                }`}>
-                                                <Clock size={16} />
-                                                <span>
-                                                    {isRegistrationClosed(job.registration_deadline)
-                                                        ? `Registration closed on ${fmtDeadline(job.registration_deadline)}`
-                                                        : `Deadline: ${fmtDeadline(job.registration_deadline)}`
-                                                    }
-                                                </span>
-                                            </div>
-                                        )}
-
-                                        {/* Enroll / Status buttons */}
-                                        {applications.has(job.id) ? (
-                                            <div className="space-y-3">
-                                                <div className="w-full py-3 bg-shnoor-successLight border-2 border-shnoor-success text-shnoor-success rounded-lg font-bold text-center flex items-center justify-center space-x-2">
-                                                    <CheckCircle size={20} />
-                                                    <span>Enrolled</span>
+                                            <div className="flex items-center justify-between gap-3 mb-3.5">
+                                                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/70 text-[#403f75] dark:text-indigo-300 flex items-center justify-center flex-shrink-0 border border-indigo-100/80 dark:border-indigo-900/60 shadow-2xs">
+                                                    <Briefcase size={18} />
                                                 </div>
 
-                                                {applications.get(job.id).total_tests > applications.get(job.id).completed_tests && (
-                                                    <button
-                                                        onClick={() => navigate('/student/my-applications')}
-                                                        className="w-full py-3 bg-shnoor-indigo hover:bg-[#4d4d9c] text-white rounded-lg font-bold transition-all shadow-sm"
-                                                    >
-                                                        Take Pending Tests ({applications.get(job.id).total_tests - applications.get(job.id).completed_tests} remaining)
-                                                    </button>
-                                                )}
-
-                                                <button
-                                                    onClick={() => navigate('/student/my-applications')}
-                                                    className="w-full py-3 border-2 border-shnoor-indigo text-shnoor-indigo rounded-lg font-bold hover:bg-shnoor-lavender transition-all"
-                                                >
-                                                    View Application Details
-                                                </button>
+                                                <div className="flex flex-wrap gap-2 shrink-0">
+                                                    {!applications.has(job.id) && isExpiringSoon(job.registration_deadline) && (
+                                                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200/70 dark:border-amber-800/60 whitespace-nowrap">
+                                                            ⚡ Closing Soon
+                                                        </span>
+                                                    )}
+                                                    {!applications.has(job.id) && isRegistrationClosed(job.registration_deadline) && (
+                                                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-600 dark:bg-slate-800/80 dark:text-slate-400 border border-slate-200/70 dark:border-slate-700/60 whitespace-nowrap">
+                                                            Registration Closed
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </div>
-                                        ) : (
-                                            <button
-                                                onClick={() => handleEnrollClick(job)}
-                                                disabled={enrollingJobs.has(job.id)}
-                                                className="flex items-center justify-center space-x-2 w-full py-3.5 bg-shnoor-indigo hover:bg-[#4d4d9c] text-white rounded-lg font-bold text-base transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                                            >
-                                                {enrollingJobs.has(job.id) ? (
-                                                    <>
-                                                        <Loader2 size={18} className="animate-spin" />
-                                                        <span>Enrolling...</span>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <CheckCircle2 size={18} />
-                                                        <span>Enroll Now</span>
-                                                    </>
-                                                )}
-                                            </button>
-                                        )}
+
+                                            {/* Title & Metadata */}
+                                            <div className="space-y-2">
+                                                <h3
+                                                    className="font-bold text-base sm:text-lg text-slate-900 dark:text-white line-clamp-2 leading-snug break-words group-hover:text-[#403f75] dark:group-hover:text-indigo-300 transition-colors"
+                                                    title={job.job_role}
+                                                >
+                                                    {job.job_role}
+                                                </h3>
+                                                <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-400 pt-0.5">
+                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50/80 dark:bg-indigo-950/50 text-[#403f75] dark:text-indigo-300 border border-indigo-100 dark:border-indigo-900/60">
+                                                        <Building2 size={13} className="text-[#403f75] dark:text-indigo-400 flex-shrink-0" />
+                                                        <span>{job.company_name}</span>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            
+                                            {job.job_description && (
+                                                <p className="mt-3.5 text-[13px] sm:text-sm text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                                                    {job.job_description}
+                                                </p>
+                                            )}
+                                        </div>
+
+
+
+                                        {/* Stats / Deadline Section */}
+                                        <div className="mt-4 pt-3.5 border-t border-slate-100 dark:border-slate-800">
+                                            {!applications.has(job.id) && (
+                                                <div className={`flex items-center gap-2.5 bg-slate-50/90 dark:bg-slate-800/60 rounded-xl p-3 sm:p-3.5 border border-slate-100 dark:border-slate-700/60 mb-3.5`}>
+                                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center shadow-2xs flex-shrink-0 ${isRegistrationClosed(job.registration_deadline) ? 'bg-slate-100 text-slate-500' : isExpiringSoon(job.registration_deadline) ? 'bg-amber-50 text-amber-500' : 'bg-indigo-50 text-[#403f75]'}`}>
+                                                        <Clock size={16} />
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <p className="text-[10px] sm:text-xs font-medium text-slate-500 dark:text-slate-400 leading-tight mb-0.5">
+                                                            {isRegistrationClosed(job.registration_deadline) ? 'Registration Closed' : 'Deadline'}
+                                                        </p>
+                                                        <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white leading-tight truncate">
+                                                            {fmtDeadline(job.registration_deadline)}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Enroll / Status buttons */}
+                                            {applications.has(job.id) ? (
+                                                <div className="flex items-center gap-2.5 h-10 sm:h-11">
+                                                    <div className="h-full px-4 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/60 text-emerald-600 dark:text-emerald-400 rounded-xl font-bold flex items-center justify-center gap-2 shadow-2xs flex-shrink-0">
+                                                        <CheckCircle size={16} />
+                                                        <span className="text-xs sm:text-sm">Enrolled</span>
+                                                    </div>
+                                                    
+                                                    {applications.get(job.id).total_tests > applications.get(job.id).completed_tests ? (
+                                                        <button
+                                                            onClick={() => navigate('/student/my-applications')}
+                                                            className="h-full flex-1 inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#403f75] to-[#57569b] hover:from-[#343360] hover:to-[#4a4988] active:scale-98 text-white text-xs sm:text-sm font-bold rounded-xl transition-all shadow-md shadow-[#403f75]/20 cursor-pointer"
+                                                        >
+                                                            Take Pending Tests ({applications.get(job.id).total_tests - applications.get(job.id).completed_tests})
+                                                        </button>
+                                                    ) : (
+                                                        <button
+                                                            onClick={() => navigate('/student/my-applications')}
+                                                            className="h-full flex-1 inline-flex items-center justify-center gap-1.5 bg-slate-50 dark:bg-[#1E1E38] hover:bg-indigo-50/70 dark:hover:bg-indigo-950/40 text-slate-700 dark:text-slate-200 hover:text-[#403f75] dark:hover:text-indigo-300 text-xs sm:text-sm font-bold rounded-xl transition-all cursor-pointer border border-slate-200/90 dark:border-slate-700 hover:border-indigo-200/80 shadow-2xs"
+                                                        >
+                                                            View Details
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <div className="flex h-10 sm:h-11">
+                                                    <button
+                                                        onClick={() => handleEnrollClick(job)}
+                                                        disabled={enrollingJobs.has(job.id) || isRegistrationClosed(job.registration_deadline)}
+                                                        className="h-full w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#403f75] to-[#57569b] hover:from-[#343360] hover:to-[#4a4988] disabled:opacity-50 disabled:cursor-not-allowed active:scale-98 text-white text-xs sm:text-sm font-bold rounded-xl transition-all shadow-md shadow-[#403f75]/20 cursor-pointer"
+                                                    >
+                                                        {enrollingJobs.has(job.id) ? (
+                                                            <>
+                                                                <Loader2 size={16} className="animate-spin" />
+                                                                <span>Enrolling...</span>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <CheckCircle2 size={16} />
+                                                                <span>Enroll Now</span>
+                                                            </>
+                                                        )}
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </div>
                 )}

@@ -45,6 +45,7 @@ const ICON_PIN = 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.2
 /* ─── Nav links (smooth-scroll) ───────────────────────────────────────────── */
 const NAV_LINKS = [
   { label: 'Home', href: '#home' },
+  { label: 'Find Jobs', href: '#find-jobs' },
   { label: 'How It Works', href: '#how-it-works' },
   { label: 'Features', href: '#features' },
   { label: 'About', href: '#about' },
@@ -85,6 +86,21 @@ const DEFAULT_PLANS = [
     price_monthly: 'Custom',
     features: ['Unlimited candidates', 'Dedicated account manager', 'Custom integrations', 'Full proctoring suite', 'SLA guarantee'],
   },
+];
+
+const MOCK_JOBS = [
+  { id: 1, title: 'Data Analytics', company: 'TechCorp', location: 'Remote', type: 'Full-time' },
+  { id: 2, title: 'React Developer', company: 'WebSolutions', location: 'New York, NY', type: 'Contract' },
+  { id: 3, title: 'Backend Developer', company: 'DataSystems', location: 'San Francisco, CA', type: 'Full-time' },
+  { id: 4, title: 'Data Scientist', company: 'AI Innovations', location: 'Remote', type: 'Full-time' },
+  { id: 5, title: 'DevOps Engineer', company: 'CloudNet', location: 'Remote', type: 'Full-time' },
+  { id: 6, title: 'Security Analyst', company: 'CyberSec Systems', location: 'Austin, TX', type: 'Contract' },
+  { id: 7, title: 'iOS Developer', company: 'MobileFirst', location: 'London, UK', type: 'Full-time' },
+  { id: 8, title: 'Java Developer', company: 'FinTech Solutions', location: 'New York, NY', type: 'Full-time' },
+  { id: 9, title: 'UI/UX Designer', company: 'UX Studios', location: 'Berlin, DE', type: 'Contract' },
+  { id: 10, title: 'Machine Learning Engineer', company: 'NextGen AI', location: 'Remote', type: 'Full-time' },
+  { id: 11, title: 'Unity Developer', company: 'GameDev Corp', location: 'Tokyo, JP', type: 'Full-time' },
+  { id: 12, title: 'Research Scientist', company: 'Quantum Computing', location: 'Boston, MA', type: 'Full-time' }
 ];
 
 /* ─── Main Component ──────────────────────────────────────────────────────── */
@@ -130,6 +146,8 @@ const LandingPage = () => {
   const [plansLoading, setPlansLoading] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [showJobs, setShowJobs] = useState(false);
+  const [showAllJobs, setShowAllJobs] = useState(false);
   const navRef = useRef(null);
 
   // Fetch live pricing plans during idle time
@@ -162,6 +180,7 @@ const LandingPage = () => {
   }, []);
 
   const scrollToSection = (e, href) => {
+    if (!href.startsWith('#')) return; // Allow normal navigation for non-hash links
     e.preventDefault();
     setMobileMenuOpen(false);
     if (href === '#home') {
@@ -363,6 +382,78 @@ const LandingPage = () => {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════════════════════
+          2.5 FIND JOBS — Discover opportunities
+          ══════════════════════════════════════════════════════════════════════ */}
+      <section id="find-jobs" className="landing-find-jobs bg-theme-panel/30 py-16 sm:py-24 px-4 sm:px-8 border-t border-theme-border/60">
+        <div className="max-w-[1280px] mx-auto text-center">
+          <span className="inline-block text-xs font-extrabold text-theme-accent uppercase tracking-[0.25em] mb-4 bg-theme-panel border border-theme-border px-3.5 py-1.5 rounded-full shadow-xs">FIND JOBS</span>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-theme-text mb-4 leading-tight tracking-tight">
+            Prove your skills and land your dream job
+          </h2>
+          <p className="text-base sm:text-lg text-theme-muted max-w-2xl mx-auto leading-relaxed font-normal mb-8">
+            Browse active recruitment drives and open positions from top organizations using SHNOOR Assessments. Apply, take proctored technical tests, and showcase your true potential directly through our platform.
+          </p>
+          <button 
+            onClick={() => setShowJobs(true)}
+            className="group inline-flex items-center gap-2 bg-theme-accent hover:bg-theme-accent2 text-white text-sm font-bold px-8 py-4 rounded-xl shadow-lg shadow-theme-accent/20 transition-all cursor-pointer">
+            Browse Job Board
+            <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+          </button>
+
+          {showJobs && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fadeIn text-left" onClick={() => setShowJobs(false)}>
+              <div className="bg-theme-card border border-theme-border rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl relative" onClick={e => e.stopPropagation()}>
+                {/* Modal Header */}
+                <div className="sticky top-0 bg-theme-card/95 backdrop-blur z-10 px-6 py-5 border-b border-theme-border flex justify-between items-center">
+                  <div>
+                    <h2 className="text-2xl font-bold text-theme-text">Featured Opportunities</h2>
+                    <p className="text-theme-muted text-sm mt-1">Top picks for you</p>
+                  </div>
+                  <button onClick={() => setShowJobs(false)} className="w-10 h-10 bg-theme-panel hover:bg-theme-border text-theme-muted hover:text-theme-text rounded-full flex items-center justify-center transition-colors cursor-pointer">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                  </button>
+                </div>
+
+                {/* Modal Body */}
+                <div className="p-6 grid gap-4">
+                  {(showAllJobs ? MOCK_JOBS : MOCK_JOBS.slice(0, 4)).map(job => (
+                    <Link to="/job-board" key={job.id} className="bg-theme-panel/50 border border-theme-border rounded-xl p-5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-theme-accent/50 hover:bg-theme-panel transition-all cursor-pointer group">
+                      <div>
+                        <h3 className="text-lg font-bold text-theme-text mb-1 group-hover:text-theme-accent transition-colors">{job.title}</h3>
+                        <div className="flex flex-wrap items-center gap-3 text-sm text-theme-muted">
+                          <span className="font-semibold text-theme-accent">{job.company}</span>
+                          <span>•</span>
+                          <span>{job.location}</span>
+                          <span>•</span>
+                          <span>{job.type}</span>
+                        </div>
+                      </div>
+                      <div className="shrink-0 text-theme-muted opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+                
+                {/* Modal Footer */}
+                <div className="p-6 border-t border-theme-border bg-theme-panel/30 text-center">
+                  {!showAllJobs ? (
+                    <button onClick={() => setShowAllJobs(true)} className="inline-flex items-center justify-center bg-theme-accent hover:bg-theme-accent2 text-white font-bold text-sm px-6 py-3 rounded-xl transition-colors shadow-sm cursor-pointer">
+                      View more positions ↓
+                    </button>
+                  ) : (
+                    <button onClick={() => setShowAllJobs(false)} className="inline-flex items-center justify-center bg-theme-panel hover:bg-theme-border text-theme-text border border-theme-border font-bold text-sm px-6 py-3 rounded-xl transition-colors shadow-sm cursor-pointer">
+                      View less positions ↑
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
