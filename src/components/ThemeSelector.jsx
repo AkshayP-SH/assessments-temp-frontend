@@ -1,20 +1,20 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { applyTheme, getSavedTheme } from '../utils/theme';
 
-const SunIcon = ({ className = "w-[18px] h-[18px]" }) => (
-  <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+const SunIcon = ({ className = "w-5 h-5", style = {} }) => (
+  <svg className={className} style={style} fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
     <circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
   </svg>
 );
 
-const MoonIcon = ({ className = "w-[18px] h-[18px]" }) => (
-  <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+const MoonIcon = ({ className = "w-5 h-5", style = {} }) => (
+  <svg className={className} style={style} fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
     <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
   </svg>
 );
 
-const LeafIcon = ({ className = "w-[18px] h-[18px]" }) => (
-  <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+const LeafIcon = ({ className = "w-5 h-5", style = {} }) => (
+  <svg className={className} style={style} fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
     <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
   </svg>
 );
@@ -97,7 +97,7 @@ const ThemeSelector = ({ className = '', variant = 'dark' }) => {
     };
   }, [isOpen]);
 
-  const ActiveIcon = theme === 'dark' ? MoonIcon : theme === 'green' ? LeafIcon : SunIcon;
+  const ActiveIcon = theme === 'dark' ? MoonIcon : (theme === 'green' || theme === 'leaf') ? LeafIcon : SunIcon;
 
   return (
     <div ref={rootRef} className="relative">
@@ -111,18 +111,37 @@ const ThemeSelector = ({ className = '', variant = 'dark' }) => {
         aria-expanded={isOpen}
         title="Change theme"
       >
-        <ActiveIcon className="w-[18px] h-[18px]" />
+        <ActiveIcon className="w-5 h-5 stroke-[2.2]" />
       </button>
 
       {isOpen && (
         <div
           ref={menuRef}
           style={{ top: menuPosition.top, left: menuPosition.left }}
-          className="theme-selector-menu fixed z-50 flex gap-1 rounded-2xl p-1.5 shadow-xl"
+          className={`theme-selector-menu fixed z-50 flex gap-1 rounded-2xl p-1.5 shadow-2xl border ${
+            theme === 'dark'
+              ? 'bg-[#1E1E38] border-slate-700 text-slate-300'
+              : (theme === 'green' || theme === 'leaf')
+              ? 'bg-white border-[#C8D8CE] text-[#111827]'
+              : 'bg-white border-slate-200 text-[#111827]'
+          }`}
         >
           {THEMES.map((themeOption) => {
             const { id, label } = themeOption;
-            const isActive = theme === id;
+            const isActive = theme === id || (id === 'green' && theme === 'leaf');
+
+            let activeBg = '#403F75';
+            if (theme === 'green' || theme === 'leaf') {
+              activeBg = '#235D43';
+            } else if (theme === 'dark') {
+              activeBg = '#6366F1';
+            }
+
+            const iconStrokeColor = isActive
+              ? '#FFFFFF'
+              : theme === 'dark'
+              ? '#CBD5E1'
+              : '#111827';
 
             return (
               <button
@@ -135,9 +154,22 @@ const ThemeSelector = ({ className = '', variant = 'dark' }) => {
                 }}
                 aria-label={label}
                 title={label}
-                className={`theme-selector-option flex h-10 w-10 items-center justify-center rounded-xl outline-none focus:outline-none transition-colors ${isActive ? 'is-active' : ''}`}
+                style={{
+                  backgroundColor: isActive ? activeBg : 'transparent',
+                  color: iconStrokeColor,
+                }}
+                className={`theme-selector-option flex h-10 w-10 items-center justify-center rounded-xl outline-none focus:outline-none transition-all cursor-pointer ${
+                  isActive ? 'is-active shadow-sm' : 'hover:bg-slate-100 dark:hover:bg-white/10'
+                }`}
               >
-                <themeOption.Icon className="w-[18px] h-[18px]" />
+                <themeOption.Icon
+                  className="w-5 h-5"
+                  style={{
+                    stroke: iconStrokeColor,
+                    strokeWidth: '2.5px',
+                    color: iconStrokeColor,
+                  }}
+                />
               </button>
             );
           })}

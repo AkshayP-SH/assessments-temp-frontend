@@ -179,9 +179,9 @@ const ResultsTab = React.memo(({
       <div className="flex items-center gap-2">
         <button
           onClick={() => setDetailViewTab('results')}
-          className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${
+          className={`px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
             detailViewTab === 'results'
-              ? 'bg-[#44448E] text-white shadow-sm'
+              ? 'bg-gradient-to-r from-[#403f75] to-[#57569b] text-white shadow-xs'
               : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200 hover:bg-slate-50'
           }`}
         >
@@ -190,9 +190,9 @@ const ResultsTab = React.memo(({
         </button>
         <button
           onClick={() => setDetailViewTab('feedback')}
-          className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${
+          className={`px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
             detailViewTab === 'feedback'
-              ? 'bg-[#44448E] text-white shadow-sm'
+              ? 'bg-gradient-to-r from-[#403f75] to-[#57569b] text-white shadow-xs'
               : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200 hover:bg-slate-50'
           }`}
         >
@@ -220,19 +220,19 @@ const ResultsTab = React.memo(({
             <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
               <div className="text-center">
                 <p className="text-xs text-slate-500 font-medium mb-1">Total Attempts</p>
-                <p className="text-2xl font-bold text-slate-900">{selectedExamStudents.length}</p>
+                <p className="text-2xl font-bold text-slate-900 dark:text-white">{selectedExamStudents.length}</p>
               </div>
-              <div className="text-center md:border-l md:border-slate-200">
+              <div className="text-center md:border-l md:border-slate-200 dark:md:border-slate-800">
                 <p className="text-xs text-slate-500 font-medium mb-1">Average Score</p>
-                <p className="text-2xl font-bold text-[#44448E]">{avgScore.toFixed(1)}/{maxTotal}</p>
+                <p className="text-2xl font-bold text-[#403f75] dark:text-[#a5a4e8]">{avgScore.toFixed(1)}/{maxTotal}</p>
               </div>
-              <div className="text-center md:border-l md:border-slate-200">
+              <div className="text-center md:border-l md:border-slate-200 dark:md:border-slate-800">
                 <p className="text-xs text-slate-500 font-medium mb-1">Highest Score</p>
-                <p className="text-2xl font-bold text-emerald-600">{highestScore}/{maxTotal}</p>
+                <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{highestScore}/{maxTotal}</p>
               </div>
-              <div className="text-center md:border-l md:border-slate-200">
+              <div className="text-center md:border-l md:border-slate-200 dark:md:border-slate-800">
                 <p className="text-xs text-slate-500 font-medium mb-1">Lowest Score</p>
-                <p className="text-2xl font-bold text-amber-600">{lowestScore}/{maxTotal}</p>
+                <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">{lowestScore}/{maxTotal}</p>
               </div>
               <div className="text-center md:border-l md:border-slate-200">
                 <p className="text-xs text-slate-500 font-medium mb-1">Pass Rate</p>

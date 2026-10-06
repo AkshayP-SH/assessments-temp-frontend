@@ -45,7 +45,7 @@ const Instructions = () => {
             setTestDetails({
               title: data.test.title,
               duration: data.test.duration || 60,
-              totalQuestions: data.test.questions.length
+              totalQuestions: (data.test.questions?.length || 0) + (data.test.codingQuestions?.length || 0)
             });
 
             // Check if progress exists

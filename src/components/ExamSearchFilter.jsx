@@ -253,8 +253,8 @@ const ExamSearchFilter = memo(({
               type="button"
               onClick={() => setShowFilters(!showFilters)}
               className={`h-11 px-4 rounded-xl border text-sm font-bold flex items-center gap-2 transition-all cursor-pointer ${showFilters
-                  ? 'bg-[#403f75] text-white border-[#403f75] shadow-xs'
-                  : 'bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border-slate-200/80 dark:border-slate-700'
+                ? 'bg-[#403f75] text-white border-[#403f75] shadow-xs'
+                : 'bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border-slate-200/80 dark:border-slate-700'
                 }`}
             >
               <Filter size={16} />

@@ -5,6 +5,7 @@ import ExamSearchFilter from '../components/ExamSearchFilter';
 import StudentInterviews from '../components/StudentInterviews';
 import JobBoard from './JobBoard';
 import MyApplications from './MyApplications';
+import StudentProfile from './StudentProfile';
 import StudentSupportChatbot from '../components/chatbot/StudentSupportChatbot';
 import ThemeSelector from '../components/ThemeSelector';
 import StudentHeader from '../components/StudentHeader';
@@ -14,7 +15,7 @@ import { apiFetch } from '../config/api';
 import shnoorLogo from '../assets/shnoor-logo.png';
 import { useSEO } from '../hooks/useSEO';
 import { useQuery } from '@tanstack/react-query';
-const STUDENT_DASHBOARD_TABS = ['tests', 'interviews', 'job-board', 'my-applications'];
+const STUDENT_DASHBOARD_TABS = ['tests', 'interviews', 'job-board', 'my-applications', 'profile'];
 
 const Dashboard = () => {
   useSEO({
@@ -48,6 +49,10 @@ const Dashboard = () => {
 
   // Search, Filter, Sort States
   const [searchTerm, setSearchTerm] = useState('');
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState(() => {
+    const saved = localStorage.getItem('studentSidebarPinned');
+    return saved === null ? true : saved === 'true';
+  });
   const [filters, setFilters] = useState({
     published: 'all',
     attempted: 'all',
@@ -220,7 +225,7 @@ const Dashboard = () => {
   }, [availableTests, searchTerm, filters, sortBy, testsWithProgress]);
 
   return (
-    <div className="min-h-screen bg-[#F8F8FB]">
+    <div className="min-h-screen bg-[#F0F2F8] dark:bg-[#0E0E27] text-slate-900 dark:text-slate-100">
       {showJobModal && selectedTest && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4 animate-fade-in">
           <div className="bg-white dark:bg-[#1E1E38] rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden">
@@ -367,14 +372,15 @@ const Dashboard = () => {
         onLogout={handleLogout}
       />
 
-      {/* Collapsible Sidebar Rail + Mobile Tabs */}
+      {/* Sidebar */}
       <StudentSidebar
         activeTab={activeTab}
         onTabChange={setActiveTab}
+        onExpandChange={setIsSidebarExpanded}
       />
 
-      {/* Main Content with offset for desktop sidebar rail */}
-      <main className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:pr-8 lg:pl-[96px] py-6 sm:py-8 transition-all">
+      {/* Main content */}
+      <main className={`w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:pr-8 ${isSidebarExpanded ? 'lg:pl-[288px]' : 'lg:pl-[96px]'} py-6 sm:py-8 transition-all duration-300 ease-in-out`}>
 
         {/* Tests Tab */}
         {activeTab === 'tests' && (
@@ -401,16 +407,16 @@ const Dashboard = () => {
 
 
             {!loading && availableTests.length === 0 && (
-              <div className="text-center py-12 bg-white rounded-xl border border-shnoor-mist shadow-[0_8px_30px_rgba(14,14,39,0.06)]">
-                <BookOpen className="mx-auto h-12 w-12 text-shnoor-mist mb-4" />
-                <h3 className="text-lg font-bold text-shnoor-navy">No Tests Available</h3>
-                <p className="text-shnoor-indigoMedium mt-2">You have completed all available tests or there are no new assessments at this time.</p>
+              <div className="text-center py-12 bg-white dark:bg-[#1E1E38] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                <BookOpen className="mx-auto h-12 w-12 text-slate-400 dark:text-slate-500 mb-4" />
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">No Tests Available</h3>
+                <p className="text-slate-500 dark:text-slate-400 mt-2">You have completed all available tests or there are no new assessments at this time.</p>
               </div>
             )}
 
             {!loading && availableTests.length > 0 && (
               <>
-                {/* Search & Filter Bar with generous bottom spacing */}
+                {/* Search & filter */}
                 <div className="mb-8 sm:mb-10">
                   <ExamSearchFilter
                     onSearchChange={setSearchTerm}
@@ -435,152 +441,154 @@ const Dashboard = () => {
                     <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 mt-2">Try adjusting your search or filters to see more tests.</p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 sm:gap-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
                     {filteredTests.map((test) => {
                       const isCompleted = test.alreadyTaken || test.testStatus === 'expired';
                       const isInProgress = test.isAvailable && !test.alreadyTaken && testsWithProgress.has(test.id);
 
-                      // Card styling with high visibility and contrast
-                      let cardBorder = 'border-2 border-slate-200 dark:border-slate-700 hover:border-[#403f75] dark:hover:border-indigo-500 shadow-sm hover:shadow-md';
-                      let cardBg = 'bg-white dark:bg-[#1E1E38]';
-
-                      if (test.isMockTest) {
-                        cardBg = 'bg-[#F2FAF6] dark:bg-[#0d2a20]';
-                        cardBorder = 'border-2 border-emerald-300 dark:border-emerald-700 shadow-sm';
-                      } else if (isCompleted) {
-                        cardBg = 'bg-white dark:bg-[#1E1E38]';
-                        cardBorder = 'border-2 border-slate-300 dark:border-slate-700 shadow-sm';
-                      } else if (test.testStatus === 'upcoming') {
-                        cardBg = 'bg-amber-50/40 dark:bg-amber-950/20';
-                        cardBorder = 'border-2 border-amber-300 dark:border-amber-700 shadow-sm';
-                      }
+                      // Uniform blue/indigo styling for cards
+                      const topAccentGradient = 'from-[#403f75] via-indigo-500 to-[#57569b]';
+                      const cardBorder = 'border border-indigo-100/90 dark:border-slate-800 hover:border-[#403f75]/60 dark:hover:border-indigo-500/50';
+                      const iconBoxClass = 'bg-indigo-50 dark:bg-indigo-950/60 text-[#403f75] dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-900/60';
 
                       return (
                         <div
                           key={test.id}
-                          className={`${cardBg} ${cardBorder} ${test.isMockTest ? 'col-span-full' : ''} rounded-2xl p-6 sm:p-7 flex flex-col justify-between transition-all duration-200`}
+                          className={`bg-white dark:bg-[#1A1A32] ${cardBorder} ${test.isMockTest ? 'col-span-full' : ''} rounded-2xl flex flex-col justify-between transition-all duration-200 shadow-[0_2px_12px_rgba(14,14,39,0.04)] hover:shadow-[0_12px_28px_rgba(64,63,117,0.12)] min-h-[320px] h-full overflow-hidden group`}
                         >
-                          <div>
-                            {/* Card Top Header: Badges and Icon */}
-                            <div className="flex justify-between items-start mb-4 gap-3">
-                              <div className="flex flex-wrap items-center gap-2">
-                                {/* Subject Tag */}
-                                <span className="px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-300/80 dark:border-slate-700">
-                                  {test.subject || 'General'}
-                                </span>
+                          {/* Card top color accent bar (3-4px) */}
+                          <div className={`h-[3.5px] w-full bg-gradient-to-r ${topAccentGradient}`} />
 
-                                {/* Status Tags */}
-                                {test.isMockTest && (
-                                  <span className="px-3 py-1 rounded-lg text-xs font-bold bg-indigo-50 dark:bg-indigo-950/60 text-[#403f75] dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/60">
-                                    🎯 Mock Test
+                          <div className="p-5 sm:p-6 flex flex-col flex-1 justify-between">
+                            <div className="flex-1 flex flex-col">
+                              {/* Card Top Header: Badges and Icon */}
+                              <div className="flex justify-between items-start mb-3.5 gap-2.5">
+                                <div className="flex flex-wrap items-center gap-1.5">
+                                  {/* Subject Tag */}
+                                  <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase tracking-wider bg-indigo-50/80 dark:bg-indigo-950/50 text-[#403f75] dark:text-indigo-300 border border-indigo-100 dark:border-indigo-900/60">
+                                    {test.subject || 'General'}
                                   </span>
-                                )}
 
-                                {isCompleted && (
-                                  <span className="px-3 py-1 rounded-lg text-xs font-bold bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800/60">
-                                    All Attempts Used ({test.attemptsTaken}/{test.maxAttempts})
-                                  </span>
-                                )}
+                                  {/* Status Tags */}
+                                  {test.isMockTest && (
+                                    <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800/60">
+                                      Mock Test
+                                    </span>
+                                  )}
 
-                                {!isCompleted && !test.isMockTest && test.isAvailable && (
-                                  <span className="px-3 py-1 rounded-lg text-xs font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60">
-                                    Available
-                                  </span>
-                                )}
+                                  {isCompleted && (
+                                    <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400 border border-rose-200/80 dark:border-rose-800/60">
+                                      Attempts ({test.attemptsTaken}/{test.maxAttempts})
+                                    </span>
+                                  )}
 
-                                {isInProgress && (
-                                  <span className="px-3 py-1 rounded-lg text-xs font-bold bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-400 border border-teal-200 dark:border-teal-800/60">
-                                    ⏸ In Progress
-                                  </span>
-                                )}
+                                  {!isCompleted && !test.isMockTest && test.isAvailable && (
+                                    <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-800/60">
+                                      Available
+                                    </span>
+                                  )}
 
-                                {test.testStatus === 'upcoming' && !test.alreadyTaken && (
-                                  <span className="px-3 py-1 rounded-lg text-xs font-bold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800/60">
-                                    🕐 Upcoming
-                                  </span>
-                                )}
+                                  {isInProgress && (
+                                    <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-400 border border-teal-200/80 dark:border-teal-800/60">
+                                      In Progress
+                                    </span>
+                                  )}
+
+                                  {test.testStatus === 'upcoming' && !test.alreadyTaken && (
+                                    <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-200/80 dark:border-amber-800/60">
+                                      Upcoming
+                                    </span>
+                                  )}
+                                </div>
+
+                                <div className={`w-8 h-8 rounded-xl ${iconBoxClass} flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-105`}>
+                                  <BookOpen size={15} />
+                                </div>
                               </div>
 
-                              <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 flex-shrink-0">
-                                <BookOpen size={16} />
+                              {/* Title */}
+                              <h3 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white capitalize tracking-tight mt-1 mb-1 break-words leading-snug line-clamp-2 min-h-[2.5rem]" title={test.title}>
+                                {test.title}
+                              </h3>
+
+                              {test.isMockTest && (
+                                <p className="text-xs text-emerald-700 dark:text-emerald-400 font-semibold mb-2">
+                                  Practice test to get familiar with the assessment platform
+                                </p>
+                              )}
+
+                              {/* Details List */}
+                              <div className="space-y-2 mt-3.5 mb-5 text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium">
+                                <div className="flex items-center">
+                                  <div className="w-6 h-6 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 flex items-center justify-center mr-2.5 flex-shrink-0 text-[#403f75] dark:text-indigo-400">
+                                    <Clock size={13} />
+                                  </div>
+                                  <span>Duration: <strong className="text-slate-900 dark:text-white font-bold">{test.duration} mins</strong></span>
+                                </div>
+                                <div className="flex items-center">
+                                  <div className="w-6 h-6 rounded-lg bg-sky-50 dark:bg-sky-950/60 flex items-center justify-center mr-2.5 flex-shrink-0 text-sky-600 dark:text-sky-400">
+                                    <AlertCircle size={13} />
+                                  </div>
+                                  <span><strong className="text-slate-900 dark:text-white font-bold">{test.questions}</strong> Questions • <span className="capitalize">{test.difficulty || 'Medium'}</span></span>
+                                </div>
+                                <div className="flex items-center">
+                                  <div className="w-6 h-6 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center mr-2.5 flex-shrink-0 text-emerald-600 dark:text-emerald-400">
+                                    <BookOpen size={13} />
+                                  </div>
+                                  <span>Attempts: <strong className="text-slate-900 dark:text-white font-bold">{test.attemptsTaken}/{test.maxAttempts}</strong> ({test.attemptsRemaining} left)</span>
+                                </div>
+                                {test.startDateTime && (
+                                  <div className="flex items-center">
+                                    <div className="w-6 h-6 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center mr-2.5 flex-shrink-0 text-slate-500 dark:text-slate-400">
+                                      <Clock size={13} />
+                                    </div>
+                                    <span className="truncate">From: <strong className="text-slate-800 dark:text-slate-200">{new Date(test.startDateTime).toLocaleDateString()}</strong></span>
+                                  </div>
+                                )}
+                                {test.endDateTime && (
+                                  <div className="flex items-center">
+                                    <div className="w-6 h-6 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center mr-2.5 flex-shrink-0 text-slate-500 dark:text-slate-400">
+                                      <Clock size={13} />
+                                    </div>
+                                    <span className="truncate">Until: <strong className="text-slate-800 dark:text-slate-200">{new Date(test.endDateTime).toLocaleDateString()}</strong></span>
+                                  </div>
+                                )}
                               </div>
                             </div>
 
-                            {/* Title */}
-                            <h3 className="text-xl font-extrabold text-slate-900 dark:text-white capitalize tracking-tight mt-2 mb-1 break-words leading-tight">
-                              {test.title}
-                            </h3>
+                            {/* Action Buttons */}
+                            <div className="space-y-2.5 pt-2 mt-auto">
+                              <button
+                                onClick={() => handleViewJobDescription(test)}
+                                className="w-full h-10 px-3.5 bg-slate-50 dark:bg-[#1E1E38] hover:bg-indigo-50/70 dark:hover:bg-indigo-950/40 text-slate-700 dark:text-slate-200 hover:text-[#403f75] dark:hover:text-indigo-300 font-bold rounded-xl border border-slate-200/90 dark:border-slate-700 hover:border-indigo-200/80 transition-all text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer shadow-2xs"
+                              >
+                                <FileText size={15} />
+                                <span>View Job Description</span>
+                              </button>
 
-                            {test.isMockTest && (
-                              <p className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold mb-2">
-                                Practice test to get familiar with the platform
-                              </p>
-                            )}
-
-                            {/* Details List */}
-                            <div className="space-y-2.5 mt-4 mb-6 text-sm text-slate-700 dark:text-slate-300 font-medium">
-                              <div className="flex items-center">
-                                <Clock size={16} className="mr-2.5 text-slate-500 flex-shrink-0" />
-                                <span>Duration: <strong className="text-slate-900 dark:text-white font-bold">{test.duration} minutes</strong></span>
-                              </div>
-                              <div className="flex items-center">
-                                <AlertCircle size={16} className="mr-2.5 text-slate-500 flex-shrink-0" />
-                                <span><strong className="text-slate-900 dark:text-white font-bold">{test.questions}</strong> Questions • <span className="capitalize">{test.difficulty}</span> Level</span>
-                              </div>
-                              <div className="flex items-center">
-                                <BookOpen size={16} className="mr-2.5 text-slate-500 flex-shrink-0" />
-                                <span>Attempts: <strong className="text-slate-900 dark:text-white font-bold">{test.attemptsTaken}/{test.maxAttempts}</strong> ({test.attemptsRemaining} remaining)</span>
-                              </div>
-                              {test.startDateTime && (
-                                <div className="flex items-center">
-                                  <Clock size={16} className="mr-2.5 text-slate-500 flex-shrink-0" />
-                                  <span>Available from: <strong className="text-slate-800 dark:text-slate-200">{new Date(test.startDateTime).toLocaleString()}</strong></span>
-                                </div>
-                              )}
-                              {test.endDateTime && (
-                                <div className="flex items-center">
-                                  <Clock size={16} className="mr-2.5 text-slate-500 flex-shrink-0" />
-                                  <span>Available until: <strong className="text-slate-800 dark:text-slate-200">{new Date(test.endDateTime).toLocaleString()}</strong></span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Action Buttons */}
-                          <div className="space-y-3 pt-2">
-                            <button
-                              onClick={() => handleViewJobDescription(test)}
-                              className="w-full h-11 px-4 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold rounded-xl border border-slate-300 dark:border-slate-600 transition-all text-sm flex items-center justify-center gap-2 cursor-pointer shadow-2xs"
-                            >
-                              <FileText size={16} />
-                              <span>View Job Description</span>
-                            </button>
-
-                            <button
-                              onClick={() => test.isAvailable && !test.alreadyTaken && handleTakeTest(test.id)}
-                              disabled={!test.isAvailable || test.alreadyTaken}
-                              className={`w-full h-11 px-4 font-bold rounded-xl transition-all shadow-sm text-sm flex items-center justify-center ${
-                                test.alreadyTaken
-                                  ? 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold border border-slate-300 dark:border-slate-600 cursor-not-allowed'
+                              <button
+                                onClick={() => test.isAvailable && !test.alreadyTaken && handleTakeTest(test.id)}
+                                disabled={!test.isAvailable || test.alreadyTaken}
+                                className={`w-full h-10 px-3.5 font-bold rounded-xl transition-all shadow-sm text-xs sm:text-sm flex items-center justify-center ${test.alreadyTaken
+                                  ? 'bg-slate-100 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 border border-slate-200/80 dark:border-slate-700/80 cursor-not-allowed'
                                   : test.testStatus === 'upcoming'
-                                  ? 'bg-amber-500 text-white cursor-not-allowed'
-                                  : test.testStatus === 'expired'
-                                  ? 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold border border-slate-300 dark:border-slate-600 cursor-not-allowed'
-                                  : isInProgress || test.isMockTest
-                                  ? 'bg-emerald-600 hover:bg-emerald-700 active:scale-99 text-white cursor-pointer'
-                                  : 'bg-[#403f75] hover:bg-[#2d2c55] active:scale-99 text-white cursor-pointer'
-                              }`}
-                            >
-                              {test.alreadyTaken
-                                ? `Completed (${test.attemptsTaken}/${test.maxAttempts} attempts used)`
-                                : test.testStatus === 'upcoming'
-                                ? `🕐 Available from ${new Date(test.startDateTime).toLocaleString()}`
-                                : test.testStatus === 'expired'
-                                ? `⏰ Expired on ${new Date(test.endDateTime).toLocaleString()}`
-                                : isInProgress
-                                ? '▶ Resume Test'
-                                : `Take Test (${test.attemptsRemaining} attempts left)`}
-                            </button>
+                                    ? 'bg-amber-500 text-white cursor-not-allowed'
+                                    : test.testStatus === 'expired'
+                                      ? 'bg-slate-100 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 border border-slate-200/80 dark:border-slate-700/80 cursor-not-allowed'
+                                      : 'bg-gradient-to-r from-[#403f75] to-[#57569b] hover:from-[#343360] hover:to-[#4a4988] text-white shadow-md shadow-[#403f75]/20 active:scale-[0.99] cursor-pointer'
+                                  }`}
+                              >
+                                {test.alreadyTaken
+                                  ? `Completed (${test.attemptsTaken}/${test.maxAttempts} attempts)`
+                                  : test.testStatus === 'upcoming'
+                                    ? `Available from ${new Date(test.startDateTime).toLocaleDateString()}`
+                                    : test.testStatus === 'expired'
+                                      ? `Expired on ${new Date(test.endDateTime).toLocaleDateString()}`
+                                      : isInProgress
+                                        ? 'Resume Test'
+                                        : `Take Test (${test.attemptsRemaining} attempts left)`}
+                              </button>
+                            </div>
                           </div>
                         </div>
                       );
@@ -594,41 +602,91 @@ const Dashboard = () => {
 
         {/* Interviews Tab */}
         {activeTab === 'interviews' && (
-          <StudentInterviews />
+          <>
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <div>
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                  Interviews
+                </h2>
+                <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 mt-1 font-medium">
+                  View and join your scheduled interview sessions
+                </p>
+              </div>
+            </div>
+            <StudentInterviews />
+          </>
         )}
 
         {/* Job Board Tab */}
         {activeTab === 'job-board' && (
-          <JobBoard isEmbedded />
+          <>
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <div>
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                  Job Board
+                </h2>
+                <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 mt-1 font-medium">
+                  Explore and apply to active job openings and off-campus hiring opportunities
+                </p>
+              </div>
+            </div>
+            <JobBoard isEmbedded />
+          </>
         )}
 
         {/* My Applications Tab */}
         {activeTab === 'my-applications' && (
-          <MyApplications isEmbedded />
+          <>
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <div>
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                  My Applications
+                </h2>
+                <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 mt-1 font-medium">
+                  Track your job applications, assessment progress, and status updates
+                </p>
+              </div>
+            </div>
+            <MyApplications isEmbedded onBrowseJobs={() => setActiveTab('job-board')} />
+          </>
+        )}
+
+        {/* My Profile Tab */}
+        {activeTab === 'profile' && (
+          <StudentProfile />
         )}
 
         {/* Info Section */}
         {(activeTab === 'tests' || activeTab === 'interviews') && (
-          <div className="mt-12 bg-shnoor-lavender border-2 border-shnoor-mist rounded-xl p-6 shadow-sm">
-            <h3 className="text-lg font-bold text-shnoor-navy mb-3">Important Instructions</h3>
-            <ul className="space-y-2 text-sm text-shnoor-indigoMedium">
-              <li className="flex items-start">
-                <span className="mr-2 text-shnoor-indigo font-bold">•</span>
-                Ensure you have a stable internet connection before starting
-              </li>
-              <li className="flex items-start">
-                <span className="mr-2 text-shnoor-indigo font-bold">•</span>
-                All tests require fullscreen mode and prohibit tab switching
-              </li>
-              <li className="flex items-start">
-                <span className="mr-2 text-shnoor-indigo font-bold">•</span>
-                Three warnings for tab switching will result in automatic submission
-              </li>
-              <li className="flex items-start">
-                <span className="mr-2 text-shnoor-indigo font-bold">•</span>
-                Your progress is automatically saved - you can resume tests if interrupted
-              </li>
-            </ul>
+          <div className="mt-12 bg-white dark:bg-[#1E1E38] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-[0_2px_12px_rgba(14,14,39,0.04)] overflow-hidden">
+            <div className="h-1 w-full bg-gradient-to-r from-[#403f75] via-indigo-500 to-[#6868AC]" />
+            <div className="p-6 sm:p-7">
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#403f75] dark:bg-indigo-400" />
+                Important Assessment Guidelines
+              </h3>
+              <ul className="space-y-2.5 text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+                <li className="flex items-start">
+                  <span className="mr-2.5 text-[#403f75] dark:text-indigo-400 font-bold">•</span>
+                  <span><strong>Stable Connection:</strong> Ensure you have a stable internet connection before starting.</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="mr-2.5 text-[#403f75] dark:text-indigo-400 font-bold">•</span>
+                  <span><strong>Fullscreen Mode:</strong> All tests require fullscreen mode and prohibit tab switching.</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="mr-2.5 text-[#403f75] dark:text-indigo-400 font-bold">•</span>
+                  <span><strong>Strict Warnings:</strong> Three warnings for tab switching will result in automatic submission.</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="mr-2.5 text-[#403f75] dark:text-indigo-400 font-bold">•</span>
+                  <span><strong>Auto-Saved Progress:</strong> Your progress is automatically saved — you can resume tests if interrupted.</span>
+                </li>
+              </ul>
+            </div>
           </div>
         )}
       </main>
@@ -638,3 +696,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+

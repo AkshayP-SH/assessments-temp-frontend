@@ -1,11 +1,10 @@
-// src/pages/admin/AdminDashboard.jsx
 import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import {
   FileSpreadsheet, ArrowLeft, Users, AlertCircle, Video, Loader2, Building2, Briefcase, Landmark, FileText, X,
-  BarChart3, UploadCloud, ShieldAlert, CreditCard
+  BarChart3, UploadCloud, ShieldAlert, CreditCard, MessageSquare, Settings, ChevronLeft, ChevronRight, ChevronDown, User
 } from 'lucide-react';
 
 import { apiFetch } from '../../config/api';
@@ -23,6 +22,7 @@ const InterviewSchedule = lazy(() => import('./InterviewSchedule'));
 const AdminJobOpenings = lazy(() => import('../../components/admin/AdminJobOpenings'));
 const AdminReports = lazy(() => import('./AdminReports'));
 const SubscriptionPlansSettings = lazy(() => import('./SubscriptionPlansSettings'));
+const AdminProfile = lazy(() => import('./AdminProfile'));
 
 // Modular Admin Components
 import ExamsTab from './ExamsTab';
@@ -43,6 +43,7 @@ const AdminDashboard = () => {
   });
 
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState('exams');
   const [showCreateTest, setShowCreateTest] = useState(false);
   const [editingTest, setEditingTest] = useState(null);
@@ -202,6 +203,67 @@ const AdminDashboard = () => {
     const diff = new Date(currentUser.subscriptionEndDate) - new Date();
     return Math.ceil(diff / (1000 * 60 * 60 * 24));
   }, [currentUser]);
+
+  const isClientPortal = location.pathname.startsWith('/client');
+  const isClientAdmin = currentUser?.role === 'client_admin' || !!localStorage.getItem('clientToken');
+  const basePath = isClientPortal ? '/client' : '/admin';
+
+  const [unreadMessageCount, setUnreadMessageCount] = useState(0);
+
+  // Sync unread message count from backend
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      try {
+        const token = localStorage.getItem('adminToken') || localStorage.getItem('clientToken');
+        if (!token) return;
+        const res = await apiFetch('api/student-messages/unread-count', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success) {
+            setUnreadMessageCount(data.count || 0);
+          }
+        }
+      } catch (err) {
+        // silent
+      }
+    };
+    fetchUnreadCount();
+    const interval = setInterval(fetchUnreadCount, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const sidebarNavItems = useMemo(() => [
+    { id: 'exams', label: 'Manage Exams', icon: FileSpreadsheet },
+    { id: 'institutes', label: 'Manage Institutes', icon: Landmark },
+    { id: 'reports', label: 'Reports', icon: BarChart3 },
+    { id: 'bulk-upload', label: 'Bulk Upload', icon: UploadCloud },
+    { id: 'violations', label: 'Violations', icon: ShieldAlert },
+    { id: 'interviews', label: 'Interviews', icon: Video },
+    { id: 'job-openings', label: 'Job Openings', icon: Briefcase },
+    { id: 'messages', label: 'Messages', icon: MessageSquare, isRoute: true, path: `${basePath}/student-messages`, badge: unreadMessageCount },
+    ...(!isClientAdmin ? [{ id: 'clients', label: 'Clients', icon: Building2, isRoute: true, path: '/admin/clients' }] : []),
+    ...(isSuperAdmin ? [{ id: 'subscription-plans', label: 'Subscription Plans', icon: CreditCard }] : []),
+    { id: 'profile', label: 'My Profile', icon: User },
+    { id: 'settings', label: 'Settings', icon: Settings, isRoute: true, path: `${basePath}/settings` }
+  ], [basePath, isClientAdmin, isSuperAdmin, unreadMessageCount]);
+
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState(() => {
+    const saved = localStorage.getItem('adminSidebarExpanded');
+    return saved === null ? true : saved === 'true';
+  });
+  const [isSidebarHovered, setIsSidebarHovered] = useState(false);
+
+  const isExpanded = isSidebarExpanded || isSidebarHovered;
+
+  const toggleSidebarExpanded = () => {
+    setIsSidebarExpanded(prev => {
+      const next = !prev;
+      localStorage.setItem('adminSidebarExpanded', String(next));
+      return next;
+    });
+  };
 
   // Fetch clients list for super admin selector and default to Shnoor International
   useEffect(() => {
@@ -2029,39 +2091,44 @@ const AdminDashboard = () => {
   };
 
   return (
-    <Suspense fallback={<div className="flex h-screen items-center justify-center bg-[#F4F6FB] dark:bg-[#11111d]"><Loader2 className="animate-spin h-12 w-12 text-[#403f75] dark:text-[#9A9AC9]" /></div>}>
-      <div className="admin-dashboard-root min-h-screen bg-[#F4F6FB] dark:bg-[#11111d]">
+    <Suspense fallback={<div className="flex h-screen items-center justify-center bg-[#F0F2F8] dark:bg-[#0E0E27]"><Loader2 className="animate-spin h-12 w-12 text-[#403f75] dark:text-[#9A9AC9]" /></div>}>
+      <div className="admin-dashboard-root min-h-screen bg-[#F0F2F8] dark:bg-[#0E0E27] text-slate-900 dark:text-slate-100">
         {/* Header with integrated Viewing as selector */}
         <AdminHeader
           viewAsControl={
             isSuperAdmin ? (
-              <div className="flex items-center gap-2.5 bg-slate-100/90 hover:bg-slate-100 dark:bg-[#1E1E38] dark:hover:bg-[#25254A] border border-slate-200/90 dark:border-slate-700/80 px-3 py-1 rounded-xl transition-all shadow-2xs">
-                <Building2 size={16} className="text-[#403f75] dark:text-[#9A9AC9] flex-shrink-0" />
-                <div className="flex flex-col min-w-0">
-                  <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 leading-none">
-                    View As
+              <div className="flex items-center gap-2.5 bg-slate-100/90 hover:bg-slate-100 dark:bg-[#1E1E38] dark:hover:bg-[#25254A] border border-slate-200/90 dark:border-slate-700/80 px-2.5 py-1.5 rounded-xl transition-all shadow-2xs">
+                <div className="w-7 h-7 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-[#403f75] dark:text-indigo-400 flex items-center justify-center flex-shrink-0">
+                  <Building2 size={15} />
+                </div>
+                <div className="flex flex-col justify-center min-w-0 pr-1">
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400 leading-none select-none pl-0 ml-0">
+                    VIEW AS
                   </span>
                   <div className="flex items-center gap-1.5 mt-0.5">
-                    <select
-                      value={viewAsClientId}
-                      onChange={e => {
-                        const val = e.target.value;
-                        setViewAsClientId(val);
-                        sessionStorage.setItem('superAdminSelectedClientId', val);
-                        setTests([]);
-                        setAllInstitutes([]);
-                      }}
-                      className="bg-transparent text-xs font-bold text-slate-800 dark:text-slate-100 focus:outline-none cursor-pointer pr-1 max-w-[200px] truncate"
-                    >
-                      <option value="" className="text-slate-800 bg-white dark:bg-[#1E1E38] dark:text-white font-medium">
-                        All Clients (Platform View)
-                      </option>
-                      {clientsList.map(c => (
-                        <option key={c.id} value={c.id} className="text-slate-800 bg-white dark:bg-[#1E1E38] dark:text-white font-medium">
-                          {c.company_name || c.name} {c.status !== 'active' ? '(suspended)' : ''}
+                    <div className="relative inline-flex items-center">
+                      <select
+                        value={viewAsClientId}
+                        onChange={e => {
+                          const val = e.target.value;
+                          setViewAsClientId(val);
+                          sessionStorage.setItem('superAdminSelectedClientId', val);
+                          setTests([]);
+                          setAllInstitutes([]);
+                        }}
+                        className="view-as-select appearance-none !bg-transparent bg-transparent !border-0 border-0 !p-0 p-0 text-xs font-bold text-slate-800 dark:text-slate-100 focus:outline-none cursor-pointer max-w-[185px] truncate leading-tight pr-3.5 pl-0 ml-0"
+                      >
+                        <option value="" className="text-slate-800 bg-white dark:bg-[#1E1E38] dark:text-white font-medium">
+                          All Clients (Platform View)
                         </option>
-                      ))}
-                    </select>
+                        {clientsList.map(c => (
+                          <option key={c.id} value={c.id} className="text-slate-800 bg-white dark:bg-[#1E1E38] dark:text-white font-medium">
+                            {c.company_name || c.name} {c.status !== 'active' ? '(suspended)' : ''}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown size={11} className="text-slate-400 dark:text-slate-500 pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 stroke-[2.5]" />
+                    </div>
                     {defaultClientId && viewAsClientId !== defaultClientId && (
                       <button
                         type="button"
@@ -2071,7 +2138,7 @@ const AdminDashboard = () => {
                           setTests([]);
                           setAllInstitutes([]);
                         }}
-                        className="p-0.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-all cursor-pointer flex items-center justify-center"
+className="p-0.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-all cursor-pointer flex items-center justify-center ml-0.5"
                         title="Remove filter (Reset to Global View)"
                         aria-label="Remove filter"
                       >
@@ -2113,8 +2180,8 @@ const AdminDashboard = () => {
           </div>
         )}
 
-        {/* Main Content with offset for sidebar rail */}
-        <div className="w-full px-4 sm:px-6 lg:pr-6 lg:pl-[88px] pt-4 sm:pt-6 pb-12 transition-all">
+        {/* Main Content with dynamic offset for sidebar rail */}
+        <div className={`w-full px-4 sm:px-6 lg:pr-6 ${isExpanded ? 'lg:pl-[280px]' : 'lg:pl-[88px]'} pt-4 sm:pt-6 pb-12 transition-all duration-300 ease-in-out`}>
           <div className="admin-dashboard-content">
 
             {/* Subscription Expiry Banner */}
@@ -2148,46 +2215,86 @@ const AdminDashboard = () => {
               </div>
             )}
 
-            {/* JioHotstar / Disney+ Style Expandable Sidebar Navigation Rail */}
+            {/* Sidebar navigation */}
             {!showCreateTest && !selectedExamId && (
               <>
-                {/* Desktop Expandable Light-Themed Sidebar Rail */}
+                {/* Desktop sidebar */}
                 <aside
                   aria-label="Module Navigation"
-                  className="hidden lg:flex fixed left-0 top-[60px] sm:top-[68px] bottom-0 w-[72px] hover:w-60 bg-white/95 dark:bg-[#1A1A32]/95 backdrop-blur-xl border-r border-slate-200/90 dark:border-slate-800 z-40 transition-all duration-300 ease-in-out flex-col justify-between py-5 shadow-sm group overflow-hidden select-none"
+                  onMouseEnter={() => setIsSidebarHovered(true)}
+                  onMouseLeave={() => setIsSidebarHovered(false)}
+                  className={`hidden lg:flex fixed left-0 top-[60px] sm:top-[68px] bottom-0 ${isExpanded ? 'w-64' : 'w-[72px]'
+                    } bg-white/95 dark:bg-[#1A1A32]/95 backdrop-blur-xl border-r border-slate-200/90 dark:border-slate-800 z-40 transition-all duration-300 ease-in-out flex-col py-4 shadow-sm overflow-hidden select-none`}
                 >
-                  <div className="flex flex-col gap-2 w-full px-2.5">
-                    {[
-                      { id: 'exams', label: 'Manage Exams', icon: FileSpreadsheet },
-                      { id: 'institutes', label: 'Manage Institutes', icon: Landmark },
-                      { id: 'reports', label: 'Reports', icon: BarChart3 },
-                      { id: 'bulk-upload', label: 'Bulk Upload', icon: UploadCloud },
-                      { id: 'violations', label: 'Violations', icon: ShieldAlert },
-                      { id: 'interviews', label: 'Interviews', icon: Video },
-                      { id: 'job-openings', label: 'Job Openings', icon: Briefcase },
-                      ...(isSuperAdmin ? [{ id: 'subscription-plans', label: 'Subscription Plans', icon: CreditCard }] : [])
-                    ].map((tab) => {
-                      const isActive = activeTab === tab.id;
+                  {/* Top Control Bar with Collapse Toggle Button */}
+                  <div className="px-2.5 pb-3 border-b border-slate-200/80 dark:border-slate-800/80 mb-2 flex-shrink-0">
+                    <button
+                      type="button"
+                      onClick={toggleSidebarExpanded}
+                      className={`w-full flex items-center ${isExpanded ? 'justify-between px-3' : 'justify-center px-0'} h-10 rounded-xl border border-slate-200/90 dark:border-[#383860] bg-slate-100 dark:bg-[#25254A] hover:bg-slate-200 dark:hover:bg-[#303060] text-slate-700 dark:text-white shadow-2xs transition-all duration-200 cursor-pointer group`}
+                      title={isSidebarExpanded ? 'Collapse Sidebar' : 'Pin / Expand Sidebar'}
+                      aria-label={isSidebarExpanded ? 'Collapse Sidebar' : 'Pin / Expand Sidebar'}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-5 h-5 flex items-center justify-center flex-shrink-0 text-slate-500 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
+                          {isSidebarExpanded ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
+                        </div>
+                        <span
+                          className={`transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden text-xs font-bold tracking-tight text-slate-700 dark:text-white text-left ${isExpanded ? 'opacity-100 max-w-[130px]' : 'opacity-0 max-w-0 hidden'
+                            }`}
+                        >
+                          {isSidebarExpanded ? 'Collapse Menu' : 'Pin Sidebar'}
+                        </span>
+                      </div>
+                      {isExpanded && (
+                        <span className="text-[10px] font-bold text-slate-500 dark:text-slate-300 bg-slate-200/80 dark:bg-[#181832] px-1.5 py-0.5 rounded-md flex-shrink-0 uppercase tracking-wider">
+                          {isSidebarExpanded ? 'Hide' : 'Pin'}
+                        </span>
+                      )}
+                    </button>
+                  </div>
+
+                  <div className="flex flex-col gap-1.5 w-full px-2.5 overflow-y-auto flex-1 scrollbar-none">
+                    {sidebarNavItems.map((tab) => {
+                      const isActive = !tab.isRoute && activeTab === tab.id;
                       const Icon = tab.icon;
                       return (
                         <button
                           key={tab.id}
                           type="button"
-                          onClick={() => setActiveTab(tab.id)}
+                          onClick={() => {
+                            if (tab.isRoute) {
+                              navigate(tab.path);
+                            } else {
+                              setActiveTab(tab.id);
+                            }
+                          }}
                           className={`flex items-center h-11 px-3 w-full rounded-xl transition-all duration-200 cursor-pointer relative group/item ${isActive
-                            ? 'bg-[#403f75] dark:bg-indigo-600 text-white font-bold shadow-md shadow-[#403f75]/25'
+                            ? 'bg-gradient-to-r from-[#403f75] to-[#57569b] text-white font-bold shadow-md shadow-[#403f75]/25'
                             : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/90 dark:hover:bg-slate-800/80'
                             }`}
+                          title={!isExpanded ? tab.label : undefined}
                         >
-                          <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
+                          <div className="w-6 h-6 flex items-center justify-center flex-shrink-0 relative">
                             <Icon
                               size={19}
-                              className={`transition-transform duration-150 group-hover/item:scale-110 ${isActive ? 'text-white' : 'text-slate-500 dark:text-slate-400 group-hover/item:text-slate-800 dark:group-hover/item:text-white'
+                              className={`transition-transform duration-150 ${isActive ? 'text-white' : 'text-slate-500 dark:text-slate-400 group-hover/item:text-slate-800 dark:group-hover/item:text-white'
                                 }`}
                             />
+                            {tab.badge > 0 && !isExpanded && (
+                              <span className="absolute -top-1 -right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white dark:ring-[#1A1A32]" />
+                            )}
                           </div>
-                          <span className="ml-3 opacity-0 max-w-0 group-hover:max-w-[170px] group-hover:opacity-100 transition-all duration-300 ease-out whitespace-nowrap overflow-hidden text-sm font-bold tracking-tight text-left">
-                            {tab.label}
+                          <span
+                            className={`ml-3 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden text-sm font-bold tracking-tight text-left flex items-center justify-between flex-1 ${isExpanded ? 'opacity-100 max-w-[180px]' : 'opacity-0 max-w-0'
+                              }`}
+                          >
+                            <span className="truncate">{tab.label}</span>
+                            {tab.badge > 0 && (
+                              <span className="ml-1.5 px-1.5 py-0.2 bg-red-500 text-white text-[10px] font-black rounded-full flex-shrink-0">
+                                {tab.badge > 99 ? '99+' : tab.badge}
+                              </span>
+                            )}
                           </span>
                         </button>
                       );
@@ -2195,28 +2302,25 @@ const AdminDashboard = () => {
                   </div>
                 </aside>
 
-                {/* Mobile / Tablet Horizontal Capsule Navigation */}
+                {/* Mobile tabs */}
                 <div className="lg:hidden mb-6 w-full">
                   <div className="bg-white/95 dark:bg-[#1A1A32]/95 backdrop-blur-md p-1.5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-2xs inline-flex flex-nowrap items-center gap-1.5 max-w-full overflow-x-auto scrollbar-none" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-                    {[
-                      { id: 'exams', label: 'Manage Exams', icon: FileSpreadsheet },
-                      { id: 'institutes', label: 'Manage Institutes', icon: Landmark },
-                      { id: 'reports', label: 'Reports', icon: BarChart3 },
-                      { id: 'bulk-upload', label: 'Bulk Upload', icon: UploadCloud },
-                      { id: 'violations', label: 'Violations', icon: ShieldAlert },
-                      { id: 'interviews', label: 'Interviews', icon: Video },
-                      { id: 'job-openings', label: 'Job Openings', icon: Briefcase },
-                      ...(isSuperAdmin ? [{ id: 'subscription-plans', label: 'Subscription Plans', icon: CreditCard }] : [])
-                    ].map((tab) => {
-                      const isActive = activeTab === tab.id;
+                    {sidebarNavItems.map((tab) => {
+                      const isActive = !tab.isRoute && activeTab === tab.id;
                       const Icon = tab.icon;
                       return (
                         <button
                           key={tab.id}
                           type="button"
-                          onClick={() => setActiveTab(tab.id)}
+                          onClick={() => {
+                            if (tab.isRoute) {
+                              navigate(tab.path);
+                            } else {
+                              setActiveTab(tab.id);
+                            }
+                          }}
                           className={`group inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-[13px] font-semibold rounded-xl transition-all duration-150 whitespace-nowrap flex-shrink-0 cursor-pointer ${isActive
-                            ? 'bg-[#403f75] dark:bg-indigo-600 text-white font-bold shadow-xs'
+                            ? 'bg-gradient-to-r from-[#403f75] to-[#57569b] text-white font-bold shadow-xs'
                             : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/90 dark:hover:bg-slate-800/70'
                             }`}
                         >
@@ -2228,6 +2332,11 @@ const AdminDashboard = () => {
                               }`}
                           />
                           <span>{tab.label}</span>
+                          {tab.badge > 0 && (
+                            <span className="px-1.5 py-0.2 bg-red-500 text-white text-[10px] font-black rounded-full">
+                              {tab.badge > 99 ? '99+' : tab.badge}
+                            </span>
+                          )}
                         </button>
                       );
                     })}
@@ -2236,7 +2345,7 @@ const AdminDashboard = () => {
               </>
             )}
 
-            {/* Create Test Modal/Section */}
+            {/* Create test section */}
             {showCreateTest ? (
               <div className="space-y-4 mb-6">
                 <div className="flex items-center justify-between">
@@ -2417,6 +2526,13 @@ const AdminDashboard = () => {
                 {activeTab === 'subscription-plans' && isSuperAdmin && (
                   <div className="space-y-6">
                     <SubscriptionPlansSettings />
+                  </div>
+                )}
+
+                {/* My Profile Tab */}
+                {activeTab === 'profile' && (
+                  <div className="animate-fade-in">
+                    <AdminProfile />
                   </div>
                 )}
               </>

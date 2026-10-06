@@ -46,7 +46,7 @@ const fmtDate = (iso) => {
     });
 };
 
-export default function MyApplications({ isEmbedded = false }) {
+export default function MyApplications({ isEmbedded = false, onBrowseJobs }) {
     const navigate = useNavigate();
     const [applications, setApplications] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -238,7 +238,7 @@ export default function MyApplications({ isEmbedded = false }) {
 
                 {/* Empty state */}
                 {!loading && !error && applications.length === 0 && (
-                    <div className="text-center py-20 bg-white rounded-xl border border-shnoor-mist shadow-[0_8px_30px_rgba(14,14,39,0.06)]">
+                    <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-light p-12 text-center">
                         <Briefcase size={64} className="mx-auto mb-4 text-shnoor-mist" />
                         <p className="font-bold text-xl text-shnoor-navy mb-2">
                             No Applications Yet
@@ -247,7 +247,7 @@ export default function MyApplications({ isEmbedded = false }) {
                             Start applying to job openings to see them tracked here
                         </p>
                         <button
-                            onClick={() => navigate('/job-board')}
+                            onClick={() => onBrowseJobs ? onBrowseJobs() : navigate('/job-board')}
                             className="inline-flex items-center space-x-2 px-6 py-3 bg-shnoor-indigo hover:bg-[#4d4d9c] text-white rounded-lg font-bold transition-all shadow-sm"
                         >
                             <Briefcase size={18} />

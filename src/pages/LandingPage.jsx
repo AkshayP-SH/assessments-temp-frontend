@@ -248,9 +248,6 @@ const LandingPage = () => {
           2. HERO — Platform-level intro (org + candidate)
           ══════════════════════════════════════════════════════════════════════ */}
       <section id="home" className="landing-hero bg-theme-page py-12 sm:py-20 px-4 sm:px-8 overflow-hidden relative">
-        <div className="absolute top-0 right-0 -mr-32 -mt-32 w-[600px] h-[600px] bg-theme-accent/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-[400px] h-[400px] bg-theme-accent2/10 rounded-full blur-3xl pointer-events-none" />
-
         <div className="max-w-[1280px] mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center relative z-10">
           {/* Left — Text */}
           <div className="flex flex-col gap-6 items-center lg:items-start text-center lg:text-left">
@@ -269,7 +266,7 @@ const LandingPage = () => {
 
             <div className="flex flex-col sm:flex-row gap-4 mt-2">
               <Link to="/register">
-                <button className="group flex items-center gap-2 bg-theme-accent hover:bg-theme-accent2 text-white text-sm font-bold px-7 py-3.5 rounded-xl shadow-lg shadow-theme-accent/20 transition-all cursor-pointer">
+                <button className="group flex items-center gap-2 bg-theme-accent hover:bg-theme-accent2 text-white text-sm font-bold px-7 py-3.5 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer">
                   Get Started
                   <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                 </button>
@@ -583,7 +580,6 @@ const LandingPage = () => {
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-stretch">
             {/* Left — Dark Recognition Card */}
             <div className="bg-theme-hdr rounded-2xl p-8 sm:p-10 flex flex-col justify-between relative overflow-hidden border border-white/10 shadow-lg">
-              <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-theme-accent/15 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
               <div className="relative z-10">
                 <span className="inline-block text-xs font-extrabold text-theme-auth-acc uppercase tracking-[0.25em] mb-4 bg-white/10 border border-white/15 px-3.5 py-1.5 rounded-full">RECOGNITION</span>
                 <h2 className="text-2xl sm:text-3xl font-extrabold text-white leading-tight mb-4 tracking-tight">
@@ -690,7 +686,6 @@ const LandingPage = () => {
           9. CTA
           ══════════════════════════════════════════════════════════════════════ */}
       <section className="landing-cta bg-theme-hdr py-16 sm:py-24 px-4 sm:px-8 border-t border-white/10 relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[640px] h-[280px] bg-theme-accent opacity-15 blur-[120px] pointer-events-none rounded-full" />
         <div className="max-w-2xl mx-auto text-center relative z-10">
           <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4 sm:mb-5 tracking-tight">Ready to get started?</h2>
           <p className="text-base sm:text-lg text-slate-200 mb-8 sm:mb-10 leading-relaxed font-normal">
@@ -708,7 +703,7 @@ const LandingPage = () => {
               </button>
             </Link>
           </div>
-          <Link to="/login" className="text-theme-auth-acc hover:text-white text-sm font-semibold transition-colors">
+          <Link to="/login" className="text-white/90 hover:text-white text-sm font-semibold transition-colors underline-offset-4 hover:underline">
             Already have an account? Sign In →
           </Link>
         </div>
