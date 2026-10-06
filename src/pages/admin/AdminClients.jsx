@@ -219,9 +219,12 @@ const EditClientModal = ({ client, onClose, onUpdated, subscriptionPlans = [] })
                   disabled={loading}
                   className="w-full h-[42px] px-3 rounded-lg border border-shnoor-mist text-sm focus:outline-none focus:border-shnoor-indigo bg-white">
                   {subscriptionPlans.length > 0 ? (
-                    subscriptionPlans.map(plan => (
-                      <option key={plan.id} value={plan.plan_id}>{plan.name}</option>
-                    ))
+                    <>
+                      {form.plan_id === 'trial' && <option value="trial">7-Day Trial</option>}
+                      {subscriptionPlans.map(plan => (
+                        <option key={plan.id} value={plan.plan_id}>{plan.name}</option>
+                      ))}
+                    </>
                   ) : (
                     <>
                       <option value="Basic">Basic</option>
@@ -1073,10 +1076,10 @@ const AdminClients = () => {
                           </div>
                         </td>
                         <td className="px-5 py-4 font-semibold text-gray-900 dark:text-gray-200">
-                          {subscriptionPlans.find(p => p.plan_id === client.plan_id)?.name || client.plan_id || 'Basic'}
+                          {client.plan_id === 'trial' ? '7-Day Trial' : (subscriptionPlans.find(p => p.plan_id === client.plan_id)?.name || client.plan_id || 'Basic')}
                         </td>
                         <td className="px-5 py-4 text-[#9A9AC9] dark:text-gray-400 capitalize">
-                          {client.subscription_duration?.toLowerCase().replace('_', ' ') || '30 Days'}
+                          {client.plan_id === 'trial' ? '7 Days' : (client.subscription_duration?.toLowerCase().replace('_', ' ') || '30 Days')}
                         </td>
                         <td className="px-5 py-4">
                           <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${client.payment_status === 'PAID' ? 'bg-[#dcfce7] dark:bg-green-900/30 text-[#166534] dark:text-green-400' : 'bg-[#fee2e2] dark:bg-red-900/30 text-[#991b1b] dark:text-red-400'}`}>
