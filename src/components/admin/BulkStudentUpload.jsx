@@ -135,7 +135,7 @@ Robert Johnson,robert.johnson@example.com,5551234567,Harvard University`;
                 <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
                     <label 
                         htmlFor="fileInput"
-                        className="py-2.5 px-5 rounded-xl border-0 text-sm font-semibold bg-theme-panel text-theme-text hover:bg-theme-accent cursor-pointer transition-colors inline-block"
+                        className="py-2.5 px-5 rounded-xl text-sm font-semibold bg-[#403f75] hover:bg-[#343360] dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white cursor-pointer transition-all shadow-xs hover:shadow-sm inline-flex items-center gap-2"
                     >
                         Choose File
                     </label>

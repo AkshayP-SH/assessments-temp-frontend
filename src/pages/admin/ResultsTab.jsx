@@ -43,14 +43,16 @@ const ResultsTab = React.memo(({
 
   return (
     <div className="space-y-6">
-      {/* Top Back Navigation Bar */}
-      <div className="flex items-center justify-between">
+      {/* Top Back Navigation Link */}
+      <div className="flex items-center">
         <button
+          type="button"
           onClick={onBack}
-          className="btn-secondary"
+          className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-[#403f75] hover:text-[#2d2c55] dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors cursor-pointer group"
+          title="Back to Exams"
         >
-          <ArrowLeft size={16} />
-          <span>Back to Exams List</span>
+          <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+          <span>Back to Exams</span>
         </button>
       </div>
 
