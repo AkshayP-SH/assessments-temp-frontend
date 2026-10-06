@@ -5,6 +5,7 @@ import ExamSearchFilter from '../components/ExamSearchFilter';
 import StudentInterviews from '../components/StudentInterviews';
 import JobBoard from './JobBoard';
 import MyApplications from './MyApplications';
+import StudentProfile from './StudentProfile';
 import StudentSupportChatbot from '../components/chatbot/StudentSupportChatbot';
 import ThemeSelector from '../components/ThemeSelector';
 import StudentHeader from '../components/StudentHeader';
@@ -14,7 +15,7 @@ import { apiFetch } from '../config/api';
 import shnoorLogo from '../assets/shnoor-logo.png';
 import { useSEO } from '../hooks/useSEO';
 
-const STUDENT_DASHBOARD_TABS = ['tests', 'interviews', 'job-board', 'my-applications'];
+const STUDENT_DASHBOARD_TABS = ['tests', 'interviews', 'job-board', 'my-applications', 'profile'];
 
 const Dashboard = () => {
   useSEO({
@@ -700,6 +701,11 @@ const Dashboard = () => {
             </div>
             <MyApplications isEmbedded onBrowseJobs={() => setActiveTab('job-board')} />
           </>
+        )}
+
+        {/* My Profile Tab */}
+        {activeTab === 'profile' && (
+          <StudentProfile />
         )}
 
         {/* Info Section */}

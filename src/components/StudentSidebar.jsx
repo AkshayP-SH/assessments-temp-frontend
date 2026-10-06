@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { BookOpen, Video, Briefcase, FileText, ChevronLeft, ChevronRight } from 'lucide-react';
+import { BookOpen, Video, Briefcase, FileText, User, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const STUDENT_TABS = [
   { id: 'tests', label: 'My Tests', icon: BookOpen },
   { id: 'interviews', label: 'Interviews', icon: Video },
   { id: 'job-board', label: 'Job Board', icon: Briefcase },
-  { id: 'my-applications', label: 'My Applications', icon: FileText }
+  { id: 'my-applications', label: 'My Applications', icon: FileText },
+  { id: 'profile', label: 'My Profile', icon: User }
 ];
 
 export default function StudentSidebar({ activeTab, onTabChange, badges = {}, onExpandChange }) {
