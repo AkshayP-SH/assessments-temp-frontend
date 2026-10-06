@@ -533,6 +533,7 @@ const CodingBankModal = ({ question, onClose, onSave, categories = [], tags = []
                     value={tagInput}
                     onChange={(e) => setTagInput(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+                    list="coding-tags-list"
                     className="flex-1 h-10 px-4 rounded-xl border border-[#D1D1E6] bg-white text-sm text-gray-900 placeholder-[#9A9AC9] focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors"
                     placeholder="Add tag and press Enter"
                   />
@@ -544,6 +545,11 @@ const CodingBankModal = ({ question, onClose, onSave, categories = [], tags = []
                     Add
                   </button>
                 </div>
+                <datalist id="coding-tags-list">
+                  {tags.map((tag) => (
+                    <option key={tag} value={tag} />
+                  ))}
+                </datalist>
                 {/* Tag Pills */}
                 {formData.tags.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 mt-2">
