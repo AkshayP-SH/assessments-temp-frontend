@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Upload, FileText, Plus, Save, Trash2, ArrowLeft, CheckCircle, AlertCircle, Loader2, Pencil, X, Eye, AlignLeft, List, Code } from 'lucide-react';
+import { Upload, FileText, Plus, Save, Trash2, ArrowLeft, CheckCircle, AlertCircle, Loader2, Pencil, Eye, AlignLeft, List, Code } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { apiFetch } from '../../config/api';
 import CodingQuestionSelector from './CodingQuestionSelector';
@@ -9,10 +9,45 @@ import TestBulkStep from './TestBulkStep';
 import TestSuccessStep from './TestSuccessStep';
 import CodingQuestionModal from './CodingQuestionModal';
 import CodingViewModal from './CodingViewModal';
+import MCQBankSelector from './MCQBankSelector';
+import BulkUploadModal from './BulkUploadModal';
+import ModalShell, { ModalButton, FieldLabel, modalInputClass, modalTextareaClass } from './ModalShell';
 
 const ENABLE_CODE_EXECUTION = true;
 
-const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
+const SectionHeader = ({ title, description, action }) => (
+    <div className="flex items-start justify-between gap-4 mb-5">
+        <div className="min-w-0">
+            <h3 className="text-base font-semibold text-shnoor-navy">{title}</h3>
+            <p className="text-[13px] text-shnoor-indigoMedium mt-0.5">{description}</p>
+        </div>
+        {action}
+    </div>
+);
+
+const AddQuestionCard = ({ icon, title, description, onClick, disabled }) => {
+    const Icon = icon;
+    return (
+        <button
+            type="button"
+            onClick={onClick}
+            disabled={disabled}
+            className="group text-left p-5 bg-white border border-[#E3E2EE] rounded-xl transition-all hover:border-shnoor-indigo hover:shadow-[0_4px_16px_rgba(68,68,142,0.08)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-[#E3E2EE] disabled:hover:shadow-none"
+        >
+            <div className="w-11 h-11 rounded-[10px] bg-shnoor-lavender flex items-center justify-center mb-4">
+                <Icon className="w-5 h-5 text-shnoor-indigo" />
+            </div>
+            <h4 className="text-[15px] font-semibold text-shnoor-navy">{title}</h4>
+            <p className="text-[13px] text-shnoor-indigoMedium mt-1 leading-snug">{description}</p>
+        </button>
+    );
+};
+
+const TypeBadge = ({ children }) => (
+    <span className="px-2 py-0.5 rounded-md bg-shnoor-lavender text-shnoor-indigo text-[11px] font-semibold whitespace-nowrap">{children}</span>
+);
+
+const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId, onBack }) => {
     const FALLBACK_DEFAULT_JOB_ROLE = 'General Assessment Candidate';
     const FALLBACK_DEFAULT_JOB_DESCRIPTION = 'This assessment evaluates candidate readiness across core technical and problem-solving skills relevant to the role.';
     const [step, setStep] = useState('init'); // init, manual, bulk, success\n
@@ -914,200 +949,299 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
         setUploadedTestName('');
     };
 
+    const totalQuestionCount = questions.length + codingQuestions.length;
+    const totalMarks =
+        codingQuestions.reduce((sum, q) => sum + (Number(q.marks) || 10), 0) +
+        questions.reduce((sum, q) => sum + (Number(q.marks) || 1), 0);
+    const entryDisabled = !testTitle || nameAvailability.available === false || nameAvailability.checking;
+
+    const sectionCardClass = 'bg-white border border-[#E3E2EE] rounded-xl p-6';
+    const inputClass = (extra = '') =>
+        `w-full h-11 px-3.5 border border-[#E3E2EE] rounded-lg text-sm text-shnoor-navy placeholder:text-shnoor-soft focus:outline-none focus:ring-2 focus:ring-shnoor-indigo/25 focus:border-shnoor-indigo transition-colors ${viewMode ? 'bg-[#F4F4F9] opacity-60 cursor-not-allowed' : 'bg-white'} ${extra}`;
+    const labelClass = 'block text-xs font-semibold text-shnoor-navy mb-1.5';
+    const iconBtnClass = 'w-9 h-9 flex items-center justify-center rounded-lg text-shnoor-navyLight hover:bg-shnoor-lavender hover:text-shnoor-indigo transition-colors';
+
+    const renderCodingRow = (q) => {
+        const testCaseCount = (q.publicTestCases?.length || 0) + (q.hiddenTestCases?.length || 0);
+        const meta = [
+            q.difficulty ? q.difficulty.charAt(0).toUpperCase() + q.difficulty.slice(1) : null,
+            `${q.marks || 10} marks`,
+            `${testCaseCount} test case${testCaseCount !== 1 ? 's' : ''}`
+        ].filter(Boolean).join(' · ');
+        return (
+            <div key={q.id} className="flex items-center justify-between gap-3 px-4 py-3 border border-[#E3E2EE] rounded-xl bg-white">
+                <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-[10px] bg-shnoor-lavender flex items-center justify-center flex-shrink-0">
+                        <Code className="w-[18px] h-[18px] text-shnoor-indigo" />
+                    </div>
+                    <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                            <h4 className="text-sm font-semibold text-shnoor-navy truncate">{q.title}</h4>
+                            <TypeBadge>Coding</TypeBadge>
+                        </div>
+                        <p className="text-xs text-shnoor-indigoMedium mt-0.5">{meta}</p>
+                    </div>
+                </div>
+                <div className="flex items-center gap-1 flex-shrink-0">
+                    <button type="button" onClick={() => handleViewCodingQuestion(q)} className={iconBtnClass} title="View question">
+                        <Eye size={17} />
+                    </button>
+                    {!viewMode && (
+                        <>
+                            <button type="button" onClick={() => handleEditCodingQuestion(q)} className={iconBtnClass} title="Edit question">
+                                <Pencil size={16} />
+                            </button>
+                            <button type="button" onClick={() => handleRemoveCodingQuestion(q.id)} className="w-9 h-9 flex items-center justify-center rounded-lg text-red-500 hover:bg-shnoor-dangerLight transition-colors" title="Delete question">
+                                <Trash2 size={16} />
+                            </button>
+                        </>
+                    )}
+                </div>
+            </div>
+        );
+    };
+
+    const renderMcqRow = (q) => (
+        <div key={q.id} className="flex items-center justify-between gap-3 px-4 py-3 border border-[#E3E2EE] rounded-xl bg-white">
+            <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-[10px] bg-shnoor-lavender flex items-center justify-center flex-shrink-0">
+                    <FileText className="w-[18px] h-[18px] text-shnoor-indigo" />
+                </div>
+                <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                        <h4 className="text-sm font-semibold text-shnoor-navy line-clamp-1">{q.text}</h4>
+                        <TypeBadge>MCQ</TypeBadge>
+                    </div>
+                    <p className="text-xs text-shnoor-indigoMedium mt-0.5">
+                        {q.fromBank ? 'Question bank' : 'Manual entry'} · {q.marks || 1} marks
+                    </p>
+                </div>
+            </div>
+            <div className="flex items-center gap-1 flex-shrink-0">
+                <button type="button" onClick={() => handleRemoveQuestion(q.id)} className="w-9 h-9 flex items-center justify-center rounded-lg text-red-500 hover:bg-shnoor-dangerLight transition-colors" title="Delete question">
+                    <Trash2 size={16} />
+                </button>
+            </div>
+        </div>
+    );
+
     return (
         <div className="space-y-6">
             {/* Step 1: Initialization (stays mounted under the Manual Entry / Bulk Upload modals) */}
             {(step === 'init' || step === 'manual' || step === 'bulk') && (
-                <div className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-light p-8 max-w-3xl mx-auto">
-                    <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-2xl font-bold text-shnoor-navy">{isEditMode ? (viewMode ? 'View Assessment' : 'Edit Assessment') : 'Create New Assessment'}</h2>
+                <div className="w-full max-w-[1280px] mx-auto bg-white border border-[#E3E2EE] rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)]">
+                    {/* Card header */}
+                    <div className="flex items-center justify-between gap-4 px-5 sm:px-8 py-5 border-b border-[#E3E2EE]">
+                        <div className="flex items-center gap-4 min-w-0">
+                            {onBack && (
+                                <button
+                                    type="button"
+                                    onClick={onBack}
+                                    className="w-11 h-11 flex-shrink-0 flex items-center justify-center border border-[#E3E2EE] rounded-[10px] text-shnoor-indigo hover:bg-shnoor-lavender transition-colors"
+                                    title={isEditMode ? 'Cancel Editing' : 'Back to Exams'}
+                                >
+                                    <ArrowLeft size={18} />
+                                </button>
+                            )}
+                            <div className="min-w-0">
+                                <p className="text-xs text-shnoor-indigoMedium">Back to Exams</p>
+                                <h2 className="text-xl sm:text-[26px] leading-tight font-bold text-shnoor-navy truncate">
+                                    {isEditMode ? (viewMode ? 'View Assessment' : 'Edit Assessment') : 'Create New Assessment'}
+                                </h2>
+                            </div>
+                        </div>
                         {viewMode && (
                             <button
+                                type="button"
                                 onClick={() => setViewMode(false)}
-                                className="px-4 py-2 bg-shnoor-indigo text-white rounded-lg hover:bg-shnoor-indigo transition-colors font-medium flex items-center space-x-2"
+                                className="h-10 px-4 bg-shnoor-indigo text-white rounded-lg hover:bg-shnoor-navyLight transition-colors text-sm font-semibold flex items-center gap-2 flex-shrink-0"
                             >
-                                <Pencil size={18} />
+                                <Pencil size={16} />
                                 <span>Edit</span>
                             </button>
                         )}
                     </div>
 
-                    <div className="space-y-6">
-                        {/* Test Title */}
-                        <div>
-                            <label className="block text-sm font-bold text-shnoor-navy mb-2">Test Title *</label>
+                    {/* Body */}
+                    <div className="p-4 sm:p-8 space-y-5 bg-[#F4F4F9]/40">
+                        {/* Basic Details */}
+                        <section className={sectionCardClass}>
+                            <SectionHeader title="Basic Details" description="Give the test a clear name students will recognise." />
+                            <label className={labelClass}>Test Title <span className="text-red-500">*</span></label>
                             <div className="relative">
                                 <input
                                     type="text"
                                     value={testTitle}
                                     onChange={(e) => setTestTitle(e.target.value)}
                                     disabled={viewMode}
-                                    className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-4 focus:border-shnoor-indigo focus:ring-shnoor-indigo/20 transition-all font-medium text-shnoor-navy shadow-sm pr-10 ${viewMode ? 'bg-shnoor-light opacity-50 cursor-not-allowed border-shnoor-light' :
-                                        nameAvailability.available === false
-                                            ? 'border-shnoor-danger bg-shnoor-dangerLight'
-                                            : nameAvailability.available === true
-                                                ? 'border-shnoor-success bg-white'
-                                                : 'border-shnoor-light bg-white'
-                                        }`}
+                                    className={inputClass(`pr-10 ${!viewMode && nameAvailability.available === false
+                                        ? '!border-red-400 !bg-red-50/40'
+                                        : !viewMode && nameAvailability.available === true
+                                            ? '!border-emerald-400'
+                                            : ''}`)}
                                     placeholder="e.g., Java Fundamentals - Batch A"
                                     required
                                 />
                                 {nameAvailability.checking && (
                                     <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                                        <Loader2 className="w-5 h-5 text-shnoor-navy animate-spin" />
+                                        <Loader2 className="w-4 h-4 text-shnoor-indigoMedium animate-spin" />
                                     </div>
                                 )}
                                 {!nameAvailability.checking && nameAvailability.available === true && (
                                     <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                                        <CheckCircle className="w-5 h-5 text-shnoor-success" />
+                                        <CheckCircle className="w-4 h-4 text-emerald-500" />
                                     </div>
                                 )}
                                 {!nameAvailability.checking && nameAvailability.available === false && (
                                     <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                                        <AlertCircle className="w-5 h-5 text-shnoor-danger" />
+                                        <AlertCircle className="w-4 h-4 text-red-500" />
                                     </div>
                                 )}
                             </div>
                             {nameAvailability.message && (
-                                <p className={`mt-2 text-sm ${nameAvailability.available
-                                    ? 'text-shnoor-success'
-                                    : 'text-shnoor-danger'
-                                    }`}>
+                                <p className={`mt-2 text-xs font-medium ${nameAvailability.available ? 'text-emerald-600' : 'text-red-500'}`}>
                                     {nameAvailability.message}
                                 </p>
                             )}
-                        </div>
+                        </section>
 
-                        {/* Job Roles Section */}
-                        <div className="space-y-4">
-                            <div className="flex items-center justify-between">
-                                <label className="block text-sm font-bold text-shnoor-navy">Job Roles & Descriptions</label>
-                                {!viewMode && (
+                        {/* Job Roles */}
+                        <section className={sectionCardClass}>
+                            <SectionHeader
+                                title="Job Roles"
+                                description="Students pick a role and read its description before taking the test."
+                                action={!viewMode && (
                                     <button
                                         type="button"
                                         onClick={handleAddJobRole}
-                                        className="flex items-center space-x-1 px-3 py-1.5 bg-white text-shnoor-indigo hover:text-shnoor-navy rounded-lg hover:bg-shnoor-light/30 border border-shnoor-light transition-colors text-sm font-medium"
+                                        className="h-9 px-3.5 flex items-center gap-1.5 border border-[#E3E2EE] rounded-lg bg-white text-shnoor-indigo hover:bg-shnoor-lavender text-sm font-semibold transition-colors flex-shrink-0"
                                     >
-                                        <Plus size={16} />
+                                        <Plus size={15} />
                                         <span>Add Role</span>
                                     </button>
                                 )}
-                            </div>
-
-                            {jobRoles.map((role, index) => (
-                                <div key={index} className="p-5 border border-shnoor-light rounded-xl space-y-3 bg-white shadow-sm">
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-sm font-bold text-shnoor-navy">
-                                            Role {index + 1} {index === 0 && <span className="text-shnoor-indigo ml-2 px-2 py-1 bg-shnoor-lavender rounded-md text-xs">(Default)</span>}
-                                        </span>
-                                        {!viewMode && jobRoles.length > 1 && (
-                                            <button
-                                                type="button"
-                                                onClick={() => handleRemoveJobRole(index)}
-                                                className="text-shnoor-danger hover:text-shnoor-danger p-1"
-                                                title="Remove this role"
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
-                                        )}
-                                    </div>
-
-                                    <div>
+                            />
+                            <div className="space-y-4">
+                                {jobRoles.map((role, index) => (
+                                    <div key={index} className="p-4 bg-[#F8F8FC] border border-[#E3E2EE] rounded-xl space-y-3">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-xs font-bold text-shnoor-navy">Role {index + 1}</span>
+                                                {index === 0 && (
+                                                    <span className="px-2 py-0.5 rounded-md bg-shnoor-lavender text-shnoor-indigo text-[11px] font-semibold">Default</span>
+                                                )}
+                                            </div>
+                                            {!viewMode && jobRoles.length > 1 && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleRemoveJobRole(index)}
+                                                    className="w-8 h-8 flex items-center justify-center rounded-lg text-red-500 hover:bg-shnoor-dangerLight transition-colors"
+                                                    title="Remove this role"
+                                                >
+                                                    <Trash2 size={15} />
+                                                </button>
+                                            )}
+                                        </div>
                                         <input
                                             type="text"
                                             value={role.job_role}
                                             onChange={(e) => handleJobRoleChange(index, 'job_role', e.target.value)}
                                             disabled={viewMode}
-                                            className={`w-full px-4 py-3 border-2 border-shnoor-light rounded-xl focus:ring-4 focus:ring-shnoor-indigo/20 focus:border-shnoor-indigo transition-all font-medium text-shnoor-navy ${viewMode ? 'bg-shnoor-light opacity-50 cursor-not-allowed' : 'bg-white'}`}
+                                            className={inputClass()}
                                             placeholder="e.g., Senior Software Engineer, Junior Developer"
                                         />
-                                    </div>
-
-                                    <div>
                                         <textarea
                                             value={role.job_description}
                                             onChange={(e) => handleJobRoleChange(index, 'job_description', e.target.value)}
                                             rows={4}
                                             disabled={viewMode}
-                                            className={`w-full px-4 py-3 border border-shnoor-mist rounded-lg focus:ring-2 focus:ring-shnoor-navyLight focus:border-transparent resize-y ${viewMode ? 'bg-shnoor-lavender cursor-not-allowed' : ''}`}
+                                            className={inputClass('!h-auto py-2.5 resize-y leading-relaxed')}
                                             placeholder="Enter job description, requirements, responsibilities..."
                                         />
                                     </div>
+                                ))}
+                            </div>
+                        </section>
+
+                        {/* Test Settings */}
+                        <section className={sectionCardClass}>
+                            <SectionHeader title="Test Settings" description="Timing, attempts and the pass mark." />
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-[1fr_1fr_1fr_1.35fr_1.35fr] gap-4">
+                                <div>
+                                    <label className={labelClass}>Duration <span className="text-red-500">*</span></label>
+                                    <div className="relative">
+                                        <input
+                                            type="number"
+                                            value={duration}
+                                            onChange={(e) => setDuration(parseInt(e.target.value) || 60)}
+                                            min="1"
+                                            disabled={viewMode}
+                                            className={inputClass('pr-12')}
+                                            required
+                                        />
+                                        <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-shnoor-indigoMedium pointer-events-none">min</span>
+                                    </div>
                                 </div>
-                            ))}
-                            <p className="text-xs text-shnoor-navy">Students will be able to select a role and view its description before taking the test</p>
-                        </div>
+                                <div>
+                                    <label className={labelClass}>Max Attempts <span className="text-red-500">*</span></label>
+                                    <input
+                                        type="number"
+                                        value={maxAttempts}
+                                        onChange={(e) => setMaxAttempts(parseInt(e.target.value) || 1)}
+                                        min="1"
+                                        disabled={viewMode}
+                                        className={inputClass()}
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className={labelClass}>Passing <span className="text-red-500">*</span></label>
+                                    <div className="relative">
+                                        <input
+                                            type="number"
+                                            value={passingPercentage}
+                                            onChange={(e) => setPassingPercentage(parseInt(e.target.value) || 50)}
+                                            disabled={viewMode}
+                                            className={inputClass('pr-10')}
+                                            min="0"
+                                            max="100"
+                                            required
+                                        />
+                                        <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-shnoor-indigoMedium pointer-events-none">%</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className={labelClass}>Start date &amp; time <span className="font-normal text-shnoor-indigoMedium">(optional)</span></label>
+                                    <input
+                                        type="datetime-local"
+                                        value={startDateTime}
+                                        onChange={(e) => setStartDateTime(e.target.value)}
+                                        disabled={viewMode}
+                                        className={inputClass()}
+                                    />
+                                </div>
+                                <div>
+                                    <label className={labelClass}>End date &amp; time <span className="font-normal text-shnoor-indigoMedium">(optional)</span></label>
+                                    <input
+                                        type="datetime-local"
+                                        value={endDateTime}
+                                        onChange={(e) => setEndDateTime(e.target.value)}
+                                        disabled={viewMode}
+                                        className={inputClass()}
+                                    />
+                                </div>
+                            </div>
+                        </section>
 
-                        {/* Duration and Max Attempts */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-shnoor-navy mb-2">Duration (minutes) *</label>
-                                <input
-                                    type="number"
-                                    value={duration}
-                                    onChange={(e) => setDuration(parseInt(e.target.value) || 60)}
-                                    min="1"
-                                    disabled={viewMode}
-                                    className={`w-full px-4 py-3 border border-shnoor-mist rounded-lg focus:ring-2 focus:ring-shnoor-navyLight focus:border-transparent ${viewMode ? 'bg-shnoor-lavender cursor-not-allowed' : ''}`}
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-shnoor-navy mb-2">Max Attempts *</label>
-                                <input
-                                    type="number"
-                                    value={maxAttempts}
-                                    onChange={(e) => setMaxAttempts(parseInt(e.target.value) || 1)}
-                                    min="1"
-                                    disabled={viewMode}
-                                    className={`w-full px-4 py-3 border border-shnoor-mist rounded-lg focus:ring-2 focus:ring-shnoor-navyLight focus:border-transparent ${viewMode ? 'bg-shnoor-lavender cursor-not-allowed' : ''}`}
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-shnoor-navy mb-2">Passing % *</label>
-                                <input
-                                    type="number"
-                                    value={passingPercentage}
-                                    onChange={(e) => setPassingPercentage(parseInt(e.target.value) || 50)}
-                                    disabled={viewMode}
-                                    className={`w-full px-4 py-3 border border-shnoor-mist rounded-lg focus:ring-2 focus:ring-shnoor-navyLight focus:border-transparent ${viewMode ? 'bg-shnoor-lavender cursor-not-allowed' : ''}`}
-                                    min="0"
-                                    max="100"
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        {/* Start and End DateTime */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-shnoor-navy mb-2">Start Date & Time (Optional)</label>
-                                <input
-                                    type="datetime-local"
-                                    value={startDateTime}
-                                    onChange={(e) => setStartDateTime(e.target.value)}
-                                    disabled={viewMode}
-                                    className={`w-full px-4 py-3 border border-shnoor-mist rounded-lg focus:ring-2 focus:ring-shnoor-navyLight focus:border-transparent ${viewMode ? 'bg-shnoor-lavender cursor-not-allowed' : ''}`}
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-shnoor-navy mb-2">End Date & Time (Optional)</label>
-                                <input
-                                    type="datetime-local"
-                                    value={endDateTime}
-                                    onChange={(e) => setEndDateTime(e.target.value)}
-                                    disabled={viewMode}
-                                    className={`w-full px-4 py-3 border border-shnoor-mist rounded-lg focus:ring-2 focus:ring-shnoor-navyLight focus:border-transparent ${viewMode ? 'bg-shnoor-lavender cursor-not-allowed' : ''}`}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Add Coding Question Button */}
-                         {!viewMode && (
-                            <div className="pt-4 border-t border-shnoor-mist">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                    <button
+                        {/* Add Questions */}
+                        {!viewMode && (
+                            <section className={sectionCardClass}>
+                                <SectionHeader title="Add Questions" description="Use any mix of these. At least one question is required." />
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                    <AddQuestionCard
+                                        icon={Code}
+                                        title="Create Coding Question"
+                                        description="Write a new problem with its own test cases."
                                         onClick={() => {
                                             setEditingCodingQuestionId(null);
                                             setCurrentCodingQuestion({
@@ -1121,603 +1255,425 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId }) => {
                                             });
                                             setShowCodingModal(true);
                                         }}
-                                        className="py-3 bg-white border-2 border-shnoor-mist hover:border-shnoor-indigo text-shnoor-navy hover:text-shnoor-indigo font-semibold rounded-lg transition-all flex items-center justify-center space-x-2"
-                                    >
-                                        <Plus size={20} />
-                                        <span>Create New Coding Question</span>
-                                    </button>
-                                    <button
+                                    />
+                                    <AddQuestionCard
+                                        icon={List}
+                                        title="Select from Question Bank"
+                                        description="Pick from questions recommended for this role."
                                         onClick={() => setShowCodingSelector(true)}
-                                        className="py-3 bg-shnoor-indigo hover:bg-shnoor-navy text-white font-semibold rounded-lg transition-all flex items-center justify-center space-x-2"
-                                    >
-                                        <List size={20} />
-                                        <span>Select from Question Bank</span>
-                                    </button>
-                                </div>
-                            </div>
-                        )} 
-
-                        {/* Coding Questions List (edit mode; create mode renders the combined list below the entry options) */}
-                         {isEditMode && codingQuestions.length > 0 && (
-                            <div className="pt-4 space-y-3">
-                                <h4 className="font-semibold text-shnoor-navy mb-3">Coding Questions ({codingQuestions.length})</h4>
-                                {codingQuestions.map((q, idx) => (
-                                    <div key={q.id} className="bg-white border-2 border-shnoor-mist rounded-lg p-4 hover:border-shnoor-mist transition-colors">
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center space-x-3">
-                                                <div className="w-10 h-10 bg-shnoor-lavender rounded-lg flex items-center justify-center">
-                                                    <Code className="w-5 h-5 text-shnoor-navy" />
-                                                </div>
-                                                <div>
-                                                    <h4 className="font-semibold text-shnoor-navy">Coding Question {idx + 1}</h4>
-                                                    <p className="text-sm text-shnoor-navy">{q.title}</p>
-                                                    <p className="text-xs text-shnoor-indigo mt-1">Marks: {q.marks || 10}</p>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center space-x-2">
-                                                <button
-                                                    onClick={() => handleViewCodingQuestion(q)}
-                                                    className="p-2 bg-shnoor-lavender hover:bg-shnoor-lavender text-shnoor-navy rounded-lg transition-colors"
-                                                    title="View question"
-                                                >
-                                                    <Eye size={18} />
-                                                </button>
-                                                {!viewMode && (
-                                                    <>
-                                                        <button
-                                                            onClick={() => handleEditCodingQuestion(q)}
-                                                            className="p-2 bg-shnoor-lavender hover:bg-shnoor-lavender text-shnoor-indigo rounded-lg transition-colors"
-                                                            title="Edit question"
-                                                        >
-                                                            <Pencil size={18} />
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleRemoveCodingQuestion(q.id)}
-                                                            className="p-2 bg-shnoor-dangerLight hover:bg-shnoor-dangerLight text-shnoor-danger rounded-lg transition-colors"
-                                                            title="Delete question"
-                                                        >
-                                                            <Trash2 size={18} />
-                                                        </button>
-                                                    </>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )} 
-
-                        {isEditMode ? (
-                            /* Edit Mode: Show options to edit manually or upload new file */
-                            <div className="pt-6">
-                                <div className="bg-shnoor-lavender border-2 border-shnoor-mist rounded-xl p-6 mb-6">
-                                    <div className="flex items-center space-x-3 mb-3">
-                                        <div className="w-10 h-10 bg-shnoor-indigo rounded-full flex items-center justify-center">
-                                            <FileText className="w-5 h-5 text-white" />
-                                        </div>
-                                        <div>
-                                            <h3 className="font-bold text-shnoor-navy">Current Questions</h3>
-                                            <p className="text-sm text-shnoor-navy">{questions.length} question{questions.length !== 1 ? 's' : ''} loaded</p>
-                                        </div>
-                                    </div>
-                                    {!viewMode && (
-                                        <p className="text-sm text-shnoor-navy">
-                                            Choose how you want to update the questions for this test.
-                                        </p>
+                                    />
+                                    {isEditMode ? (
+                                        <>
+                                            <AddQuestionCard
+                                                icon={FileText}
+                                                title="Edit Questions Manually"
+                                                description={`Edit, add or remove questions individually (${questions.length} loaded).`}
+                                                onClick={() => handleStart('manual')}
+                                            />
+                                            <AddQuestionCard
+                                                icon={Upload}
+                                                title="Upload New Questions File"
+                                                description={`Replaces all ${questions.length} existing question${questions.length !== 1 ? 's' : ''} with a new CSV/Excel file.`}
+                                                onClick={() => handleStart('bulk')}
+                                            />
+                                        </>
+                                    ) : (
+                                        <>
+                                            <AddQuestionCard
+                                                icon={Plus}
+                                                title="Manual Entry"
+                                                description="Add questions one by one with a simple form."
+                                                onClick={() => handleStart('manual')}
+                                                disabled={entryDisabled}
+                                            />
+                                            <AddQuestionCard
+                                                icon={Upload}
+                                                title="Bulk Upload"
+                                                description="Upload an Excel or CSV file of questions."
+                                                onClick={() => handleStart('bulk')}
+                                                disabled={entryDisabled}
+                                            />
+                                        </>
                                     )}
                                 </div>
 
-                                {!viewMode && (
-                                    <>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                                            <button
-                                                onClick={() => handleStart('manual')}
-                                                className="p-6 border-2 border-shnoor-mist rounded-xl text-left transition-all hover:border-shnoor-indigo hover:shadow-lg group bg-white"
-                                            >
-                                                <div className="w-12 h-12 bg-shnoor-lavender rounded-full flex items-center justify-center mb-4 group-hover:bg-shnoor-indigo transition-colors">
-                                                    <FileText className="w-6 h-6 text-shnoor-indigo group-hover:text-white" />
-                                                </div>
-                                                <h3 className="font-bold text-shnoor-navy mb-2">Edit Questions Manually</h3>
-                                                <p className="text-sm text-shnoor-navy mb-3">Edit existing questions, add new ones, or remove questions individually.</p>
-                                                <div className="flex items-center text-xs text-shnoor-indigo font-medium">
-                                                    <span>Edit {questions.length} question{questions.length !== 1 ? 's' : ''}</span>
-                                                    <ArrowLeft size={14} className="ml-1 rotate-180" />
-                                                </div>
-                                            </button>
-
-                                            <button
-                                                onClick={() => handleStart('bulk')}
-                                                className="p-6 border-2 border-shnoor-mist rounded-xl text-left transition-all hover:border-shnoor-danger hover:shadow-lg group bg-white"
-                                            >
-                                                <div className="w-12 h-12 bg-shnoor-dangerLight rounded-full flex items-center justify-center mb-4 group-hover:bg-shnoor-danger transition-colors">
-                                                    <Upload className="w-6 h-6 text-shnoor-danger group-hover:text-white" />
-                                                </div>
-                                                <h3 className="font-bold text-shnoor-navy mb-2">Upload New Questions File</h3>
-                                                <p className="text-sm text-shnoor-navy mb-3">Replace all existing questions by uploading a new CSV/Excel file.</p>
-                                                <div className="flex items-center text-xs text-shnoor-danger font-medium">
-                                                    <AlertCircle size={14} className="mr-1" />
-                                                    <span>Will replace {questions.length} question{questions.length !== 1 ? 's' : ''}</span>
-                                                </div>
-                                            </button>
+                                {isEditMode && (
+                                    <div className="mt-4 bg-shnoor-warningLight rounded-xl p-4 flex items-start gap-3">
+                                        <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                                        <div className="text-sm text-amber-800">
+                                            <p className="font-semibold mb-1">Important:</p>
+                                            <ul className="list-disc list-inside space-y-1">
+                                                <li>Review test details above before proceeding</li>
+                                                <li>Uploading a new file will <strong>delete all existing questions</strong></li>
+                                                <li>Changes will be saved when you click "Save Changes"</li>
+                                            </ul>
                                         </div>
-
-                                        <div className="bg-shnoor-warningLight border-2 border-shnoor-warningLight rounded-xl p-4 flex items-start space-x-3 mb-6">
-                                            <AlertCircle className="w-5 h-5 text-shnoor-warning flex-shrink-0 mt-0.5" />
-                                            <div className="text-sm text-shnoor-warning">
-                                                <p className="font-semibold mb-1">Important:</p>
-                                                <ul className="list-disc list-inside space-y-1">
-                                                    <li>Review test details above before proceeding</li>
-                                                    <li>Uploading a new file will <strong>delete all existing questions</strong></li>
-                                                    <li>Changes will be saved when you click "Save Changes"</li>
-                                                </ul>
-                                            </div>
-                                        </div>
-
-                                        {/* Save Changes and Cancel Buttons */}
-                                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-3">
-                                            <button
-                                                onClick={handleManualSubmit}
-                                                disabled={isUploading}
-                                                className="flex-1 py-4 bg-shnoor-indigo hover:bg-shnoor-indigo text-white font-bold rounded-lg transition-colors shadow-sm flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                                            >
-                                                {isUploading ? (
-                                                    <>
-                                                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                                                        <span>Saving...</span>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <Save size={20} />
-                                                        <span>Save Changes</span>
-                                                    </>
-                                                )}
-                                            </button>
-                                            <button
-                                                onClick={() => setViewMode(true)}
-                                                disabled={isUploading}
-                                                className="px-6 py-4 bg-shnoor-lavender hover:bg-shnoor-lavender text-shnoor-navy font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                            >
-                                                Cancel
-                                            </button>
-                                        </div>
-                                    </>
+                                    </div>
                                 )}
-                            </div>
-                        ) : (
-                            /* Create Mode: Show manual and bulk upload options */
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-                                <button
-                                    onClick={() => handleStart('manual')}
-                                    className={`p-6 border-2 border-shnoor-mist rounded-xl text-left transition-all hover:border-shnoor-indigo group bg-white ${!testTitle || nameAvailability.available === false || nameAvailability.checking
-                                        ? 'opacity-50 cursor-not-allowed'
-                                        : 'hover:shadow-md'
-                                        }`}
-                                    disabled={!testTitle || nameAvailability.available === false || nameAvailability.checking}
-                                >
-                                    <div className="w-12 h-12 bg-shnoor-lavender rounded-full flex items-center justify-center mb-4 group-hover:bg-shnoor-indigo transition-colors">
-                                        <Plus className="w-6 h-6 text-shnoor-indigo group-hover:text-white" />
-                                    </div>
-                                    <h3 className="font-bold text-shnoor-navy mb-1">Manual Entry</h3>
-                                    <p className="text-sm text-shnoor-navy">Add questions one by one with a simple form interface.</p>
-                                </button>
-
-                                <button
-                                    onClick={() => handleStart('bulk')}
-                                    className={`p-6 border-2 border-shnoor-mist rounded-xl text-left transition-all hover:border-shnoor-indigo group bg-white ${!testTitle || nameAvailability.available === false || nameAvailability.checking
-                                        ? 'opacity-50 cursor-not-allowed'
-                                        : 'hover:shadow-md'
-                                        }`}
-                                    disabled={!testTitle || nameAvailability.available === false || nameAvailability.checking}
-                                >
-                                    <div className="w-12 h-12 bg-shnoor-lavender rounded-full flex items-center justify-center mb-4 group-hover:bg-shnoor-indigo transition-colors">
-                                        <Upload className="w-6 h-6 text-shnoor-indigo group-hover:text-white" />
-                                    </div>
-                                    <h3 className="font-bold text-shnoor-navy mb-1">Bulk Upload</h3>
-                                    <p className="text-sm text-shnoor-navy">Upload an Excel or CSV file containing multiple questions.</p>
-                                </button>
-                            </div>
+                            </section>
                         )}
 
-                        {/* Questions List + Save (create mode) */}
-                        {!isEditMode && (
-                            <div className="pt-4">
-                                <h4 className="font-semibold text-shnoor-navy mb-3">Questions ({questions.length + codingQuestions.length})</h4>
-                                {questions.length + codingQuestions.length === 0 ? (
-                                    <div className="text-center py-8 text-shnoor-navy border-2 border-dashed border-shnoor-mist rounded-lg">
-                                        <FileText className="mx-auto h-10 w-10 mb-2 opacity-50" />
-                                        <p>No questions added yet</p>
+                        {/* Questions */}
+                        {isEditMode ? (
+                            <section className={sectionCardClass}>
+                                <SectionHeader
+                                    title={`Questions (${questions.length + codingQuestions.length})`}
+                                    description={viewMode ? 'Questions currently loaded for this test.' : 'Choose how you want to update the questions for this test.'}
+                                />
+                                <div className="max-h-80 overflow-y-auto space-y-3 pr-1">
+                                    <div className="flex items-center gap-3 px-4 py-3 border border-[#E3E2EE] rounded-xl bg-[#F8F8FC]">
+                                        <div className="w-10 h-10 rounded-[10px] bg-shnoor-lavender flex items-center justify-center flex-shrink-0">
+                                            <FileText className="w-[18px] h-[18px] text-shnoor-indigo" />
+                                        </div>
+                                        <p className="text-sm font-semibold text-shnoor-navy">
+                                            {questions.length} question{questions.length !== 1 ? 's' : ''} loaded
+                                        </p>
+                                    </div>
+                                    {codingQuestions.map(renderCodingRow)}
+                                </div>
+                            </section>
+                        ) : (
+                            <section className={sectionCardClass}>
+                                <SectionHeader
+                                    title={`Questions (${totalQuestionCount})`}
+                                    description="Everything added to this test."
+                                    action={totalQuestionCount > 0 && (
+                                        <span className="px-3 py-1 rounded-full bg-shnoor-lavender text-shnoor-indigo text-xs font-semibold whitespace-nowrap flex-shrink-0">
+                                            {totalMarks} marks
+                                        </span>
+                                    )}
+                                />
+                                {totalQuestionCount === 0 ? (
+                                    <div className="text-center py-8 text-shnoor-indigoMedium border border-dashed border-shnoor-mist rounded-xl">
+                                        <FileText className="mx-auto h-9 w-9 mb-2 opacity-50" />
+                                        <p className="text-sm">No questions added yet</p>
                                     </div>
                                 ) : (
-                                    <div className="max-h-96 overflow-y-auto space-y-3 pr-1">
-                                        {codingQuestions.map((q, idx) => (
-                                            <div key={q.id} className="bg-white border-2 border-shnoor-mist rounded-lg p-4 hover:border-shnoor-mist transition-colors">
-                                                <div className="flex items-center justify-between">
-                                                    <div className="flex items-center space-x-3">
-                                                        <div className="w-10 h-10 bg-shnoor-lavender rounded-lg flex items-center justify-center">
-                                                            <Code className="w-5 h-5 text-shnoor-navy" />
-                                                        </div>
-                                                        <div>
-                                                            <h4 className="font-semibold text-shnoor-navy">Coding Question {idx + 1}</h4>
-                                                            <p className="text-sm text-shnoor-navy">{q.title}</p>
-                                                            <p className="text-xs text-shnoor-indigo mt-1">Marks: {q.marks || 10}</p>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex items-center space-x-2">
-                                                        <button
-                                                            onClick={() => handleViewCodingQuestion(q)}
-                                                            className="p-2 bg-shnoor-lavender hover:bg-shnoor-lavender text-shnoor-navy rounded-lg transition-colors"
-                                                            title="View question"
-                                                        >
-                                                            <Eye size={18} />
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleEditCodingQuestion(q)}
-                                                            className="p-2 bg-shnoor-lavender hover:bg-shnoor-lavender text-shnoor-indigo rounded-lg transition-colors"
-                                                            title="Edit question"
-                                                        >
-                                                            <Pencil size={18} />
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleRemoveCodingQuestion(q.id)}
-                                                            className="p-2 bg-shnoor-dangerLight hover:bg-shnoor-dangerLight text-shnoor-danger rounded-lg transition-colors"
-                                                            title="Delete question"
-                                                        >
-                                                            <Trash2 size={18} />
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                        {questions.map((q, idx) => (
-                                            <div key={q.id} className="bg-white border-2 border-shnoor-mist rounded-lg p-4 hover:border-shnoor-mist transition-colors">
-                                                <div className="flex items-center justify-between gap-3">
-                                                    <div className="flex items-center space-x-3 min-w-0">
-                                                        <div className="w-10 h-10 bg-shnoor-lavender rounded-lg flex items-center justify-center flex-shrink-0">
-                                                            <FileText className="w-5 h-5 text-shnoor-navy" />
-                                                        </div>
-                                                        <div className="min-w-0">
-                                                            <div className="flex flex-wrap items-center gap-1.5">
-                                                                <h4 className="font-semibold text-shnoor-navy">MCQ Question {idx + 1}</h4>
-                                                                {q.fromBank && (
-                                                                    <span className="text-xs text-shnoor-indigo bg-shnoor-lavender px-2 py-0.5 rounded">Bank</span>
-                                                                )}
-                                                            </div>
-                                                            <p className="text-sm text-shnoor-navy line-clamp-1">{q.text}</p>
-                                                            <p className="text-xs text-shnoor-indigo mt-1">Marks: {q.marks || 1}</p>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex items-center space-x-2 flex-shrink-0">
-                                                        <button
-                                                            onClick={() => handleRemoveQuestion(q.id)}
-                                                            className="p-2 bg-shnoor-dangerLight hover:bg-shnoor-dangerLight text-shnoor-danger rounded-lg transition-colors"
-                                                            title="Delete question"
-                                                        >
-                                                            <Trash2 size={18} />
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))}
+                                    <div className="max-h-80 overflow-y-auto space-y-3 pr-1">
+                                        {codingQuestions.map(renderCodingRow)}
+                                        {questions.map(renderMcqRow)}
                                     </div>
                                 )}
+                            </section>
+                        )}
+                    </div>
 
-                                {/* Sticky Save button */}
-                                <div className="sticky bottom-0 z-10 bg-white pt-4 pb-2 mt-2">
+                    {/* Footer */}
+                    {!viewMode && (
+                        <div className="sticky bottom-0 z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 sm:px-8 py-4 border-t border-[#E3E2EE] bg-[#FAFAFD] rounded-b-2xl">
+                            <p className="text-[13px] text-shnoor-indigoMedium">
+                                {isEditMode ? 'Changes will be saved to this assessment.' : 'Your test will be saved as a draft. You can publish it on the next step.'}
+                            </p>
+                            {isEditMode ? (
+                                <div className="flex items-center gap-3">
                                     <button
+                                        type="button"
+                                        onClick={() => setViewMode(true)}
+                                        disabled={isUploading}
+                                        className="h-11 px-5 border border-[#E3E2EE] bg-white text-shnoor-navy hover:bg-shnoor-lavender rounded-lg text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="button"
                                         onClick={handleManualSubmit}
-                                        disabled={questions.length + codingQuestions.length === 0 || isUploading || !testTitle.trim() || nameAvailability.available === false}
-                                        className="w-full py-4 bg-shnoor-indigo hover:bg-shnoor-indigo text-white font-bold rounded-lg transition-colors shadow-sm flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        disabled={isUploading}
+                                        className="h-11 px-5 bg-shnoor-indigo hover:bg-shnoor-navyLight text-white rounded-lg text-sm font-semibold transition-colors shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         {isUploading ? (
-                                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                                            <>
+                                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                                <span>Saving...</span>
+                                            </>
                                         ) : (
                                             <>
-                                                <Save size={20} />
-                                                <span>Save ({questions.length + codingQuestions.length} Questions)</span>
+                                                <Save size={17} />
+                                                <span>Save Changes</span>
                                             </>
                                         )}
                                     </button>
                                 </div>
-                            </div>
-                        )}
-                    </div>
+                            ) : (
+                                <button
+                                    type="button"
+                                    onClick={handleManualSubmit}
+                                    disabled={totalQuestionCount === 0 || isUploading || !testTitle.trim() || nameAvailability.available === false}
+                                    className="h-11 px-5 bg-shnoor-indigo hover:bg-shnoor-navyLight text-white rounded-lg text-sm font-semibold transition-colors shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {isUploading ? (
+                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                    ) : (
+                                        <>
+                                            <Save size={17} />
+                                            <span>Save ({totalQuestionCount} Questions)</span>
+                                        </>
+                                    )}
+                                </button>
+                            )}
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* Publish step keeps its original back button */}
+            {step === 'success' && onBack && (
+                <div className="flex items-center justify-between">
+                    <button onClick={onBack} className="btn-secondary" title={isEditMode ? 'Cancel Editing' : 'Back to Exams'}>
+                        <ArrowLeft size={16} />
+                        <span>Back to Exams</span>
+                    </button>
                 </div>
             )}
 
             {/* Manual Entry Modal */}
             {step === 'manual' && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-                    <div className="bg-white rounded-xl shadow-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
-                    <div className="sticky top-0 z-10 bg-white border-b border-shnoor-mist p-6 flex items-center justify-between">
-                        <div>
-                            <h3 className="text-xl font-bold text-shnoor-navy">{testTitle}</h3>
-                            <p className="text-sm text-shnoor-navy">Adding questions manually</p>
-                        </div>
-                        <div className="flex items-center space-x-3">
-                            <div className="flex items-center space-x-2 bg-shnoor-lavender px-4 py-2 rounded-lg">
-                                <span className="text-shnoor-indigo font-bold">{questions.length}</span>
-                                <span className="text-shnoor-indigo text-sm">Questions Added</span>
-                            </div>
-                            <button
-                                onClick={() => setStep('init')}
-                                className="p-2 hover:bg-shnoor-lavender rounded-lg transition-colors"
+                <ModalShell
+                    icon={Pencil}
+                    title={testTitle}
+                    titleAddon={
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-shnoor-lavender text-shnoor-indigo text-xs font-medium whitespace-nowrap flex-shrink-0">
+                            <span className="font-semibold">{questions.length}</span> Questions Added
+                        </span>
+                    }
+                    subtitle="Adding questions manually"
+                    onClose={() => setStep('init')}
+                    size="lg"
+                    fullHeight
+                    bodyClassName="lg:grid lg:grid-cols-5 lg:grid-rows-1 lg:overflow-hidden"
+                    footerStart={`${questions.length} question${questions.length !== 1 ? 's' : ''} added`}
+                    footerActions={
+                        <>
+                            <ModalButton
+                                variant="outline"
+                                onClick={isEditMode ? () => {
+                                    setStep('init');
+                                    setViewMode(true);
+                                } : () => setStep('init')}
+                                disabled={isUploading}
                             >
-                                <X size={20} className="text-shnoor-navy" />
+                                Cancel
+                            </ModalButton>
+                            <ModalButton
+                                icon={Save}
+                                loading={isUploading}
+                                // Create mode: return to the Create New Assessment page; the test is saved from there
+                                onClick={isEditMode ? handleManualSubmit : () => setStep('init')}
+                                disabled={questions.length === 0}
+                            >
+                                {isEditMode ? 'Save Changes' : 'Save'} ({questions.length} Questions)
+                            </ModalButton>
+                        </>
+                    }
+                >
+                    {/* Form Side */}
+                    <div className="lg:col-span-3 lg:overflow-y-auto p-6 space-y-5">
+                        <div className="inline-flex rounded-lg bg-gray-100 p-1">
+                            <button
+                                type="button"
+                                onClick={() => setQuestionInputMode('type')}
+                                className={`h-8 px-3 rounded-md text-[13px] font-medium transition-colors flex items-center gap-1.5 ${
+                                    questionInputMode === 'type'
+                                        ? 'bg-white text-shnoor-indigo shadow-sm'
+                                        : 'text-gray-600 hover:text-shnoor-navy'
+                                }`}
+                            >
+                                <FileText size={14} />
+                                Type Manually
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setQuestionInputMode('bank')}
+                                className={`h-8 px-3 rounded-md text-[13px] font-medium transition-colors flex items-center gap-1.5 ${
+                                    questionInputMode === 'bank'
+                                        ? 'bg-white text-shnoor-indigo shadow-sm'
+                                        : 'text-gray-600 hover:text-shnoor-navy'
+                                }`}
+                            >
+                                <List size={14} />
+                                From Question Bank
                             </button>
                         </div>
+
+                        {questionInputMode === 'bank' ? (
+                            <MCQBankSelector
+                                key={bankSelectorKey}
+                                variant="inline"
+                                onSelect={handleSelectMcqFromBank}
+                                selectedQuestionIds={questions.filter((q) => q.bankId).map((q) => q.bankId)}
+                                selectedRoles={jobRoles}
+                            />
+                        ) : (
+                        <>
+                        <div>
+                            <div className="flex items-center justify-between mb-1.5">
+                                <FieldLabel className="mb-0">Question Text</FieldLabel>
+                                <div className="inline-flex rounded-lg bg-gray-100 p-0.5">
+                                    <button
+                                        type="button"
+                                        onClick={() => setCurrentQuestion({ ...currentQuestion, format: 'paragraph' })}
+                                        className={`h-7 w-8 flex items-center justify-center rounded-md transition-colors ${currentQuestion.format === 'paragraph'
+                                            ? 'bg-white text-shnoor-indigo shadow-sm'
+                                            : 'text-gray-500 hover:text-shnoor-navy'
+                                            }`}
+                                        title="Paragraph format (Markdown supported)"
+                                    >
+                                        <AlignLeft size={15} />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setCurrentQuestion({ ...currentQuestion, format: 'line' })}
+                                        className={`h-7 w-8 flex items-center justify-center rounded-md transition-colors ${currentQuestion.format === 'line'
+                                            ? 'bg-white text-shnoor-indigo shadow-sm'
+                                            : 'text-gray-500 hover:text-shnoor-navy'
+                                            }`}
+                                        title="Line format (preserves line breaks)"
+                                    >
+                                        <List size={15} />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setCurrentQuestion({ ...currentQuestion, format: 'code' })}
+                                        className={`h-7 w-8 flex items-center justify-center rounded-md transition-colors ${currentQuestion.format === 'code'
+                                            ? 'bg-white text-shnoor-indigo shadow-sm'
+                                            : 'text-gray-500 hover:text-shnoor-navy'
+                                            }`}
+                                        title="Code format (monospace, syntax highlighting)"
+                                    >
+                                        <Code size={15} />
+                                    </button>
+                                </div>
+                            </div>
+                            <textarea
+                                value={currentQuestion.text}
+                                onChange={(e) => setCurrentQuestion({ ...currentQuestion, text: e.target.value })}
+                                rows={5}
+                                className={`${modalTextareaClass} ${currentQuestion.format === 'code' ? 'font-mono' : ''}`}
+                                placeholder="Enter Question here"
+                                style={{ whiteSpace: 'pre-wrap' }}
+                            />
+                            <p className="text-xs text-gray-500 mt-1.5">
+                                {currentQuestion.format === 'paragraph' && 'Paragraph: supports Markdown formatting (**bold**, *italic*, `code`, lists)'}
+                                {currentQuestion.format === 'line' && 'Line: preserves line breaks and spacing'}
+                                {currentQuestion.format === 'code' && 'Code: monospace font with syntax highlighting'}
+                            </p>
+                        </div>
+
+                        <div>
+                            <div className="flex items-center justify-between mb-1.5">
+                                <FieldLabel className="mb-0">Options</FieldLabel>
+                                <span className="text-xs text-gray-500">Mark the correct answer</span>
+                            </div>
+                            <div className="space-y-2">
+                                {currentQuestion.options.map((opt, idx) => {
+                                    const isCorrect = currentQuestion.correctOption === idx;
+                                    return (
+                                        <div key={idx} className="flex items-center gap-2">
+                                            <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-semibold flex-shrink-0 transition-colors ${isCorrect ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                                                {String.fromCharCode(65 + idx)}
+                                            </span>
+                                            <input
+                                                type="text"
+                                                value={opt}
+                                                onChange={(e) => {
+                                                    const newOptions = [...currentQuestion.options];
+                                                    newOptions[idx] = e.target.value;
+                                                    setCurrentQuestion({ ...currentQuestion, options: newOptions });
+                                                }}
+                                                className={`${modalInputClass} flex-1 ${isCorrect ? '!border-green-500 focus:!ring-green-500/20' : ''}`}
+                                                placeholder={`Option ${idx + 1}`}
+                                            />
+                                            <label
+                                                className={`h-10 px-3 rounded-lg border inline-flex items-center gap-2 text-[13px] font-medium cursor-pointer flex-shrink-0 transition-colors ${
+                                                    isCorrect
+                                                        ? 'border-green-500 bg-green-50 text-green-700'
+                                                        : 'border-shnoor-mist text-gray-500 hover:border-shnoor-light hover:text-shnoor-navy'
+                                                }`}
+                                                title="Mark as correct answer"
+                                            >
+                                                <input
+                                                    type="radio"
+                                                    name="manual-correct-option"
+                                                    checked={isCorrect}
+                                                    onChange={() => setCurrentQuestion({ ...currentQuestion, correctOption: idx })}
+                                                    className="accent-green-600"
+                                                />
+                                                Correct
+                                            </label>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        <div className="flex justify-end">
+                            <ModalButton variant="secondary" icon={Plus} onClick={handleAddQuestion}>
+                                Add Question to Test
+                            </ModalButton>
+                        </div>
+                        </>
+                        )}
                     </div>
 
-                    <div className="p-6">
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        {/* Form Side */}
-                        <div className="lg:col-span-2 space-y-6">
-                            <div className="flex rounded-lg border border-shnoor-mist p-1 bg-shnoor-lavender">
-                                <button
-                                    type="button"
-                                    onClick={() => setQuestionInputMode('type')}
-                                    className={`flex-1 py-2.5 px-4 rounded-md text-sm font-semibold transition-colors flex items-center justify-center gap-2 ${
-                                        questionInputMode === 'type'
-                                            ? 'bg-white text-shnoor-indigo shadow-sm'
-                                            : 'text-shnoor-navy hover:text-shnoor-indigo'
-                                    }`}
-                                >
-                                    <FileText size={16} />
-                                    Type Manually
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setQuestionInputMode('bank')}
-                                    className={`flex-1 py-2.5 px-4 rounded-md text-sm font-semibold transition-colors flex items-center justify-center gap-2 ${
-                                        questionInputMode === 'bank'
-                                            ? 'bg-white text-shnoor-indigo shadow-sm'
-                                            : 'text-shnoor-navy hover:text-shnoor-indigo'
-                                    }`}
-                                >
-                                    <List size={16} />
-                                    From Question Bank
-                                </button>
-                            </div>
-
-                            {questionInputMode === 'bank' ? (
-                                <MCQBankSelector
-                                    key={bankSelectorKey}
-                                    variant="inline"
-                                    onSelect={handleSelectMcqFromBank}
-                                    selectedQuestionIds={questions.filter((q) => q.bankId).map((q) => q.bankId)}
-                                    selectedRoles={jobRoles}
-                                />
-                            ) : (
-                            <>
-                            <div>
-                                <div className="flex items-center justify-between mb-2">
-                                    <label className="block text-sm font-medium text-shnoor-navy">Question Text</label>
-                                    <div className="flex items-center space-x-1 bg-shnoor-lavender rounded-lg p-1">
-                                        <button
-                                            type="button"
-                                            onClick={() => setCurrentQuestion({ ...currentQuestion, format: 'paragraph' })}
-                                            className={`p-2 rounded transition-colors ${currentQuestion.format === 'paragraph'
-                                                ? 'bg-shnoor-indigo text-white'
-                                                : 'text-shnoor-navy hover:bg-white'
-                                                }`}
-                                            title="Paragraph format (Markdown supported)"
-                                        >
-                                            <AlignLeft size={16} />
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => setCurrentQuestion({ ...currentQuestion, format: 'line' })}
-                                            className={`p-2 rounded transition-colors ${currentQuestion.format === 'line'
-                                                ? 'bg-shnoor-indigo text-white'
-                                                : 'text-shnoor-navy hover:bg-white'
-                                                }`}
-                                            title="Line format (preserves line breaks)"
-                                        >
-                                            <List size={16} />
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => setCurrentQuestion({ ...currentQuestion, format: 'code' })}
-                                            className={`p-2 rounded transition-colors ${currentQuestion.format === 'code'
-                                                ? 'bg-shnoor-indigo text-white'
-                                                : 'text-shnoor-navy hover:bg-white'
-                                                }`}
-                                            title="Code format (monospace, syntax highlighting)"
-                                        >
-                                            <Code size={16} />
-                                        </button>
-                                    </div>
+                    {/* Preview Side */}
+                    <div className="lg:col-span-2 lg:overflow-y-auto bg-gray-50 border-t lg:border-t-0 lg:border-l border-shnoor-mist p-6">
+                        <div className="flex items-center justify-between mb-1">
+                            <h4 className="text-sm font-semibold text-shnoor-navy">Added Questions</h4>
+                            <span className="text-xs text-gray-500">{questions.length}</span>
+                        </div>
+                        <p className="text-xs text-gray-500 mb-4">Remove any with the trash icon before saving the test.</p>
+                        {questions.length === 0 ? (
+                            <div className="text-center py-10">
+                                <div className="w-10 h-10 rounded-xl bg-white border border-shnoor-mist text-gray-400 flex items-center justify-center mx-auto mb-3">
+                                    <FileText size={18} />
                                 </div>
-                                <textarea
-                                    value={currentQuestion.text}
-                                    onChange={(e) => setCurrentQuestion({ ...currentQuestion, text: e.target.value })}
-                                    rows={6}
-                                    className={`w-full px-4 py-3 border border-shnoor-mist rounded-lg focus:ring-2 focus:ring-shnoor-navyLight focus:border-transparent text-sm ${currentQuestion.format === 'code' ? 'font-mono' : ''
-                                        }`}
-                                    placeholder="Enter Question here"
-                                    style={{ whiteSpace: 'pre-wrap' }}
-                                />
-                                <p className="text-xs text-shnoor-indigoMedium mt-1">
-                                    {currentQuestion.format === 'paragraph' && '📝 Paragraph: Supports Markdown formatting (**bold**, *italic*, `code`, lists)'}
-                                    {currentQuestion.format === 'line' && '📄 Line: Preserves line breaks and spacing'}
-                                    {currentQuestion.format === 'code' && '💻 Code: Monospace font with syntax highlighting'}
-                                </p>
+                                <p className="text-sm font-medium text-shnoor-navy">No questions yet</p>
+                                <p className="text-xs text-gray-500 mt-1">Questions you add will appear here.</p>
                             </div>
-
+                        ) : (
                             <div className="space-y-3">
-                                <label className="block text-sm font-medium text-shnoor-navy">Options</label>
-                                {currentQuestion.options.map((opt, idx) => (
-                                    <div key={idx} className="flex items-center space-x-3">
-                                        <span className="w-6 text-sm text-shnoor-navy font-medium">{String.fromCharCode(65 + idx)}</span>
-                                        <input
-                                            type="text"
-                                            value={opt}
-                                            onChange={(e) => {
-                                                const newOptions = [...currentQuestion.options];
-                                                newOptions[idx] = e.target.value;
-                                                setCurrentQuestion({ ...currentQuestion, options: newOptions });
-                                            }}
-                                            className={`flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-shnoor-navyLight focus:border-transparent ${currentQuestion.correctOption === idx ? 'border-shnoor-success bg-shnoor-successLight' : 'border-shnoor-mist'}`}
-                                            placeholder={`Option ${idx + 1}`}
-                                        />
-                                        <button
-                                            onClick={() => setCurrentQuestion({ ...currentQuestion, correctOption: idx })}
-                                            className={`p-2 rounded-full transition-colors ${currentQuestion.correctOption === idx ? 'bg-shnoor-successLight text-shnoor-success' : 'bg-shnoor-lavender text-shnoor-navy hover:bg-shnoor-lavender'}`}
-                                            title="Mark as correct answer"
-                                        >
-                                            <CheckCircle size={20} />
-                                        </button>
+                                {questions.map((q, idx) => (
+                                    <div key={q.id} className="bg-white p-3 rounded-xl border border-shnoor-mist">
+                                        <div className="flex justify-between items-start mb-2 gap-2">
+                                            <div className="flex flex-wrap items-center gap-1.5">
+                                                <span className="font-semibold text-[11px] text-shnoor-indigo bg-shnoor-lavender px-2 py-0.5 rounded-md">Q{idx + 1}</span>
+                                                {q.fromBank && (
+                                                    <span className="text-[11px] text-gray-600 bg-gray-100 px-2 py-0.5 rounded-md">Bank</span>
+                                                )}
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleRemoveQuestion(q.id)}
+                                                className="p-1.5 -m-1 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors flex-shrink-0"
+                                                title="Remove question"
+                                            >
+                                                <Trash2 size={15} />
+                                            </button>
+                                        </div>
+                                        <p className="text-[13px] font-medium text-shnoor-navy mb-2 line-clamp-2">{q.text}</p>
+                                        <div className="space-y-1">
+                                            {q.options.map((opt, i) => (
+                                                <div key={i} className={`flex items-center gap-1.5 text-xs px-2 py-1 rounded-md ${q.correctOption === i ? 'bg-green-50 text-green-700 font-medium' : 'text-gray-600'}`}>
+                                                    <span className="font-semibold">{String.fromCharCode(65 + i)}.</span>
+                                                    <span className="truncate">{opt}</span>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
                                 ))}
                             </div>
-
-                            <button
-                                type="button"
-                                onClick={handleAddQuestion}
-                                className="w-full py-3 bg-theme-accent hover:bg-theme-accent2 text-white font-semibold rounded-lg transition-colors flex items-center justify-center space-x-2"
-                            >
-                                <Plus size={20} />
-                                <span>Add Question to Test</span>
-                            </button>
-                            </>
-                            )}
-
-                            <div className="pt-6 border-t border-shnoor-mist">
-                                <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-3">
-                                    <button
-                                        // Create mode: return to the Create New Assessment page; the test is saved from there
-                                        onClick={isEditMode ? handleManualSubmit : () => setStep('init')}
-                                        disabled={questions.length === 0 || isUploading}
-                                        className={`flex-1 py-4 bg-shnoor-indigo hover:bg-shnoor-indigo text-white font-bold rounded-lg transition-colors shadow-sm flex items-center justify-center space-x-2 ${questions.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                    >
-                                        {isUploading ? (
-                                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                                        ) : (
-                                            <>
-                                                <Save size={20} />
-                                                <span>{isEditMode ? 'Save Changes' : 'Save'} ({questions.length} Questions)</span>
-                                            </>
-                                        )}
-                                    </button>
-                                    {isEditMode && (
-                                        <button
-                                            onClick={() => {
-                                                setStep('init');
-                                                setViewMode(true);
-                                            }}
-                                            disabled={isUploading}
-                                            className="px-6 py-4 bg-shnoor-lavender hover:bg-shnoor-lavender text-shnoor-navy font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                        >
-                                            Cancel
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Preview Side */}
-                        <div className="bg-shnoor-lavender rounded-xl p-4 h-fit max-h-[600px] overflow-y-auto border border-shnoor-mist">
-                            <h3 className="font-bold text-shnoor-navy mb-1">Added Questions</h3>
-                            <p className="text-xs text-shnoor-navy mb-4">Questions you add appear here. Remove any with the trash icon before saving the test.</p>
-                            {questions.length === 0 ? (
-                                <div className="text-center py-8 text-shnoor-navy">
-                                    <FileText className="mx-auto h-10 w-10 mb-2 opacity-50" />
-                                    <p>No questions added yet</p>
-                                </div>
-                            ) : (
-                                <div className="space-y-4">
-                                    {questions.map((q, idx) => (
-                                        <div key={q.id} className="bg-white p-4 rounded-lg border border-shnoor-mist shadow-sm">
-                                            <div className="flex justify-between items-start mb-2 gap-2">
-                                                <div className="flex flex-wrap items-center gap-1.5">
-                                                    <span className="font-bold text-xs text-shnoor-navy bg-shnoor-lavender px-2 py-1 rounded">Q{idx + 1}</span>
-                                                    {q.fromBank && (
-                                                        <span className="text-xs text-shnoor-indigo bg-shnoor-lavender px-2 py-0.5 rounded">Bank</span>
-                                                    )}
-                                                </div>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => handleRemoveQuestion(q.id)}
-                                                    className="p-1.5 text-shnoor-danger hover:bg-shnoor-dangerLight rounded-lg flex-shrink-0"
-                                                    title="Remove question"
-                                                >
-                                                    <Trash2 size={16} />
-                                                </button>
-                                            </div>
-                                            <p className="text-sm font-medium text-shnoor-navy mb-2 line-clamp-2">{q.text}</p>
-                                            <div className="space-y-1">
-                                                {q.options.map((opt, i) => (
-                                                    <div key={i} className={`text-xs px-2 py-1 rounded ${q.correctOption === i ? 'bg-shnoor-successLight text-shnoor-success font-medium' : 'text-shnoor-navy'}`}>
-                                                        {opt}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
+                        )}
                     </div>
-                    </div>
-                    </div>
-                </div>
+                </ModalShell>
             )}
 
             {/* Bulk Upload Modal */}
             {step === 'bulk' && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-                    <div className="bg-white rounded-xl shadow-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
-                    <div className="sticky top-0 z-10 bg-white border-b border-shnoor-mist p-6 flex items-center justify-between">
-                        <div>
-                            <h3 className="text-xl font-bold text-shnoor-navy">{testTitle}</h3>
-                            <p className="text-sm text-shnoor-navy">Bulk Upload via Excel/CSV</p>
-                        </div>
-                        <button
-                            onClick={() => setStep('init')}
-                            className="p-2 hover:bg-shnoor-lavender rounded-lg transition-colors"
-                        >
-                            <X size={20} className="text-shnoor-navy" />
-                        </button>
-                    </div>
-
-                    <div className="p-6">
-                    <div className="border-2 border-dashed border-shnoor-mist rounded-lg p-12 text-center hover:border-shnoor-indigo transition-colors relative">
-                        {isUploading && (
-                            <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10">
-                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-shnoor-indigo"></div>
-                            </div>
-                        )}
-
-                        <div className="w-16 h-16 bg-shnoor-lavender rounded-full flex items-center justify-center mx-auto mb-4">
-                            <Upload className="w-8 h-8 text-shnoor-navy" />
-                        </div>
-                        <p className="text-shnoor-navy mb-2">Drag and drop your Excel/CSV file here</p>
-                        <p className="text-sm text-shnoor-navy mb-6">Supported formats: .csv, .xlsx, .xls</p>
-
-                        <label className="inline-flex items-center px-6 py-3 bg-shnoor-indigo hover:bg-shnoor-indigo text-white font-semibold rounded-lg cursor-pointer transition-colors shadow-sm">
-                            <Upload size={18} className="mr-2" />
-                            Select File
-                            <input
-                                type="file"
-                                accept=".csv,.xlsx,.xls"
-                                className="hidden"
-                                onChange={handleBulkUpload}
-                                disabled={isUploading}
-                            />
-                        </label>
-                    </div>
-
-                    <div className="mt-8 bg-shnoor-lavender p-4 rounded-lg flex items-start space-x-3">
-                        <div className="flex-shrink-0">
-                            <FileText className="h-5 w-5 text-shnoor-indigo" />
-                        </div>
-                        <div className="text-sm text-shnoor-indigo">
-                            <p className="font-bold mb-1">CSV Template Format:</p>
-                            <p>Question, Option1, Option2, Option3, Option4, CorrectOption(1-4), Marks, Tags</p>
-                        </div>
-                    </div>
-                    </div>
-                    </div>
-                </div>
+                <BulkUploadModal
+                    testTitle={testTitle}
+                    isUploading={isUploading}
+                    onUpload={handleBulkUpload}
+                    onClose={() => setStep('init')}
+                />
             )}
 
             {/* Step 3: Success Screen */}
