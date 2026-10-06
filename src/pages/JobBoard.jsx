@@ -1,7 +1,7 @@
 // src/pages/JobBoard.jsx
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Briefcase, Building2, Clock, ArrowLeft, Loader2, RefreshCw, Search, CheckCircle2, CheckCircle, X } from 'lucide-react';
+import { LogOut, Briefcase, Building2, Clock, ArrowLeft, Loader2, RefreshCw, Search, CheckCircle2, CheckCircle, X, Code, Link2, Calendar, FileText } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiFetch } from '../config/api';
 import ThemeSelector from '../components/ThemeSelector';
@@ -44,11 +44,26 @@ export default function JobBoard({ isEmbedded = false }) {
     });
 
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
 
     const [search, setSearch] = useState('');
     const [enrollingJobs, setEnrollingJobs] = useState(new Set());
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [successData, setSuccessData] = useState(null);
+    
+    // Application form state
+    const [showApplicationModal, setShowApplicationModal] = useState(false);
+    const [selectedJob, setSelectedJob] = useState(null);
+    const [applicationForm, setApplicationForm] = useState({
+        primarySkill: '',
+        yearsOfExperience: '',
+        githubUrl: ''
+    });
+
+    // View Details state
+    const [viewDetailsJob, setViewDetailsJob] = useState(null);
+    const [viewDetailsData, setViewDetailsData] = useState(null);
+
     const [studentName, setStudentName] = useState('');
     const [studentId, setStudentId] = useState('');
     const [institute, setInstitute] = useState('');
@@ -113,6 +128,22 @@ export default function JobBoard({ isEmbedded = false }) {
                     });
                 }
             }
+
+            // Restore mock job applications from localStorage (since they don't exist in DB)
+            try {
+                const savedData = JSON.parse(localStorage.getItem('student_job_applications') || '{}');
+                Object.keys(savedData).forEach(jobId => {
+                    if (jobId.startsWith('mock-') && !applicationsMap.has(jobId)) {
+                        applicationsMap.set(jobId, {
+                            id: `mock-app-${jobId}`,
+                            job_opening_id: jobId,
+                            status: 'submitted',
+                            total_tests: 0,
+                            completed_tests: 0
+                        });
+                    }
+                });
+            } catch(e) { console.error('Failed to parse local mock apps', e); }
             const MOCK_JOBS = [
                 { id: 'mock-1', company_name: 'TechCorp', job_role: 'Data Analytics', job_description: 'We are looking for a Data Analyst to join our team...', registration_deadline: new Date(Date.now() + 864000000).toISOString(), eligibility_criteria: 'B.Tech/B.E. in Computer Science or related field.' },
                 { id: 'mock-2', company_name: 'WebSolutions', job_role: 'React Developer', job_description: 'Seeking a frontend developer with strong React experience...', registration_deadline: new Date(Date.now() + 864000000).toISOString(), eligibility_criteria: '2+ years of experience in React.' },
@@ -167,7 +198,7 @@ export default function JobBoard({ isEmbedded = false }) {
         );
     }, [debouncedSearch, jobs]);
 
-    const handleEnrollClick = async (job) => {
+    const handleEnrollClick = (job) => {
         const token = localStorage.getItem('studentAuthToken');
         if (!token) {
             navigate('/login?redirect=/job-board&message=Please login to enroll in jobs');
@@ -178,44 +209,92 @@ export default function JobBoard({ isEmbedded = false }) {
             return;
         }
 
+        setSelectedJob(job);
+        setApplicationForm({ primarySkill: '', yearsOfExperience: '', githubUrl: '' });
+        setShowApplicationModal(true);
+    };
+
+    const submitApplication = async (e) => {
+        e.preventDefault();
+        const job = selectedJob;
+        if (!job) return;
+
+        const token = localStorage.getItem('studentAuthToken');
+
+        // Save form data locally for "View Details" to show later
+        try {
+            const savedData = JSON.parse(localStorage.getItem('student_job_applications') || '{}');
+            savedData[job.id] = applicationForm;
+            localStorage.setItem('student_job_applications', JSON.stringify(savedData));
+        } catch(e) { console.error('Failed to save local app data', e); }
+
+        setShowApplicationModal(false);
         setEnrollingJobs(prev => new Set([...prev, job.id]));
 
         try {
-            const res = await apiFetch(`/api/job-applications/apply/${job.id}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    resume_url: null,
-                    cover_letter: ''
-                })
-            });
-
-            const data = await res.json();
-
-            if (data.success) {
-                setApplications(prev => {
-                    const newMap = new Map(prev);
+            // Mock jobs shouldn't hit the API as they aren't in the database
+            if (String(job.id).startsWith('mock-')) {
+                await new Promise(resolve => setTimeout(resolve, 800)); // simulate network delay
+                
+                queryClient.setQueryData(['jobBoardData'], oldData => {
+                    if (!oldData) return oldData;
+                    const newMap = new Map(oldData.applications);
                     newMap.set(job.id, {
                         job_opening_id: job.id,
-                        status: data.data.status || 'submitted',
-                        application_id: data.data.applicationId,
-                        total_tests: data.data.testsAssigned || 0,
+                        status: 'submitted',
+                        application_id: 'mock-app-' + Date.now(),
+                        total_tests: 0,
                         completed_tests: 0
                     });
-                    return newMap;
+                    return { ...oldData, applications: newMap };
                 });
 
                 setSuccessData({
                     jobRole: job.job_role,
                     companyName: job.company_name,
-                    testsAssigned: data.data.testsAssigned || 0
+                    testsAssigned: 0
                 });
                 setShowSuccessModal(true);
             } else {
-                alert(data.message || 'Failed to enroll. Please try again.');
+                // Real jobs hitting real API
+                const res = await apiFetch(`/api/job-applications/apply/${job.id}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        resume_url: null,
+                        cover_letter: '',
+                        form_data: applicationForm // Sending the modal form data as well
+                    })
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    queryClient.setQueryData(['jobBoardData'], oldData => {
+                        if (!oldData) return oldData;
+                        const newMap = new Map(oldData.applications);
+                        newMap.set(job.id, {
+                            job_opening_id: job.id,
+                            status: data.data.status || 'submitted',
+                            application_id: data.data.applicationId,
+                            total_tests: data.data.testsAssigned || 0,
+                            completed_tests: 0
+                        });
+                        return { ...oldData, applications: newMap };
+                    });
+
+                    setSuccessData({
+                        jobRole: job.job_role,
+                        companyName: job.company_name,
+                        testsAssigned: data.data.testsAssigned || 0
+                    });
+                    setShowSuccessModal(true);
+                } else {
+                    alert(data.message || 'Failed to enroll. Please try again.');
+                }
             }
         } catch (err) {
             console.error('Enrollment error:', err);
@@ -402,7 +481,15 @@ export default function JobBoard({ isEmbedded = false }) {
                                                         </button>
                                                     ) : (
                                                         <button
-                                                            onClick={() => navigate('/student/my-applications')}
+                                                            onClick={() => {
+                                                                let data = null;
+                                                                try {
+                                                                    const savedData = JSON.parse(localStorage.getItem('student_job_applications') || '{}');
+                                                                    data = savedData[job.id] || null;
+                                                                } catch(e) {}
+                                                                setViewDetailsJob(job);
+                                                                setViewDetailsData(data);
+                                                            }}
                                                             className="h-full flex-1 inline-flex items-center justify-center gap-1.5 bg-slate-50 dark:bg-[#1E1E38] hover:bg-indigo-50/70 dark:hover:bg-indigo-950/40 text-slate-700 dark:text-slate-200 hover:text-[#403f75] dark:hover:text-indigo-300 text-xs sm:text-sm font-bold rounded-xl transition-all cursor-pointer border border-slate-200/90 dark:border-slate-700 hover:border-indigo-200/80 shadow-2xs"
                                                         >
                                                             View Details
@@ -439,6 +526,82 @@ export default function JobBoard({ isEmbedded = false }) {
                     </div>
                 )}
             </main>
+
+            {/* Application Modal */}
+            {showApplicationModal && selectedJob && (
+                <div 
+                    className="fixed inset-0 bg-[#0E0E27]/40 backdrop-blur-sm flex items-center justify-center z-[100] p-4 font-sans animate-fade-in"
+                    onClick={() => setShowApplicationModal(false)}
+                >
+                    <div 
+                        className="bg-white dark:bg-[#1E1E38] rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-mist dark:border-slate-700 max-w-md w-full overflow-hidden"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
+                            <div>
+                                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Job Application</h3>
+                                <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-0.5">{selectedJob.job_role} at {selectedJob.company_name}</p>
+                            </div>
+                            <button
+                                onClick={() => setShowApplicationModal(false)}
+                                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg p-1.5 transition-colors cursor-pointer"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+                        
+                        <form onSubmit={submitApplication} className="p-6 space-y-5">
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Primary Technical Skill</label>
+                                <input 
+                                    type="text" 
+                                    required
+                                    placeholder="e.g. React, Python, Data Analysis"
+                                    value={applicationForm.primarySkill}
+                                    onChange={(e) => setApplicationForm({...applicationForm, primarySkill: e.target.value})}
+                                    className="w-full px-4 py-2.5 bg-white dark:bg-[#1A1A32] border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#403f75]/50 dark:text-white transition-all"
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Years of Experience</label>
+                                <select 
+                                    required
+                                    value={applicationForm.yearsOfExperience}
+                                    onChange={(e) => setApplicationForm({...applicationForm, yearsOfExperience: e.target.value})}
+                                    className="w-full px-4 py-2.5 bg-white dark:bg-[#1A1A32] border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#403f75]/50 dark:text-white transition-all appearance-none"
+                                >
+                                    <option value="" disabled>Select experience level</option>
+                                    <option value="Fresher (0 years)">Fresher (0 years)</option>
+                                    <option value="1-2 years">1-2 years</option>
+                                    <option value="3-5 years">3-5 years</option>
+                                    <option value="5+ years">5+ years</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Portfolio / GitHub / LinkedIn URL <span className="text-slate-400 font-normal">(Optional)</span></label>
+                                <input 
+                                    type="url" 
+                                    placeholder="https://..."
+                                    value={applicationForm.githubUrl}
+                                    onChange={(e) => setApplicationForm({...applicationForm, githubUrl: e.target.value})}
+                                    className="w-full px-4 py-2.5 bg-white dark:bg-[#1A1A32] border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#403f75]/50 dark:text-white transition-all"
+                                />
+                            </div>
+
+                            <div className="pt-2">
+                                <button
+                                    type="submit"
+                                    className="w-full py-3 bg-gradient-to-r from-[#403f75] to-[#57569b] hover:from-[#343360] hover:to-[#4a4988] text-white rounded-xl font-bold text-sm shadow-md shadow-[#403f75]/20 active:scale-[0.98] transition-all cursor-pointer"
+                                >
+                                    Submit Application
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
 
             {/* Success Modal */}
             {showSuccessModal && successData && (
@@ -504,6 +667,95 @@ export default function JobBoard({ isEmbedded = false }) {
                                     </button>
                                 )}
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* View Details Modal */}
+            {viewDetailsJob && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setViewDetailsJob(null)}></div>
+                    <div className="bg-white dark:bg-[#1A1A32] rounded-2xl p-6 sm:p-8 max-w-md w-full relative z-10 shadow-2xl animate-scale-up border border-slate-100 dark:border-slate-700/60">
+                        <button
+                            onClick={() => setViewDetailsJob(null)}
+                            className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors p-1"
+                        >
+                            <X size={20} />
+                        </button>
+
+                        <div className="text-center mb-6">
+                            <div className="w-14 h-14 bg-indigo-50 dark:bg-indigo-900/40 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-indigo-100 dark:border-indigo-800/60">
+                                <Briefcase size={28} className="text-[#403f75] dark:text-indigo-400" />
+                            </div>
+                            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-1.5">Application Details</h2>
+                            <p className="text-sm text-slate-500 dark:text-slate-400">
+                                {viewDetailsJob.job_role} at {viewDetailsJob.company_name}
+                            </p>
+                        </div>
+
+                        <div className="space-y-3 mb-8">
+                            {viewDetailsData ? (
+                                <>
+                                    <div className="group flex items-start gap-4 p-4 rounded-xl bg-slate-50/50 dark:bg-[#1E1E38]/50 border border-slate-200 dark:border-slate-700/60 hover:bg-white dark:hover:bg-[#1A1A32] hover:border-indigo-300 dark:hover:border-indigo-500/50 hover:shadow-lg hover:shadow-indigo-500/5 transition-all cursor-default">
+                                        <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center flex-shrink-0 text-[#403f75] dark:text-indigo-400 group-hover:scale-110 group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/50 transition-all">
+                                            <Code size={18} />
+                                        </div>
+                                        <div>
+                                            <p className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-0.5">Primary Technical Skill</p>
+                                            <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+                                                {viewDetailsData.primarySkill || 'Not provided'}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="group flex items-start gap-4 p-4 rounded-xl bg-slate-50/50 dark:bg-[#1E1E38]/50 border border-slate-200 dark:border-slate-700/60 hover:bg-white dark:hover:bg-[#1A1A32] hover:border-indigo-300 dark:hover:border-indigo-500/50 hover:shadow-lg hover:shadow-indigo-500/5 transition-all cursor-default">
+                                        <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center flex-shrink-0 text-[#403f75] dark:text-indigo-400 group-hover:scale-110 group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/50 transition-all">
+                                            <Clock size={18} />
+                                        </div>
+                                        <div>
+                                            <p className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-0.5">Years of Experience</p>
+                                            <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+                                                {viewDetailsData.yearsOfExperience || 'Not provided'}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="group flex items-start gap-4 p-4 rounded-xl bg-slate-50/50 dark:bg-[#1E1E38]/50 border border-slate-200 dark:border-slate-700/60 hover:bg-white dark:hover:bg-[#1A1A32] hover:border-indigo-300 dark:hover:border-indigo-500/50 hover:shadow-lg hover:shadow-indigo-500/5 transition-all cursor-default">
+                                        <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center flex-shrink-0 text-[#403f75] dark:text-indigo-400 group-hover:scale-110 group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/50 transition-all">
+                                            <Link2 size={18} />
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                            <p className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-0.5">Portfolio / GitHub / LinkedIn</p>
+                                            {viewDetailsData.githubUrl ? (
+                                                <a href={viewDetailsData.githubUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 hover:underline truncate block">
+                                                    {viewDetailsData.githubUrl}
+                                                </a>
+                                            ) : (
+                                                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">Not provided</p>
+                                            )}
+                                        </div>
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="text-center py-10 px-4 bg-slate-50 dark:bg-slate-800/30 rounded-xl border border-slate-100 dark:border-slate-700/50">
+                                    <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-3">
+                                        <FileText size={20} className="text-slate-400" />
+                                    </div>
+                                    <p className="text-slate-600 dark:text-slate-400 text-sm font-medium">
+                                        No custom application details found for this job.
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="flex justify-center">
+                            <button
+                                onClick={() => setViewDetailsJob(null)}
+                                className="w-full h-12 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-sm font-bold rounded-xl transition-all shadow-sm"
+                            >
+                                Close
+                            </button>
                         </div>
                     </div>
                 </div>

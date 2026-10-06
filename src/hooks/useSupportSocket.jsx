@@ -112,6 +112,12 @@ export const useSupportSocket = ({
           notification.messagePreview || 'You have a new support message',
           { tag: `support-${notification.id}` }
         );
+      } else if (notification.type === 'job-application') {
+        showBrowserNotification(
+          `New Application: ${notification.studentName || 'Student'}`,
+          notification.messagePreview || 'A new job application was submitted',
+          { tag: `job-${notification.id}` }
+        );
       } else if (notification.type === 'admin-reply') {
         showBrowserNotification(
           'New reply from Support',
@@ -236,6 +242,20 @@ export const useSupportSocket = ({
         if (data.count === 0) {
           clearNotifications();
         }
+      });
+
+      // New Job Application
+      socket.on('job:applied', (data) => {
+        addNotification({
+          type: 'job-application',
+          id: data.applicationId || Date.now(),
+          studentName: data.studentName,
+          studentId: data.studentId,
+          jobRole: data.jobRole,
+          companyName: data.companyName,
+          messagePreview: `Applied for ${data.jobRole} at ${data.companyName}`,
+          createdAt: data.createdAt || new Date().toISOString()
+        }, true);
       });
 
     }
