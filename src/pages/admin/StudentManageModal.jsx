@@ -63,56 +63,57 @@ const StudentManageModal = ({
         <div className="p-6 space-y-6 overflow-y-auto flex-1">
           {/* Add Student Form */}
           {showAddStudentForm ? (
-            <div className="bg-slate-50 dark:bg-[#232348] border border-slate-200 dark:border-slate-700 rounded-xl p-4.5 space-y-3">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">Add New Student</h4>
+            <div className="bg-slate-50/90 dark:bg-[#232348] border border-slate-200/90 dark:border-slate-700/90 rounded-xl p-4 sm:p-4.5 shadow-xs transition-all">
+              <div className="flex items-center justify-between pb-2.5 border-b border-slate-200/80 dark:border-slate-700/80 mb-3">
+                <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-800 dark:text-slate-200">Add New Student</h4>
                 <button
                   onClick={() => setShowAddStudentForm(false)}
-                  className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-md transition-colors cursor-pointer"
+                  className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg hover:bg-slate-200/60 dark:hover:bg-slate-700/60 transition-colors cursor-pointer"
+                  title="Close form"
                 >
-                  <X size={16} />
+                  <X size={15} />
                 </button>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                 <input
                   type="text"
                   placeholder="Full Name *"
                   value={newStudentData.full_name}
                   onChange={(e) => setNewStudentData({ ...newStudentData, full_name: e.target.value })}
-                  className="px-3.5 py-2 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#403f75]/15 focus:border-[#403f75] bg-white dark:bg-[#1E1E38] text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-400 text-sm shadow-xs transition-all"
+                  className="px-3.5 py-2 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#403f75]/15 focus:border-[#403f75] bg-white dark:bg-[#1E1E38] text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-400 text-xs sm:text-sm shadow-2xs transition-all"
                 />
                 <input
                   type="email"
                   placeholder="Email *"
                   value={newStudentData.email}
                   onChange={(e) => setNewStudentData({ ...newStudentData, email: e.target.value })}
-                  className="px-3.5 py-2 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#403f75]/15 focus:border-[#403f75] bg-white dark:bg-[#1E1E38] text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-400 text-sm shadow-xs transition-all"
+                  className="px-3.5 py-2 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#403f75]/15 focus:border-[#403f75] bg-white dark:bg-[#1E1E38] text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-400 text-xs sm:text-sm shadow-2xs transition-all"
                 />
                 <input
                   type="text"
                   placeholder="Roll Number (Optional)"
                   value={newStudentData.roll_number}
                   onChange={(e) => setNewStudentData({ ...newStudentData, roll_number: e.target.value })}
-                  className="px-3.5 py-2 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#403f75]/15 focus:border-[#403f75] bg-white dark:bg-[#1E1E38] text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-400 text-sm shadow-xs transition-all"
+                  className="px-3.5 py-2 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#403f75]/15 focus:border-[#403f75] bg-white dark:bg-[#1E1E38] text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-400 text-xs sm:text-sm shadow-2xs transition-all"
                 />
                 <input
                   type="text"
                   value={newStudentData.institute}
                   disabled
-                  className="px-3.5 py-2 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-100 dark:bg-[#181830] text-slate-500 dark:text-slate-400 text-sm"
+                  className="px-3.5 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-100 dark:bg-[#181830] text-slate-500 dark:text-slate-400 text-xs sm:text-sm cursor-not-allowed"
                 />
               </div>
-              <div className="flex justify-end gap-2.5 pt-2">
+              <div className="flex justify-end items-center gap-2.5 pt-2.5 border-t border-slate-200/80 dark:border-slate-700/80">
                 <button
                   onClick={() => setShowAddStudentForm(false)}
-                  className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white dark:bg-[#25254A] text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-[#303060] transition-colors cursor-pointer"
+                  className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-white dark:bg-[#25254A] text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-[#303060] transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleAddStudent}
                   disabled={isAddingStudent}
-                  className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-[#403f75] hover:bg-[#343360] dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-all disabled:opacity-50 cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-[#403f75] hover:bg-[#343360] dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                 >
                   {isAddingStudent && (
                     <Loader2 className="animate-spin" size={13} />

@@ -177,40 +177,52 @@ const InterviewsList = () => {
   return (
     <div className="space-y-6">
       <Card noPadding>
-        <div className="p-4 sm:p-8">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 pb-4 sm:pb-6 border-b border-shnoor-light">
-            <div>
-              <h2 className="text-2xl sm:text-3xl font-bold text-shnoor-navy mb-2 flex items-center">
-                <Video className="mr-2 sm:mr-3 text-shnoor-indigo h-6 w-6 sm:h-8 sm:w-8" />
-                Interviews
-              </h2>
-              <p className="text-sm sm:text-base text-shnoor-indigoMedium ml-8 sm:ml-11">Manage and join scheduled interviews</p>
+        <div className="p-4 sm:p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="h-10 w-10 shrink-0 rounded-lg bg-shnoor-lavender flex items-center justify-center">
+              <Video className="h-5 w-5 text-shnoor-indigo" />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-xl font-semibold text-shnoor-navy">Interviews</h2>
+                <span className="px-2 py-0.5 rounded-full bg-shnoor-lavender text-shnoor-indigo text-xs font-semibold">
+                  {interviews.length} {interviews.length === 1 ? 'interview' : 'interviews'}
+                </span>
+              </div>
+              <p className="text-xs text-shnoor-indigoMedium">Manage and join scheduled interviews</p>
             </div>
           </div>
-          
-          <div className="flex flex-col md:flex-row gap-4 md:items-end">
-            <div className="w-full md:w-auto flex-1">
-              <label className="block text-sm font-bold text-shnoor-navy mb-2">Date</label>
-              <div className="flex flex-col sm:flex-row gap-2">
+
+          <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-4">
+            <div className="w-full sm:w-auto">
+              <label className="block text-xs font-medium text-shnoor-indigoMedium mb-1">Date</label>
+              <div className={`relative flex items-center h-10 rounded-lg border border-theme-border bg-theme-card transition-opacity ${showAllDates ? 'opacity-50' : ''}`}>
+                <Calendar className="absolute left-3 h-4 w-4 text-shnoor-indigoMedium pointer-events-none" />
                 <input
                   type="date"
                   value={filter.date}
                   onChange={(e) => setFilter({ ...filter, date: e.target.value })}
                   disabled={showAllDates}
-                  className="w-full sm:w-auto flex-1 px-4 py-3 border border-shnoor-light rounded-xl focus:outline-none focus:ring-4 focus:ring-shnoor-lavender focus:border-shnoor-indigo bg-white text-shnoor-navy font-medium disabled:bg-shnoor-lavender disabled:cursor-not-allowed transition-all"
+                  className="w-full sm:w-44 h-full pl-9 pr-3 bg-transparent rounded-lg text-sm font-medium text-shnoor-navy focus:outline-none focus:ring-2 focus:ring-shnoor-lavender disabled:cursor-not-allowed"
                 />
-                <Button
-                  onClick={() => setShowAllDates(!showAllDates)}
-                  variant={showAllDates ? "primary" : "outline"}
-                  className="w-full sm:w-auto !rounded-xl !h-[50px]"
-                >
-                  {showAllDates ? 'Show Today Only' : 'Show All Dates'}
-                </Button>
               </div>
             </div>
-            
-            <div className="w-full md:w-64">
-              <label className="block text-sm font-bold text-shnoor-navy mb-2">Status</label>
+
+            <button
+              type="button"
+              role="switch"
+              aria-checked={showAllDates}
+              onClick={() => setShowAllDates(!showAllDates)}
+              className="flex items-center gap-2 h-10 self-start sm:self-auto"
+            >
+              <span className={`relative inline-flex h-6 w-11 shrink-0 rounded-full transition-colors ${showAllDates ? 'bg-shnoor-indigo' : 'bg-shnoor-indigoMedium/60'}`}>
+                <span className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${showAllDates ? 'translate-x-5' : ''}`} />
+              </span>
+              <span className="text-sm font-medium text-shnoor-navy whitespace-nowrap">All dates</span>
+            </button>
+
+            <div className="w-full sm:w-40">
+              <label className="block text-xs font-medium text-shnoor-indigoMedium mb-1">Status</label>
               <Select
                 value={[{ value: '', label: 'All' }, { value: 'scheduled', label: 'Scheduled' }, { value: 'in_progress', label: 'In Progress' }, { value: 'completed', label: 'Completed' }].find(opt => opt.value === filter.status) || { value: '', label: 'All' }}
                 onChange={(selectedOption) => setFilter({ ...filter, status: selectedOption ? selectedOption.value : '' })}
@@ -228,18 +240,32 @@ const InterviewsList = () => {
                 styles={{
                     control: (base) => ({
                         ...base,
-                        padding: '4px',
-                        borderRadius: '1rem',
+                        minHeight: '40px',
+                        height: '40px',
+                        borderRadius: '0.5rem',
+                        fontSize: '0.875rem',
                         backgroundColor: 'rgb(var(--theme-card))',
-                        borderColor: 'rgb(var(--theme-shell-stroke))',
+                        borderColor: 'rgb(var(--theme-border))',
                         boxShadow: 'none',
                         '&:hover': {
                             borderColor: 'rgb(var(--theme-accent))'
                         }
                     }),
+                    valueContainer: (base) => ({
+                        ...base,
+                        padding: '0 10px'
+                    }),
+                    indicatorsContainer: (base) => ({
+                        ...base,
+                        height: '38px'
+                    }),
+                    indicatorSeparator: () => ({
+                        display: 'none'
+                    }),
                     singleValue: (base) => ({
                         ...base,
-                        color: 'rgb(var(--theme-text))'
+                        color: 'rgb(var(--theme-text))',
+                        fontWeight: 500
                     }),
                     input: (base) => ({
                         ...base,
@@ -252,6 +278,7 @@ const InterviewsList = () => {
                     menu: (base) => ({
                         ...base,
                         maxHeight: '300px',
+                        borderRadius: '0.5rem',
                         backgroundColor: 'rgb(var(--theme-card))',
                         border: '1px solid rgb(var(--theme-border))',
                         zIndex: 9999,
@@ -277,6 +304,7 @@ const InterviewsList = () => {
                     }),
                     option: (base, state) => ({
                         ...base,
+                        fontSize: '0.875rem',
                         backgroundColor: state.isSelected
                             ? 'rgb(var(--theme-accent))'
                             : state.isFocused
@@ -284,7 +312,7 @@ const InterviewsList = () => {
                                 : 'rgb(var(--theme-card))',
                         color: state.isSelected ? 'white' : 'rgb(var(--theme-text))',
                         cursor: 'pointer',
-                        padding: '10px 12px',
+                        padding: '8px 12px',
                     }),
                 }}
               />
@@ -294,69 +322,72 @@ const InterviewsList = () => {
       </Card>
 
       {interviews.length === 0 ? (
-        <Card>
-          <div className="text-center py-12 bg-shnoor-lavender rounded-xl border border-shnoor-light">
-            <Calendar className="mx-auto h-12 w-12 text-shnoor-indigoMedium mb-3" />
-            <p className="text-shnoor-navy font-medium">No interviews scheduled for this date</p>
+        <Card className="!p-4">
+          <div className="flex flex-col items-center justify-center text-center py-12 rounded-lg border border-dashed border-theme-border bg-theme-panel/40">
+            <div className="h-10 w-10 rounded-lg bg-shnoor-lavender flex items-center justify-center mb-3">
+              <Calendar className="h-5 w-5 text-shnoor-indigo" />
+            </div>
+            <p className="text-sm font-medium text-shnoor-navy">No interviews scheduled for this date</p>
           </div>
         </Card>
       ) : (
-        <div className="grid gap-4">
+        <div className="grid gap-3">
           {interviews.map((interview) => (
-            <Card key={interview.id} className="hover:shadow-[0_8px_30px_rgba(14,14,39,0.12)] transition-shadow cursor-default" noPadding>
-              <div className="p-4 sm:p-6">
-                <div className="flex flex-col sm:flex-row justify-between sm:items-start space-y-4 sm:space-y-0">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3 mb-3 flex-wrap gap-y-2">
-                      <h3 className="text-lg font-bold text-shnoor-navy break-words">
+            <Card key={interview.id} className="hover:border-shnoor-indigo/30 hover:shadow-[0_6px_20px_rgba(14,14,39,0.08)] transition-all cursor-default" noPadding>
+              <div className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-start gap-3 min-w-0 flex-1">
+                  <div className="h-10 w-10 shrink-0 rounded-full bg-shnoor-lavender text-shnoor-indigo flex items-center justify-center text-sm font-semibold">
+                    {(interview.student_name || '?').split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase()}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="text-base font-semibold text-shnoor-navy break-words">
                         {interview.student_name}
                       </h3>
-                      <span className={`px-3 py-1 rounded-full text-xs font-bold shrink-0 ${getStatusColor(interview.status)}`}>
+                      <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold shrink-0 ${getStatusColor(interview.status)}`}>
                         {interview.status.replace('_', ' ').toUpperCase()}
                       </span>
                     </div>
-                    
-                    <div className="space-y-2 text-sm text-shnoor-indigoMedium font-medium">
-                      <p className="flex items-center">
-                        <Users className="w-4 h-4 mr-2 shrink-0 text-shnoor-indigo" />
+                    <p className="text-xs text-shnoor-soft truncate">{interview.student_email}</p>
+                    <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-shnoor-indigoMedium font-medium">
+                      <span className="flex items-center min-w-0">
+                        <Users className="w-3.5 h-3.5 mr-1.5 shrink-0 text-shnoor-indigo" />
                         <span className="truncate">{interview.institute_name || 'No Institute'}</span>
-                      </p>
-                      <p className="flex items-center">
-                        <Clock className="w-4 h-4 mr-2 shrink-0 text-shnoor-indigo" />
+                      </span>
+                      <span className="flex items-center">
+                        <Clock className="w-3.5 h-3.5 mr-1.5 shrink-0 text-shnoor-indigo" />
                         {formatDateTime(interview.scheduled_time)} ({interview.duration} min)
-                      </p>
-                      <p className="text-shnoor-soft truncate">{interview.student_email}</p>
+                      </span>
                     </div>
                   </div>
+                </div>
 
-                  <div className="flex items-center sm:justify-end space-x-3 w-full sm:w-auto mt-4 sm:mt-0">
-                    {(interview.status === 'scheduled' || interview.status === 'in_progress') && (
-                      <Button
-                        onClick={() => joinInterview(interview.id)}
-                        variant="primary"
-                        className="flex-1 sm:flex-none flex items-center justify-center space-x-2 !rounded-xl"
-                      >
-                        <Video size={18} />
-                        <span className="whitespace-nowrap">{interview.status === 'in_progress' ? 'Resume Call' : 'Call'}</span>
-                      </Button>
-                    )}
-                    
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  {(interview.status === 'scheduled' || interview.status === 'in_progress') && (
                     <button
-                      onClick={() => openEditModal(interview)}
-                      className="p-3 flex items-center justify-center text-shnoor-indigo hover:bg-shnoor-lavender rounded-xl transition-colors shrink-0"
-                      title="Edit schedule"
+                      onClick={() => joinInterview(interview.id)}
+                      className="flex-1 sm:flex-none h-10 px-4 rounded-lg bg-shnoor-indigo text-white text-sm font-semibold flex items-center justify-center gap-2 hover:bg-shnoor-navy transition-colors"
                     >
-                      <Edit2 size={18} />
+                      <Video size={16} />
+                      <span className="whitespace-nowrap">{interview.status === 'in_progress' ? 'Resume Call' : 'Call'}</span>
                     </button>
-                    
-                    <button
-                      onClick={() => deleteInterview(interview.id, interview.student_name)}
-                      className="p-3 flex items-center justify-center text-red-500 hover:bg-red-50 rounded-xl transition-colors shrink-0"
-                      title="Delete interview"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
+                  )}
+
+                  <button
+                    onClick={() => openEditModal(interview)}
+                    className="h-10 w-10 flex items-center justify-center text-shnoor-indigo border border-theme-border hover:bg-shnoor-lavender rounded-lg transition-colors shrink-0"
+                    title="Edit schedule"
+                  >
+                    <Edit2 size={16} />
+                  </button>
+
+                  <button
+                    onClick={() => deleteInterview(interview.id, interview.student_name)}
+                    className="h-10 w-10 flex items-center justify-center text-red-500 border border-theme-border hover:bg-red-50 rounded-lg transition-colors shrink-0"
+                    title="Delete interview"
+                  >
+                    <Trash2 size={16} />
+                  </button>
                 </div>
               </div>
             </Card>
@@ -365,8 +396,8 @@ const InterviewsList = () => {
       )}
 
       {editing && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 animate-fadeIn">
-          <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 w-full max-w-md m-4 border border-shnoor-light">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
+          <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 w-full max-w-md max-h-[90vh] overflow-y-auto border border-shnoor-light">
             <h2 className="text-xl font-bold text-shnoor-navy mb-6">
               Reschedule Interview
               <span className="block text-sm font-medium text-shnoor-indigoMedium mt-1">{editing.student_name}</span>

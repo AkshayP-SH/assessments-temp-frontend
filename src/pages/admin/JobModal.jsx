@@ -18,9 +18,9 @@ const JobModal = ({
 }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] max-w-3xl w-full max-h-[90vh] overflow-hidden">
-        <div className="bg-gradient-to-r from-shnoor-indigo to-shnoor-navy px-6 py-4 flex justify-between items-center">
-          <div>
+      <div className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="bg-gradient-to-r from-shnoor-indigo to-shnoor-navy px-4 sm:px-6 py-4 flex justify-between items-center gap-3">
+          <div className="min-w-0">
             <h3 className="text-xl font-bold text-white">{selectedJobTest?.name}</h3>
             <p className="text-shnoor-lavender text-sm mt-1">Job Role & Description</p>
           </div>

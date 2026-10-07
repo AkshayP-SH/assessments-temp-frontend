@@ -37,12 +37,10 @@ const InstitutesTab = ({
 }) => {
   return (
     <div className="space-y-6">
-      <div className="section-header flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="section-title text-2xl font-bold text-slate-900 dark:text-white">
-            Manage Institutes
-          </h2>
-          <p className="section-subtitle text-sm text-slate-500 dark:text-slate-400 mt-1">Manage your institutes and their students</p>
+      <div className="section-header">
+        <div className="section-header-left">
+          <h2 className="section-title">Manage Institutes</h2>
+          <p className="section-subtitle">Manage your institutes and their students</p>
         </div>
 
         {/* Search Institutes */}

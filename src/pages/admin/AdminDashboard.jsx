@@ -2181,7 +2181,7 @@ className="p-0.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-sl
         )}
 
         {/* Main Content with dynamic offset for sidebar rail */}
-        <div className={`w-full px-4 sm:px-6 lg:pr-6 ${isExpanded ? 'lg:pl-[280px]' : 'lg:pl-[88px]'} pt-4 sm:pt-6 pb-12 transition-all duration-300 ease-in-out`}>
+        <div className={`w-full px-4 sm:px-6 ${!showCreateTest && !selectedExamId ? (isExpanded ? 'lg:pl-[280px] lg:pr-6' : 'lg:pl-[88px] lg:pr-6') : 'lg:px-6'} pt-4 sm:pt-6 pb-12 transition-all duration-300 ease-in-out`}>
           <div className="admin-dashboard-content">
 
             {/* Subscription Expiry Banner */}

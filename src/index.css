@@ -2686,56 +2686,71 @@ html[data-theme='dark'] option {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+:is(html[data-theme='green'], html[data-theme='leaf']) .student-header {
+  background-color: rgb(var(--theme-card, 255 255 255) / 0.95) !important;
+  border-bottom-color: rgb(var(--theme-border, 224 232 222)) !important;
+}
+
+:is(html[data-theme='green'], html[data-theme='leaf']) .student-header .admin-header-title {
+  color: rgb(var(--theme-text, 22 38 25)) !important;
+}
+
+:is(html[data-theme='green'], html[data-theme='leaf']) .student-header .admin-header-subtitle {
+  color: rgb(var(--theme-accent, 115 142 98)) !important;
+}
+
 :is(html[data-theme='green'], html[data-theme='leaf']) .student-header-user-name {
-  color: #FFFFFF !important;
+  color: rgb(var(--theme-text, 22 38 25)) !important;
 }
 
 :is(html[data-theme='green'], html[data-theme='leaf']) .student-header-user-sub {
-  color: rgb(180 205 175) !important;
+  color: rgb(var(--theme-text-muted, 60 84 64)) !important;
 }
 
-:is(html[data-theme='green'], html[data-theme='leaf']) .student-header-avatar {
-  background: linear-gradient(135deg, #2D6A4F, #52B788) !important;
+:is(html[data-theme='green'], html[data-theme='leaf']) :is(.student-header-avatar, .student-profile-avatar) {
+  background: linear-gradient(135deg, #5E7650, #738E62) !important;
   color: #FFFFFF !important;
-  box-shadow: 0 2px 8px rgba(45, 106, 79, 0.3) !important;
+  box-shadow: 0 2px 8px rgba(94, 118, 80, 0.3) !important;
 }
 
 :is(html[data-theme='green'], html[data-theme='leaf']) .student-header-theme-shell {
-  background-color: rgba(255, 255, 255, 0.1) !important;
-  border-color: rgba(255, 255, 255, 0.18) !important;
+  background-color: rgb(var(--theme-panel, 242 246 240)) !important;
+  border-color: rgb(var(--theme-border, 224 232 222)) !important;
 }
 
 :is(html[data-theme='green'], html[data-theme='leaf']) .student-header-theme-shell button {
-  color: #E2E8F0 !important;
+  color: rgb(var(--theme-text, 22 38 25)) !important;
 }
 
 :is(html[data-theme='green'], html[data-theme='leaf']) .student-header-back {
-  background-color: rgba(255, 255, 255, 0.1) !important;
-  border-color: rgba(255, 255, 255, 0.18) !important;
-  color: #FFFFFF !important;
+  background-color: rgb(var(--theme-panel, 242 246 240)) !important;
+  border-color: rgb(var(--theme-border, 224 232 222)) !important;
+  color: rgb(var(--theme-text, 22 38 25)) !important;
 }
 
 :is(html[data-theme='green'], html[data-theme='leaf']) .student-header-back:hover {
-  background-color: rgba(255, 255, 255, 0.2) !important;
+  background-color: rgb(var(--theme-panel-strong, 230 238 227)) !important;
 }
 
 :is(html[data-theme='green'], html[data-theme='leaf']) .student-header-logout {
-  background-color: rgba(239, 68, 68, 0.2) !important;
-  border-color: rgba(239, 68, 68, 0.4) !important;
-  color: #FCA5A5 !important;
+  background-color: #FEF2F2 !important;
+  border-color: #FECACA !important;
+  color: #DC2626 !important;
 }
 
 :is(html[data-theme='green'], html[data-theme='leaf']) .student-header-logout svg {
-  color: #FCA5A5 !important;
+  color: #DC2626 !important;
 }
 
 :is(html[data-theme='green'], html[data-theme='leaf']) .student-header-logout:hover {
-  background-color: rgba(239, 68, 68, 0.35) !important;
-  color: #FFFFFF !important;
+  background-color: #FEE2E2 !important;
+  border-color: #FCA5A5 !important;
+  color: #B91C1C !important;
 }
 
 :is(html[data-theme='green'], html[data-theme='leaf']) .student-header-logout:hover svg {
-  color: #FFFFFF !important;
+  color: #B91C1C !important;
 }
 
 /* Student Page Canvas in Green/Leaf Theme */

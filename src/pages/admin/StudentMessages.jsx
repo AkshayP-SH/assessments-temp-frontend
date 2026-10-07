@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Mail, MailOpen, Trash2, Image, Filter, RefreshCw, CheckCheck, User, AlertCircle, X, Send, Building, MessageCircle, Paperclip, Smile, CheckCircle, Clock, BarChart3, TrendingUp, ThumbsUp, ThumbsDown, Star } from 'lucide-react';
+import { ArrowLeft, Mail, MailOpen, Trash2, ChevronDown, RefreshCw, CheckCheck, User, AlertCircle, X, Send, Building, MessageCircle, Paperclip, Smile, CheckCircle, Clock, BarChart3, TrendingUp, ThumbsUp, ThumbsDown, Star } from 'lucide-react';
 import AdminLayout from '../../components/AdminLayout';
 import { useSupportSocket } from '../../hooks/useSupportSocket';
 import { API_URL } from '../../config/api';
@@ -44,7 +44,7 @@ const StudentMessages = () => {
   const [closingConversation, setClosingConversation] = useState(false);
 
 
-  const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
   const selectedMessageRef = useRef(null);
   const fileInputRef = useRef(null);
   const emojiPickerRef = useRef(null);
@@ -177,7 +177,8 @@ const StudentMessages = () => {
   }, [fetchMessages, navigate]);
 
   useEffect(() => {
-    if (messagesEndRef.current) messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    const el = messagesContainerRef.current;
+    if (el) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
   }, [conversationThread]);
 
   useEffect(() => {
@@ -352,6 +353,8 @@ const StudentMessages = () => {
     }
 
     setSelectedMessage(msg);
+    // Below lg the list is replaced by the conversation, so bring it into view
+    if (window.matchMedia('(max-width: 1023px)').matches) window.scrollTo({ top: 0 });
     markConversationAsRead(msg);
     fetchConversationThread(msg.id);
   };
@@ -510,113 +513,113 @@ const StudentMessages = () => {
 
   return (
     <AdminLayout title="Student Support">
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold text-theme-text">Student Support</h1>
-          {unreadCount > 0 && (
-            <span className="px-2 py-0.5 bg-red-100 text-red-600 rounded-full text-xs font-medium">
-              {unreadCount} unread
-            </span>
-          )}
-        </div>
-        <button
-          onClick={() => navigate('/admin/dashboard')}
-          className="flex items-center gap-2 text-theme-muted hover:text-theme-text transition-colors text-sm font-semibold cursor-pointer"
-        >
-          <ArrowLeft size={16} />
-          Back to Dashboard
-        </button>
-      </div>
-
-      {/* Filters and Actions */}
-      <div className="bg-theme-card rounded-xl border border-theme-border p-3 mb-6 flex flex-wrap items-center justify-between gap-4 shadow-sm">
-        {/* Left: Filters */}
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Filter size={16} className="text-theme-muted" />
-            <span className="text-sm font-semibold text-theme-text">Filter:</span>
-          </div>
-          <div className="flex gap-2">
-            {[{ key: 'all', label: 'All Messages' }, { key: 'unread', label: 'Unread' }].map(({ key, label }) => (
-              <button
-                key={key}
-                onClick={() => { setFilter(key); setPagination(prev => ({ ...prev, page: 1 })); }}
-                className={`px-3 py-1.5 text-sm rounded-lg transition-all flex items-center gap-1.5 font-semibold cursor-pointer ${
-                  filter === key 
-                    ? 'bg-theme-accent text-white shadow-xs' 
-                    : 'bg-theme-panel text-theme-text hover:bg-theme-panelx border border-theme-border'
-                }`}
-              >
-                {label}
-                {key === 'unread' && unreadCount > 0 && (
-                  <span className={`px-1.5 py-0.5 rounded-full text-xs font-bold ${
-                    filter === 'unread' ? 'bg-white text-theme-accent' : 'bg-red-500 text-white'
-                  }`}>{unreadCount}</span>
+      {/* Header, Actions and Filters */}
+      <div className={`bg-theme-card rounded-xl border border-theme-border shadow-sm p-4 sm:p-5 mb-4 sm:mb-6 ${selectedMessage ? 'hidden lg:block' : ''}`}>
+        {/* Row 1: Title and Actions */}
+        <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-theme-border">
+          <div className="flex items-center gap-3 min-w-0">
+            <button
+              onClick={() => navigate('/admin/dashboard')}
+              aria-label="Back to Dashboard"
+              className="w-10 h-10 sm:w-9 sm:h-9 shrink-0 flex items-center justify-center rounded-lg border border-theme-border bg-theme-card hover:bg-theme-panel text-theme-accent transition-colors cursor-pointer"
+            >
+              <ArrowLeft size={16} />
+            </button>
+            <div className="min-w-0">
+              <p className="text-xs text-theme-muted">Back to Dashboard</p>
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <h1 className="text-xl font-bold text-theme-text">Student Support</h1>
+                {unreadCount > 0 && (
+                  <span className="px-2 py-0.5 bg-red-100 text-red-600 rounded-full text-xs font-medium">
+                    {unreadCount} unread
+                  </span>
                 )}
-              </button>
-            ))}
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-2 border border-theme-border rounded-lg px-3 py-1.5 bg-theme-card ml-2">
-            <Building size={14} className="text-theme-muted" />
+
+          <div className="grid grid-cols-3 gap-2 w-full sm:flex sm:flex-wrap sm:items-center sm:gap-3 sm:w-auto">
+            <button
+              onClick={() => setShowAnalytics(!showAnalytics)}
+              className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 min-h-[48px] sm:min-h-0 px-2 sm:px-4 py-2 text-xs sm:text-sm whitespace-nowrap rounded-lg transition-all font-semibold cursor-pointer border ${showAnalytics
+                ? 'bg-theme-accent text-white border-theme-accent shadow-xs'
+                : 'bg-theme-card text-theme-text hover:bg-theme-panel border-theme-border'
+                }`}
+            >
+              <BarChart3 size={14} className={showAnalytics ? '' : 'text-theme-accent'} />
+              Analytics
+            </button>
+            <button
+              onClick={fetchMessages}
+              className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 min-h-[48px] sm:min-h-0 px-2 sm:px-4 py-2 text-xs sm:text-sm whitespace-nowrap bg-theme-card text-theme-text hover:bg-theme-panel border border-theme-border rounded-lg transition-all font-semibold cursor-pointer"
+            >
+              <RefreshCw size={14} />
+              Refresh
+            </button>
+            <button
+              onClick={() => {
+                setBulkDeleteMode(!bulkDeleteMode);
+                setSelectedConversations(new Set());
+              }}
+              className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 min-h-[48px] sm:min-h-0 px-2 sm:px-4 py-2 text-xs sm:text-sm whitespace-nowrap rounded-lg transition-all font-semibold cursor-pointer border ${bulkDeleteMode
+                ? 'bg-red-600 text-white border-red-600'
+                : 'bg-theme-card text-red-600 border-red-200 hover:bg-red-50'
+                }`}
+            >
+              <Trash2 size={14} />
+              {bulkDeleteMode ? 'Cancel' : 'Bulk Delete'}
+            </button>
+            {unreadCount > 0 && (
+              <button
+                onClick={markAllAsRead}
+                className="col-span-3 flex items-center justify-center gap-2 min-h-[40px] sm:min-h-0 px-4 py-2 text-sm bg-theme-accent text-white hover:bg-theme-accent2 rounded-lg transition-all font-semibold cursor-pointer shadow-xs"
+              >
+                <CheckCheck size={14} />
+                Mark All Read
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Row 2: Filters */}
+        <div className="pt-4 flex flex-wrap items-center gap-3">
+          {[{ key: 'all', label: 'All Messages' }, { key: 'unread', label: 'Unread' }].map(({ key, label }) => (
+            <button
+              key={key}
+              onClick={() => { setFilter(key); setPagination(prev => ({ ...prev, page: 1 })); }}
+              className={`px-4 py-2 text-sm rounded-lg transition-all flex items-center gap-1.5 font-semibold cursor-pointer ${
+                filter === key
+                  ? 'bg-theme-accent text-white shadow-xs'
+                  : 'bg-theme-accent/10 text-theme-accent hover:bg-theme-accent/15'
+              }`}
+            >
+              {label}
+              {key === 'unread' && unreadCount > 0 && (
+                <span className={`px-1.5 py-0.5 rounded-full text-xs font-bold ${
+                  filter === 'unread' ? 'bg-white text-theme-accent' : 'bg-red-500 text-white'
+                }`}>{unreadCount}</span>
+              )}
+            </button>
+          ))}
+          <div className="relative flex items-center gap-2 w-full sm:w-auto min-w-0 min-h-[40px] border border-theme-border rounded-lg px-3 py-2 bg-theme-card">
+            <Building size={14} className="text-theme-muted shrink-0" />
             <select
               value={selectedCollege}
               onChange={(e) => { setSelectedCollege(e.target.value); setPagination(prev => ({ ...prev, page: 1 })); }}
-              className="text-sm text-theme-text focus:outline-none bg-transparent min-w-[150px] cursor-pointer"
+              className="appearance-none text-sm text-theme-text focus:outline-none bg-transparent w-full min-w-0 sm:w-auto sm:min-w-[200px] sm:max-w-xs truncate pr-6 cursor-pointer"
             >
               <option value="" className="bg-theme-card text-theme-text">All Colleges</option>
               {colleges.map(college => <option key={college} value={college} className="bg-theme-card text-theme-text">{college}</option>)}
             </select>
+            <ChevronDown size={14} className="absolute right-3 text-theme-muted pointer-events-none" />
           </div>
-        </div>
-
-        {/* Right: Actions */}
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setShowAnalytics(!showAnalytics)}
-            className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-all font-semibold cursor-pointer border ${showAnalytics
-              ? 'bg-theme-accent text-white border-theme-accent shadow-xs'
-              : 'bg-theme-panel text-theme-text hover:bg-theme-panelx border-theme-border'
-              }`}
-          >
-            <BarChart3 size={14} />
-            Analytics
-          </button>
-          <button
-            onClick={() => {
-              setBulkDeleteMode(!bulkDeleteMode);
-              setSelectedConversations(new Set());
-            }}
-            className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-all font-semibold cursor-pointer border ${bulkDeleteMode
-              ? 'bg-red-600 text-white border-red-600'
-              : 'bg-theme-panel text-theme-text hover:bg-theme-panelx border-theme-border'
-              }`}
-          >
-            <Trash2 size={14} />
-            {bulkDeleteMode ? 'Cancel' : 'Bulk Delete'}
-          </button>
-          <button
-            onClick={fetchMessages}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm bg-theme-panel text-theme-text hover:bg-theme-panelx border border-theme-border rounded-lg transition-all font-semibold cursor-pointer"
-          >
-            <RefreshCw size={14} />
-            Refresh
-          </button>
-          {unreadCount > 0 && (
-            <button
-              onClick={markAllAsRead}
-              className="flex items-center gap-2 px-3 py-1.5 text-sm bg-theme-accent text-white hover:bg-theme-accent2 rounded-lg transition-all font-semibold cursor-pointer shadow-xs"
-            >
-              <CheckCheck size={14} />
-              Mark All Read
-            </button>
-          )}
         </div>
       </div>
 
       {/* Analytics Section */}
       {showAnalytics && (
-        <div className="bg-theme-card rounded-xl border border-theme-border p-6 mb-6">
-          <div className="flex items-center justify-between mb-6">
+        <div className={`bg-theme-card rounded-xl border border-theme-border p-4 sm:p-6 mb-4 sm:mb-6 ${selectedMessage ? 'hidden lg:block' : ''}`}>
+          <div className="flex items-center justify-between gap-3 mb-6">
             <h2 className="text-xl font-bold text-theme-text flex items-center gap-2">
               <TrendingUp size={24} />
               Feedback Analytics
@@ -636,7 +639,7 @@ const StudentMessages = () => {
           ) : analytics ? (
             <div className="space-y-6">
               {/* Overview Stats */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="bg-theme-panel rounded-xl p-5 border border-theme-border">
                   <div className="flex items-center gap-2 mb-3">
                     <MessageCircle size={18} className="text-theme-accent" />
@@ -709,7 +712,7 @@ const StudentMessages = () => {
                     <Clock size={18} />
                     Response Time Feedback
                   </h3>
-                  <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
                     {analytics.responseTimeDistribution.map(({ feedback_response_time, count }) => (
                       <div key={feedback_response_time} className="bg-theme-card rounded-lg p-3 border border-theme-border text-center">
                         <p className="text-2xl font-bold text-theme-text">{count}</p>
@@ -729,8 +732,8 @@ const StudentMessages = () => {
                   <div className="space-y-3 max-h-96 overflow-y-auto">
                     {analytics.recentFeedback.map((feedback, idx) => (
                       <div key={idx} className="bg-theme-card rounded-lg p-4 border border-theme-border">
-                        <div className="flex items-start justify-between mb-2">
-                          <div>
+                        <div className="flex flex-wrap items-start justify-between gap-2 mb-2">
+                          <div className="min-w-0">
                             <p className="font-medium text-theme-text">{feedback.name}</p>
                             {feedback.college && (
                               <p className="text-xs text-theme-muted flex items-center gap-1">
@@ -762,7 +765,7 @@ const StudentMessages = () => {
                           )}
                         </div>
                         {feedback.feedback_comments && (
-                          <p className="text-sm text-theme-text italic">"{feedback.feedback_comments}"</p>
+                          <p className="text-sm text-theme-text italic break-words">"{feedback.feedback_comments}"</p>
                         )}
                         <p className="text-xs text-theme-muted mt-2">
                           Submitted {new Date(feedback.feedback_submitted_at).toLocaleDateString()}
@@ -785,22 +788,25 @@ const StudentMessages = () => {
       {/* Messages List */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Messages sidebar */}
-        <div className="lg:col-span-1 bg-theme-card rounded-xl border border-theme-border overflow-hidden flex flex-col shadow-sm" style={{ height: '700px' }}>
+        <div className={`lg:col-span-1 bg-theme-card rounded-xl border border-theme-border overflow-hidden flex-col shadow-sm lg:h-[700px] ${selectedMessage ? 'hidden lg:flex' : 'flex'}`}>
           <div className="p-4 bg-theme-accent text-white">
-            <div className="flex items-center justify-between">
-              <h2 className="font-bold text-white">Messages ({pagination.total})</h2>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="font-bold text-white flex items-center">
+                Messages
+                <span className="ml-2 px-2 py-0.5 rounded-full bg-white text-theme-accent text-xs font-bold">{pagination.total}</span>
+              </h2>
               {bulkDeleteMode && (
                 <div className="flex items-center gap-2">
                   <button
                     onClick={selectAllConversations}
-                    className="text-xs px-2 py-1 bg-white/20 hover:bg-white/30 text-white rounded font-medium"
+                    className="text-xs px-3 py-2 lg:px-2 lg:py-1 bg-white/20 hover:bg-white/30 text-white rounded font-medium"
                   >
                     {selectedConversations.size === messages.length ? 'Deselect All' : 'Select All'}
                   </button>
                   {selectedConversations.size > 0 && (
                     <button
                       onClick={handleBulkDelete}
-                      className="text-xs px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 font-medium"
+                      className="text-xs px-3 py-2 lg:px-2 lg:py-1 bg-red-600 text-white rounded hover:bg-red-700 font-medium"
                     >
                       Delete ({selectedConversations.size})
                     </button>
@@ -809,7 +815,7 @@ const StudentMessages = () => {
               )}
             </div>
           </div>
-          <div className="flex-1 flex flex-col divide-y divide-theme-border overflow-y-auto">
+          <div className="flex-1 flex flex-col divide-y divide-theme-border lg:overflow-y-auto">
             {loading ? (
               <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
                 <div className="w-8 h-8 border-2 border-theme-accent/30 border-t-theme-accent rounded-full animate-spin mx-auto mb-2"></div>
@@ -829,8 +835,8 @@ const StudentMessages = () => {
               messages.map(msg => (
                 <div
                   key={msg.id}
-                  className={`p-4 cursor-pointer hover:bg-theme-panel transition-colors ${selectedMessage?.id === msg.id ? 'bg-theme-panel border-l-4 border-theme-accent' : ''
-                    } ${msg.unread_count > 0 ? 'bg-theme-accent/5' : ''}`}
+                  className={`px-5 py-3.5 h-[114px] shrink-0 overflow-hidden cursor-pointer hover:bg-theme-panel transition-colors ${selectedMessage?.id === msg.id ? 'bg-[#F1F0FA] dark:bg-theme-panel' : msg.unread_count > 0 ? 'bg-theme-accent/5' : ''
+                    }`}
                 >
                   <div className="flex items-start gap-3 min-w-0">
                     {bulkDeleteMode && msg.student_id && (
@@ -849,32 +855,30 @@ const StudentMessages = () => {
                       className="flex items-start gap-3 flex-1 min-w-0"
                     >
                       <div className="relative shrink-0">
-                        <div className={`p-2 rounded-lg ${msg.unread_count > 0 ? 'bg-theme-accent/15 text-theme-accent' : 'bg-theme-panel text-theme-muted'}`}>
-                          {msg.unread_count > 0 ? <Mail size={16} className="text-theme-accent" /> : <MailOpen size={16} className="text-theme-muted" />}
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#F1F0FA] dark:bg-theme-panel text-theme-accent">
+                          {msg.unread_count > 0 ? <Mail size={18} /> : <MailOpen size={18} />}
                         </div>
                         {msg.unread_count > 0 && (
                           <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-theme-card" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-1">
-                          <p className={`text-sm truncate ${msg.unread_count > 0 ? 'font-bold text-theme-text' : 'text-theme-text'}`}>{msg.name}</p>
-                          <span className="text-xs text-theme-muted shrink-0 ml-2">{formatDate(msg.created_at)}</span>
+                        <div className="flex items-center justify-between">
+                          <p className={`text-[15px] leading-5 truncate min-w-0 text-theme-text ${msg.unread_count > 0 ? 'font-bold' : 'font-semibold'}`}>{msg.name}</p>
+                          <div className="shrink-0 ml-2 flex items-center gap-1.5">
+                            {msg.image_path && <Paperclip size={12} className="text-theme-accent" />}
+                            {parseInt(msg.unread_count) > 0 && (
+                              <span className="px-1.5 bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300 rounded-full text-[10px] leading-4 font-semibold">
+                                {parseInt(msg.unread_count)} new
+                              </span>
+                            )}
+                            <span className="text-xs text-theme-muted">{formatDate(msg.created_at)}</span>
+                          </div>
                         </div>
                         {msg.college && (
-                          <p className="text-xs text-theme-accent mb-1 flex items-start gap-1 font-medium"><Building size={10} className="shrink-0 mt-0.5" /><span className="break-words">{msg.college}</span></p>
+                          <p className="text-[12.5px] leading-[17px] mt-0.5 text-theme-accent flex items-center gap-1 font-medium min-w-0"><Building size={12} className="shrink-0" /><span className="truncate">{msg.college}</span></p>
                         )}
-                        <p className="text-sm text-theme-muted break-words">{msg.message}</p>
-                        {parseInt(msg.unread_count) > 0 && (
-                          <div className="flex items-center gap-1 mt-1">
-                            <span className="px-1.5 py-0.5 bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300 rounded-full text-xs font-semibold">
-                              {parseInt(msg.unread_count)} new
-                            </span>
-                          </div>
-                        )}
-                        {msg.image_path && (
-                          <div className="flex items-center gap-1 mt-1 text-xs text-theme-accent font-medium"><Image size={12} />Attachment</div>
-                        )}
+                        <p className="text-[13.5px] leading-5 mt-1 text-theme-muted line-clamp-2 break-words">{msg.message}</p>
                       </div>
                     </div>
                   </div>
@@ -883,17 +887,17 @@ const StudentMessages = () => {
             )}
           </div>
           {pagination.pages > 1 && (
-            <div className="p-4 border-t border-theme-border flex items-center justify-center gap-2 flex-shrink-0 bg-theme-card">
+            <div className="px-3 sm:px-4 py-3 border-t border-theme-border flex items-center justify-between sm:justify-center gap-3 flex-shrink-0 bg-theme-panel">
               <button
                 onClick={() => setPagination(prev => ({ ...prev, page: Math.max(1, prev.page - 1) }))}
                 disabled={pagination.page === 1}
-                className="px-3 py-1 text-sm border border-theme-border rounded hover:bg-theme-panel disabled:opacity-50 text-theme-text"
+                className="min-h-[40px] px-4 py-2 text-sm font-semibold border border-theme-border rounded-lg bg-theme-card hover:bg-theme-panel disabled:opacity-50 text-theme-text"
               >Prev</button>
               <span className="text-sm text-theme-muted">Page {pagination.page} of {pagination.pages}</span>
               <button
                 onClick={() => setPagination(prev => ({ ...prev, page: Math.min(prev.pages, prev.page + 1) }))}
                 disabled={pagination.page === pagination.pages}
-                className="px-3 py-1 text-sm border border-theme-border rounded hover:bg-theme-panel disabled:opacity-50 text-theme-text"
+                className="min-h-[40px] px-4 py-2 text-sm font-semibold border border-theme-border rounded-lg bg-theme-card hover:bg-theme-panel disabled:opacity-50 text-theme-text"
               >Next</button>
             </div>
           )}
@@ -901,30 +905,42 @@ const StudentMessages = () => {
 
 
         {/* Message detail / Conversation */}
-        <div className="lg:col-span-2 bg-theme-card rounded-xl border border-theme-border overflow-hidden flex flex-col shadow-sm" style={{ height: '700px' }}>
+        <div className={`lg:col-span-2 bg-theme-card rounded-xl border border-theme-border overflow-hidden flex-col shadow-sm h-[calc(100dvh-7rem)] min-h-[420px] sm:h-[calc(100dvh-9rem)] lg:h-[700px] lg:min-h-0 ${selectedMessage ? 'flex' : 'hidden lg:flex'}`}>
           {selectedMessage ? (
             <>
               {/* Header */}
-              <div className="p-4 border-b border-theme-border bg-theme-panel flex items-center justify-between flex-shrink-0">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-theme-accent/15 flex items-center justify-center text-theme-accent">
+              <div className="p-3 sm:p-4 border-b border-theme-border bg-theme-panel flex items-center justify-between gap-2 flex-shrink-0">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                  <button
+                    onClick={() => {
+                      setSelectedMessage(null);
+                      setConversationThread([]);
+                      setReplyMessage('');
+                      removeImage();
+                    }}
+                    className="lg:hidden w-10 h-10 shrink-0 flex items-center justify-center rounded-lg text-theme-accent hover:bg-theme-card transition-colors"
+                    aria-label="Back to messages"
+                  >
+                    <ArrowLeft size={18} />
+                  </button>
+                  <div className="hidden sm:flex shrink-0 w-10 h-10 rounded-full bg-theme-accent/15 flex items-center justify-center text-theme-accent">
                     <User size={20} className="text-theme-accent" />
                   </div>
-                  <div>
-                    <h2 className="font-bold text-theme-text">{selectedMessage.name}</h2>
+                  <div className="min-w-0">
+                    <h2 className="font-bold text-theme-text truncate">{selectedMessage.name}</h2>
                     {selectedMessage.college && (
-                      <p className="text-xs text-theme-muted flex items-center gap-1">
-                        <Building size={10} />{selectedMessage.college}
+                      <p className="text-xs text-theme-muted flex items-center gap-1 min-w-0">
+                        <Building size={10} className="shrink-0" /><span className="truncate">{selectedMessage.college}</span>
                       </p>
                     )}
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 sm:gap-2 shrink-0">
                   {selectedMessage.student_id && (
                     <button
                       onClick={closeConversation}
                       disabled={closingConversation}
-                      className="p-2 text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-950/30 rounded-lg transition-colors disabled:opacity-50"
+                      className="p-3 lg:p-2 text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-950/30 rounded-lg transition-colors disabled:opacity-50"
                       title="Close conversation and request feedback"
                     >
                       {closingConversation ? (
@@ -936,7 +952,7 @@ const StudentMessages = () => {
                   )}
                   <button
                     onClick={deleteConversation}
-                    className="p-2 text-theme-muted hover:text-red-600 hover:bg-theme-card rounded-lg transition-colors"
+                    className="p-3 lg:p-2 text-theme-muted hover:text-red-600 hover:bg-theme-card rounded-lg transition-colors"
                     title="Delete conversation"
                   >
                     <Trash2 size={16} />
@@ -948,7 +964,7 @@ const StudentMessages = () => {
                       setReplyMessage('');
                       removeImage();
                     }}
-                    className="p-2 text-theme-muted hover:text-theme-text hover:bg-theme-card rounded-lg transition-colors"
+                    className="hidden lg:block p-2 text-theme-muted hover:text-theme-text hover:bg-theme-card rounded-lg transition-colors"
                     title="Close chat"
                   >
                     <X size={18} />
@@ -957,7 +973,7 @@ const StudentMessages = () => {
               </div>
 
               {/* Conversation Thread */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-theme-page">
+              <div ref={messagesContainerRef} className="flex-1 min-h-0 overflow-y-auto p-3 sm:p-4 space-y-4 bg-theme-page">
                 {loadingThread ? (
                   <div className="flex items-center justify-center py-8">
                     <div className="w-6 h-6 border-2 border-theme-accent/30 border-t-theme-accent rounded-full animate-spin"></div>
@@ -966,7 +982,7 @@ const StudentMessages = () => {
                   <div className="flex justify-start">
                     <div className="max-w-[80%]">
                       <div className="bg-theme-card border border-theme-border p-4 rounded-xl rounded-tl-none shadow-sm">
-                        <p className="text-theme-text whitespace-pre-wrap">{selectedMessage.message}</p>
+                        <p className="text-theme-text whitespace-pre-wrap break-words">{selectedMessage.message}</p>
                         {selectedMessage.image_path && (
                           <img
                             src={`${API_URL}${selectedMessage.image_path}`}
@@ -984,12 +1000,12 @@ const StudentMessages = () => {
                     const isAdmin = msg.sender_type === 'admin';
                     return (
                       <div key={msg.id || index} className={`flex ${isAdmin ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[80%] ${isAdmin ? 'order-2' : 'order-1'}`}>
+                        <div className={`max-w-[85%] sm:max-w-[80%] min-w-0 ${isAdmin ? 'order-2' : 'order-1'}`}>
                           {!isAdmin && <p className="text-xs text-theme-text font-medium mb-1 ml-1">{selectedMessage.name}</p>}
                           {isAdmin && <p className="text-xs text-theme-accent font-semibold mb-1 mr-1 text-right">Admin</p>}
-                          <div className={`p-4 rounded-xl shadow-sm ${isAdmin ? 'bg-theme-accent text-white rounded-tr-none' : 'bg-theme-card border border-theme-border text-theme-text rounded-tl-none'
+                          <div className={`p-3 sm:p-4 rounded-xl shadow-sm ${isAdmin ? 'bg-theme-accent text-white rounded-tr-none' : 'bg-theme-card border border-theme-border text-theme-text rounded-tl-none'
                             }`}>
-                            <p className="whitespace-pre-wrap">{msg.message}</p>
+                            <p className="whitespace-pre-wrap break-words">{msg.message}</p>
                             {msg.image_path && (
                               <img
                                 src={`${API_URL}${msg.image_path}`}
@@ -1007,11 +1023,10 @@ const StudentMessages = () => {
                     );
                   })
                 )}
-                <div ref={messagesEndRef} />
               </div>
 
               {/* Reply Input */}
-              <div className="border-t border-theme-border p-4 bg-theme-card flex-shrink-0">
+              <div className="border-t border-theme-border p-3 sm:p-4 bg-theme-card flex-shrink-0">
                 <form onSubmit={sendReply} className="space-y-3">
                   {imagePreview && (
                     <div className="relative inline-block">
@@ -1026,25 +1041,25 @@ const StudentMessages = () => {
                       </button>
                     </div>
                   )}
-                  <div className="flex items-end gap-3">
-                    <div className="relative" ref={emojiPickerRef}>
+                  <div className="flex items-end gap-2 sm:gap-3">
+                    <div className="relative shrink-0" ref={emojiPickerRef}>
                       <button
                         type="button"
                         onClick={() => setShowEmojiPicker((prev) => !prev)}
-                        className="p-3 rounded-xl border border-theme-border text-theme-muted hover:text-theme-accent hover:border-theme-accent transition-colors"
+                        className="p-2.5 sm:p-3 rounded-xl border border-theme-border text-theme-muted hover:text-theme-accent hover:border-theme-accent transition-colors"
                         title="Add emoji"
                       >
                         <Smile size={18} />
                       </button>
                       {showEmojiPicker && (
-                        <div className="absolute bottom-14 left-0 bg-theme-card border border-theme-border rounded-xl p-2 shadow-lg w-80 max-h-56 overflow-y-auto z-20">
+                        <div className="absolute bottom-14 left-0 bg-theme-card border border-theme-border rounded-xl p-2 shadow-lg w-72 sm:w-80 max-w-[calc(100vw-3rem)] max-h-56 overflow-y-auto z-20">
                           <div className="grid grid-cols-8 gap-1">
                             {EMOJI_OPTIONS.map((emoji) => (
                               <button
                                 key={emoji}
                                 type="button"
                                 onClick={() => addEmoji(emoji)}
-                                className="h-8 w-8 rounded-md hover:bg-theme-panel text-lg"
+                                className="h-8 w-full rounded-md hover:bg-theme-panel text-lg"
                               >{emoji}</button>
                             ))}
                           </div>
@@ -1054,13 +1069,13 @@ const StudentMessages = () => {
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="p-3 rounded-xl border border-theme-border text-theme-muted hover:text-theme-accent hover:border-theme-accent transition-colors"
+                      className="shrink-0 p-2.5 sm:p-3 rounded-xl border border-theme-border text-theme-muted hover:text-theme-accent hover:border-theme-accent transition-colors"
                       title="Upload file or screenshot"
                     >
                       <Paperclip size={18} />
                     </button>
                     <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <textarea
                         value={replyMessage}
                         onChange={(e) => setReplyMessage(e.target.value)}
@@ -1080,7 +1095,7 @@ const StudentMessages = () => {
                     <button
                       type="submit"
                       disabled={sendingReply || (!replyMessage.trim() && !selectedImage)}
-                      className="p-3 rounded-xl bg-theme-accent text-white hover:bg-theme-accent2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xs cursor-pointer"
+                      className="shrink-0 p-2.5 sm:p-3 rounded-xl bg-theme-accent text-white hover:bg-theme-accent2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xs cursor-pointer"
                     >
                       {sendingReply ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Send size={18} />}
                     </button>

@@ -421,7 +421,7 @@ export default function StudentProfile() {
             </p>
           </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center justify-end gap-2.5 w-full sm:w-auto">
           <button
             onClick={() => fetchProfileData(true)}
             disabled={refreshing}
@@ -455,7 +455,7 @@ export default function StudentProfile() {
                   className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover shadow-md border-2 border-indigo-100 dark:border-indigo-900/60"
                 />
               ) : (
-                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-[#403f75] to-[#6868AC] text-white flex items-center justify-center text-xl sm:text-2xl font-black shadow-md">
+                <div className="student-profile-avatar w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-[#403f75] to-[#6868AC] text-white flex items-center justify-center text-xl sm:text-2xl font-black shadow-md">
                   {getInitials(profile?.full_name)}
                 </div>
               )}

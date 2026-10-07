@@ -14,8 +14,8 @@ const CloneModal = ({
 
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-100">
-        <div className="bg-[#44448E] text-white px-6 py-4 flex justify-between items-center">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto border border-slate-100">
+        <div className="bg-[#44448E] text-white px-4 sm:px-6 py-4 flex justify-between items-center gap-3">
           <div>
             <h3 className="text-lg font-bold text-white tracking-tight">Clone Test</h3>
             <p className="text-indigo-200 text-xs mt-0.5 font-medium">Create a copy of "{testToClone.name}"</p>
@@ -29,7 +29,7 @@ const CloneModal = ({
           </button>
         </div>
 
-        <div className="p-6 space-y-4">
+        <div className="p-4 sm:p-6 space-y-4">
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-1.5">
               New Test Name <span className="text-rose-500">*</span>

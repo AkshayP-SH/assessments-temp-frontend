@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
 import Select from 'react-select';
-import { FileSpreadsheet, AlertCircle, Download } from 'lucide-react';
+import { AlertCircle, Download, Loader2 } from 'lucide-react';
 import { apiFetch } from '../../config/api';
-import Card from '../../components/Card';
-import Button from '../../components/Button';
 
 const AdminReports = () => {
     const [institutes, setInstitutes] = useState([]);
@@ -48,7 +46,6 @@ const AdminReports = () => {
             let queryParams = '';
 
             if (selectedInstitutes.length > 0) {
-                // Use pipe separator instead of comma to avoid conflicts with institute names containing commas
                 const values = selectedInstitutes.map(i => i.value).join('|');
                 queryParams = `?institutes=${encodeURIComponent(values)}`;
             } else {
@@ -67,7 +64,6 @@ const AdminReports = () => {
                 throw new Error('Export failed');
             }
 
-            // Handle file download
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -88,160 +84,169 @@ const AdminReports = () => {
 
     return (
         <div className="space-y-6">
-            <Card className="overflow-hidden" noPadding>
-                <div className="p-4 sm:p-8">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 sm:mb-8 pb-4 sm:pb-6 border-b border-shnoor-light">
-                        <div>
-                            <h2 className="text-2xl sm:text-3xl font-bold text-shnoor-navy mb-2 flex items-center">
-                                <FileSpreadsheet className="mr-2 sm:mr-3 text-shnoor-indigo h-6 w-6 sm:h-8 sm:w-8" />
-                                Student Reports
-                            </h2>
-                            <p className="text-sm sm:text-base text-shnoor-indigoMedium ml-8 sm:ml-11">Download candidate details in Excel format</p>
-                        </div>
+            {/* Section Header */}
+            <div className="section-header">
+                <div>
+                    <h2 className="section-title">Student Reports</h2>
+                    <p className="section-subtitle">Download candidate details in Excel format</p>
+                </div>
+            </div>
+
+            {/* Reports Card */}
+            <div className="surface-card p-6 sm:p-8">
+                <div className="space-y-6 max-w-2xl">
+                    <div>
+                        <label className="block text-sm font-bold text-slate-900 dark:text-white mb-2.5">
+                            Filter by Institute
+                            <span className="text-slate-400 dark:text-slate-500 font-normal ml-2 text-xs">
+                                (Leave empty to download all students)
+                            </span>
+                        </label>
+                        <Select
+                            isMulti
+                            options={institutes.filter(inst => !selectedInstitutes.find(s => s.value === inst.value))}
+                            value={selectedInstitutes}
+                            onChange={setSelectedInstitutes}
+                            className="basic-multi-select"
+                            classNamePrefix="select"
+                            placeholder={isLoading ? "Loading institutes..." : "Select institutes..."}
+                            isDisabled={isLoading}
+                            isSearchable={true}
+                            isClearable={true}
+                            closeMenuOnSelect={true}
+                            menuPosition="fixed"
+                            menuPlacement="auto"
+                            filterOption={(option, inputValue) => {
+                                return option.label.toLowerCase().includes(inputValue.toLowerCase());
+                            }}
+                            styles={{
+                                control: (base, state) => ({
+                                    ...base,
+                                    minHeight: '44px',
+                                    borderRadius: '0.75rem',
+                                    backgroundColor: 'rgb(var(--theme-card))',
+                                    borderColor: state.isFocused ? '#403f75' : 'rgb(var(--theme-shell-stroke))',
+                                    boxShadow: state.isFocused ? '0 0 0 2px rgba(64, 63, 117, 0.15)' : 'none',
+                                    padding: '2px 4px',
+                                    cursor: 'pointer',
+                                    '&:hover': {
+                                        borderColor: '#403f75'
+                                    }
+                                }),
+                                valueContainer: (base) => ({
+                                    ...base,
+                                    padding: '2px 8px',
+                                    gap: '4px',
+                                }),
+                                singleValue: (base) => ({
+                                    ...base,
+                                    color: 'rgb(var(--theme-text))',
+                                }),
+                                input: (base) => ({
+                                    ...base,
+                                    color: 'rgb(var(--theme-text))',
+                                    margin: '0 4px',
+                                    padding: 0,
+                                }),
+                                placeholder: (base) => ({
+                                    ...base,
+                                    color: 'rgb(var(--theme-text-muted))',
+                                    fontSize: '0.875rem',
+                                    marginLeft: '4px',
+                                    marginRight: '4px',
+                                }),
+                                menu: (base) => ({
+                                    ...base,
+                                    maxHeight: '300px',
+                                    backgroundColor: 'rgb(var(--theme-card))',
+                                    border: '1px solid rgb(var(--theme-border))',
+                                    zIndex: 9999,
+                                }),
+                                menuList: (base) => ({
+                                    ...base,
+                                    maxHeight: '300px',
+                                    overflowY: 'auto',
+                                    '::-webkit-scrollbar': {
+                                        width: '8px',
+                                    },
+                                    '::-webkit-scrollbar-track': {
+                                        background: 'rgb(var(--theme-panel))',
+                                        borderRadius: '10px',
+                                    },
+                                    '::-webkit-scrollbar-thumb': {
+                                        background: 'rgb(var(--theme-border))',
+                                        borderRadius: '10px',
+                                    },
+                                    '::-webkit-scrollbar-thumb:hover': {
+                                        background: 'rgb(var(--theme-accent))',
+                                    },
+                                }),
+                                menuPortal: (base) => ({
+                                    ...base,
+                                    zIndex: 9999,
+                                }),
+                                option: (base, state) => ({
+                                    ...base,
+                                    backgroundColor: state.isSelected
+                                        ? 'rgb(var(--theme-accent))'
+                                        : state.isFocused
+                                            ? 'rgb(var(--theme-panel))'
+                                            : 'rgb(var(--theme-card))',
+                                    color: state.isSelected ? 'white' : 'rgb(var(--theme-text))',
+                                    cursor: 'pointer',
+                                    padding: '10px 12px',
+                                }),
+                                multiValue: (base) => ({
+                                    ...base,
+                                    backgroundColor: 'rgb(var(--theme-panel))',
+                                    borderRadius: '0.5rem',
+                                }),
+                                multiValueLabel: (base) => ({
+                                    ...base,
+                                    color: 'rgb(var(--theme-text))',
+                                    fontWeight: 500,
+                                }),
+                                multiValueRemove: (base) => ({
+                                    ...base,
+                                    color: 'rgb(var(--theme-text))',
+                                    ':hover': {
+                                        backgroundColor: 'rgb(var(--theme-border))',
+                                        color: 'rgb(var(--theme-text))',
+                                    },
+                                }),
+                            }}
+                            menuPortalTarget={document.body}
+                        />
                     </div>
 
-                    <div className="space-y-8 max-w-3xl">
-                        <div>
-                            <label className="block text-sm font-bold text-shnoor-navy mb-3">
-                                Filter by Institute
-                                <span className="text-shnoor-soft font-normal ml-2 text-xs">(Leave empty to download all students)</span>
-                            </label>
-                            <Select
-                                isMulti
-                                options={institutes.filter(inst => !selectedInstitutes.find(s => s.value === inst.value))}
-                                value={selectedInstitutes}
-                                onChange={setSelectedInstitutes}
-                                className="basic-multi-select"
-                                classNamePrefix="select"
-                                placeholder={isLoading ? "Loading institutes..." : "Select institutes..."}
-                                isDisabled={isLoading}
-                                isSearchable={true}
-                                isClearable={true}
-                                closeMenuOnSelect={true}
-                                menuPosition="fixed"
-                                menuPlacement="auto"
-                                filterOption={(option, inputValue) => {
-                                    // Case-insensitive filtering
-                                    return option.label.toLowerCase().includes(inputValue.toLowerCase());
-                                }}
-                                styles={{
-                                    control: (base) => ({
-                                        ...base,
-                                        padding: '4px',
-                                        borderRadius: '1rem',
-                                        backgroundColor: 'rgb(var(--theme-card))',
-                                        borderColor: 'rgb(var(--theme-shell-stroke))',
-                                        boxShadow: 'none',
-                                        '&:hover': {
-                                            borderColor: 'rgb(var(--theme-accent))'
-                                        }
-                                    }),
-                                    singleValue: (base) => ({
-                                        ...base,
-                                        color: 'rgb(var(--theme-text))'
-                                    }),
-                                    input: (base) => ({
-                                        ...base,
-                                        color: 'rgb(var(--theme-text))'
-                                    }),
-                                    placeholder: (base) => ({
-                                        ...base,
-                                        color: 'rgb(var(--theme-text-muted))'
-                                    }),
-                                    menu: (base) => ({
-                                        ...base,
-                                        maxHeight: '300px',
-                                        backgroundColor: 'rgb(var(--theme-card))',
-                                        border: '1px solid rgb(var(--theme-border))',
-                                        zIndex: 9999,
-                                    }),
-                                    menuList: (base) => ({
-                                        ...base,
-                                        maxHeight: '300px',
-                                        overflowY: 'auto',
-                                        '::-webkit-scrollbar': {
-                                            width: '8px',
-                                        },
-                                        '::-webkit-scrollbar-track': {
-                                            background: 'rgb(var(--theme-panel))',
-                                            borderRadius: '10px',
-                                        },
-                                        '::-webkit-scrollbar-thumb': {
-                                            background: 'rgb(var(--theme-border))',
-                                            borderRadius: '10px',
-                                        },
-                                        '::-webkit-scrollbar-thumb:hover': {
-                                            background: 'rgb(var(--theme-accent))',
-                                        },
-                                    }),
-                                    menuPortal: (base) => ({
-                                        ...base,
-                                        zIndex: 9999,
-                                    }),
-                                    option: (base, state) => ({
-                                        ...base,
-                                        backgroundColor: state.isSelected
-                                            ? 'rgb(var(--theme-accent))'
-                                            : state.isFocused
-                                                ? 'rgb(var(--theme-panel))'
-                                                : 'rgb(var(--theme-card))',
-                                        color: state.isSelected ? 'white' : 'rgb(var(--theme-text))',
-                                        cursor: 'pointer',
-                                        padding: '10px 12px',
-                                    }),
-                                    multiValue: (base) => ({
-                                        ...base,
-                                        backgroundColor: 'rgb(var(--theme-panel))',
-                                        borderRadius: '0.75rem',
-                                    }),
-                                    multiValueLabel: (base) => ({
-                                        ...base,
-                                        color: 'rgb(var(--theme-text))',
-                                        fontWeight: 500,
-                                    }),
-                                    multiValueRemove: (base) => ({
-                                        ...base,
-                                        color: 'rgb(var(--theme-text))',
-                                        ':hover': {
-                                            backgroundColor: 'rgb(var(--theme-border))',
-                                            color: 'rgb(var(--theme-text))',
-                                        },
-                                    }),
-                                }}
-                                menuPortalTarget={document.body}
-                            />
+                    {error && (
+                        <div className="p-3.5 bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 rounded-xl border border-rose-200 dark:border-rose-900/60 flex items-center text-sm">
+                            <AlertCircle className="w-4 h-4 mr-2 shrink-0" />
+                            <span>{error}</span>
                         </div>
+                    )}
 
-                        {error && (
-                            <div className="p-4 bg-shnoor-dangerLight text-shnoor-danger rounded-xl border border-shnoor-dangerLight flex items-center mb-4">
-                                <AlertCircle className="w-5 h-5 mr-2" />
-                                {error}
-                            </div>
-                        )}
-
-                        <div className="pt-4">
-                            <Button
-                                onClick={handleDownload}
-                                disabled={isDownloading || isLoading}
-                                variant="primary"
-                                className="w-full sm:w-auto min-w-[200px] flex items-center justify-center gap-2"
-                            >
-                                {isDownloading ? (
-                                    <>
-                                        <div className="w-5 h-5 border-[3px] border-white/30 border-t-white rounded-full animate-spin"></div>
-                                        Generating...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Download size={24} />
-                                        Download Excel Report
-                                    </>
-                                )}
-                            </Button>
-                        </div>
+                    <div className="pt-2">
+                        <button
+                            onClick={handleDownload}
+                            disabled={isDownloading || isLoading}
+                            className="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-[#403f75] hover:bg-[#343360] dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white rounded-xl text-sm font-bold shadow-xs hover:shadow-sm transition-all disabled:opacity-50 cursor-pointer"
+                        >
+                            {isDownloading ? (
+                                <>
+                                    <Loader2 className="animate-spin" size={16} />
+                                    <span>Generating...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <Download size={16} />
+                                    <span>Download Excel Report</span>
+                                </>
+                            )}
+                        </button>
                     </div>
                 </div>
-            </Card>
+            </div>
         </div>
     );
 };

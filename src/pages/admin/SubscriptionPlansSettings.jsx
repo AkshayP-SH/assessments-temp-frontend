@@ -71,11 +71,14 @@ const SubscriptionPlansSettings = () => {
 
   return (
     <div className="pt-2 pb-8 max-w-[1200px]">
-      <h2 className="text-2xl font-bold text-shnoor-navy mb-8">Subscription Plans</h2>
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold text-shnoor-navy">Subscription Plans</h2>
+        <p className="text-sm text-[#9A9AC9] mt-0.5">Manage the pricing, limits, and features of each subscription plan.</p>
+      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {plans.map(plan => (
-          <div key={plan.id} className="bg-white border-0 rounded-2xl p-6 shadow-sm flex flex-col">
+          <div key={plan.id} className="bg-white border-0 rounded-2xl p-4 sm:p-6 shadow-sm flex flex-col min-w-0">
             <div className="mb-5">
               <label className="block text-xs font-bold text-shnoor-soft uppercase mb-2">Plan ID</label>
               <input 
@@ -143,7 +146,7 @@ const SubscriptionPlansSettings = () => {
             </div>
 
             <div className="mb-5">
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-1 xl:grid-cols-3 gap-3">
                 <div className="flex flex-col justify-end">
                   <label className="block text-xs font-bold text-shnoor-soft uppercase mb-2">Max Institutes</label>
                   <input 

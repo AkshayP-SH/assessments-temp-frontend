@@ -668,7 +668,7 @@ export default function AdminProfile() {
       {/* Edit Profile Modal */}
       {isEditModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="w-full max-w-lg bg-white dark:bg-[#1A1A32] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-white dark:bg-[#1A1A32] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl animate-in fade-in zoom-in-95 duration-150">
             {/* Modal Header */}
             <div className="flex items-center justify-between p-5 sm:p-6 border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-2.5">

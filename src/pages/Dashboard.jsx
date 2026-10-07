@@ -402,26 +402,25 @@ const Dashboard = () => {
         onLogout={handleLogout}
       />
 
-      {/* Sidebar */}
-      <StudentSidebar
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        onExpandChange={setIsSidebarExpanded}
-      />
-
       {/* Main content */}
-      <main className={`w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:pr-8 ${isSidebarExpanded ? 'lg:pl-[288px]' : 'lg:pl-[96px]'} py-6 sm:py-8 transition-all duration-300 ease-in-out`}>
+      <main className={`w-full max-w-[1600px] mx-auto px-3 sm:px-6 lg:pr-8 ${isSidebarExpanded ? 'lg:pl-[288px]' : 'lg:pl-[96px]'} pt-2.5 sm:pt-6 pb-12 transition-all duration-300 ease-in-out`}>
+        {/* Sidebar Navigation */}
+        <StudentSidebar
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          onExpandChange={setIsSidebarExpanded}
+        />
 
         {/* Tests Tab */}
         {activeTab === 'tests' && (
           <>
             {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 mb-4 sm:mb-6">
               <div>
-                <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                <h2 className="text-xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                   My Tests
                 </h2>
-                <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 mt-1 font-medium">
+                <p className="text-xs sm:text-base text-slate-500 dark:text-slate-400 mt-0.5 sm:mt-1 font-medium">
                   View and take your assigned tests and assessments
                 </p>
               </div>

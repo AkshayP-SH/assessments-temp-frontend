@@ -135,7 +135,7 @@ Robert Johnson,robert.johnson@example.com,5551234567,Harvard University`;
                 <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
                     <label 
                         htmlFor="fileInput"
-                        className="py-2.5 px-5 rounded-xl border-0 text-sm font-semibold bg-theme-panel text-theme-text hover:bg-theme-accent cursor-pointer transition-colors inline-block"
+                        className="py-2.5 px-5 rounded-xl text-sm font-semibold bg-[#403f75] hover:bg-[#343360] dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white cursor-pointer transition-all shadow-xs hover:shadow-sm inline-flex items-center gap-2"
                     >
                         Choose File
                     </label>
@@ -211,7 +211,7 @@ Robert Johnson,robert.johnson@example.com,5551234567,Harvard University`;
                             <h4 className="font-semibold text-shnoor-success mb-3">
                                 ✓ Successfully Created ({result.results.success.length})
                             </h4>
-                            <div className="bg-shnoor-successLight rounded-lg p-4 max-h-60 overflow-y-auto">
+                            <div className="bg-shnoor-successLight rounded-lg p-4 max-h-60 overflow-auto">
                                 <table className="min-w-full text-sm">
                                     <thead>
                                         <tr className="border-b border-shnoor-successLight">
