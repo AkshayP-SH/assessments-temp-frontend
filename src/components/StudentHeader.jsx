@@ -47,45 +47,45 @@ export default function StudentHeader({
 
   return (
     <div className="w-full sticky top-0 z-50">
-      <header className="admin-header w-full h-[60px] sm:h-[68px] shadow-sm sticky top-0 z-50 rounded-none border-b border-gray-200 dark:border-slate-800 bg-white/95 dark:bg-[#1A1A32]/95 backdrop-blur-md">
-        <div className="w-full px-4 sm:px-6 lg:px-6 h-full flex items-center justify-between gap-4">
+      <header className="student-header w-full h-[58px] sm:h-[68px] shadow-sm sticky top-0 z-50 rounded-none border-b border-gray-200 dark:border-slate-800 bg-white/95 dark:bg-[#1A1A32]/95 backdrop-blur-md">
+        <div className="w-full px-3 sm:px-6 h-full flex items-center justify-between gap-2 sm:gap-4">
           {/* Logo and Title */}
-          <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
-            <div className="site-header-logo w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center flex-shrink-0 bg-white border border-[#D1D1E6] dark:border-transparent shadow-2xs">
+          <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
+            <div className="site-header-logo w-8 h-8 sm:w-10 sm:h-10 rounded-xl overflow-hidden flex items-center justify-center flex-shrink-0 bg-white border border-[#D1D1E6] dark:border-transparent shadow-2xs">
               <img
                 src={shnoorLogo}
                 alt="Shnoor Logo"
                 className="w-full h-full object-contain"
               />
             </div>
-            <div className="flex-shrink-0">
-              <h1 className="admin-header-title font-extrabold text-base sm:text-lg lg:text-xl leading-tight whitespace-nowrap text-slate-900 dark:text-white tracking-tight">
+            <div className="min-w-0 flex flex-col justify-center">
+              <h1 className="admin-header-title font-extrabold text-sm sm:text-lg lg:text-xl leading-tight truncate text-slate-900 dark:text-white tracking-tight">
                 {title}
               </h1>
-              <p className="admin-header-subtitle text-xs font-semibold text-[#403f75] dark:text-indigo-400 whitespace-nowrap leading-tight mt-0.5">
+              <p className="admin-header-subtitle text-[10px] sm:text-xs font-semibold text-[#403f75] dark:text-indigo-400 truncate leading-tight mt-0.5">
                 {subtitle}
               </p>
             </div>
           </div>
 
           {/* Right side controls */}
-          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
             {showBackButton && (
               <button
                 onClick={handleBack}
-                className="student-header-back h-9 sm:h-10 px-3 sm:px-4 text-xs sm:text-sm font-bold text-[#403f75] dark:text-indigo-300 bg-[#F1F3FB] dark:bg-[#1E1E38] hover:bg-slate-200/80 dark:hover:bg-slate-700/80 border border-slate-200/80 dark:border-slate-700/80 rounded-xl transition-all flex items-center justify-center shadow-2xs active:scale-98"
+                className="student-header-back h-8 sm:h-10 px-2.5 sm:px-4 text-xs sm:text-sm font-bold text-[#403f75] dark:text-indigo-300 bg-[#F1F3FB] dark:bg-[#1E1E38] hover:bg-slate-200/80 dark:hover:bg-slate-700/80 border border-slate-200/80 dark:border-slate-700/80 rounded-xl transition-all flex items-center justify-center shadow-2xs active:scale-98 cursor-pointer"
                 title={backLabel}
               >
-                <ArrowLeft size={15} className="mr-1.5" />
+                <ArrowLeft size={14} className="sm:mr-1.5" />
                 <span className="hidden sm:inline">{backLabel}</span>
               </button>
             )}
 
             {children}
 
-            {/* Student info */}
+            {/* Student info (tablet & desktop) */}
             {studentName && (
-              <div className="hidden sm:flex items-center gap-2.5 mr-1">
+              <div className="hidden md:flex items-center gap-2.5 mr-1">
                 <div className="flex flex-col text-right">
                   <span className="student-header-user-name text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 leading-tight">
                     {studentName}
@@ -101,21 +101,21 @@ export default function StudentHeader({
             )}
 
             {/* Theme toggle */}
-            <div className="student-header-theme-shell flex items-center bg-slate-100/90 dark:bg-[#1E1E38] p-1 rounded-xl border border-slate-200/90 dark:border-slate-700/80 shadow-2xs gap-0.5">
+            <div className="student-header-theme-shell flex items-center bg-slate-100/90 dark:bg-[#1E1E38] p-0.5 sm:p-1 rounded-xl border border-slate-200/90 dark:border-slate-700/80 shadow-2xs flex-shrink-0">
               <ThemeSelector
                 variant="light"
-                className="!rounded-lg !w-9 !h-9 !p-0 !border-0 !shadow-none !bg-transparent hover:bg-white/80 dark:hover:bg-slate-750 transition-all text-slate-600 dark:text-slate-300"
+                className="!rounded-lg !w-7.5 !h-7.5 sm:!w-9 sm:!h-9 !p-0 !border-0 !shadow-none !bg-transparent hover:bg-white/80 dark:hover:bg-slate-700 transition-all text-slate-600 dark:text-slate-300"
               />
             </div>
 
             {/* Logout button */}
             <button
               onClick={handleLogout}
-              className="student-header-logout h-10 px-4 text-xs sm:text-sm font-bold text-rose-600 dark:text-rose-400 bg-rose-50/90 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 border border-rose-200/80 dark:border-rose-800/60 rounded-xl transition-all flex items-center justify-center shadow-2xs cursor-pointer ml-1 sm:ml-2 flex-shrink-0 active:scale-98 whitespace-nowrap"
+              className="student-header-logout h-8 sm:h-10 px-2.5 sm:px-3.5 text-xs sm:text-sm font-bold text-rose-600 dark:text-rose-400 bg-rose-50/90 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 border border-rose-200/80 dark:border-rose-800/60 rounded-xl transition-all flex items-center justify-center shadow-2xs cursor-pointer flex-shrink-0 active:scale-98 whitespace-nowrap"
               title="Logout"
             >
-              <LogOut size={15} className="mr-1.5 text-rose-600 dark:text-rose-400" />
-              <span>Logout</span>
+              <LogOut size={14} className="sm:mr-1.5 text-rose-600 dark:text-rose-400" />
+              <span className="inline text-xs sm:text-sm">Logout</span>
             </button>
           </div>
         </div>

@@ -66,21 +66,17 @@ const ExamsTab = ({
   return (
     <div className="w-full">
       {/* Header Row */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-            Exams
-          </h2>
-          <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 mt-1 font-medium">
-            Manage all your exams and view results
-          </p>
+      <div className="section-header mb-6">
+        <div className="section-header-left">
+          <h2 className="section-title">Exams</h2>
+          <p className="section-subtitle">Manage all your exams and view results</p>
         </div>
         <button
           type="button"
           onClick={() => setShowCreateTest(true)}
-          className="inline-flex items-center justify-center gap-2 h-11 px-5 bg-gradient-to-r from-[#403f75] to-[#57569b] hover:from-[#343360] hover:to-[#4a4988] active:scale-98 text-white rounded-xl font-bold text-sm sm:text-base shadow-md shadow-[#403f75]/20 transition-all cursor-pointer whitespace-nowrap"
+          className="inline-flex items-center justify-center gap-2 h-10 px-5 bg-gradient-to-r from-[#403f75] to-[#57569b] hover:from-[#343360] hover:to-[#4a4988] active:scale-98 text-white rounded-xl font-bold text-sm shadow-sm transition-all cursor-pointer whitespace-nowrap"
         >
-          <Plus size={18} />
+          <Plus size={16} />
           <span>Create Test</span>
         </button>
       </div>
@@ -193,7 +189,7 @@ const ExamsTab = ({
                                 type="checkbox"
                                 checked={selectedTests.includes(test.id)}
                                 onChange={() => toggleTestSelection(test.id)}
-                                className="w-4.5 h-4.5 text-[#403f75] border-slate-300 rounded focus:ring-2 focus:ring-[#403f75] cursor-pointer"
+                                className="w-4 h-4 text-[#403f75] border-slate-300 rounded focus:ring-2 focus:ring-[#403f75] cursor-pointer"
                                 title="Select exam"
                               />
                               <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/70 text-[#403f75] dark:text-indigo-300 flex items-center justify-center flex-shrink-0 border border-indigo-100/80 dark:border-indigo-900/60 shadow-2xs">

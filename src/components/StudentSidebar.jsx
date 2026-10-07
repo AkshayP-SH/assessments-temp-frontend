@@ -122,9 +122,9 @@ export default function StudentSidebar({ activeTab, onTabChange, badges = {}, on
       </aside>
 
       {/* Mobile tabs */}
-      <div className="lg:hidden mb-6 w-full">
+      <div className="lg:hidden mb-3 w-full overflow-x-auto scrollbar-none">
         <div
-          className="bg-white/95 dark:bg-[#1A1A32]/95 backdrop-blur-md p-1.5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-2xs inline-flex flex-nowrap items-center gap-1.5 max-w-full overflow-x-auto scrollbar-none"
+          className="bg-white/95 dark:bg-[#1A1A32]/95 backdrop-blur-md p-1 rounded-xl border border-slate-200/90 dark:border-slate-800 shadow-2xs inline-flex flex-nowrap items-center gap-1 min-w-max"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {STUDENT_TABS.map((tab) => {

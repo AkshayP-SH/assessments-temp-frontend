@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertCircle, Download, Loader2, CheckCircle } from 'lucide-react';
+import { Download, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import Select from 'react-select';
 
 const ViolationsTab = ({
@@ -13,31 +13,29 @@ const ViolationsTab = ({
 }) => {
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-light p-4 sm:p-8 flex flex-col">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 space-y-4 sm:space-y-0">
-          <div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-shnoor-navy flex items-center">
-              <AlertCircle className="mr-2 sm:mr-3 text-shnoor-indigo h-6 w-6 sm:h-8 sm:w-8" />
-              Violations
-            </h2>
-            <p className="text-sm sm:text-base text-shnoor-indigoMedium mt-1">Monitor detected suspicious activities during exams</p>
-          </div>
-          {selectedTestForViolations && violationsByStudent.length > 0 && (
-            <button
-              onClick={exportViolationsToExcel}
-              className="w-full sm:w-auto flex items-center justify-center space-x-2 px-5 py-3 bg-shnoor-indigo hover:bg-shnoor-navy text-white rounded-xl transition-all shadow-[0_8px_30px_rgba(14,14,39,0.06)] hover:shadow-[0_8px_30px_rgba(14,14,39,0.12)] transform hover:-translate-y-0.5 font-semibold"
-              title="Export Violations Report"
-            >
-              <Download size={20} />
-              <span>Export Report</span>
-            </button>
-          )}
+      {/* Section Header */}
+      <div className="section-header">
+        <div className="section-header-left">
+          <h2 className="section-title">Violations</h2>
+          <p className="section-subtitle">Monitor detected suspicious activities during exams</p>
         </div>
+        {selectedTestForViolations && violationsByStudent.length > 0 && (
+          <button
+            onClick={exportViolationsToExcel}
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#403f75] hover:bg-[#343360] dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold shadow-xs transition-all cursor-pointer"
+            title="Export Violations Report"
+          >
+            <Download size={16} />
+            <span>Export Report</span>
+          </button>
+        )}
+      </div>
 
+      {/* Test Selector & Violations Card */}
+      <div className="surface-card p-6 sm:p-8">
         {/* Test Selector */}
-        <div className="mb-6">
-          <label className="block text-sm font-bold text-shnoor-navy mb-2">
+        <div className="mb-6 max-w-2xl">
+          <label className="block text-sm font-bold text-slate-900 dark:text-white mb-2.5">
             Select Test to View Violations
           </label>
           <Select
@@ -58,28 +56,40 @@ const ViolationsTab = ({
             className="basic-single"
             classNamePrefix="select"
             styles={{
-                control: (base) => ({
+                control: (base, state) => ({
                     ...base,
-                    padding: '4px',
-                    borderRadius: '1rem',
+                    minHeight: '44px',
+                    borderRadius: '0.75rem',
                     backgroundColor: 'rgb(var(--theme-card))',
-                    borderColor: 'rgb(var(--theme-shell-stroke))',
-                    boxShadow: 'none',
+                    borderColor: state.isFocused ? '#403f75' : 'rgb(var(--theme-shell-stroke))',
+                    boxShadow: state.isFocused ? '0 0 0 2px rgba(64, 63, 117, 0.15)' : 'none',
+                    padding: '2px 4px',
+                    cursor: 'pointer',
                     '&:hover': {
-                        borderColor: 'rgb(var(--theme-accent))'
+                        borderColor: '#403f75'
                     }
+                }),
+                valueContainer: (base) => ({
+                    ...base,
+                    padding: '2px 8px',
+                    gap: '4px',
                 }),
                 singleValue: (base) => ({
                     ...base,
-                    color: 'rgb(var(--theme-text))'
+                    color: 'rgb(var(--theme-text))',
                 }),
                 input: (base) => ({
                     ...base,
-                    color: 'rgb(var(--theme-text))'
+                    color: 'rgb(var(--theme-text))',
+                    margin: '0 4px',
+                    padding: 0,
                 }),
                 placeholder: (base) => ({
                     ...base,
-                    color: 'rgb(var(--theme-text-muted))'
+                    color: 'rgb(var(--theme-text-muted))',
+                    fontSize: '0.875rem',
+                    marginLeft: '4px',
+                    marginRight: '4px',
                 }),
                 menu: (base) => ({
                     ...base,
