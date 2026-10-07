@@ -260,17 +260,17 @@ export default function AdminJobApplicants() {
             <div className="space-y-6">
 
                 {/* ── Page Header ── */}
-                <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-mist p-6">
-                    <div className="flex items-center justify-between mb-6">
-                        <div className="flex items-center space-x-4">
+                <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-mist p-4 sm:p-6">
+                    <div className="flex items-center justify-between gap-3 mb-6">
+                        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
                             <button
                                 onClick={() => navigate('/admin/dashboard')}
-                                className="p-2 hover:bg-shnoor-lavender rounded-lg transition-colors"
+                                className="p-2.5 sm:p-2 shrink-0 hover:bg-shnoor-lavender rounded-lg transition-colors"
                             >
                                 <ArrowLeft size={20} />
                             </button>
-                            <div>
-                                <h2 className="text-2xl font-bold text-shnoor-navy flex items-center space-x-2">
+                            <div className="min-w-0">
+                                <h2 className="text-xl sm:text-2xl font-bold text-shnoor-navy flex items-center space-x-2">
                                     <Users size={24} />
                                     <span>Job Applicants</span>
                                 </h2>
@@ -279,7 +279,7 @@ export default function AdminJobApplicants() {
                                 </p>
                             </div>
                         </div>
-                        <button onClick={fetchData} className="p-2 hover:bg-shnoor-lavender rounded-lg transition-colors" title="Refresh">
+                        <button onClick={fetchData} className="p-2.5 sm:p-2 shrink-0 hover:bg-shnoor-lavender rounded-lg transition-colors" title="Refresh">
                             <RefreshCw size={20} />
                         </button>
                     </div>
@@ -345,7 +345,7 @@ export default function AdminJobApplicants() {
                     <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-mist overflow-hidden">
 
                         {/* ── Tab Bar ── */}
-                        <div className="flex items-center justify-between border-b-2 border-shnoor-mist bg-white">
+                        <div className="flex items-center justify-between border-b-2 border-shnoor-mist bg-white overflow-x-auto">
                             <div className="flex">
                                 {tabs.map(tab => {
                                     const Icon = tab.icon;
@@ -354,7 +354,7 @@ export default function AdminJobApplicants() {
                                         <button
                                             key={tab.id}
                                             onClick={() => setActiveTab(tab.id)}
-                                            className={`relative flex items-center space-x-2.5 px-6 py-4 text-sm font-semibold transition-colors focus:outline-none
+                                            className={`relative flex items-center space-x-2.5 px-4 sm:px-6 py-4 text-sm font-semibold whitespace-nowrap shrink-0 transition-colors focus:outline-none
                                                 ${active
                                                     ? 'text-shnoor-indigo border-b-2 border-shnoor-indigo bg-white -mb-px'
                                                     : 'text-shnoor-indigoMedium hover:text-shnoor-navy hover:bg-shnoor-lavender/40'

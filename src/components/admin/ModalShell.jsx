@@ -66,7 +66,7 @@ const ModalShell = ({
   toolbar,
   footerStart,
   footerActions,
-  bodyClassName = 'p-6 space-y-5',
+  bodyClassName = 'p-4 sm:p-6 space-y-5',
   children
 }) => (
   <div className={`fixed inset-0 ${zIndexClass} bg-black/50 flex items-center justify-center p-4`}>
@@ -76,7 +76,7 @@ const ModalShell = ({
       className={`bg-white w-full ${WIDTHS[size]} max-h-[90vh] ${fullHeight ? 'lg:h-[90vh]' : ''} rounded-2xl shadow-2xl flex flex-col overflow-hidden`}
     >
       {/* Header */}
-      <div className="flex items-center gap-3 px-6 py-4 border-b border-shnoor-mist flex-shrink-0">
+      <div className="flex items-center gap-3 px-4 sm:px-6 py-4 border-b border-shnoor-mist flex-shrink-0">
         {Icon && (
           <div className="w-10 h-10 rounded-xl bg-shnoor-lavender text-shnoor-indigo flex items-center justify-center flex-shrink-0">
             <Icon size={20} />
@@ -100,7 +100,7 @@ const ModalShell = ({
       </div>
 
       {toolbar && (
-        <div className="px-6 py-4 border-b border-shnoor-mist bg-gray-50 flex-shrink-0">{toolbar}</div>
+        <div className="px-4 sm:px-6 py-4 border-b border-shnoor-mist bg-gray-50 flex-shrink-0">{toolbar}</div>
       )}
 
       {/* Body */}
@@ -108,9 +108,9 @@ const ModalShell = ({
 
       {/* Footer */}
       {(footerStart || footerActions) && (
-        <div className="flex items-center justify-between gap-3 px-6 py-4 border-t border-shnoor-mist bg-gray-50 flex-shrink-0">
+        <div className="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-4 border-t border-shnoor-mist bg-gray-50 flex-shrink-0">
           <div className="min-w-0 text-[13px] text-gray-500 truncate">{footerStart}</div>
-          <div className="flex items-center gap-2 flex-shrink-0">{footerActions}</div>
+          <div className="flex flex-wrap items-center justify-end gap-2 ml-auto">{footerActions}</div>
         </div>
       )}
     </div>

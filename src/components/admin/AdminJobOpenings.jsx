@@ -228,10 +228,10 @@ export default function AdminJobOpenings({ clientId }) {
         <div className="space-y-6">
             {/* Toast */}
             {toast && (
-                <div className={`fixed top-6 right-6 z-50 flex items-center space-x-3 px-5 py-3 rounded-xl shadow-lg text-white text-sm font-medium transition-all
+                <div className={`fixed top-4 right-4 left-4 sm:left-auto sm:top-6 sm:right-6 sm:max-w-md z-50 flex items-center space-x-3 px-5 py-3 rounded-xl shadow-lg text-white text-sm font-medium transition-all
                     ${toast.type === 'success' ? 'bg-emerald-600' : 'bg-red-600'}`}>
                     {toast.type === 'success' ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
-                    <span>{toast.msg}</span>
+                    <span className="flex-1 min-w-0 break-words">{toast.msg}</span>
                     <button onClick={() => setToast(null)}><X size={16} /></button>
                 </div>
             )}
@@ -358,7 +358,7 @@ export default function AdminJobOpenings({ clientId }) {
                             </div>
                         </div>
 
-                        <div className="flex items-center justify-end space-x-3 pt-3 border-t border-slate-100">
+                        <div className="flex flex-wrap items-center justify-end gap-3 pt-3 border-t border-slate-100">
                             <button
                                 type="button"
                                 onClick={() => { setShowForm(false); setForm(EMPTY_FORM); }}
@@ -415,20 +415,27 @@ export default function AdminJobOpenings({ clientId }) {
                 ) : (
                     <div className="divide-y divide-shnoor-mist">
                         {jobs.map(job => (
-                            <div key={job.id} className="px-8 py-6">
+                            <div key={job.id} className="px-4 py-4 sm:px-8 sm:py-6">
                                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                                     <div className="flex-1 min-w-0 w-full">
-                                        <div className="flex items-center space-x-3 flex-wrap gap-y-2">
-                                            <h3 className="text-lg font-bold text-shnoor-navy truncate">{job.job_role}</h3>
+                                        <div className="flex items-center gap-x-3 flex-wrap gap-y-2">
+                                            <h3 className="text-lg font-bold text-shnoor-navy truncate min-w-0">{job.job_role}</h3>
                                             <span className={`text-xs font-semibold px-3 py-1 rounded-full shrink-0 ${job.is_published
                                                     ? 'bg-emerald-100 text-emerald-700'
                                                     : 'bg-amber-100 text-amber-700'
                                                 }`}>
                                                 {job.is_published ? '✓ Published' : '● Draft'}
                                             </span>
+                                            <button
+                                                onClick={() => setExpandedId(expandedId === job.id ? null : job.id)}
+                                                title="Toggle details"
+                                                className="sm:hidden ml-auto flex items-center justify-center w-10 h-10 -mr-2 rounded-lg text-shnoor-indigoMedium hover:bg-shnoor-lavender transition-colors"
+                                            >
+                                                {expandedId === job.id ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                                            </button>
                                         </div>
-                                        <div className="flex items-center space-x-4 mt-2 text-sm text-shnoor-indigoMedium flex-wrap gap-y-2">
-                                            <span className="flex items-center">
+                                        <div className="flex items-center gap-x-4 mt-2 text-sm text-shnoor-indigoMedium flex-wrap gap-y-2">
+                                            <span className="flex items-center min-w-0 max-w-full">
                                                 <Building2 size={14} className="mr-1 shrink-0" />
                                                 <span className="truncate">{job.company_name}</span>
                                             </span>
@@ -452,11 +459,11 @@ export default function AdminJobOpenings({ clientId }) {
                                     </div>
 
                                     {/* Actions */}
-                                    <div className="flex flex-wrap items-center gap-2 shrink-0 w-full sm:w-auto mt-2 sm:mt-0">
+                                    <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
                                         <button
                                             onClick={() => setExpandedId(expandedId === job.id ? null : job.id)}
                                             title="Toggle details"
-                                            className="flex items-center justify-center p-2 rounded-lg text-shnoor-indigoMedium hover:bg-shnoor-lavender transition-colors"
+                                            className="hidden sm:flex items-center justify-center p-2 rounded-lg text-shnoor-indigoMedium hover:bg-shnoor-lavender transition-colors"
                                         >
                                             {expandedId === job.id ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                                         </button>
@@ -466,18 +473,18 @@ export default function AdminJobOpenings({ clientId }) {
                                                 <button
                                                     onClick={() => navigate(`/admin/job-applicants/${job.id}`)}
                                                     title="View applicants"
-                                                    className="flex items-center justify-center space-x-1.5 px-4 py-2 bg-shnoor-indigo hover:bg-[#4d4d9c] text-white rounded-xl text-sm font-semibold transition-all shadow-sm"
+                                                    className="flex-1 sm:flex-none min-w-0 min-h-[40px] flex items-center justify-center gap-1.5 px-2 sm:px-4 py-2 bg-shnoor-indigo hover:bg-[#4d4d9c] text-white rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all shadow-sm"
                                                 >
-                                                    <Users size={16} />
+                                                    <Users size={16} className="hidden sm:block shrink-0" />
                                                     <span>View Applicants</span>
                                                 </button>
 
                                                 <button
                                                     onClick={() => openTestLinkModal(job.id)}
                                                     title="Link tests to this job"
-                                                    className="flex items-center justify-center space-x-1.5 px-4 py-2 bg-shnoor-indigoMedium hover:bg-shnoor-indigo text-white rounded-xl text-sm font-semibold transition-all shadow-sm"
+                                                    className="flex-1 sm:flex-none min-w-0 min-h-[40px] flex items-center justify-center gap-1.5 px-2 sm:px-4 py-2 bg-shnoor-indigoMedium hover:bg-shnoor-indigo text-white rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all shadow-sm"
                                                 >
-                                                    <TestTube size={16} />
+                                                    <TestTube size={16} className="hidden sm:block shrink-0" />
                                                     <span>Link Tests</span>
                                                 </button>
                                             </>
@@ -488,7 +495,7 @@ export default function AdminJobOpenings({ clientId }) {
                                                 onClick={() => handlePublish(job.id)}
                                                 disabled={publishingId === job.id}
                                                 title="Publish & send emails"
-                                                className="flex items-center justify-center space-x-1.5 px-4 py-2 bg-shnoor-indigo hover:bg-shnoor-navy text-white rounded-xl text-sm font-semibold transition-all disabled:opacity-60"
+                                                className="flex-1 sm:flex-none min-h-[40px] flex items-center justify-center gap-1.5 px-4 py-2 bg-shnoor-indigo hover:bg-shnoor-navy text-white rounded-xl text-sm font-semibold whitespace-nowrap transition-all disabled:opacity-60"
                                             >
                                                 {publishingId === job.id
                                                     ? <Loader2 size={16} className="animate-spin" />
@@ -501,7 +508,7 @@ export default function AdminJobOpenings({ clientId }) {
                                             onClick={() => handleDelete(job.id)}
                                             disabled={deletingId === job.id}
                                             title="Delete"
-                                            className="flex items-center justify-center p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors disabled:opacity-60"
+                                            className="shrink-0 ml-auto sm:ml-0 flex items-center justify-center w-10 h-10 sm:w-auto sm:h-auto sm:p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors disabled:opacity-60"
                                         >
                                             {deletingId === job.id
                                                 ? <Loader2 size={18} className="animate-spin" />
@@ -512,7 +519,7 @@ export default function AdminJobOpenings({ clientId }) {
 
                                 {/* Expanded details */}
                                 {expandedId === job.id && (
-                                    <div className="mt-4 space-y-3 text-sm text-shnoor-navy bg-shnoor-lavender rounded-xl p-5">
+                                    <div className="mt-4 space-y-3 text-sm text-shnoor-navy bg-shnoor-lavender rounded-xl p-4 sm:p-5 break-words">
                                         <div>
                                             <p className="font-semibold text-shnoor-indigoMedium uppercase text-xs tracking-wider mb-1">Job Description</p>
                                             <p className="whitespace-pre-wrap">{job.job_description}</p>
@@ -547,10 +554,10 @@ export default function AdminJobOpenings({ clientId }) {
             {showTestLinkModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
                     <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-                        <div className="bg-shnoor-indigo px-6 py-5 flex items-center justify-between sticky top-0 z-10">
-                            <div className="flex items-center space-x-3">
-                                <TestTube size={24} className="text-white" />
-                                <h3 className="text-xl font-bold text-white">Link Tests to Job</h3>
+                        <div className="bg-shnoor-indigo px-4 py-4 sm:px-6 sm:py-5 flex items-center justify-between gap-3 sticky top-0 z-10">
+                            <div className="flex items-center gap-3 min-w-0">
+                                <TestTube size={24} className="text-white shrink-0" />
+                                <h3 className="text-lg sm:text-xl font-bold text-white truncate">Link Tests to Job</h3>
                             </div>
                             <button
                                 onClick={() => setShowTestLinkModal(null)}
@@ -560,10 +567,10 @@ export default function AdminJobOpenings({ clientId }) {
                             </button>
                         </div>
 
-                        <div className="p-6">
+                        <div className="p-4 sm:p-6">
                             {/* All Tests - Single List with Toggle */}
                             <div>
-                                <div className="flex items-center justify-between mb-4">
+                                <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
                                     <h4 className="text-sm font-bold uppercase text-shnoor-navy">
                                         Available Tests
                                     </h4>
@@ -590,15 +597,15 @@ export default function AdminJobOpenings({ clientId }) {
                                             return (
                                                 <div
                                                     key={test.id}
-                                                    className={`flex items-center justify-between rounded-xl p-4 transition-all ${isLinked
+                                                    className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl p-4 transition-all ${isLinked
                                                             ? 'bg-shnoor-successLight border-2 border-shnoor-success shadow-sm'
                                                             : 'bg-white border border-shnoor-mist hover:border-shnoor-indigo hover:shadow-md'
                                                         }`}
                                                 >
-                                                    <div className="flex-1">
-                                                        <div className="flex items-center space-x-2 mb-1">
-                                                            {isLinked && <CheckCircle size={18} className="text-green-600" />}
-                                                            <p className="font-bold text-shnoor-navy">{test.display_name}</p>
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            {isLinked && <CheckCircle size={18} className="text-green-600 shrink-0" />}
+                                                            <p className="font-bold text-shnoor-navy break-words min-w-0">{test.display_name}</p>
                                                         </div>
                                                         <p className="text-xs text-shnoor-indigoMedium ml-6">
                                                             {test.display_duration} min • {test.display_question_count} questions • {test.display_total_marks} marks
@@ -610,7 +617,7 @@ export default function AdminJobOpenings({ clientId }) {
                                                             : handleLinkTest(showTestLinkModal, test.id)
                                                         }
                                                         disabled={linkingTest}
-                                                        className={`flex items-center space-x-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all disabled:opacity-50 shadow-sm hover:shadow-md ${isLinked
+                                                        className={`shrink-0 w-full sm:w-auto flex items-center justify-center space-x-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all disabled:opacity-50 shadow-sm hover:shadow-md ${isLinked
                                                                 ? 'bg-shnoor-success hover:opacity-90 text-white'
                                                                 : 'bg-shnoor-indigo hover:bg-[#4d4d9c] text-white'
                                                             }`}

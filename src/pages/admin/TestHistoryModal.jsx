@@ -8,8 +8,8 @@ const TestHistoryModal = ({
 }) => {
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100">
-        <div className="bg-[#44448E] text-white px-6 py-4 flex justify-between items-center">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto border border-slate-100">
+        <div className="bg-[#44448E] text-white px-4 sm:px-6 py-4 flex justify-between items-center gap-3">
           <div>
             <h3 className="text-lg font-bold text-white tracking-tight">Test History</h3>
             <p className="text-indigo-200 text-xs mt-0.5 font-medium">{testHistory?.testName}</p>
@@ -22,7 +22,7 @@ const TestHistoryModal = ({
           </button>
         </div>
 
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {isLoadingHistory ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="animate-spin text-[#44448E]" size={28} />

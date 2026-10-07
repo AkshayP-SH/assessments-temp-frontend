@@ -159,9 +159,9 @@ const CustomDateTimePicker = ({ value, onChange, placeholder, disabled }) => {
       </div>
 
       {isOpen && (
-        <div className="absolute z-50 mt-2 bg-white dark:bg-[#25254A] border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-100">
+        <div className="absolute z-50 mt-2 max-w-[calc(100vw-2rem)] bg-white dark:bg-[#25254A] border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-100">
           <div className="flex flex-col sm:flex-row">
-            <div className="p-4" style={{ width: '320px' }}>
+            <div className="p-4 w-full sm:w-[320px]">
               <div className="flex items-center justify-between mb-4">
                 <button
                   type="button"
@@ -242,7 +242,7 @@ const CustomDateTimePicker = ({ value, onChange, placeholder, disabled }) => {
               </div>
             </div>
 
-            <div className="border-t sm:border-t-0 sm:border-l border-slate-200 dark:border-slate-700 p-4 bg-slate-50 dark:bg-[#1E1E38]" style={{ width: '200px' }}>
+            <div className="border-t sm:border-t-0 sm:border-l border-slate-200 dark:border-slate-700 p-4 bg-slate-50 dark:bg-[#1E1E38] w-full sm:w-[200px]">
               <div className="flex items-center gap-2 mb-3">
                 <Clock size={16} className="text-[#403f75] dark:text-indigo-400" />
                 <span className="text-sm font-bold text-slate-800 dark:text-slate-200">Time</span>

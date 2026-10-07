@@ -223,10 +223,13 @@ const SystemSettingsTab = () => {
                                 name="default_test_job_description"
                                 value={settings.default_test_job_description || ''}
                                 onChange={handleChange}
-                                rows="4"
-                                className="w-full px-4 py-3 rounded-xl border border-[#D1D1E6] bg-white text-sm text-gray-900 placeholder-[#9A9AC9] focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors resize-none"
+                                rows="12"
+                                className="w-full px-4 py-3 rounded-xl border border-[#D1D1E6] bg-white text-sm leading-relaxed text-gray-900 placeholder-[#9A9AC9] focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors resize-y min-h-[240px] max-h-[600px]"
                                 placeholder="Default description shown when test-specific description is not provided"
                             ></textarea>
+                            <p className="text-xs text-[#9A9AC9] mt-2">
+                                Drag the bottom-right corner to resize. Supports multiple lines.
+                            </p>
                         </div>
                     </div>
                 </Card>
