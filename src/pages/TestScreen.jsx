@@ -83,7 +83,7 @@ int main() {
   const [showTabWarning, setShowTabWarning] = useState(false);
   const [initialTimeRemaining, setInitialTimeRemaining] = useState(3600);
   const [hasStarted, setHasStarted] = useState(false);
-  const timeoutSubmissionRef = useRef(false);
+  const [timeoutSubmissionStarted, setTimeoutSubmissionStarted] = useState(false);
   const [testDetails, setTestDetails] = useState(null);
   const [currentAIViolation, setCurrentAIViolation] = useState(null);
   const [aiViolationCount, setAiViolationCount] = useState(0);
@@ -243,10 +243,11 @@ int main() {
   }, [answers, warningCount, timeLeft, stopTimer, navigate, stopProctoring, isSubmitting]);
 
   useEffect(() => {
-    if (timeLeft === 0 && hasStarted) {
+    if (timeLeft === 0 && hasStarted && !timeoutSubmissionStarted) {
+      setTimeoutSubmissionStarted(true);
       submitTest('timeout');
     }
-  }, [timeLeft, submitTest, hasStarted]);
+  }, [timeLeft, submitTest, hasStarted, timeoutSubmissionStarted]);
 
   const handleTabSwitch = useCallback((count, max) => {
     if (!hasStarted) {

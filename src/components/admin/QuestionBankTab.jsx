@@ -301,22 +301,14 @@ const QuestionBankTab = () => {
         ) : activeTab === 'mcq' ? (
           <MCQQuestionsList
             questions={mcqQuestions}
-onEdit={(q) => {
-              handleEditMCQ(q);
-              setEditingQuestion(q);
-              setShowMCQModal(true);
-            }}
+            onEdit={handleEditMCQ}
             onDelete={handleDeleteMCQ}
             getDifficultyColor={getDifficultyColor}
           />
         ) : (
           <CodingQuestionsList
             questions={codingQuestions}
-onEdit={(q) => {
-              handleEditCoding(q);
-              setEditingQuestion(q);
-              setShowCodingModal(true);
-            }}
+            onEdit={handleEditCoding}
             onDelete={handleDeleteCoding}
             getDifficultyColor={getDifficultyColor}
           />
@@ -515,4 +507,3 @@ const CodingQuestionsList = memo(({ questions = [], onEdit, onDelete, getDifficu
 });
 
 export default QuestionBankTab;
-
