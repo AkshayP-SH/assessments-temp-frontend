@@ -36,7 +36,7 @@ const isRegistrationClosed = (iso) => {
 
 
 
-export default function JobBoard({ isEmbedded = false }) {
+export default function JobBoard({ isEmbedded = false, onTabChange }) {
     useSEO({
         title: "Job Board - SHNOOR Assessments",
         description: "View and apply to active job openings",
@@ -50,6 +50,27 @@ export default function JobBoard({ isEmbedded = false }) {
     const [enrollingJobs, setEnrollingJobs] = useState(new Set());
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [successData, setSuccessData] = useState(null);
+    const [savedJobs, setSavedJobs] = useState(() => {
+        try {
+            const saved = localStorage.getItem('student_saved_jobs');
+            return new Set(saved ? JSON.parse(saved) : []);
+        } catch {
+            return new Set();
+        }
+    });
+
+    const toggleSaveJob = (jobId) => {
+        setSavedJobs(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(jobId)) {
+                newSet.delete(jobId);
+            } else {
+                newSet.add(jobId);
+            }
+            localStorage.setItem('student_saved_jobs', JSON.stringify(Array.from(newSet)));
+            return newSet;
+        });
+    };
     
     // Application form state
     const [showApplicationModal, setShowApplicationModal] = useState(false);
@@ -499,16 +520,19 @@ We offer a competitive salary, comprehensive health benefits, and a flexible wor
                                                         className="px-8 py-2.5 bg-gradient-to-r from-[#403f75] to-[#57569b] hover:from-[#343360] hover:to-[#4a4988] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-colors shadow-sm flex items-center gap-2 cursor-pointer"
                                                     >
                                                         {enrollingJobs.has(viewDescriptionJob.id) ? (
-                                                            <><Loader2 size={16} className="animate-spin" /> Enrolling...</>
+                                                            <><Loader2 size={16} className="animate-spin" /> Applying...</>
                                                         ) : isRegistrationClosed(viewDescriptionJob.registration_deadline) ? (
                                                             'Registration Closed'
                                                         ) : (
-                                                            'Enroll Now'
+                                                            'Apply Now'
                                                         )}
                                                     </button>
                                                 )}
-                                                <button className="w-11 h-11 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors border border-slate-200 dark:border-slate-700">
-                                                    <Bookmark size={18} />
+                                                <button 
+                                                    onClick={() => toggleSaveJob(viewDescriptionJob.id)}
+                                                    className={`w-11 h-11 rounded-xl flex items-center justify-center transition-colors border ${savedJobs.has(viewDescriptionJob.id) ? 'bg-indigo-50 border-indigo-200 text-indigo-600 dark:bg-indigo-900/30 dark:border-indigo-800 dark:text-indigo-400' : 'bg-slate-50 border-slate-200 text-slate-600 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'}`}
+                                                >
+                                                    <Bookmark size={18} fill={savedJobs.has(viewDescriptionJob.id) ? 'currentColor' : 'none'} />
                                                 </button>
                                             </div>
                                         </div>
@@ -787,7 +811,15 @@ We offer a competitive salary, comprehensive health benefits, and a flexible wor
 
                             <div className="space-y-3 pt-2">
                                 <button
-                                    onClick={() => navigate('/student/my-applications')}
+                                    onClick={() => {
+                                        localStorage.setItem('studentDashboardTab', 'my-applications');
+                                        if (onTabChange) {
+                                            onTabChange('my-applications');
+                                        } else {
+                                            navigate('/dashboard');
+                                        }
+                                        setShowSuccessModal(false);
+                                    }}
                                     className="w-full py-3 bg-shnoor-indigo hover:bg-[#4d4d9c] text-white rounded-lg font-bold transition-all shadow-sm"
                                 >
                                     View My Applications
