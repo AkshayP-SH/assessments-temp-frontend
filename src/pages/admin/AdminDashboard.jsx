@@ -194,12 +194,7 @@ const AdminDashboard = () => {
   }, []);
 
   const defaultClientId = useMemo(() => {
-    const shnoorClient = clientsList.find(c =>
-      (c.company_name && c.company_name.toLowerCase().includes('shnoor')) ||
-      (c.name && c.name.toLowerCase().includes('shnoor')) ||
-      String(c.id) === '1'
-    );
-    return shnoorClient ? String(shnoorClient.id) : (clientsList.length > 0 ? String(clientsList[0].id) : '');
+    return '';
   }, [clientsList]);
 
   // Calculate days remaining for banner
@@ -294,22 +289,10 @@ const AdminDashboard = () => {
               return;
             }
           }
-
-          // Find Shnoor International or client 1 as default organization
-          const shnoorClient = list.find(c =>
-            (c.company_name && c.company_name.toLowerCase().includes('shnoor')) ||
-            (c.name && c.name.toLowerCase().includes('shnoor')) ||
-            String(c.id) === '1'
-          );
-
-          if (shnoorClient) {
-            const defaultId = String(shnoorClient.id);
-            setViewAsClientId(defaultId);
-            sessionStorage.setItem('superAdminSelectedClientId', defaultId);
-          } else if (list.length > 0) {
-            const defaultId = String(list[0].id);
-            setViewAsClientId(defaultId);
-            sessionStorage.setItem('superAdminSelectedClientId', defaultId);
+          // Default to Global View for Super Admin
+          if (!sessionStorage.getItem('superAdminSelectedClientId')) {
+            setViewAsClientId('');
+            sessionStorage.setItem('superAdminSelectedClientId', '');
           }
         }
       })
@@ -2155,8 +2138,8 @@ const AdminDashboard = () => {
                           setTests([]);
                           setAllInstitutes([]);
                         }}
-                        className="p-0.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-all cursor-pointer flex items-center justify-center ml-0.5"
-                        title="Remove filter (Reset to Shnoor International)"
+className="p-0.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-all cursor-pointer flex items-center justify-center ml-0.5"
+                        title="Remove filter (Reset to Global View)"
                         aria-label="Remove filter"
                       >
                         <X size={13} className="stroke-[2.5]" />

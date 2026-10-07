@@ -23,7 +23,7 @@ import {
   Camera,
   Trash2
 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from 'react-toastify';
 import { apiFetch } from '../config/api';
 
 export default function StudentProfile() {
@@ -66,7 +66,7 @@ export default function StudentProfile() {
       const token = localStorage.getItem('studentAuthToken');
       if (!token) return;
 
-      const response = await apiFetch('api/student/profile', {
+      const response = await apiFetch('api/profile', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -74,17 +74,17 @@ export default function StudentProfile() {
 
       if (response.ok) {
         const data = await response.json();
-        if (data.success && data.student) {
-          setProfile(data.student);
+        if (data.success && data.user) {
+          setProfile(data.user);
           setFormData({
-            full_name: data.student.full_name || '',
-            roll_number: data.student.roll_number || '',
-            phone: data.student.phone || '',
-            address: data.student.address || '',
-            course: data.student.course || '',
-            specialization: data.student.specialization || '',
-            resume_link: data.student.resume_link || '',
-            profile_image: data.student.profile_image || ''
+            full_name: data.user.full_name || '',
+            roll_number: data.user.roll_number || '',
+            phone: data.user.phone || '',
+            address: data.user.address || '',
+            course: data.user.course || '',
+            specialization: data.user.specialization || '',
+            resume_link: data.user.resume_link || '',
+            profile_image: data.user.profile_image || ''
           });
         }
       } else {
@@ -905,4 +905,3 @@ export default function StudentProfile() {
     </>
   );
 }
-

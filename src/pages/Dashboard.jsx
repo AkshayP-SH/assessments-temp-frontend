@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState, useMemo, useCallback } from 'react';
-import { LogOut, Clock, BookOpen, AlertCircle, FileText, X, Video, Briefcase } from 'lucide-react';
+import { LogOut, Clock, BookOpen, AlertCircle, FileText, X, Video, Briefcase, ArrowRight } from 'lucide-react';
 import ExamSearchFilter from '../components/ExamSearchFilter';
 import StudentInterviews from '../components/StudentInterviews';
 import JobBoard from './JobBoard';
@@ -12,9 +12,9 @@ import StudentHeader from '../components/StudentHeader';
 import StudentSidebar from '../components/StudentSidebar';
 import { clearStorageKeepTheme } from '../utils/theme';
 import { apiFetch } from '../config/api';
-import shnoorLogo from '../assets/shnoor-logo.png';
 import { useSEO } from '../hooks/useSEO';
-
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { io } from 'socket.io-client';
 const STUDENT_DASHBOARD_TABS = ['tests', 'interviews', 'job-board', 'my-applications', 'profile'];
 
 const Dashboard = () => {
@@ -28,20 +28,31 @@ const Dashboard = () => {
   const [studentName, setStudentName] = useState('');
   const [studentId, setStudentId] = useState('');
   const [institute, setInstitute] = useState('');
+  const queryClient = useQueryClient();
 
-  // Helper to capitalize institute name for display
-  const capitalizeInstitute = (name) => {
-    if (!name) return '';
-    return name
-      .toLowerCase()
-      .split(' ')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-  };
+  useEffect(() => {
+    const studentId = localStorage.getItem('studentId');
+    if (!studentId) return;
 
-  const [availableTests, setAvailableTests] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [testsWithProgress, setTestsWithProgress] = useState(new Set());
+    const socketUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? window.location.origin : 'http://localhost:5000');
+    const socket = io(socketUrl, {
+      transports: ['polling', 'websocket'],
+    });
+
+    socket.on('connect', () => {
+      socket.emit('student:join-dashboard', { studentId });
+    });
+
+    socket.on('test:assigned', () => {
+      // Refresh the queries to get new tests
+      queryClient.invalidateQueries(['studentTests']);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [queryClient]);
+
   const [selectedTest, setSelectedTest] = useState(null);
   const [showJobModal, setShowJobModal] = useState(false);
   const [selectedJobRoleIndex, setSelectedJobRoleIndex] = useState(0);
@@ -63,59 +74,50 @@ const Dashboard = () => {
   });
   const [sortBy, setSortBy] = useState('latest');
 
-  useEffect(() => {
-    const fetchData = async () => {
-      // Validate token type - force re-login if old Firebase token
+  const { data: dashboardData, isLoading: loading } = useQuery({
+    queryKey: ['studentTests'],
+    queryFn: async () => {
       const { validateAndCleanupToken } = await import('../utils/tokenValidator');
       if (!validateAndCleanupToken()) {
         navigate('/login');
-        return;
+        return { availableTests: [], testsWithProgress: new Set() };
       }
 
       const token = localStorage.getItem('studentAuthToken');
       if (!token) {
         navigate('/login');
-        return;
+        return { availableTests: [], testsWithProgress: new Set() };
       }
 
       setStudentName(localStorage.getItem('studentName') || 'Student');
       setStudentId(localStorage.getItem('studentId') || '');
       setInstitute(localStorage.getItem('institute') || '');
 
-      try {
-        const response = await apiFetch('api/student/tests', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
+      const response = await apiFetch('api/student/tests', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
 
-        // Handle 401 - Token expired or invalid
-        if (response.status === 401) {
-          console.log('Authentication token expired or invalid');
-          clearStorageKeepTheme();
-          navigate('/login');
-          return;
-        }
+      if (response.status === 401) {
+        clearStorageKeepTheme();
+        navigate('/login');
+        return { availableTests: [], testsWithProgress: new Set() };
+      }
 
-        if (!response.ok) {
-          throw new Error('Failed to fetch tests');
-        }
+      if (!response.ok) {
+        throw new Error('Failed to fetch tests');
+      }
 
-        const data = await response.json();
-        console.log('=== STUDENT TESTS API RESPONSE ===');
-        console.log('Full response:', data);
-        console.log('Tests count:', data.tests?.length);
-        if (data.tests && data.tests.length > 0) {
-          console.log('First test:', data.tests[0]);
-          console.log('First test jobRoles:', data.tests[0].jobRoles);
-        }
+      const data = await response.json();
+      
+      if (!data.success) {
+        throw new Error('Failed to load tests');
+      }
 
-        if (data.success) {
-          setAvailableTests(data.tests);
+      const availableTests = data.tests || [];
 
           // Check for saved progress for each test
           const progressChecks = await Promise.all(
-            data.tests.map(async (test) => {
+            availableTests.map(async (test) => {
               // Skip progress check if test is not available, already taken, or no attempts left
               if (!test.isAvailable || test.alreadyTaken || !test.hasAttemptsLeft) {
                 return { testId: test.id, hasProgress: false };
@@ -142,44 +144,19 @@ const Dashboard = () => {
             })
           );
 
-          const testsWithProgressSet = new Set(
+          const testsWithProgress = new Set(
             progressChecks
               .filter(p => p.hasProgress)
               .map(p => p.testId)
           );
-          setTestsWithProgress(testsWithProgressSet);
-        } else {
-          alert('Failed to load tests');
-        }
-      } catch (err) {
-        console.error('Error loading tests:', err);
-        alert('Connection error. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
-    };
 
-    fetchData();
-  }, [navigate]);
+          return { availableTests, testsWithProgress };
+        },
+        refetchInterval: 30000
+      });
 
-  // Poll every 30 s so newly-assigned tests appear without a manual refresh
-  useEffect(() => {
-    const refreshTests = async () => {
-      const token = localStorage.getItem('studentAuthToken');
-      if (!token) return;
-      try {
-        const res = await apiFetch('api/student/tests', { headers: { 'Authorization': `Bearer ${token}` } });
-        if (res.ok) {
-          const data = await res.json();
-          if (data.success) setAvailableTests(prev =>
-            JSON.stringify(data.tests) === JSON.stringify(prev) ? prev : data.tests
-          );
-        }
-      } catch { /* silent */ }
-    };
-    const id = setInterval(refreshTests, 30000);
-    return () => clearInterval(id);
-  }, []);
+  const availableTests = dashboardData?.availableTests || [];
+  const testsWithProgress = dashboardData?.testsWithProgress || new Set();
 
   useEffect(() => {
     localStorage.setItem('studentDashboardTab', activeTab);
@@ -270,7 +247,11 @@ const Dashboard = () => {
         break;
     }
 
-    return filtered;
+    // Always put Mock Tests at the end
+    const realTests = filtered.filter(t => !t.isMockTest);
+    const mockTests = filtered.filter(t => t.isMockTest);
+
+    return [...realTests, ...mockTests];
   }, [availableTests, searchTerm, filters, sortBy, testsWithProgress]);
 
   return (
@@ -712,25 +693,24 @@ const Dashboard = () => {
           <div className="mt-12 bg-white dark:bg-[#1E1E38] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-[0_2px_12px_rgba(14,14,39,0.04)] overflow-hidden">
             <div className="h-1 w-full bg-gradient-to-r from-[#403f75] via-indigo-500 to-[#6868AC]" />
             <div className="p-6 sm:p-7">
-              <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#403f75] dark:bg-indigo-400" />
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white mb-4">
                 Important Assessment Guidelines
               </h3>
               <ul className="space-y-2.5 text-xs sm:text-sm text-slate-600 dark:text-slate-300">
                 <li className="flex items-start">
-                  <span className="mr-2.5 text-[#403f75] dark:text-indigo-400 font-bold">•</span>
+                  <ArrowRight size={14} className="mr-2.5 text-[#403f75] dark:text-indigo-400 shrink-0 mt-0.5" />
                   <span><strong>Stable Connection:</strong> Ensure you have a stable internet connection before starting.</span>
                 </li>
                 <li className="flex items-start">
-                  <span className="mr-2.5 text-[#403f75] dark:text-indigo-400 font-bold">•</span>
+                  <ArrowRight size={14} className="mr-2.5 text-[#403f75] dark:text-indigo-400 shrink-0 mt-0.5" />
                   <span><strong>Fullscreen Mode:</strong> All tests require fullscreen mode and prohibit tab switching.</span>
                 </li>
                 <li className="flex items-start">
-                  <span className="mr-2.5 text-[#403f75] dark:text-indigo-400 font-bold">•</span>
+                  <ArrowRight size={14} className="mr-2.5 text-[#403f75] dark:text-indigo-400 shrink-0 mt-0.5" />
                   <span><strong>Strict Warnings:</strong> Three warnings for tab switching will result in automatic submission.</span>
                 </li>
                 <li className="flex items-start">
-                  <span className="mr-2.5 text-[#403f75] dark:text-indigo-400 font-bold">•</span>
+                  <ArrowRight size={14} className="mr-2.5 text-[#403f75] dark:text-indigo-400 shrink-0 mt-0.5" />
                   <span><strong>Auto-Saved Progress:</strong> Your progress is automatically saved — you can resume tests if interrupted.</span>
                 </li>
               </ul>
