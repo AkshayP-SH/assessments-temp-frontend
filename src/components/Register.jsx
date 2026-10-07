@@ -85,15 +85,15 @@ const ResumeLinkRow = ({ label, value }) => (
 
 /* ─── Review Section Card ────────────────────────────────────────────────────── */
 const ReviewSection = ({ title, stepIndex, onEdit, children }) => (
-  <div className="bg-theme-card border border-theme-border rounded-xl overflow-hidden shadow-xs">
+  <div className="bg-theme-card border border-theme-border rounded-xl overflow-hidden shadow-xs card-3d-subtle hover:shadow-md transition-all duration-300 transform-style-3d border-glow-hover">
     <div className="flex items-center justify-between px-5 py-3 bg-theme-panel border-b border-theme-border">
       <p className="text-xs font-bold text-theme-text uppercase tracking-widest">{title}</p>
       <button
         type="button"
         onClick={() => onEdit(stepIndex)}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-theme-accent hover:text-white bg-theme-accent/10 hover:bg-theme-accent border border-theme-accent/30 hover:border-theme-accent rounded-lg transition-all duration-150 group cursor-pointer"
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-theme-accent hover:text-white bg-theme-accent/10 hover:bg-theme-accent border border-theme-accent/30 hover:border-theme-accent rounded-lg transition-all duration-150 group cursor-pointer btn-action-gesture"
       >
-        <svg className="w-3.5 h-3.5 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+        <svg className="w-3.5 h-3.5 transition-transform group-hover:scale-110 icon-gesture" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
         </svg>
         <span>Edit</span>
@@ -726,9 +726,13 @@ const Register = () => {
       </div>
       {/* ── LEFT PANEL ────────────────────────────────────── */}
       <div className="auth-left-panel hidden lg:flex lg:w-[38%] flex-col justify-between bg-shnoor-navy px-12 py-12 relative overflow-hidden">
+        {/* Floating Ambient 3D Glow Orbs */}
+        <div className="auth-glow-orb auth-glow-orb-primary w-96 h-96 -top-24 -left-24 pointer-events-none" />
+        <div className="auth-glow-orb auth-glow-orb-secondary w-80 h-80 bottom-8 -right-16 pointer-events-none" />
+
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-12">
-            <div className="site-header-logo flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl bg-white p-1 shadow-xs">
+            <div className="site-header-logo flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl bg-white p-1 shadow-md card-3d-lift shimmer-hover hover:scale-105 transition-all duration-300">
               <img src={shnoorLogo} alt="Shnoor" className="h-full w-full object-contain" width="44" height="44" loading="eager" fetchPriority="high" />
             </div>
             <div>
@@ -745,13 +749,18 @@ const Register = () => {
           </p>
 
           {/* Step list */}
-          <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-3">
             {STEP_META.map((s, i) => {
               const isDone = i < step;
               const isActive = i === step;
               return (
-                <div key={i} className={`flex items-start gap-4 transition-all duration-300 ${isActive ? 'opacity-100' : isDone ? 'opacity-90' : 'opacity-60'}`}>
-                  <div className={`auth-step-badge w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300 ${isDone ? 'is-complete' : isActive ? 'is-active' : 'is-pending'}`}>
+                <div
+                  key={i}
+                  className={`flex items-start gap-4 p-2.5 -mx-2.5 rounded-xl transition-all duration-300 card-3d-subtle hover:bg-white/[0.08] border border-transparent hover:border-white/10 group cursor-default transform-style-3d ${
+                    isActive ? 'opacity-100 bg-white/[0.06] border-white/10' : isDone ? 'opacity-90' : 'opacity-60'
+                  }`}
+                >
+                  <div className={`auth-step-badge w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300 icon-gesture group-hover:scale-110 ${isDone ? 'is-complete' : isActive ? 'is-active scale-105 shadow-md shadow-indigo-500/30' : 'is-pending'}`}>
                     {isDone ? (
                       <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -772,18 +781,22 @@ const Register = () => {
           </div>
         </div>
 
-        <div className="relative z-10">
+        <div className="relative z-10 card-3d-subtle hover:bg-white/[0.04] p-3 -mx-3 rounded-xl transition-all duration-200">
           <div className="flex gap-1 mb-3">
             {[1, 2, 3, 4, 5, 6, 7].map((index) => (
-              <div key={index} className="h-1.5 flex-1 rounded-full" style={{ backgroundColor: `rgb(var(--theme-progress-${index}))` }} />
+              <div key={index} className="h-1.5 flex-1 rounded-full transition-transform duration-300 hover:scale-y-125" style={{ backgroundColor: `rgb(var(--theme-progress-${index}))` }} />
             ))}
           </div>
           <p className="auth-bottom-copy text-xs">SHNOOR Recruitment & Assessment Portal</p>
         </div>
       </div>
       {/* ── RIGHT PANEL ───────────────────────────────────── */}
-      <div className="auth-right-panel flex-1 bg-white flex items-center justify-center px-6 py-10 overflow-auto">
-        <div className="w-full max-w-[500px]">
+      <div className="auth-right-panel flex-1 bg-white flex items-center justify-center px-6 py-10 overflow-auto relative">
+        {/* Soft Ambient Background Orbs */}
+        <div className="auth-glow-orb auth-glow-orb-primary w-80 h-80 -top-24 -right-24 pointer-events-none opacity-20" />
+        <div className="auth-glow-orb auth-glow-orb-secondary w-72 h-72 bottom-12 -left-20 pointer-events-none opacity-15" />
+
+        <div className="w-full max-w-[500px] relative z-10 animate-entry-3d perspective-1000">
           {/* Back navigation */}
           <div className="mb-5">
             <button
@@ -795,16 +808,16 @@ const Register = () => {
                   navigate('/');
                 }
               }}
-              className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-shnoor-soft hover:text-shnoor-indigo transition-colors group cursor-pointer"
+              className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-shnoor-soft hover:text-shnoor-indigo transition-colors group cursor-pointer nav-gesture-item"
             >
-              <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+              <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1.5" />
               <span>{step > 0 ? 'Back to previous step' : 'Back to home'}</span>
             </button>
           </div>
 
           {/* Mobile brand */}
           <div className="flex items-center gap-3 mb-6 lg:hidden">
-            <div className="site-header-logo flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-white shadow-xs p-1 flex-shrink-0">
+            <div className="site-header-logo flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-white shadow-xs p-1 flex-shrink-0 card-3d-lift shimmer-hover hover:scale-105 transition-transform">
               <img src={shnoorLogo} alt="Shnoor" className="h-full w-full object-contain" width="36" height="36" loading="lazy" decoding="async" />
             </div>
             <div>
@@ -815,8 +828,8 @@ const Register = () => {
 
           {/* Client org banner — shown when registering via a client token */}
           {clientInfo && (
-            <div className="mb-5 flex items-center gap-3 bg-shnoor-indigo/10 border border-shnoor-indigo/30 rounded-xl px-4 py-3">
-              <div className="w-8 h-8 rounded-lg bg-shnoor-indigo flex items-center justify-center flex-shrink-0">
+            <div className="mb-5 flex items-center gap-3 bg-shnoor-indigo/10 border border-shnoor-indigo/30 rounded-xl px-4 py-3 card-3d-subtle hover:shadow-sm transition-all">
+              <div className="w-8 h-8 rounded-lg bg-shnoor-indigo flex items-center justify-center flex-shrink-0 icon-gesture">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
                   <polyline points="9 22 9 12 15 12 15 22" />
@@ -855,14 +868,14 @@ const Register = () => {
 
           {/* Heading */}
           <div className="mb-6">
-            <h1 className="text-2xl font-extrabold text-shnoor-navy">{STEP_META[step].title}</h1>
+            <h1 className="text-2xl font-extrabold text-shnoor-navy tracking-tight">{STEP_META[step].title}</h1>
             <p className="text-sm text-shnoor-soft mt-0.5">{STEP_META[step].desc}</p>
           </div>
 
           {/* API error */}
           {apiError && (
-            <div className="mb-5 flex items-start gap-3 bg-shnoor-dangerLight border border-shnoor-dangerLight text-shnoor-danger rounded-xl px-4 py-3 text-sm">
-              <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 16 16">
+            <div className="mb-5 flex items-start gap-3 bg-shnoor-dangerLight border border-shnoor-dangerLight text-shnoor-danger rounded-xl px-4 py-3 text-sm modal-3d-entrance shadow-xs">
+              <svg className="w-4 h-4 mt-0.5 flex-shrink-0 animate-pulse-subtle" fill="currentColor" viewBox="0 0 16 16">
                 <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zm0 12a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm0-9a1 1 0 0 0-1 1v6a1 1 0 0 0 2 0V4a1 1 0 0 0-1-1z" />
               </svg>
               {apiError}
@@ -871,14 +884,16 @@ const Register = () => {
 
           {/* Step fields — wrapped in form for enter-key and validation */}
           <form onSubmit={step < TOTAL_STEPS - 1 ? (e) => { e.preventDefault(); goNext(); } : (e) => { e.preventDefault(); handleSubmit(); }}>
-            {renderStep()}
+            <div className="animate-entry-3d">
+              {renderStep()}
+            </div>
 
             {/* Navigation */}
             <div className={`flex flex-col-reverse sm:flex-row gap-3 mt-8 ${step === 0 ? 'justify-end' : 'justify-between'}`}>
               {step > 0 && (
                 <Button type="button" onClick={goBack} disabled={isLoading}
-                  className="w-full sm:w-auto h-[50px] px-6 rounded-lg font-semibold text-shnoor-navy border-2 border-shnoor-mist hover:border-shnoor-indigo hover:bg-shnoor-lavender transition-all flex items-center justify-center gap-2">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  className="w-full sm:w-auto h-[50px] px-6 rounded-lg font-semibold text-shnoor-navy border-2 border-shnoor-mist hover:border-shnoor-indigo hover:bg-shnoor-lavender transition-all flex items-center justify-center gap-2 btn-action-gesture">
+                  <svg className="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
                   </svg>
                   Back
@@ -886,14 +901,14 @@ const Register = () => {
               )}
 
               {step < TOTAL_STEPS - 1 ? (
-                <Button type="submit" variant="primary" className="w-full sm:flex-1 !h-[50px]">
+                <Button type="submit" variant="primary" className="w-full sm:flex-1 !h-[50px] btn-action-gesture shimmer-hover">
                   Continue
-                  <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                   </svg>
                 </Button>
               ) : (
-                <Button type="submit" variant="primary" className="w-full sm:flex-1 !h-[50px]" disabled={isLoading || !termsAccepted}>
+                <Button type="submit" variant="primary" className="w-full sm:flex-1 !h-[50px] btn-action-gesture shimmer-hover" disabled={isLoading || !termsAccepted}>
                   {isLoading ? (
                     <>
                       <div className="w-5 h-5 border-[3px] border-white border-t-transparent rounded-full animate-spin" />
@@ -901,7 +916,7 @@ const Register = () => {
                     </>
                   ) : (
                     <>
-                      <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 mr-1 icon-gesture" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       Confirm & Register
@@ -916,7 +931,7 @@ const Register = () => {
           <div className="mt-7 pt-6 border-t border-shnoor-lavender">
             <p className="text-center text-sm text-shnoor-soft">
               Already registered?{' '}
-              <Link to="/login" className="text-shnoor-indigo font-semibold hover:text-shnoor-navy transition-colors">
+              <Link to="/login" className="text-shnoor-indigo font-semibold hover:text-shnoor-navy transition-colors inline-block hover:underline">
                 Sign in
               </Link>
             </p>
@@ -932,15 +947,15 @@ const Register = () => {
 
       {/* Terms and Conditions Modal */}
       {showTermsModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-fadeIn">
+          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl modal-3d-entrance border border-shnoor-mist">
             {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-shnoor-mist bg-shnoor-lavender">
               <h2 className="text-xl font-extrabold text-shnoor-navy">Terms and Conditions</h2>
               <button
                 type="button"
                 onClick={() => setShowTermsModal(false)}
-                className="text-shnoor-soft hover:text-shnoor-navy transition-colors p-1"
+                className="text-shnoor-soft hover:text-shnoor-navy transition-all p-1.5 rounded-lg hover:bg-black/5 hover:scale-110 active:scale-95"
               >
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <line x1="18" y1="6" x2="6" y2="18"></line>

@@ -270,7 +270,7 @@ export default function MyApplications({ isEmbedded = false, onBrowseJobs }) {
                                 return (
                                     <div
                                         key={app.application_id}
-                                        className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border-2 border-shnoor-indigo overflow-hidden transition-all duration-200 hover:shadow-[0_8px_30px_rgba(14,14,39,0.08)]"
+                                        className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border-2 border-shnoor-indigo overflow-hidden transition-all duration-300 card-3d-lift shimmer-hover transform-style-3d hover:shadow-[0_16px_36px_rgba(14,14,39,0.12)]"
                                     >
                                         {/* Card header */}
                                         <div className="bg-shnoor-lavender/50 border-b border-shnoor-mist px-6 py-5">
@@ -339,9 +339,9 @@ export default function MyApplications({ isEmbedded = false, onBrowseJobs }) {
                                                             {testProgress.text}
                                                         </span>
                                                     </div>
-                                                    <div className="w-full bg-shnoor-mist rounded-full h-2.5">
+                                                    <div className="w-full bg-shnoor-mist rounded-full h-2.5 overflow-hidden">
                                                         <div
-                                                            className="bg-shnoor-indigo h-2.5 rounded-full transition-all duration-500"
+                                                            className="bg-shnoor-indigo h-2.5 rounded-full transition-all duration-500 animate-progress-stream"
                                                             style={{ width: `${testProgress.percentage}%` }}
                                                         />
                                                     </div>
@@ -410,7 +410,7 @@ export default function MyApplications({ isEmbedded = false, onBrowseJobs }) {
                                                                                 {!test.is_completed && (
                                                                                     <button
                                                                                         onClick={() => handleTakeTest(test.test_id, app.application_id)}
-                                                                                        className="w-full sm:w-auto flex justify-center items-center space-x-2 px-4 py-2 bg-shnoor-indigo hover:bg-[#4d4d9c] text-white rounded-lg font-bold transition-all shadow-sm text-sm shrink-0 mt-2 sm:mt-0"
+                                                                                        className="w-full sm:w-auto flex justify-center items-center space-x-2 px-4 py-2 bg-shnoor-indigo hover:bg-[#4d4d9c] text-white rounded-lg font-bold transition-all shadow-sm text-sm shrink-0 mt-2 sm:mt-0 btn-action-gesture"
                                                                                     >
                                                                                         <PlayCircle size={16} />
                                                                                         <span>Take Test</span>

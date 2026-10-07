@@ -81,8 +81,8 @@ export default function StudentSidebar({ activeTab, onTabChange, badges = {}, on
                 key={tab.id}
                 type="button"
                 onClick={() => onTabChange(tab.id)}
-                className={`flex items-center h-11 px-3 w-full rounded-xl transition-all duration-200 cursor-pointer relative group/item ${isActive
-                  ? 'bg-gradient-to-r from-[#403f75] to-[#57569b] text-white font-bold shadow-md shadow-[#403f75]/25'
+                className={`flex items-center h-11 px-3 w-full rounded-xl nav-gesture-item cursor-pointer relative group/item ${isActive
+                  ? 'bg-gradient-to-r from-[#403f75] to-[#57569b] text-white font-bold shadow-md shadow-[#403f75]/25 translate-x-1'
                   : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/90 dark:hover:bg-slate-800/80'
                   }`}
                 title={!isExpanded ? tab.label : undefined}
@@ -90,9 +90,9 @@ export default function StudentSidebar({ activeTab, onTabChange, badges = {}, on
                 <div className="w-6 h-6 flex items-center justify-center flex-shrink-0 relative">
                   <Icon
                     size={19}
-                    className={`transition-transform duration-150 ${isActive
-                      ? 'text-white'
-                      : 'text-slate-500 dark:text-slate-400 group-hover/item:text-slate-800 dark:group-hover/item:text-white'
+                    className={`transition-transform duration-200 ${isActive
+                      ? 'text-white scale-110'
+                      : 'text-slate-500 dark:text-slate-400 group-hover/item:text-slate-800 dark:group-hover/item:text-white group-hover/item:scale-110 group-hover/item:-rotate-3'
                       }`}
                   />
                   {badgeCount != null && badgeCount > 0 && !isExpanded && (

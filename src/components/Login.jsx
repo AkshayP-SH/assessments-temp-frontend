@@ -56,29 +56,29 @@ const ORG_FEATURES = [
 
 // ── Portal Tab Switcher ────────────────────────────────────────────────────
 const PortalTabs = ({ active, onChange }) => (
-  <div className="flex rounded-xl bg-theme-panel p-1.5 mb-8 gap-1.5 relative z-10 border border-theme-border/50 shadow-xs">
+  <div className="flex rounded-xl bg-theme-panel p-1.5 mb-8 gap-1.5 relative z-10 border border-theme-border/50 shadow-xs perspective-1000">
     <button
       type="button"
       onClick={() => onChange('student')}
-      className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ${
+      className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer btn-action-gesture ${
         active === 'student'
-          ? 'bg-theme-card text-theme-text shadow-sm'
-          : 'text-theme-muted hover:text-theme-text'
+          ? 'bg-theme-card text-theme-text shadow-sm card-3d-subtle scale-[1.01]'
+          : 'text-theme-muted hover:text-theme-text hover:bg-theme-card/40'
       }`}
     >
-      <StudentIcon />
+      <span className="icon-gesture"><StudentIcon /></span>
       <span>Student / Candidate</span>
     </button>
     <button
       type="button"
       onClick={() => onChange('org')}
-      className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ${
+      className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer btn-action-gesture ${
         active === 'org'
-          ? 'bg-theme-card text-theme-text shadow-sm'
-          : 'text-theme-muted hover:text-theme-text'
+          ? 'bg-theme-card text-theme-text shadow-sm card-3d-subtle scale-[1.01]'
+          : 'text-theme-muted hover:text-theme-text hover:bg-theme-card/40'
       }`}
     >
-      <OrgIcon />
+      <span className="icon-gesture"><OrgIcon /></span>
       <span>Organisation</span>
     </button>
   </div>
@@ -299,9 +299,13 @@ const Login = () => {
 
       {/* ── LEFT PANEL ──────────────────────────────────────────────────── */}
       <div className="auth-left-panel hidden lg:flex lg:w-[45%] flex-col justify-between h-full bg-shnoor-navy px-12 xl:px-16 py-12 relative overflow-hidden">
+        {/* Floating Ambient 3D Glow Orbs */}
+        <div className="auth-glow-orb auth-glow-orb-primary w-96 h-96 -top-24 -left-24 pointer-events-none" />
+        <div className="auth-glow-orb auth-glow-orb-secondary w-80 h-80 bottom-8 -right-16 pointer-events-none" />
+
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-12">
-            <div className="site-header-logo flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-sm p-1.5 flex-shrink-0">
+            <div className="site-header-logo flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-md p-1.5 flex-shrink-0 card-3d-lift shimmer-hover hover:scale-105 transition-all duration-300">
               <img src={shnoorLogo} alt="Shnoor" className="h-full w-full object-contain" width="40" height="40" loading="eager" fetchPriority="high" />
             </div>
             <div>
@@ -323,21 +327,24 @@ const Login = () => {
               : 'Sign in to access your assigned assessments, track your progress, and complete recruitment tests.'}
           </p>
 
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-3">
             {features.map(f => (
-              <div key={f.label} className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-white/10 border border-white/15 flex items-center justify-center flex-shrink-0">
+              <div
+                key={f.label}
+                className="flex items-center gap-4 p-2.5 -mx-2.5 rounded-xl transition-all duration-200 card-3d-subtle hover:bg-white/[0.08] border border-transparent hover:border-white/10 group cursor-default transform-style-3d"
+              >
+                <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center flex-shrink-0 icon-gesture group-hover:scale-110 group-hover:bg-white/15 transition-all shadow-xs">
                   <svg className="w-5 h-5 text-white/90" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d={f.icon} />
                   </svg>
                 </div>
-                <span className="text-sm text-white/90 font-medium tracking-wide">{f.label}</span>
+                <span className="text-sm text-white/90 font-medium tracking-wide group-hover:text-white transition-colors">{f.label}</span>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="relative z-10 border-t border-white/15 pt-6 mt-12">
+        <div className="relative z-10 border-t border-white/15 pt-6 mt-12 card-3d-subtle hover:bg-white/[0.04] p-3 -mx-3 rounded-xl transition-all duration-200">
           <p className="auth-bottom-copy text-xs italic leading-relaxed">
             "These measures ensure a fair and secure assessment process for all candidates."
           </p>
@@ -346,10 +353,14 @@ const Login = () => {
 
       {/* ── RIGHT PANEL ─────────────────────────────────────────────────── */}
       <div className="auth-right-panel flex-1 flex items-center justify-center bg-theme-card px-6 sm:px-10 py-10 h-full overflow-y-auto relative">
-        <div className="w-full max-w-[440px]">
+        {/* Soft Ambient Background Orbs */}
+        <div className="auth-glow-orb auth-glow-orb-primary w-80 h-80 -top-24 -right-24 pointer-events-none opacity-20" />
+        <div className="auth-glow-orb auth-glow-orb-secondary w-72 h-72 bottom-12 -left-20 pointer-events-none opacity-15" />
+
+        <div className="w-full max-w-[440px] relative z-10 animate-entry-3d perspective-1000">
           {/* Mobile brand */}
           <div className="flex items-center justify-center gap-3 mb-8 lg:hidden">
-            <div className="site-header-logo flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white shadow-xs p-1 flex-shrink-0">
+            <div className="site-header-logo flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white shadow-xs p-1 flex-shrink-0 card-3d-lift shimmer-hover hover:scale-105 transition-transform">
               <img src={shnoorLogo} alt="Shnoor" loading="lazy" className="h-full w-full object-contain" width="40" height="40" decoding="async" />
             </div>
             <div>
@@ -362,9 +373,9 @@ const Login = () => {
           <div className="mb-5">
             <Link
               to="/"
-              className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-theme-muted hover:text-theme-accent transition-colors group cursor-pointer"
+              className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-theme-muted hover:text-theme-accent transition-colors group cursor-pointer nav-gesture-item"
             >
-              <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+              <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1.5" />
               <span>Back to home</span>
             </Link>
           </div>
@@ -382,8 +393,8 @@ const Login = () => {
 
           {/* Alerts */}
           {successMessage && (
-            <div className="mb-5 flex items-start gap-3 bg-shnoor-successLight border border-shnoor-success/30 text-shnoor-navy rounded-xl px-4 py-3 text-sm">
-              <svg className="w-4 h-4 mt-0.5 flex-shrink-0 text-shnoor-success" fill="currentColor" viewBox="0 0 16 16">
+            <div className="mb-5 flex items-start gap-3 bg-shnoor-successLight border border-shnoor-success/30 text-shnoor-navy rounded-xl px-4 py-3 text-sm modal-3d-entrance shadow-xs">
+              <svg className="w-4 h-4 mt-0.5 flex-shrink-0 text-shnoor-success animate-pulse-subtle" fill="currentColor" viewBox="0 0 16 16">
                 <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zm3.97 4.97a.75.75 0 0 0-1.08-.022L6.477 9.417 4.384 7.323a.75.75 0 0 0-1.06 1.06l2.75 2.75a.75.75 0 0 0 1.137-.089l4-5.5a.75.75 0 0 0-.24-1.573z" />
               </svg>
               <span>{successMessage}</span>
@@ -391,8 +402,8 @@ const Login = () => {
           )}
 
           {apiError && (
-            <div className="mb-5 flex items-start gap-3 bg-shnoor-dangerLight border border-shnoor-danger/30 text-shnoor-danger rounded-xl px-4 py-3 text-sm">
-              <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 16 16">
+            <div className="mb-5 flex items-start gap-3 bg-shnoor-dangerLight border border-shnoor-danger/30 text-shnoor-danger rounded-xl px-4 py-3 text-sm modal-3d-entrance shadow-xs">
+              <svg className="w-4 h-4 mt-0.5 flex-shrink-0 animate-pulse-subtle" fill="currentColor" viewBox="0 0 16 16">
                 <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zm0 12a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm0-9a1 1 0 0 0-1 1v6a1 1 0 0 0 2 0V4a1 1 0 0 0-1-1z" />
               </svg>
               <span>{apiError}</span>
@@ -405,7 +416,7 @@ const Login = () => {
             noValidate
             className="flex flex-col gap-5"
           >
-            <div>
+            <div className="auth-field-gesture">
               <InputField
                 label="Email Address"
                 id="email"
@@ -421,7 +432,7 @@ const Login = () => {
               {errors.email && <p className="text-xs text-shnoor-danger mt-1">{errors.email}</p>}
             </div>
 
-            <div className="relative">
+            <div className="relative auth-field-gesture">
               <InputField
                 label="Password"
                 id="password"
@@ -436,15 +447,16 @@ const Login = () => {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-[37px] text-theme-muted hover:text-theme-text transition-colors p-1 bg-transparent cursor-pointer"
+                className="absolute right-3 top-[37px] text-theme-muted hover:text-theme-text transition-all p-1 bg-transparent cursor-pointer hover:scale-110 active:scale-90 icon-gesture"
                 tabIndex={-1}
                 disabled={isLoading}
+                aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? <EyeOff /> : <EyeOpen />}
               </button>
               {errors.password && <p className="text-xs text-shnoor-danger mt-1">{errors.password}</p>}
               <div className="text-right mt-2">
-                <Link to="/forgot-password" className="text-xs font-medium text-theme-accent hover:text-theme-accent2 hover:underline transition-colors">
+                <Link to="/forgot-password" className="text-xs font-medium text-theme-accent hover:text-theme-accent2 hover:underline transition-colors inline-block hover:translate-x-0.5">
                   Forgot password?
                 </Link>
               </div>
@@ -453,7 +465,7 @@ const Login = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full h-[50px] bg-theme-accent hover:bg-theme-accent2 text-white text-base font-semibold rounded-lg shadow-sm hover:shadow-md transition-all duration-200 mt-2 flex items-center justify-center disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+              className="w-full h-[50px] bg-theme-accent hover:bg-theme-accent2 text-white text-base font-semibold rounded-lg shadow-sm hover:shadow-md transition-all duration-200 mt-2 flex items-center justify-center disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer btn-action-gesture shimmer-hover"
             >
               {isLoading && <div className="w-5 h-5 border-[3px] border-white/30 border-t-white rounded-full animate-spin mr-2" />}
               {isLoading ? 'Signing In...' : 'Sign In'}

@@ -420,8 +420,8 @@ export default function AdminJobOpenings({ clientId }) {
                                         <div className="flex items-center gap-x-3 flex-wrap gap-y-2">
                                             <h3 className="text-lg font-bold text-shnoor-navy truncate min-w-0">{job.job_role}</h3>
                                             <span className={`text-xs font-semibold px-3 py-1 rounded-full shrink-0 ${job.is_published
-                                                    ? 'bg-emerald-100 text-emerald-700'
-                                                    : 'bg-amber-100 text-amber-700'
+                                                ? 'bg-emerald-100 text-emerald-700'
+                                                : 'bg-amber-100 text-amber-700'
                                                 }`}>
                                                 {job.is_published ? '✓ Published' : '● Draft'}
                                             </span>
@@ -485,7 +485,7 @@ export default function AdminJobOpenings({ clientId }) {
                                                 onClick={() => handlePublish(job.id)}
                                                 disabled={publishingId === job.id}
                                                 title="Publish"
-                                                className="flex-1 sm:flex-none min-h-[40px] flex items-center justify-center gap-1.5 px-4 py-2 bg-shnoor-indigo hover:bg-shnoor-navy text-white rounded-xl text-sm font-semibold whitespace-nowrap transition-all disabled:opacity-60"
+                                                className="flex-1 sm:flex-none min-h-[40px] flex items-center justify-center gap-1.5 px-4 py-2 bg-shnoor-indigo hover:bg-shnoor-navy text-white rounded-xl text-sm font-semibold whitespace-nowrap transition-all disabled:opacity-60 btn-action-gesture"
                                             >
                                                 {publishingId === job.id
                                                     ? <Loader2 size={16} className="animate-spin" />
@@ -588,8 +588,8 @@ export default function AdminJobOpenings({ clientId }) {
                                                 <div
                                                     key={test.id}
                                                     className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl p-4 transition-all ${isLinked
-                                                            ? 'bg-shnoor-successLight border-2 border-shnoor-success shadow-sm'
-                                                            : 'bg-white border border-shnoor-mist hover:border-shnoor-indigo hover:shadow-md'
+                                                        ? 'bg-shnoor-successLight border-2 border-shnoor-success shadow-sm'
+                                                        : 'bg-white border border-shnoor-mist hover:border-shnoor-indigo hover:shadow-md'
                                                         }`}
                                                 >
                                                     <div className="flex-1 min-w-0">
@@ -608,8 +608,8 @@ export default function AdminJobOpenings({ clientId }) {
                                                         }
                                                         disabled={linkingTest}
                                                         className={`shrink-0 w-full sm:w-auto flex items-center justify-center space-x-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all disabled:opacity-50 shadow-sm hover:shadow-md ${isLinked
-                                                                ? 'bg-shnoor-success hover:opacity-90 text-white'
-                                                                : 'bg-shnoor-indigo hover:bg-[#4d4d9c] text-white'
+                                                            ? 'bg-shnoor-success hover:opacity-90 text-white'
+                                                            : 'bg-shnoor-indigo hover:bg-[#4d4d9c] text-white'
                                                             }`}
                                                     >
                                                         {linkingTest ? (

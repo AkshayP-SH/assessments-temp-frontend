@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { apiFetch } from '../config/api';
 import Button from './Button';
 import InputField from './InputField';
@@ -137,10 +138,14 @@ const ForgotPassword = () => {
       </div>
       {/* ── LEFT PANEL (dark) ─────────────────────────────── */}
       <div className="auth-left-panel hidden lg:flex lg:w-[45%] flex-col justify-between bg-shnoor-navy px-14 py-12 relative overflow-hidden">
+        {/* Floating Ambient 3D Glow Orbs */}
+        <div className="auth-glow-orb auth-glow-orb-primary w-96 h-96 -top-24 -left-24 pointer-events-none" />
+        <div className="auth-glow-orb auth-glow-orb-secondary w-80 h-80 bottom-8 -right-16 pointer-events-none" />
+
         {/* Brand */}
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-12">
-            <div className="site-header-logo flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl bg-white p-1">
+            <div className="site-header-logo flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl bg-white p-1 shadow-md card-3d-lift shimmer-hover hover:scale-105 transition-all duration-300">
               <img src={shnoorLogo} alt="Shnoor" className="h-full w-full object-contain" width="44" height="44" />
             </div>
             <div>
@@ -156,15 +161,62 @@ const ForgotPassword = () => {
           <p className="auth-left-muted text-sm leading-relaxed mb-10">
             Forgot your password? No worries. Enter your email address to verify your identity and get back into your portal.
           </p>
+
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-4 p-3 -mx-3 rounded-xl transition-all duration-200 card-3d-subtle hover:bg-white/[0.08] border border-transparent hover:border-white/10 group cursor-default transform-style-3d">
+              <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center flex-shrink-0 icon-gesture group-hover:scale-110 group-hover:bg-white/15 transition-all shadow-xs">
+                <svg className="w-5 h-5 text-white/90" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-white font-bold text-sm group-hover:text-white transition-colors">Instant OTP Verification</p>
+                <p className="auth-left-muted text-xs mt-0.5 leading-relaxed">Fast 6-digit one-time code delivery to verify ownership.</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-4 p-3 -mx-3 rounded-xl transition-all duration-200 card-3d-subtle hover:bg-white/[0.08] border border-transparent hover:border-white/10 group cursor-default transform-style-3d">
+              <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center flex-shrink-0 icon-gesture group-hover:scale-110 group-hover:bg-white/15 transition-all shadow-xs">
+                <svg className="w-5 h-5 text-white/90" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-white font-bold text-sm group-hover:text-white transition-colors">Secure Credentials Reset</p>
+                <p className="auth-left-muted text-xs mt-0.5 leading-relaxed">Protected end-to-end token validation with immediate sync.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="relative z-10 border-t border-white/15 pt-6 mt-12 card-3d-subtle hover:bg-white/[0.04] p-3 -mx-3 rounded-xl transition-all duration-200">
+          <p className="auth-bottom-copy text-xs italic leading-relaxed">
+            "We prioritize the integrity and security of candidate accounts."
+          </p>
         </div>
       </div>
 
       {/* ── RIGHT PANEL (white form) ───────────────────────── */}
-      <div className="auth-right-panel flex-1 flex items-center justify-center bg-white px-6 py-12 overflow-auto">
-        <div className="w-full max-w-[440px]">
+      <div className="auth-right-panel flex-1 flex items-center justify-center bg-white px-6 py-12 overflow-auto relative">
+        {/* Soft Ambient Background Orbs */}
+        <div className="auth-glow-orb auth-glow-orb-primary w-80 h-80 -top-24 -right-24 pointer-events-none opacity-20" />
+        <div className="auth-glow-orb auth-glow-orb-secondary w-72 h-72 bottom-12 -left-20 pointer-events-none opacity-15" />
+
+        <div className="w-full max-w-[440px] relative z-10 animate-entry-3d perspective-1000">
+          {/* Back navigation */}
+          <div className="mb-5">
+            <Link
+              to="/login"
+              className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-shnoor-soft hover:text-shnoor-indigo transition-colors group cursor-pointer nav-gesture-item"
+            >
+              <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1.5" />
+              <span>Back to sign in</span>
+            </Link>
+          </div>
+
           {/* Mobile brand header */}
           <div className="flex items-center gap-3 mb-8 lg:hidden">
-            <div className="site-header-logo flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white shadow-xs p-1 flex-shrink-0">
+            <div className="site-header-logo flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white shadow-xs p-1 flex-shrink-0 card-3d-lift shimmer-hover hover:scale-105 transition-transform">
               <img src={shnoorLogo} alt="Shnoor" className="h-full w-full object-contain" width="40" height="40" />
             </div>
             <div>
@@ -175,7 +227,7 @@ const ForgotPassword = () => {
 
           {/* Heading */}
           <div className="mb-8">
-            <h1 className="text-2xl font-extrabold text-shnoor-navy mb-1">Reset Password</h1>
+            <h1 className="text-2xl font-extrabold text-shnoor-navy mb-1 tracking-tight">Reset Password</h1>
             <p className="text-sm text-shnoor-indigoMedium">
                {step === 1 && "Enter your email to receive a verification OTP."}
                {step === 2 && "Enter the 6-digit OTP sent to your email."}
@@ -185,37 +237,39 @@ const ForgotPassword = () => {
 
           {/* Alerts */}
           {successMessage && (
-            <div className="mb-5 flex items-start gap-3 bg-shnoor-successLight border border-shnoor-successLight text-shnoor-success rounded-xl px-4 py-3 text-sm">
-              <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 16 16">
+            <div className="mb-5 flex items-start gap-3 bg-shnoor-successLight border border-shnoor-successLight text-shnoor-success rounded-xl px-4 py-3 text-sm modal-3d-entrance shadow-xs">
+              <svg className="w-4 h-4 mt-0.5 flex-shrink-0 animate-pulse-subtle" fill="currentColor" viewBox="0 0 16 16">
                 <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zm3.97 4.97a.75.75 0 0 0-1.08-.022L6.477 9.417 4.384 7.323a.75.75 0 0 0-1.06 1.06l2.75 2.75a.75.75 0 0 0 1.137-.089l4-5.5a.75.75 0 0 0-.24-1.573z" />
               </svg>
-              {successMessage}
+              <span>{successMessage}</span>
             </div>
           )}
 
           {apiError && (
-            <div className="mb-5 flex items-start gap-3 bg-shnoor-dangerLight border border-shnoor-dangerLight text-shnoor-danger rounded-xl px-4 py-3 text-sm">
-              <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 16 16">
+            <div className="mb-5 flex items-start gap-3 bg-shnoor-dangerLight border border-shnoor-dangerLight text-shnoor-danger rounded-xl px-4 py-3 text-sm modal-3d-entrance shadow-xs">
+              <svg className="w-4 h-4 mt-0.5 flex-shrink-0 animate-pulse-subtle" fill="currentColor" viewBox="0 0 16 16">
                 <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zm0 12a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm0-9a1 1 0 0 0-1 1v6a1 1 0 0 0 2 0V4a1 1 0 0 0-1-1z" />
               </svg>
-              {apiError}
+              <span>{apiError}</span>
             </div>
           )}
 
           {/* Step 1: Email Input */}
           {step === 1 && (
-            <form onSubmit={handleEmailSubmit} className="flex flex-col gap-5">
-              <InputField
-                label="Email Address"
-                id="email"
-                type="email"
-                placeholder="Enter your registered email"
-                required
-                value={email}
-                onChange={(e) => { setEmail(e.target.value); setApiError(''); }}
-                disabled={isLoading}
-              />
-              <Button type="submit" variant="primary" className="w-full !h-[52px] text-base" disabled={isLoading}>
+            <form onSubmit={handleEmailSubmit} className="flex flex-col gap-5 animate-entry-3d">
+              <div className="auth-field-gesture">
+                <InputField
+                  label="Email Address"
+                  id="email"
+                  type="email"
+                  placeholder="Enter your registered email"
+                  required
+                  value={email}
+                  onChange={(e) => { setEmail(e.target.value); setApiError(''); }}
+                  disabled={isLoading}
+                />
+              </div>
+              <Button type="submit" variant="primary" className="w-full !h-[52px] text-base btn-action-gesture shimmer-hover" disabled={isLoading}>
                 {isLoading ? 'Sending...' : 'Send OTP'}
               </Button>
             </form>
@@ -223,24 +277,26 @@ const ForgotPassword = () => {
 
           {/* Step 2: OTP Input */}
           {step === 2 && (
-            <form onSubmit={handleOtpSubmit} className="flex flex-col gap-5">
-               <InputField
-                label="6-Digit OTP"
-                id="otp"
-                type="text"
-                placeholder="Enter OTP"
-                required
-                value={otp}
-                onChange={(e) => { setOtp(e.target.value); setApiError(''); }}
-                disabled={isLoading}
-              />
-              <Button type="submit" variant="primary" className="w-full !h-[52px] text-base" disabled={isLoading}>
+            <form onSubmit={handleOtpSubmit} className="flex flex-col gap-5 animate-entry-3d">
+              <div className="auth-field-gesture">
+                <InputField
+                  label="6-Digit OTP"
+                  id="otp"
+                  type="text"
+                  placeholder="Enter OTP"
+                  required
+                  value={otp}
+                  onChange={(e) => { setOtp(e.target.value); setApiError(''); }}
+                  disabled={isLoading}
+                />
+              </div>
+              <Button type="submit" variant="primary" className="w-full !h-[52px] text-base btn-action-gesture shimmer-hover" disabled={isLoading}>
                 {isLoading ? 'Verifying...' : 'Verify OTP'}
               </Button>
               <div className="text-center">
                  <button 
                    type="button" 
-                   className="text-shnoor-indigo text-sm font-semibold hover:underline"
+                   className="text-shnoor-indigo text-sm font-semibold hover:underline btn-action-gesture cursor-pointer"
                    onClick={() => { setStep(1); setOtp(''); setApiError(''); setSuccessMessage(''); }}
                    disabled={isLoading}
                  >
@@ -252,28 +308,32 @@ const ForgotPassword = () => {
 
           {/* Step 3: New Password Input */}
           {step === 3 && (
-            <form onSubmit={handlePasswordResetSubmit} className="flex flex-col gap-5">
-              <InputField
-                label="New Password"
-                id="newPassword"
-                type="password"
-                placeholder="Enter new password"
-                required
-                value={newPassword}
-                onChange={(e) => { setNewPassword(e.target.value); setApiError(''); }}
-                disabled={isLoading}
-              />
-              <InputField
-                label="Confirm Password"
-                id="confirmPassword"
-                type="password"
-                placeholder="Confirm new password"
-                required
-                value={confirmPassword}
-                onChange={(e) => { setConfirmPassword(e.target.value); setApiError(''); }}
-                disabled={isLoading}
-              />
-              <Button type="submit" variant="primary" className="w-full !h-[52px] text-base" disabled={isLoading}>
+            <form onSubmit={handlePasswordResetSubmit} className="flex flex-col gap-5 animate-entry-3d">
+              <div className="auth-field-gesture">
+                <InputField
+                  label="New Password"
+                  id="newPassword"
+                  type="password"
+                  placeholder="Enter new password"
+                  required
+                  value={newPassword}
+                  onChange={(e) => { setNewPassword(e.target.value); setApiError(''); }}
+                  disabled={isLoading}
+                />
+              </div>
+              <div className="auth-field-gesture">
+                <InputField
+                  label="Confirm Password"
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="Confirm new password"
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => { setConfirmPassword(e.target.value); setApiError(''); }}
+                  disabled={isLoading}
+                />
+              </div>
+              <Button type="submit" variant="primary" className="w-full !h-[52px] text-base btn-action-gesture shimmer-hover" disabled={isLoading}>
                 {isLoading ? 'Resetting...' : 'Reset Password'}
               </Button>
             </form>
@@ -283,7 +343,7 @@ const ForgotPassword = () => {
           <div className="mt-8 pt-6 border-t border-shnoor-lavender">
             <p className="text-center text-sm text-shnoor-indigoMedium">
               Remember your password?{' '}
-              <Link to="/login" className="text-shnoor-indigo font-semibold hover:text-shnoor-navy transition-colors">
+              <Link to="/login" className="text-shnoor-indigo font-semibold hover:text-shnoor-navy transition-colors inline-block hover:underline">
                 Back to Sign In
               </Link>
             </p>

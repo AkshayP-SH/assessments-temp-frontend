@@ -57,6 +57,7 @@
     "vite-plugin-compression": "^0.5.1"
   },
   "optionalDependencies": {
+    "@esbuild/win32-x64": "0.28.2",
     "@rollup/rollup-linux-x64-gnu": "4.63.3",
     "@rollup/rollup-win32-x64-msvc": "4.63.3"
   }

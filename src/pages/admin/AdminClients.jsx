@@ -434,7 +434,7 @@ const CreateClientModal = ({ onClose, onCreated, subscriptionPlans = [] }) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white w-full h-auto max-h-[90vh] rounded-2xl shadow-2xl max-w-2xl flex flex-col animate-in zoom-in-95 duration-200">
+      <div className="bg-white w-full h-auto max-h-[90vh] rounded-2xl shadow-2xl max-w-2xl flex flex-col modal-3d-entrance">
         <div className="px-6 py-4 border-b border-[#D1D1E6] flex items-center justify-between rounded-t-2xl bg-white z-10 flex-shrink-0">
           <h2 className="text-lg font-bold text-gray-900">Create New Client</h2>
           <button type="button" onClick={onClose} className="text-[#9A9AC9] hover:text-gray-900 w-8 h-8 flex items-center justify-center bg-gray-50 hover:bg-gray-100 rounded-full transition-colors text-lg leading-none">✕</button>
@@ -789,7 +789,7 @@ const ClientDetailPanel = ({ client, onClose, onStatusChange, onDelete, onClient
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div className="bg-white dark:bg-[#11111d] w-full h-full sm:h-auto sm:max-h-[90vh] sm:rounded-2xl shadow-2xl sm:max-w-lg flex flex-col animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200">
+      <div className="bg-white dark:bg-[#11111d] w-full h-full sm:h-auto sm:max-h-[90vh] sm:rounded-2xl shadow-2xl sm:max-w-lg flex flex-col modal-3d-entrance">
         <div className="px-6 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between sticky top-0 bg-white dark:bg-[#11111d] z-10 flex-shrink-0">
           <div>
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">{client.company_name || client.name}</h2>
@@ -1103,7 +1103,7 @@ const AdminClients = () => {
                         <td className="px-5 py-4 text-center">
                           <button
                             onClick={() => setSelectedClient(client)}
-                            className="h-8 px-4 bg-slate-100 dark:bg-[#383863] hover:bg-slate-200 dark:hover:bg-[#403f75] text-slate-800 dark:text-white rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                            className="h-8 px-4 bg-slate-100 dark:bg-[#383863] hover:bg-slate-200 dark:hover:bg-[#403f75] text-slate-800 dark:text-white rounded-lg text-xs font-bold transition-colors cursor-pointer btn-action-gesture"
                           >
                             Manage
                           </button>

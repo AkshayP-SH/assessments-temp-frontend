@@ -1,6 +1,11 @@
-const Card = ({ children, className = '', noPadding = false }) => {
+const Card = ({ children, className = '', noPadding = false, hoverEffect = true, ...props }) => {
   return (
-    <div className={`bg-theme-card rounded-xl border border-theme-border shadow-[0_8px_30px_rgba(14,14,39,0.06)] overflow-hidden ${noPadding ? '' : 'p-6'} ${className}`}>
+    <div
+      className={`bg-theme-card rounded-xl border border-theme-border shadow-[0_8px_30px_rgba(14,14,39,0.06)] overflow-hidden ${
+        hoverEffect ? 'card-3d-lift' : ''
+      } ${noPadding ? '' : 'p-6'} ${className}`}
+      {...props}
+    >
       {children}
     </div>
   );

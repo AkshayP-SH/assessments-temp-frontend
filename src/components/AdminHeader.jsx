@@ -160,23 +160,27 @@ const AdminHeader = ({ viewAsControl, title }) => {
                 <div className="h-5 w-[1px] bg-slate-300/80 dark:bg-slate-700 mx-1" />
 
                 <button
-                  className={`h-9 px-3.5 text-xs sm:text-sm font-bold rounded-lg transition-all flex items-center justify-center relative ${location.pathname.includes('live-proctoring')
+                  className={`h-9 px-3.5 text-xs sm:text-sm font-bold rounded-lg transition-all flex items-center justify-center relative btn-action-gesture ${location.pathname.includes('live-proctoring')
                     ? 'bg-white dark:bg-[#2A2A4E] text-[#403f75] dark:text-indigo-300 shadow-xs'
                     : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/70 dark:hover:bg-slate-700/60'
                     }`}
                   onClick={() => navigate(`${basePath}/live-proctoring`)}
                 >
-                  <Video size={15} className="mr-2 text-current" />
+                  <span className="relative flex h-2 w-2 mr-2">
+                    <span className="animate-ping-slow absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                  </span>
+                  <Video size={15} className="mr-1.5 text-current icon-gesture" />
                   <span>Live Proctoring</span>
                 </button>
               </div>
 
               <button
-                className="h-10 px-4 text-xs sm:text-sm font-bold text-rose-600 dark:text-rose-400 bg-rose-50/90 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 border border-rose-200/80 dark:border-rose-800/60 rounded-xl transition-all flex items-center justify-center shadow-2xs cursor-pointer ml-2 flex-shrink-0 active:scale-98 whitespace-nowrap"
+                className="h-10 px-4 text-xs sm:text-sm font-bold text-rose-600 dark:text-rose-400 bg-rose-50/90 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 border border-rose-200/80 dark:border-rose-800/60 rounded-xl transition-all flex items-center justify-center shadow-2xs cursor-pointer ml-2 flex-shrink-0 active:scale-98 whitespace-nowrap btn-action-gesture"
                 onClick={handleLogout}
                 title="Logout from admin"
               >
-                <LogOut size={15} className="mr-1.5 text-rose-600 dark:text-rose-400" />
+                <LogOut size={15} className="mr-1.5 text-rose-600 dark:text-rose-400 icon-gesture" />
                 <span>Logout</span>
               </button>
             </div>
