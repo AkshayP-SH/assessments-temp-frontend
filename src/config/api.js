@@ -52,7 +52,11 @@ export const apiFetch = async (endpoint, options = {}) => {
     options.signal.addEventListener('abort', () => controller.abort());
   }
 
-  const timeoutId = setTimeout(() => controller.abort(), timeoutDuration);
+  let timedOut = false;
+  const timeoutId = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, timeoutDuration);
 
   try {
     const { default: apiClient } = await import('../utils/apiInterceptor');
@@ -64,6 +68,7 @@ export const apiFetch = async (endpoint, options = {}) => {
       headers: options.headers || {},
       signal: controller.signal,
       data: options.body,
+      timeout: timeoutDuration,
     };
     
     // axios throws on non-2xx statuses, but fetch doesn't
@@ -120,8 +125,15 @@ export const apiFetch = async (endpoint, options = {}) => {
 
     return response;
   } catch (error) {
-    // Catch absolute network failures (server completely off) or aborts (timeouts)
-    if (shouldHandleGlobalRedirect && (error.name === 'TypeError' || error.name === 'AbortError')) {
+    const isNetworkFailure =
+      timedOut ||
+      error?.name === 'TypeError' ||
+      error?.name === 'AbortError' ||
+      error?.code === 'ERR_NETWORK' ||
+      error?.code === 'ECONNABORTED' ||
+      error?.code === 'ETIMEDOUT';
+
+    if (shouldHandleGlobalRedirect && isNetworkFailure) {
       if (
         !endpoint.includes('/settings/public') &&
         window.location.pathname !== '/server-down' &&

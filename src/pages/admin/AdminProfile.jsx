@@ -18,7 +18,7 @@ import {
   Camera,
   Trash2
 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from 'react-toastify';
 import { apiFetch } from '../../config/api';
 
 export default function AdminProfile() {
