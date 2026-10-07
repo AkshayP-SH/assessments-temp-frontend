@@ -14,10 +14,13 @@ const EMPTY_FORM = {
 };
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
-const adminHeaders = () => ({
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${localStorage.getItem('adminToken')}`
-});
+const adminHeaders = () => {
+    const token = localStorage.getItem('adminToken') || localStorage.getItem('clientToken');
+    return {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+    };
+};
 
 const fmtDate = (iso) =>
     iso ? new Date(iso).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : '—';
@@ -162,7 +165,7 @@ export default function AdminJobOpenings({ clientId }) {
             });
             const data = await res.json();
             if (data.success) {
-                showToast('success', 'Job opening saved as draft. Press "Publish & Email" to notify students.');
+                showToast('success', 'Job opening saved as draft. Press "Publish" to activate it.');
                 setForm(EMPTY_FORM);
                 setShowForm(false);
                 fetchJobs();
@@ -177,7 +180,7 @@ export default function AdminJobOpenings({ clientId }) {
     };
 
     const handlePublish = async (id) => {
-        if (!window.confirm('This will send an email to ALL registered students. Proceed?')) return;
+        if (!window.confirm('Publish this job opening? It will become active for students.')) return;
         setPublishingId(id);
         try {
             const res = await apiFetch(`/api/job-openings/${id}/publish`, {
@@ -186,11 +189,7 @@ export default function AdminJobOpenings({ clientId }) {
             });
             const data = await res.json();
             if (data.success) {
-                const { emailsSent, emailsFailed, totalStudents } = data.stats;
-                showToast(
-                    'success',
-                    `Published! ${emailsSent}/${totalStudents} emails sent${emailsFailed > 0 ? ` (${emailsFailed} failed)` : ''}.`
-                );
+                showToast('success', 'Job opening published successfully.');
                 fetchJobs();
             } else {
                 showToast('error', data.message || 'Failed to publish.');
@@ -241,7 +240,7 @@ export default function AdminJobOpenings({ clientId }) {
                 <div className="section-header-left">
                     <h2 className="section-title">Job Openings &amp; Off-Campus Hiring</h2>
                     <p className="section-subtitle">
-                        Post new opportunities — students are notified automatically by email.
+                        Post and manage job opportunities for students.
                     </p>
                 </div>
                 <button
@@ -260,7 +259,7 @@ export default function AdminJobOpenings({ clientId }) {
                     <div className="flex items-center justify-between pb-4 mb-6 border-b border-slate-100">
                         <div>
                             <h3 className="section-title">New Job Opening</h3>
-                            <p className="section-subtitle">Fill in the opportunity details to notify students</p>
+                            <p className="section-subtitle">Fill in the opportunity details</p>
                         </div>
                         <button
                             type="button"
@@ -443,18 +442,6 @@ export default function AdminJobOpenings({ clientId }) {
                                                 <Clock size={14} className="mr-1 shrink-0" />
                                                 Deadline: {fmtDate(job.registration_deadline)}
                                             </span>
-                                            {job.is_published && (
-                                                <span className="flex items-center text-emerald-600 break-words">
-                                                    <CheckCircle size={14} className="mr-1 shrink-0" />
-                                                    {job.emails_sent ?? 0} emails sent
-                                                    {parseInt(job.emails_failed) > 0 && (
-                                                        <span className="ml-2 text-red-500 flex items-center">
-                                                            <XCircle size={14} className="mr-1 shrink-0" />
-                                                            {job.emails_failed} failed
-                                                        </span>
-                                                    )}
-                                                </span>
-                                            )}
                                         </div>
                                     </div>
 
@@ -471,7 +458,10 @@ export default function AdminJobOpenings({ clientId }) {
                                         {job.is_published && (
                                             <>
                                                 <button
-                                                    onClick={() => navigate(`/admin/job-applicants/${job.id}`)}
+                                                    onClick={() => {
+                                                        const isClient = window.location.pathname.startsWith('/client') || Boolean(clientId);
+                                                        navigate(isClient ? `/client/job-applicants/${job.id}` : `/admin/job-applicants/${job.id}`);
+                                                    }}
                                                     title="View applicants"
                                                     className="flex-1 sm:flex-none min-w-0 min-h-[40px] flex items-center justify-center gap-1.5 px-2 sm:px-4 py-2 bg-shnoor-indigo hover:bg-[#4d4d9c] text-white rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all shadow-sm"
                                                 >
@@ -494,13 +484,13 @@ export default function AdminJobOpenings({ clientId }) {
                                             <button
                                                 onClick={() => handlePublish(job.id)}
                                                 disabled={publishingId === job.id}
-                                                title="Publish & send emails"
+                                                title="Publish"
                                                 className="flex-1 sm:flex-none min-h-[40px] flex items-center justify-center gap-1.5 px-4 py-2 bg-shnoor-indigo hover:bg-shnoor-navy text-white rounded-xl text-sm font-semibold whitespace-nowrap transition-all disabled:opacity-60"
                                             >
                                                 {publishingId === job.id
                                                     ? <Loader2 size={16} className="animate-spin" />
                                                     : <Send size={16} />}
-                                                <span>{publishingId === job.id ? 'Sending…' : 'Publish & Email'}</span>
+                                                <span>{publishingId === job.id ? 'Publishing…' : 'Publish'}</span>
                                             </button>
                                         )}
 
