@@ -50,8 +50,7 @@ const TypeBadge = ({ children }) => (
 const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId, onBack }) => {
     const FALLBACK_DEFAULT_JOB_ROLE = 'General Assessment Candidate';
     const FALLBACK_DEFAULT_JOB_DESCRIPTION = 'This assessment evaluates candidate readiness across core technical and problem-solving skills relevant to the role.';
-    const [step, setStep] = useState('init'); // init, manual, bulk, success\n
-    const [toastMessage, setToastMessage] = useState('');
+    const [step, setStep] = useState('init'); // init, manual, bulk, success
 
     const showToast = (msg) => {
         alert(msg);

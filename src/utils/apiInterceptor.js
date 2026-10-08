@@ -12,17 +12,20 @@ const apiClient = axios.create({
 // Request interceptor to add auth token
 apiClient.interceptors.request.use(
   (config) => {
-    // Add admin token if available
-    const adminToken = localStorage.getItem('adminToken');
-    if (adminToken) {
-      config.headers.Authorization = `Bearer ${adminToken}`;
-    }
-    
-    // Add student token if no admin token and student token exists
-    if (!adminToken) {
-      const studentToken = localStorage.getItem('studentAuthToken');
-      if (studentToken) {
-        config.headers.Authorization = `Bearer ${studentToken}`;
+    // Only add token if Authorization header is not already set by the specific request
+    if (!config.headers.Authorization) {
+      // Add admin token if available
+      const adminToken = localStorage.getItem('adminToken');
+      if (adminToken) {
+        config.headers.Authorization = `Bearer ${adminToken}`;
+      }
+      
+      // Add student token if no admin token and student token exists
+      if (!adminToken) {
+        const studentToken = localStorage.getItem('studentAuthToken');
+        if (studentToken) {
+          config.headers.Authorization = `Bearer ${studentToken}`;
+        }
       }
     }
     

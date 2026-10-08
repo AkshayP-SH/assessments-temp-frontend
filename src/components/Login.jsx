@@ -273,6 +273,10 @@ const Login = () => {
         setApiError('Invalid email address format.');
       } else if (error.code === 'auth/too-many-requests') {
         setApiError('Too many failed login attempts. Please try again later.');
+      } else if (error.code === 'auth/network-request-failed') {
+        setApiError('Network error connecting to authentication service. Please check your internet connection.');
+      } else if (error.message === 'Network Error' || error.code === 'ERR_NETWORK' || error.name === 'TypeError' || error.message?.includes('fetch')) {
+        setApiError('Cannot connect to the server. Please ensure the backend is running.');
       } else if (error.message?.includes('Failed to fetch dynamically imported module') || error.message?.includes('Loading chunk')) {
         setApiError('Loading issue detected. Please refresh the page and try again.');
       } else {
