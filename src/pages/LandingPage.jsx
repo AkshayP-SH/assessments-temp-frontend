@@ -10,6 +10,7 @@ import { usePrefetch } from '../hooks/usePrefetch';
 import { useJsonLd } from '../hooks/useJsonLd';
 import { Mail, Phone, FileText } from 'lucide-react';
 
+
 /* ─── SVG Icon helper ─────────────────────────────────────────────────────── */
 const Icon = ({ d, cls = 'w-6 h-6', stroke = 2, fill = 'none' }) => (
   <svg className={cls} fill={fill} stroke="currentColor" strokeWidth={stroke} viewBox="0 0 24 24">
@@ -267,11 +268,15 @@ const LandingPage = () => {
           2. HERO — Platform-level intro (org + candidate)
           ══════════════════════════════════════════════════════════════════════ */}
       <section id="home" className="landing-hero bg-theme-page py-12 sm:py-20 px-4 sm:px-8 overflow-hidden relative">
+        {/* Ambient Drifting Background Accents (Respects Theme Tokens) */}
+        <div aria-hidden="true" className="absolute top-1/4 -left-28 w-96 h-96 bg-theme-accent/10 rounded-full blur-3xl pointer-events-none animate-ambient-drift" />
+        <div aria-hidden="true" className="absolute bottom-10 -right-28 w-96 h-96 bg-theme-panel/40 rounded-full blur-3xl pointer-events-none animate-ambient-drift" style={{ animationDelay: '-4.5s' }} />
+
         <div className="max-w-[1280px] mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center relative z-10">
           {/* Left — Text */}
           <div className="flex flex-col gap-6 items-center lg:items-start text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 bg-theme-panel text-theme-accent text-xs sm:text-sm font-bold px-4 py-2 rounded-full w-fit border border-theme-border shadow-xs">
-              <span className="w-2 h-2 bg-theme-accent rounded-full opacity-90" />
+            <div className="inline-flex items-center gap-2 bg-theme-panel text-theme-accent text-xs sm:text-sm font-bold px-4 py-2 rounded-full w-fit border border-theme-border shadow-xs animate-float-slow">
+              <span className="w-2 h-2 bg-theme-accent rounded-full animate-pulse-subtle opacity-90" />
               NEXT-GEN ASSESSMENT PLATFORM
             </div>
 
@@ -285,14 +290,14 @@ const LandingPage = () => {
 
             <div className="flex flex-col sm:flex-row gap-4 mt-2">
               <Link to="/register">
-                <button className="group flex items-center gap-2 bg-theme-accent hover:bg-theme-accent2 text-white text-sm font-bold px-7 py-3.5 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer">
+                <button className="group btn-action-gesture shimmer-hover flex items-center gap-2 bg-theme-accent hover:bg-theme-accent2 text-white text-sm font-bold px-7 py-3.5 rounded-xl shadow-md hover:shadow-xl transition-all cursor-pointer">
                   Get Started
-                  <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                  <svg className="w-4 h-4 transition-transform group-hover:translate-x-1.5 duration-200" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                 </button>
               </Link>
               <button
                 onClick={(e) => scrollToSection(e, '#how-it-works')}
-                className="text-sm font-bold px-7 py-3.5 rounded-xl text-theme-text bg-theme-card border-2 border-theme-border hover:border-theme-accent hover:bg-theme-panel transition-all cursor-pointer shadow-xs"
+                className="btn-action-gesture text-sm font-bold px-7 py-3.5 rounded-xl text-theme-text bg-theme-card border-2 border-theme-border hover:border-theme-accent hover:bg-theme-panel transition-all cursor-pointer shadow-xs"
               >
                 Explore Platform
               </button>
@@ -305,78 +310,80 @@ const LandingPage = () => {
                 { val: '8', label: 'Core platform capabilities' },
                 { val: '99.9%', label: 'Reliable exam operations' },
               ].map(s => (
-                <div key={s.val} className="bg-theme-card border border-theme-border rounded-2xl p-4 text-center lg:text-left shadow-xs hover:border-theme-accent/50 transition-colors">
-                  <p className="text-2xl sm:text-3xl font-extrabold text-theme-text">{s.val}</p>
+                <div key={s.val} className="bg-theme-card border border-theme-border rounded-2xl p-4 text-center lg:text-left shadow-xs hover:border-theme-accent/50 card-3d-lift shimmer-hover group transition-all">
+                  <p className="text-2xl sm:text-3xl font-extrabold text-theme-text group-hover:text-theme-accent transition-colors">{s.val}</p>
                   <p className="text-xs text-theme-muted mt-1 leading-snug font-medium">{s.label}</p>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Right — Live Platform Overview Card */}
+          {/* Right — Live Platform Overview Card (Clean Static Overview) */}
           <div className="flex justify-center lg:justify-end">
-            <div className="w-full max-w-[460px] bg-theme-hdr rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.35)] border border-white/10 overflow-hidden">
-              {/* Card header */}
-              <div className="px-6 pt-6 pb-4">
-                <p className="text-xs font-bold text-theme-auth-acc uppercase tracking-[0.2em] mb-2">LIVE PLATFORM VIEW</p>
-                <div className="flex items-start justify-between">
-<h2 className="text-xl font-extrabold text-white leading-snug pr-4">
-                    Secure assessments, real-time proctoring, and actionable results
-                  </h2>
-                  <div className="flex-shrink-0 bg-white/10 border border-white/15 rounded-xl px-3 py-2 text-center">
-                    <p className="text-[10px] text-theme-auth-acc uppercase tracking-wider font-bold">Active</p>
-                    <p className="text-[10px] text-theme-auth-acc uppercase tracking-wider font-bold">exams</p>
-                    <p className="text-xl font-extrabold text-white">12</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* For Organizations */}
-              <div className="mx-4 mb-3 bg-white/10 dark:bg-white/5 border border-white/10 rounded-xl p-4">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Icon d={ICON_ADMIN} cls="w-5 h-5 text-theme-auth-acc" />
-                  </div>
-                  <div>
-                    <p className="font-bold text-sm text-white">Organization Dashboard</p>
-                    <p className="text-xs text-slate-300">Create tests, monitor live exams, view analytics</p>
-                  </div>
-                </div>
-                <div className="flex gap-2 flex-wrap">
-                  {['Test Builder', 'Live Proctoring', 'Reports'].map(t => (
-                    <span key={t} className="text-[11px] font-semibold text-white bg-white/10 border border-white/10 px-2.5 py-1 rounded-lg">{t}</span>
-                  ))}
-                </div>
-              </div>
-
-              {/* For Candidates */}
-              <div className="mx-4 mb-3 bg-white/5 backdrop-blur rounded-xl p-4 border border-white/10">
-                <p className="text-[10px] font-bold text-theme-auth-acc uppercase tracking-[0.2em] mb-3">CANDIDATE EXPERIENCE</p>
-                <div className="flex flex-col gap-2.5">
-                  {[
-                    'Auto-assigned tests based on enrollment',
-                    'Secure fullscreen proctored exams',
-                    'Instant submission confirmation & results',
-                  ].map(item => (
-                    <div key={item} className="flex items-center gap-2.5">
-                      <div className="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center flex-shrink-0">
-                        <Icon d={CHECK} cls="w-3 h-3 text-emerald-400" stroke={3} />
-                      </div>
-                      <p className="text-sm text-white/90 font-medium">{item}</p>
+            <div className="w-full max-w-[460px]">
+              <div className="w-full bg-theme-hdr rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.35)] border border-white/10 overflow-hidden">
+                {/* Card header */}
+                <div className="px-6 pt-6 pb-4">
+                  <p className="text-xs font-bold text-theme-auth-acc uppercase tracking-[0.2em] mb-2">LIVE PLATFORM VIEW</p>
+                  <div className="flex items-start justify-between">
+                    <h2 className="text-xl font-extrabold text-white leading-snug pr-4">
+                      Secure assessments, real-time proctoring, and actionable results
+                    </h2>
+                    <div className="flex-shrink-0 bg-white/10 border border-white/15 rounded-xl px-3 py-2 text-center">
+                      <p className="text-[10px] text-theme-auth-acc uppercase tracking-wider font-bold">Active</p>
+                      <p className="text-[10px] text-theme-auth-acc uppercase tracking-wider font-bold">exams</p>
+                      <p className="text-xl font-extrabold text-white">12</p>
                     </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Security status */}
-              <div className="mx-4 mb-5 bg-white/10 dark:bg-white/5 border border-white/10 rounded-xl p-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Icon d={SHIELD} cls="w-5 h-5 text-theme-auth-acc" />
                   </div>
-                  <div>
-                    <p className="font-bold text-sm text-white">Enterprise Security</p>
-                    <p className="text-xs text-slate-300">AI proctoring • Encrypted answers • Tab detection</p>
+                </div>
+
+                {/* For Organizations */}
+                <div className="mx-4 mb-3 bg-white/10 dark:bg-white/5 border border-white/10 rounded-xl p-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Icon d={ICON_ADMIN} cls="w-5 h-5 text-theme-auth-acc" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-sm text-white">Organization Dashboard</p>
+                      <p className="text-xs text-slate-300">Create tests, monitor live exams, view analytics</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 flex-wrap">
+                    {['Test Builder', 'Live Proctoring', 'Reports'].map(t => (
+                      <span key={t} className="text-[11px] font-semibold text-white bg-white/10 border border-white/10 px-2.5 py-1 rounded-lg cursor-default">{t}</span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* For Candidates */}
+                <div className="mx-4 mb-3 bg-white/5 backdrop-blur rounded-xl p-4 border border-white/10">
+                  <p className="text-[10px] font-bold text-theme-auth-acc uppercase tracking-[0.2em] mb-3">CANDIDATE EXPERIENCE</p>
+                  <div className="flex flex-col gap-2.5">
+                    {[
+                      'Auto-assigned tests based on enrollment',
+                      'Secure fullscreen proctored exams',
+                      'Instant submission confirmation & results',
+                    ].map(item => (
+                      <div key={item} className="flex items-center gap-2.5">
+                        <div className="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center flex-shrink-0">
+                          <Icon d={CHECK} cls="w-3 h-3 text-emerald-400" stroke={3} />
+                        </div>
+                        <p className="text-sm text-white/90 font-medium">{item}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Security status */}
+                <div className="mx-4 mb-5 bg-white/10 dark:bg-white/5 border border-white/10 rounded-xl p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Icon d={SHIELD} cls="w-5 h-5 text-theme-auth-acc" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-sm text-white">Enterprise Security</p>
+                      <p className="text-xs text-slate-300">AI proctoring • Encrypted answers • Tab detection</p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -493,14 +500,14 @@ const LandingPage = () => {
                 desc: 'View real-time leaderboards, detailed performance reports, and AI-flagged violations to make data-driven hiring decisions.',
               },
             ].map(step => (
-              <div key={step.num} className="bg-theme-card border border-theme-border rounded-2xl p-8 hover:shadow-lg hover:border-theme-accent/50 hover:-translate-y-1 transition-all duration-300">
+              <div key={step.num} className="bg-theme-card border border-theme-border rounded-2xl p-8 hover:shadow-xl hover:border-theme-accent/50 card-3d-lift shimmer-hover group transition-all duration-300">
                 <div className="flex items-center justify-between mb-6">
                   <div className="w-12 h-12 bg-theme-panel border border-theme-border rounded-xl flex items-center justify-center">
-                    <Icon d={step.icon} cls="w-6 h-6 text-theme-accent" />
+                    <Icon d={step.icon} cls="w-6 h-6 text-theme-accent icon-gesture" />
                   </div>
-                  <span className="text-2xl font-extrabold text-theme-muted/50">{step.num}</span>
+                  <span className="text-2xl font-extrabold text-theme-muted/50 group-hover:text-theme-accent transition-colors duration-200">{step.num}</span>
                 </div>
-                <h3 className="text-xl font-extrabold text-theme-text mb-3">{step.title}</h3>
+                <h3 className="text-xl font-extrabold text-theme-text mb-3 group-hover:text-theme-accent transition-colors">{step.title}</h3>
                 <p className="text-theme-muted leading-relaxed text-sm">{step.desc}</p>
               </div>
             ))}
@@ -529,8 +536,8 @@ const LandingPage = () => {
                   'Designed to keep the candidate experience simple while giving recruiters full control.',
                   'Consistent workflows for test creation, proctoring, evaluation, and hiring decisions.',
                 ].map((item, i) => (
-                  <div key={i} className="flex items-start gap-3.5 bg-theme-card border border-theme-border rounded-xl p-4 shadow-xs hover:border-theme-accent/50 transition-colors">
-                    <div className="w-5 h-5 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <div key={i} className="flex items-start gap-3.5 bg-theme-card border border-theme-border rounded-xl p-4 shadow-xs hover:border-theme-accent/50 card-3d-subtle hover:translate-x-1.5 transition-all group">
+                    <div className="w-5 h-5 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center flex-shrink-0 mt-0.5 group-hover:scale-110 transition-transform">
                       <Icon d={CHECK} cls="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" stroke={3} />
                     </div>
                     <p className="text-sm font-medium text-theme-text leading-relaxed">{item}</p>
@@ -558,11 +565,11 @@ const LandingPage = () => {
                   desc: 'Automated grading, performance analytics, proctoring violation reports, and exportable results for hiring decisions.',
                 },
               ].map(card => (
-                <div key={card.title} className="bg-theme-card border border-theme-border rounded-2xl p-6 hover:shadow-lg hover:border-theme-accent/50 transition-all duration-300 flex flex-col">
+                <div key={card.title} className="bg-theme-card border border-theme-border rounded-2xl p-6 hover:shadow-xl hover:border-theme-accent/50 card-3d-lift shimmer-hover group transition-all duration-300 flex flex-col">
                   <div className="w-12 h-12 bg-theme-panel border border-theme-border rounded-xl flex items-center justify-center mb-5">
-                    <Icon d={card.icon} cls="w-6 h-6 text-theme-accent" />
+                    <Icon d={card.icon} cls="w-6 h-6 text-theme-accent icon-gesture" />
                   </div>
-                  <h3 className="font-bold text-base text-theme-text mb-2">{card.title}</h3>
+                  <h3 className="font-bold text-base text-theme-text mb-2 group-hover:text-theme-accent transition-colors">{card.title}</h3>
                   <p className="text-sm text-theme-muted leading-relaxed">{card.desc}</p>
                 </div>
               ))}
@@ -588,11 +595,11 @@ const LandingPage = () => {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {FEATURES.map(f => (
-              <div key={f.title} className="bg-theme-card border border-theme-border rounded-2xl p-6 hover:shadow-lg hover:border-theme-accent/50 hover:-translate-y-1 transition-all duration-300 flex flex-col">
+              <div key={f.title} className="bg-theme-card border border-theme-border rounded-2xl p-6 hover:shadow-xl hover:border-theme-accent/50 card-3d-lift shimmer-hover group transition-all duration-300 flex flex-col">
                 <div className="w-12 h-12 bg-theme-panel border border-theme-border rounded-xl flex items-center justify-center mb-5">
-                  <Icon d={f.icon} cls="w-6 h-6 text-theme-accent" />
+                  <Icon d={f.icon} cls="w-6 h-6 text-theme-accent icon-gesture" />
                 </div>
-                <h3 className="font-bold text-base text-theme-text mb-2">{f.title}</h3>
+                <h3 className="font-bold text-base text-theme-text mb-2 group-hover:text-theme-accent transition-colors">{f.title}</h3>
                 <p className="text-sm text-theme-muted leading-relaxed">{f.desc}</p>
               </div>
             ))}
@@ -736,9 +743,9 @@ const LandingPage = () => {
                 const isPremium = plan.name.toLowerCase().includes('premium') && !plan.name.toLowerCase().includes('super');
                 const isSuper = plan.name.toLowerCase().includes('super');
                 return (
-                  <div key={plan.id} className={`rounded-2xl p-8 flex flex-col relative transition-transform duration-300 hover:-translate-y-1 ${isPremium ? 'bg-theme-accent text-white scale-100 md:scale-105 shadow-2xl z-10 border border-white/20' : 'bg-theme-card text-theme-text border border-theme-border shadow-lg'}`}>
+                  <div key={plan.id} className={`rounded-2xl p-8 flex flex-col relative card-3d-lift shimmer-hover group transition-all duration-300 ${isPremium ? 'bg-theme-accent text-white scale-100 md:scale-105 shadow-2xl z-10 border border-white/20' : 'bg-theme-card text-theme-text border border-theme-border shadow-lg'}`}>
                     {isPremium && (
-                      <div className="absolute top-0 right-0 bg-yellow-400 text-yellow-950 text-xs font-bold px-3 py-1 rounded-bl-xl rounded-tr-xl flex items-center gap-1 shadow-xs">
+                      <div className="absolute top-0 right-0 bg-yellow-400 text-yellow-950 text-xs font-bold px-3 py-1 rounded-bl-xl rounded-tr-xl flex items-center gap-1 shadow-xs animate-pulse-subtle">
                         <Icon d={STAR} cls="w-3 h-3" fill="currentColor" stroke={0} /> Most Popular
                       </div>
                     )}
@@ -751,13 +758,13 @@ const LandingPage = () => {
                     <ul className="flex flex-col gap-3.5 mb-8 flex-1">
                       {(plan.features || []).map((f, i) => (
                         <li key={i} className={`flex items-center gap-3 text-sm font-medium ${isPremium ? 'text-white' : 'text-theme-text'}`}>
-                          <Icon d={CHECK} cls={`w-5 h-5 flex-shrink-0 ${isPremium ? 'text-yellow-400' : 'text-emerald-500'}`} stroke={3} />
+                          <Icon d={CHECK} cls={`w-5 h-5 flex-shrink-0 icon-gesture ${isPremium ? 'text-yellow-400' : 'text-emerald-500'}`} stroke={3} />
                           {f}
                         </li>
                       ))}
                     </ul>
                     <Link to="/register-organisation">
-                      <button className={`w-full h-[50px] font-bold rounded-xl transition-all duration-200 cursor-pointer ${isPremium ? 'bg-white text-theme-accent hover:bg-slate-100 shadow-md' : 'bg-theme-accent hover:bg-theme-accent2 text-white shadow-sm'}`}>
+                      <button className={`w-full h-[50px] font-bold rounded-xl btn-action-gesture transition-all duration-200 cursor-pointer ${isPremium ? 'bg-white text-theme-accent hover:bg-slate-100 shadow-md hover:shadow-lg' : 'bg-theme-accent hover:bg-theme-accent2 text-white shadow-sm'}`}>
                         {isSuper ? 'Contact Sales' : isPremium ? 'Get Premium' : 'Get Started'}
                       </button>
                     </Link>

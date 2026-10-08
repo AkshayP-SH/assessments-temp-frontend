@@ -488,7 +488,7 @@ export default function MyApplications({ isEmbedded = false, onBrowseJobs }) {
                                                                                 {!test.is_completed ? (
                                                                                     <button
                                                                                         onClick={(e) => { e.stopPropagation(); handleTakeTest(test.test_id, app.application_id || app.id); }}
-                                                                                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-xs font-bold transition-all shadow-sm"
+                                                                                        className="w-full sm:w-auto flex justify-center items-center space-x-2 px-4 py-2 bg-shnoor-indigo hover:bg-[#4d4d9c] text-white rounded-lg font-bold transition-all shadow-sm text-sm shrink-0 mt-2 sm:mt-0 btn-action-gesture"
                                                                                     >
                                                                                         Take Test
                                                                                     </button>

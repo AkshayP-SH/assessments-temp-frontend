@@ -23,6 +23,9 @@ const AdminJobOpenings = lazy(() => import('../../components/admin/AdminJobOpeni
 const AdminReports = lazy(() => import('./AdminReports'));
 const SubscriptionPlansSettings = lazy(() => import('./SubscriptionPlansSettings'));
 const AdminProfile = lazy(() => import('./AdminProfile'));
+const AdminSettings = lazy(() => import('./AdminSettings'));
+const AdminClients = lazy(() => import('./AdminClients'));
+const StudentMessages = lazy(() => import('./StudentMessages'));
 
 // Modular Admin Components
 import ExamsTab from './ExamsTab';
@@ -44,7 +47,19 @@ const AdminDashboard = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const [activeTab, setActiveTab] = useState('exams');
+  const [activeTab, setActiveTab] = useState(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get('tab') || location.state?.activeTab || 'exams';
+  });
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tabParam = params.get('tab');
+    if (tabParam && tabParam !== activeTab) {
+      setActiveTab(tabParam);
+    }
+  }, [location.search]);
+
   const [showCreateTest, setShowCreateTest] = useState(false);
   const [editingTest, setEditingTest] = useState(null);
   const [selectedExamId, setSelectedExamId] = useState(null);
@@ -242,11 +257,11 @@ const AdminDashboard = () => {
     { id: 'violations', label: 'Violations', icon: ShieldAlert },
     { id: 'interviews', label: 'Interviews', icon: Video },
     { id: 'job-openings', label: 'Job Openings', icon: Briefcase },
-    { id: 'messages', label: 'Messages', icon: MessageSquare, isRoute: true, path: `${basePath}/student-messages`, badge: unreadMessageCount },
-    ...(!isClientAdmin ? [{ id: 'clients', label: 'Clients', icon: Building2, isRoute: true, path: '/admin/clients' }] : []),
+    { id: 'messages', label: 'Messages', icon: MessageSquare, badge: unreadMessageCount },
+    ...(!isClientAdmin ? [{ id: 'clients', label: 'Clients', icon: Building2 }] : []),
     ...(isSuperAdmin ? [{ id: 'subscription-plans', label: 'Subscription Plans', icon: CreditCard }] : []),
     { id: 'profile', label: 'My Profile', icon: User },
-    { id: 'settings', label: 'Settings', icon: Settings, isRoute: true, path: `${basePath}/settings` }
+    { id: 'settings', label: 'Settings', icon: Settings }
   ], [basePath, isClientAdmin, isSuperAdmin, unreadMessageCount]);
 
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(() => {
@@ -2266,11 +2281,13 @@ className="p-0.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-sl
                             if (tab.isRoute) {
                               navigate(tab.path);
                             } else {
+                              if (selectedExamId) setSelectedExamId(null);
+                              if (showCreateTest) setShowCreateTest(false);
                               setActiveTab(tab.id);
                             }
                           }}
-                          className={`flex items-center h-11 px-3 w-full rounded-xl transition-all duration-200 cursor-pointer relative group/item ${isActive
-                            ? 'bg-gradient-to-r from-[#403f75] to-[#57569b] text-white font-bold shadow-md shadow-[#403f75]/25'
+                          className={`flex items-center h-11 px-3 w-full rounded-xl nav-gesture-item cursor-pointer relative group/item ${isActive
+                            ? 'bg-gradient-to-r from-[#403f75] to-[#57569b] text-white font-bold shadow-md shadow-[#403f75]/25 translate-x-1'
                             : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/90 dark:hover:bg-slate-800/80'
                             }`}
                           title={!isExpanded ? tab.label : undefined}
@@ -2278,11 +2295,11 @@ className="p-0.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-sl
                           <div className="w-6 h-6 flex items-center justify-center flex-shrink-0 relative">
                             <Icon
                               size={19}
-                              className={`transition-transform duration-150 ${isActive ? 'text-white' : 'text-slate-500 dark:text-slate-400 group-hover/item:text-slate-800 dark:group-hover/item:text-white'
+                              className={`transition-transform duration-200 ${isActive ? 'text-white scale-110' : 'text-slate-500 dark:text-slate-400 group-hover/item:text-slate-800 dark:group-hover/item:text-white group-hover/item:scale-110 group-hover/item:-rotate-3'
                                 }`}
                             />
                             {tab.badge > 0 && !isExpanded && (
-                              <span className="absolute -top-1 -right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white dark:ring-[#1A1A32]" />
+                              <span className="absolute -top-1 -right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white dark:ring-[#1A1A32] animate-pulse-subtle" />
                             )}
                           </div>
                           <span
@@ -2291,7 +2308,7 @@ className="p-0.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-sl
                           >
                             <span className="truncate">{tab.label}</span>
                             {tab.badge > 0 && (
-                              <span className="ml-1.5 px-1.5 py-0.2 bg-red-500 text-white text-[10px] font-black rounded-full flex-shrink-0">
+                              <span className="ml-1.5 px-1.5 py-0.2 bg-red-500 text-white text-[10px] font-black rounded-full flex-shrink-0 animate-pulse-subtle">
                                 {tab.badge > 99 ? '99+' : tab.badge}
                               </span>
                             )}
@@ -2316,24 +2333,26 @@ className="p-0.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-sl
                             if (tab.isRoute) {
                               navigate(tab.path);
                             } else {
+                              if (selectedExamId) setSelectedExamId(null);
+                              if (showCreateTest) setShowCreateTest(false);
                               setActiveTab(tab.id);
                             }
                           }}
-                          className={`group inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-[13px] font-semibold rounded-xl transition-all duration-150 whitespace-nowrap flex-shrink-0 cursor-pointer ${isActive
-                            ? 'bg-gradient-to-r from-[#403f75] to-[#57569b] text-white font-bold shadow-xs'
+                          className={`group inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-[13px] font-semibold rounded-xl nav-gesture-item whitespace-nowrap flex-shrink-0 cursor-pointer ${isActive
+                            ? 'bg-gradient-to-r from-[#403f75] to-[#57569b] text-white font-bold shadow-md shadow-[#403f75]/20 scale-[1.02]'
                             : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/90 dark:hover:bg-slate-800/70'
                             }`}
                         >
                           <Icon
                             size={15}
-                            className={`flex-shrink-0 transition-transform duration-150 group-hover:scale-105 ${isActive
+                            className={`flex-shrink-0 transition-transform duration-200 group-hover:scale-110 group-hover:rotate-3 ${isActive
                               ? 'text-white'
                               : 'text-slate-500 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-white'
                               }`}
                           />
                           <span>{tab.label}</span>
                           {tab.badge > 0 && (
-                            <span className="px-1.5 py-0.2 bg-red-500 text-white text-[10px] font-black rounded-full">
+                            <span className="px-1.5 py-0.2 bg-red-500 text-white text-[10px] font-black rounded-full animate-pulse-subtle">
                               {tab.badge > 99 ? '99+' : tab.badge}
                             </span>
                           )}
@@ -2524,6 +2543,27 @@ className="p-0.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-sl
                 {activeTab === 'profile' && (
                   <div className="animate-fade-in">
                     <AdminProfile />
+                  </div>
+                )}
+
+                {/* Messages Tab */}
+                {activeTab === 'messages' && (
+                  <div className="animate-fade-in">
+                    <StudentMessages isEmbedded={true} />
+                  </div>
+                )}
+
+                {/* Clients Management Tab */}
+                {activeTab === 'clients' && !isClientAdmin && (
+                  <div className="animate-fade-in">
+                    <AdminClients isEmbedded={true} />
+                  </div>
+                )}
+
+                {/* Settings Tab */}
+                {activeTab === 'settings' && (
+                  <div className="animate-fade-in">
+                    <AdminSettings isEmbedded={true} />
                   </div>
                 )}
               </>
