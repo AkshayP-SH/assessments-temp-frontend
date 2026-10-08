@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Upload, FileText, Plus, Save, Trash2, ArrowLeft, CheckCircle, AlertCircle, Loader2, Pencil, Eye, AlignLeft, List, Code } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import { toast } from 'react-toastify';
 import { apiFetch } from '../../config/api';
 import CodingQuestionSelector from './CodingQuestionSelector';
 import TestInitStep from './TestInitStep';
@@ -52,8 +53,14 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId, onBack 
     const FALLBACK_DEFAULT_JOB_DESCRIPTION = 'This assessment evaluates candidate readiness across core technical and problem-solving skills relevant to the role.';
     const [step, setStep] = useState('init'); // init, manual, bulk, success
 
-    const showToast = (msg) => {
-        alert(msg);
+    const showToast = (msg, type = 'error') => {
+        if (type === 'success') {
+            toast.success(msg);
+        } else if (type === 'info') {
+            toast.info(msg);
+        } else {
+            toast.error(msg);
+        }
     };
 
     const [testTitle, setTestTitle] = useState('');
@@ -407,7 +414,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId, onBack 
         setBankSelectorKey((k) => k + 1);
 
         if (converted.length < selectedBankQuestions.length) {
-            showToast(`Added ${converted.length} question(s) to the list. ${selectedBankQuestions.length - converted.length} duplicate(s) skipped.`);
+            showToast(`Added ${converted.length} question(s) to the list. ${selectedBankQuestions.length - converted.length} duplicate(s) skipped.`, 'info');
         }
     };
 
@@ -526,7 +533,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId, onBack 
         }
 
         if (newSelections.length < selectedQuestions.length) {
-            showToast(`${selectedQuestions.length - newSelections.length} duplicate question(s) were skipped.`);
+            showToast(`${selectedQuestions.length - newSelections.length} duplicate question(s) were skipped.`, 'info');
         }
 
         const fetchQuestionDetails = async () => {
@@ -667,7 +674,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId, onBack 
                         }
                     }
 
-                    showToast('Test updated successfully!');
+                    showToast('Test updated successfully!', 'success');
                     setViewMode(true);
                     setStep('init');
                     if (onSaved) onSaved();
@@ -857,7 +864,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId, onBack 
                         }
                     }
 
-                    showToast(`Questions uploaded successfully! ${data.questionsCount} questions added. Click "Save Changes" to save.`);
+                    showToast(`Questions uploaded successfully! ${data.questionsCount} questions added. Click "Save Changes" to save.`, 'success');
 
                     const testResponse = await fetch(`${cleanBaseUrl}/api/tests/${uploadedTestId}`, {
                         headers: {
@@ -884,7 +891,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId, onBack 
                 const parsed = await parseQuestionsFile(file);
 
                 if (parsed.length === 0) {
-                    alert('No valid questions found in the file. Each row needs Question, OptionA, OptionB and CorrectOption.');
+                    showToast('No valid questions found in the file. Each row needs Question, OptionA, OptionB and CorrectOption.');
                     return;
                 }
 
@@ -916,7 +923,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId, onBack 
             const data = await response.json();
 
             if (response.ok && data.success) {
-                showToast(`Test "${uploadedTestName}" published successfully! Students can now see it.`);
+                showToast(`Test "${uploadedTestName}" published successfully! Students can now see it.`, 'success');
                 resetForm();
                 if (onComplete) onComplete(data.test);
             } else {
