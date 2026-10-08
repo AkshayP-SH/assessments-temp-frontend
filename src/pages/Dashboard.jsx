@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { LogOut, Clock, BookOpen, AlertCircle, FileText, X, Video, Briefcase, ArrowRight } from 'lucide-react';
 import ExamSearchFilter from '../components/ExamSearchFilter';
@@ -14,7 +14,7 @@ import { clearStorageKeepTheme } from '../utils/theme';
 import { apiFetch } from '../config/api';
 import { useSEO } from '../hooks/useSEO';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { io } from 'socket.io-client';
+import { getNotificationSocket } from '../services/notificationSocket';
 const STUDENT_DASHBOARD_TABS = ['tests', 'interviews', 'job-board', 'my-applications', 'profile'];
 
 const Dashboard = () => {
@@ -25,31 +25,34 @@ const Dashboard = () => {
   });
 
   const navigate = useNavigate();
+  const location = useLocation();
   const [studentName, setStudentName] = useState('');
   const [studentId, setStudentId] = useState('');
   const [institute, setInstitute] = useState('');
   const queryClient = useQueryClient();
 
+  // Shared, token-authenticated socket (also feeds the header bell)
   useEffect(() => {
     const studentId = localStorage.getItem('studentId');
-    if (!studentId) return;
+    const socket = getNotificationSocket(localStorage.getItem('studentAuthToken'));
+    if (!studentId || !socket) return undefined;
 
-    const socketUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? window.location.origin : 'http://localhost:5000');
-    const socket = io(socketUrl, {
-      transports: ['polling', 'websocket'],
-    });
+    const joinDashboard = () => socket.emit('student:join-dashboard', { studentId });
+    const refreshTests = () => queryClient.invalidateQueries({ queryKey: ['studentTests'] });
+    const handleNotification = (n) => {
+      if (n?.type?.startsWith('test.') || n?.type === 'job.test_linked' || n?.refresh) refreshTests();
+    };
 
-    socket.on('connect', () => {
-      socket.emit('student:join-dashboard', { studentId });
-    });
+    socket.on('connect', joinDashboard);
+    socket.on('test:assigned', refreshTests);
+    socket.on('notification:new', handleNotification);
+    if (socket.connected) joinDashboard();
 
-    socket.on('test:assigned', () => {
-      // Refresh the queries to get new tests
-      queryClient.invalidateQueries(['studentTests']);
-    });
-
+    // Only detach our handlers: the socket is shared with the notification bell
     return () => {
-      socket.disconnect();
+      socket.off('connect', joinDashboard);
+      socket.off('test:assigned', refreshTests);
+      socket.off('notification:new', handleNotification);
     };
   }, [queryClient]);
 
@@ -57,9 +60,25 @@ const Dashboard = () => {
   const [showJobModal, setShowJobModal] = useState(false);
   const [selectedJobRoleIndex, setSelectedJobRoleIndex] = useState(0);
   const [activeTab, setActiveTab] = useState(() => {
+    const urlTab = new URLSearchParams(window.location.search).get('tab');
+    if (STUDENT_DASHBOARD_TABS.includes(urlTab)) return urlTab;
     const savedTab = localStorage.getItem('studentDashboardTab');
     return STUDENT_DASHBOARD_TABS.includes(savedTab) ? savedTab : 'tests';
   });
+
+  // Deep links from notifications: /dashboard?tab=<tab> and /dashboard?support=open
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const urlTab = params.get('tab');
+    if (STUDENT_DASHBOARD_TABS.includes(urlTab)) setActiveTab(urlTab);
+    if (params.get('support') === 'open') {
+      // Give the support widget a moment to register its listener. Not cleared on
+      // cleanup: the URL cleanup below re-runs this effect before the timer fires.
+      setTimeout(() => window.dispatchEvent(new Event('student-support:open')), 300);
+    }
+    // Drop the one-shot params so refresh/back don't re-trigger them
+    if (urlTab || params.get('support')) navigate('/dashboard', { replace: true });
+  }, [location.search, navigate]);
 
   // Search, Filter, Sort States
   const [searchTerm, setSearchTerm] = useState('');
@@ -400,7 +419,6 @@ const Dashboard = () => {
         studentId={studentId}
         institute={institute}
         onLogout={handleLogout}
-        showNotifications
       />
 
       {/* Main content */}

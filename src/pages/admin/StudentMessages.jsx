@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Mail, MailOpen, Trash2, ChevronDown, RefreshCw, CheckCheck, User, AlertCircle, X, Send, Building, MessageCircle, Paperclip, Smile, CheckCircle, Clock, BarChart3, TrendingUp, ThumbsUp, ThumbsDown, Star } from 'lucide-react';
 import AdminLayout from '../../components/AdminLayout';
 import { useSupportSocket } from '../../hooks/useSupportSocket';
@@ -17,6 +17,8 @@ const EMOJI_OPTIONS = [
 
 const StudentMessages = ({ isEmbedded = false }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const deepLinkedStudentRef = useRef(null);
   const [messages, setMessages] = useState([]);
   const [colleges, setColleges] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -410,6 +412,16 @@ const StudentMessages = ({ isEmbedded = false }) => {
     markConversationAsRead(msg);
     fetchConversationThread(msg.id);
   };
+
+  // Notification deep link: ?student=<roll number> opens that conversation once loaded
+  useEffect(() => {
+    const target = new URLSearchParams(location.search).get('student');
+    if (!target || deepLinkedStudentRef.current === target || messages.length === 0) return;
+    const thread = messages.find((m) => String(m.student_id) === target);
+    if (!thread) return;
+    deepLinkedStudentRef.current = target;
+    if (selectedMessage?.student_id !== thread.student_id) handleSelectMessage(thread);
+  }, [location.search, messages]);
 
   const openImageModal = (imagePath) => {
     setImageUrl(`${API_URL}${imagePath}`);
