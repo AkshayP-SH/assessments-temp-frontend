@@ -33,7 +33,9 @@ export const clearStorageKeepTheme = () => {
   if (typeof window === 'undefined') return;
   const appTheme = localStorage.getItem('app-theme');
   const shnoorTheme = localStorage.getItem('shnoor-theme');
+  const studentJobApplications = localStorage.getItem('student_job_applications');
   localStorage.clear();
   if (appTheme) localStorage.setItem('app-theme', appTheme);
   if (shnoorTheme) localStorage.setItem('shnoor-theme', shnoorTheme);
+  if (studentJobApplications) localStorage.setItem('student_job_applications', studentJobApplications);
 };

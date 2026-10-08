@@ -83,6 +83,7 @@ int main() {
   const [showTabWarning, setShowTabWarning] = useState(false);
   const [initialTimeRemaining, setInitialTimeRemaining] = useState(3600);
   const [hasStarted, setHasStarted] = useState(false);
+  const [timeoutSubmissionStarted, setTimeoutSubmissionStarted] = useState(false);
   const [testDetails, setTestDetails] = useState(null);
   const [currentAIViolation, setCurrentAIViolation] = useState(null);
   const [aiViolationCount, setAiViolationCount] = useState(0);
@@ -174,6 +175,7 @@ int main() {
   }, []);
 
   const submitTest = useCallback(async (reason = 'manual') => {
+    if (isSubmitting) return;
     setIsSubmitting(true);
     stopTimer();
     stopProctoring();
@@ -195,12 +197,13 @@ int main() {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
+      // Submit to backend - include studentId so backend can skip token validation
       const response = await apiFetch('api/student/submit-exam', {
         method: 'POST',
         headers: headers,
         body: JSON.stringify({
           testId: testId,
-          studentId: studentId,
+          studentId: studentId, // Send student ID for progress-based auth
           applicationId: applicationId ? parseInt(applicationId, 10) : null,
           answers: answers,
           submissionReason: reason,
@@ -209,6 +212,7 @@ int main() {
         })
       });
 
+      console.log('Response status:', response.status);
       const data = await response.json();
       console.log('Response data:', data);
 
@@ -231,18 +235,19 @@ int main() {
         setIsSubmitting(false);
         alert('Failed to submit exam: ' + data.message);
       }
-    } catch (err) {
+    } catch (error) {
       setIsSubmitting(false);
-      console.error('Error submitting exam:', err);
+      console.error('Error submitting exam:', error);
       alert('Error submitting exam. Please try again.');
     }
-  }, [answers, warningCount, timeLeft, stopTimer, navigate, stopProctoring]);
+  }, [answers, warningCount, timeLeft, stopTimer, navigate, stopProctoring, isSubmitting]);
 
   useEffect(() => {
-    if (timeLeft === 0 && hasStarted) {
-      submitTest('time_up');
+    if (timeLeft === 0 && hasStarted && !timeoutSubmissionStarted) {
+      setTimeoutSubmissionStarted(true);
+      submitTest('timeout');
     }
-  }, [timeLeft, submitTest, hasStarted]);
+  }, [timeLeft, submitTest, hasStarted, timeoutSubmissionStarted]);
 
   const handleTabSwitch = useCallback((count, max) => {
     if (!hasStarted) {
@@ -452,7 +457,7 @@ int main() {
             setWarningCount(data.savedProgress.warningCount || 0);
 
             // Set time remaining from saved progress (in seconds)
-            if (data.savedProgress && data.savedProgress.timeRemaining) {
+            if (data.savedProgress.timeRemaining !== null && data.savedProgress.timeRemaining !== undefined) {
               setInitialTimeRemaining(data.savedProgress.timeRemaining);
             } else {
               setInitialTimeRemaining(duration * 60);

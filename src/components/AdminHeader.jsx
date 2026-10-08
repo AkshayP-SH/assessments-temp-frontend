@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Video, LogOut, Settings, MessageSquare, X, Menu, Building2, Bell } from 'lucide-react';
+import { Video, LogOut, Settings, MessageSquare, X, Menu, Building2, Bell, Briefcase } from 'lucide-react';
 import Button from './Button';
 import { useSupportSocket } from '../hooks/useSupportSocket';
 import { API_URL } from '../config/api';
@@ -445,16 +445,27 @@ const AdminHeader = ({ viewAsControl, title }) => {
             className="bg-white rounded-xl shadow-2xl border border-gray-100 p-4 max-w-sm cursor-pointer hover:shadow-xl transition-shadow"
             onClick={() => {
               setToastNotification(null);
-              navigate(`${basePath}/student-messages`);
+              if (toastNotification.type === 'job-application') {
+                navigate(`${basePath}/job-applicants`);
+              } else {
+                navigate(`${basePath}/student-messages`);
+              }
             }}
           >
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 bg-shnoor-indigo/10 rounded-full flex items-center justify-center flex-shrink-0">
-                <MessageSquare size={18} className="text-shnoor-indigo" />
+                {toastNotification.type === 'job-application' ? (
+                  <Briefcase size={18} className="text-shnoor-indigo" />
+                ) : (
+                  <MessageSquare size={18} className="text-shnoor-indigo" />
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-shnoor-navy">
-                  New Message from {toastNotification.studentName || 'Student'}
+                  {toastNotification.type === 'job-application' 
+                    ? `New Application from ${toastNotification.studentName || 'Student'}`
+                    : `New Message from ${toastNotification.studentName || 'Student'}`
+                  }
                 </p>
                 <p className="text-xs text-gray-600 line-clamp-2 mt-1">
                   {toastNotification.messagePreview}

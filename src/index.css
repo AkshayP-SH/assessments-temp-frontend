@@ -718,9 +718,9 @@
 
 /* Admin Dashboard - Search & Filter Bar */
 .admin-search-filter-bar {
-  background-color: #FFFFFF;
+  background-color: rgb(var(--theme-card));
   border-radius: 0.875rem;
-  border: 1px solid #E2E8F0;
+  border: 1px solid rgb(var(--theme-border));
   padding: 0.625rem 0.875rem;
   margin-bottom: 1.25rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
@@ -764,18 +764,18 @@
   border: 1px solid transparent;
   background-color: transparent;
   font-size: 0.875rem;
-  color: #0F172A;
+  color: rgb(var(--theme-text));
   outline: none;
   transition: all 0.2s ease;
 }
 
 .admin-search-input::placeholder {
-  color: #94A3B8;
+  color: rgb(var(--theme-text-muted));
 }
 
 .admin-search-input:focus {
-  background-color: #F8FAFC;
-  border-color: #E2E8F0;
+  background-color: rgb(var(--theme-panel));
+  border-color: rgb(var(--theme-accent));
 }
 
 .admin-filter-controls {
@@ -792,9 +792,9 @@
   height: 2.375rem;
   padding: 0 0.875rem;
   border-radius: 0.625rem;
-  border: 1px solid #E2E8F0;
-  background-color: #FFFFFF;
-  color: #334155;
+  border: 1px solid rgb(var(--theme-border));
+  background-color: rgb(var(--theme-card));
+  color: rgb(var(--theme-text));
   font-size: 0.8125rem;
   font-weight: 500;
   cursor: pointer;
@@ -803,8 +803,8 @@
 }
 
 .admin-dropdown-btn:hover {
-  border-color: #CBD5E1;
-  background-color: #F8FAFC;
+  border-color: rgb(var(--theme-accent));
+  background-color: rgb(var(--theme-panel));
 }
 
 .admin-filter-btn {
@@ -814,9 +814,9 @@
   height: 2.375rem;
   padding: 0 0.875rem;
   border-radius: 0.625rem;
-  border: 1px solid #E2E8F0;
-  background-color: #FFFFFF;
-  color: #334155;
+  border: 1px solid rgb(var(--theme-border));
+  background-color: rgb(var(--theme-card));
+  color: rgb(var(--theme-text));
   font-size: 0.8125rem;
   font-weight: 500;
   cursor: pointer;
@@ -825,18 +825,18 @@
 }
 
 .admin-filter-btn:hover {
-  border-color: #CBD5E1;
-  background-color: #F8FAFC;
+  border-color: rgb(var(--theme-accent));
+  background-color: rgb(var(--theme-panel));
 }
 
 .admin-filter-btn-active {
-  background-color: #44448E;
+  background-color: rgb(var(--theme-accent));
   color: #FFFFFF;
-  border-color: #44448E;
+  border-color: rgb(var(--theme-accent));
 }
 
 .admin-filter-btn-active:hover {
-  background-color: #383878;
+  background-color: rgb(var(--theme-accent));
   color: #FFFFFF;
 }
 
@@ -2334,110 +2334,110 @@ html[data-theme='dark'] option {
   border-color: rgb(var(--theme-border)) !important;
 }
 
-:is(html[data-theme='green'], html[data-theme='leaf']) .admin-header {
+:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) .admin-header {
   background-color: rgb(var(--theme-header)) !important;
   border-bottom-color: rgb(var(--theme-header-border)) !important;
 }
 
-:is(html[data-theme='green'], html[data-theme='leaf']) .admin-header .admin-header-title {
+:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) .admin-header .admin-header-title {
   color: #FFFFFF !important;
 }
 
-:is(html[data-theme='green'], html[data-theme='leaf']) :is(.admin-exams-title, .welcome-banner-title) {
+:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) :is(.admin-exams-title, .welcome-banner-title) {
   color: rgb(var(--theme-text)) !important;
 }
 
-:is(html[data-theme='green'], html[data-theme='leaf']) .admin-header .admin-header-subtitle {
+:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) .admin-header .admin-header-subtitle {
   color: rgb(var(--theme-contrast-muted, var(--theme-accent))) !important;
 }
 
-:is(html[data-theme='green'], html[data-theme='leaf']) :is(.admin-exams-subtitle, .welcome-banner-subtitle) {
+:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) :is(.admin-exams-subtitle, .welcome-banner-subtitle) {
   color: rgb(var(--theme-text-muted)) !important;
 }
 
-:is(html[data-theme='green'], html[data-theme='leaf']) .admin-header-btn {
+:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) .admin-header-btn {
   background-color: rgba(255, 255, 255, 0.08) !important;
   border: 1px solid rgb(var(--theme-header-border)) !important;
   color: #FFFFFF !important;
 }
 
-:is(html[data-theme='green'], html[data-theme='leaf']) .admin-header-btn:hover {
+:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) .admin-header-btn:hover {
   background-color: rgba(255, 255, 255, 0.16) !important;
   border-color: rgb(var(--theme-accent)) !important;
   color: #FFFFFF !important;
 }
 
-:is(html[data-theme='green'], html[data-theme='leaf']) .admin-header-btn-active {
+:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) .admin-header-btn-active {
   background-color: rgb(var(--theme-accent) / 0.35) !important;
   border-color: rgb(var(--theme-accent)) !important;
   color: #FFFFFF !important;
 }
 
-:is(html[data-theme='green'], html[data-theme='leaf']) .admin-header-btn svg {
+:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) .admin-header-btn svg {
   color: rgb(var(--theme-accent)) !important;
 }
 
-:is(html[data-theme='green'], html[data-theme='leaf']) .admin-header .theme-selector-trigger {
-  background-color: transparent !important;
-  border: none !important;
+:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) .admin-header .theme-selector-trigger {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgb(var(--theme-header-border)) !important;
   color: rgb(var(--theme-accent)) !important;
   box-shadow: none !important;
 }
 
-:is(html[data-theme='green'], html[data-theme='leaf']) .admin-header .theme-selector-trigger:hover {
-  background-color: rgba(255, 255, 255, 0.8) !important;
-  border: none !important;
+:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) .admin-header .theme-selector-trigger:hover {
+  background-color: rgba(255, 255, 255, 0.16) !important;
+  border-color: rgb(var(--theme-accent)) !important;
   color: rgb(var(--theme-accent)) !important;
 }
 
-:is(html[data-theme='green'], html[data-theme='leaf']) .admin-header .theme-selector-trigger svg {
+:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) .admin-header .theme-selector-trigger svg {
   color: rgb(var(--theme-accent)) !important;
 }
 
-:is(html[data-theme='green'], html[data-theme='leaf']) .admin-header-badge {
+:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) .admin-header-badge {
   background-color: #EF4444 !important;
   color: #ffffff !important;
 }
 
-:is(html[data-theme='green'], html[data-theme='leaf']) .admin-header-menu-btn {
+:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) .admin-header-menu-btn {
   background-color: transparent !important;
   border-color: transparent !important;
   color: #FFFFFF !important;
 }
 
-:is(html[data-theme='green'], html[data-theme='leaf']) .admin-header-menu-btn:hover {
+:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) .admin-header-menu-btn:hover {
   background-color: rgba(255, 255, 255, 0.12) !important;
 }
 
-:is(html[data-theme='green'], html[data-theme='leaf']) .admin-header-mobile-menu {
+:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) .admin-header-mobile-menu {
   background-color: rgb(var(--theme-header)) !important;
   border-color: rgb(var(--theme-header-border)) !important;
 }
 
-:is(html[data-theme='green'], html[data-theme='leaf']) .admin-header-mobile-btn {
+:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) .admin-header-mobile-btn {
   background-color: rgba(255, 255, 255, 0.08) !important;
   border-color: rgb(var(--theme-header-border)) !important;
   color: #FFFFFF !important;
 }
 
-:is(html[data-theme='green'], html[data-theme='leaf']) .admin-header-mobile-btn:hover {
+:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) .admin-header-mobile-btn:hover {
   background-color: rgba(255, 255, 255, 0.16) !important;
 }
 
-:is(html[data-theme='green'], html[data-theme='leaf']) .admin-header-mobile-btn svg {
+:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) .admin-header-mobile-btn svg {
   color: rgb(var(--theme-accent)) !important;
 }
 
-:is(html[data-theme='green'], html[data-theme='leaf']) body :is(.border-shnoor-indigo, .hover\:border-shnoor-indigo:hover) {
+:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) body :is(.border-shnoor-indigo, .hover\:border-shnoor-indigo:hover) {
   border-color: rgb(var(--theme-accent)) !important;
 }
 
-:is(html[data-theme='green'], html[data-theme='leaf']) .admin-header-logout {
+:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) .admin-header-logout {
   background-color: rgb(var(--theme-accent)) !important;
   color: #ffffff !important;
 }
 
-:is(html[data-theme='green'], html[data-theme='leaf']) .admin-header-logout:hover {
+:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) .admin-header-logout:hover {
   background-color: rgb(var(--theme-accent-strong)) !important;
   color: #ffffff !important;
 }

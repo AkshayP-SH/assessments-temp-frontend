@@ -3,7 +3,10 @@ import { useCallback } from 'react';
 export function usePrefetch(importFn) {
   return useCallback(() => {
     try {
-      importFn();
+      const res = importFn();
+      if (res && typeof res.catch === 'function') {
+        res.catch(() => undefined);
+      }
     } catch {
       return undefined;
     }

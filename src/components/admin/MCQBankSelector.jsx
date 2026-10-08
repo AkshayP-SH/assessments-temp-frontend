@@ -59,14 +59,7 @@ const MCQBankSelector = ({
       });
       const data = await response.json();
       if (data.success) {
-        const seen = new Set();
-        const uniqueQuestions = (data.questions || []).filter((q) => {
-          const key = (q.question_text || '').trim().toLowerCase();
-          if (!key || seen.has(key)) return false;
-          seen.add(key);
-          return true;
-        });
-        setQuestions(uniqueQuestions);
+        setQuestions(data.questions || []);
       }
     } catch (error) {
       console.error('Error fetching MCQ questions:', error);

@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import shnoorLogo from '../assets/shnoor-logo.webp';
+import linkedinIcon from '../assets/linkedin.png';
+import whatsappIcon from '../assets/whatsapp.png';
 import ThemeSelector from '../components/ThemeSelector';
 import { useSEO } from '../hooks/useSEO';
 import { getApiUrl } from '../config/api';
 import { usePrefetch } from '../hooks/usePrefetch';
 import { useJsonLd } from '../hooks/useJsonLd';
+import { Mail, Phone, FileText } from 'lucide-react';
 
 /* ─── SVG Icon helper ─────────────────────────────────────────────────────── */
 const Icon = ({ d, cls = 'w-6 h-6', stroke = 2, fill = 'none' }) => (
@@ -42,6 +45,7 @@ const ICON_PIN = 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.2
 /* ─── Nav links (smooth-scroll) ───────────────────────────────────────────── */
 const NAV_LINKS = [
   { label: 'Home', href: '#home' },
+  { label: 'Find Jobs', href: '#find-jobs' },
   { label: 'How It Works', href: '#how-it-works' },
   { label: 'Features', href: '#features' },
   { label: 'About', href: '#about' },
@@ -82,6 +86,21 @@ const DEFAULT_PLANS = [
     price_monthly: 'Custom',
     features: ['Unlimited candidates', 'Dedicated account manager', 'Custom integrations', 'Full proctoring suite', 'SLA guarantee'],
   },
+];
+
+const MOCK_JOBS = [
+  { id: 1, title: 'Data Analytics', company: 'TechCorp', location: 'Remote', type: 'Full-time' },
+  { id: 2, title: 'React Developer', company: 'WebSolutions', location: 'New York, NY', type: 'Contract' },
+  { id: 3, title: 'Backend Developer', company: 'DataSystems', location: 'San Francisco, CA', type: 'Full-time' },
+  { id: 4, title: 'Data Scientist', company: 'AI Innovations', location: 'Remote', type: 'Full-time' },
+  { id: 5, title: 'DevOps Engineer', company: 'CloudNet', location: 'Remote', type: 'Full-time' },
+  { id: 6, title: 'Security Analyst', company: 'CyberSec Systems', location: 'Austin, TX', type: 'Contract' },
+  { id: 7, title: 'iOS Developer', company: 'MobileFirst', location: 'London, UK', type: 'Full-time' },
+  { id: 8, title: 'Java Developer', company: 'FinTech Solutions', location: 'New York, NY', type: 'Full-time' },
+  { id: 9, title: 'UI/UX Designer', company: 'UX Studios', location: 'Berlin, DE', type: 'Contract' },
+  { id: 10, title: 'Machine Learning Engineer', company: 'NextGen AI', location: 'Remote', type: 'Full-time' },
+  { id: 11, title: 'Unity Developer', company: 'GameDev Corp', location: 'Tokyo, JP', type: 'Full-time' },
+  { id: 12, title: 'Research Scientist', company: 'Quantum Computing', location: 'Boston, MA', type: 'Full-time' }
 ];
 
 /* ─── Main Component ──────────────────────────────────────────────────────── */
@@ -127,6 +146,8 @@ const LandingPage = () => {
   const [plansLoading, setPlansLoading] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [showJobs, setShowJobs] = useState(false);
+  const [showAllJobs, setShowAllJobs] = useState(false);
   const navRef = useRef(null);
 
   // Fetch live pricing plans during idle time
@@ -159,6 +180,7 @@ const LandingPage = () => {
   }, []);
 
   const scrollToSection = (e, href) => {
+    if (!href.startsWith('#')) return; // Allow normal navigation for non-hash links
     e.preventDefault();
     setMobileMenuOpen(false);
     if (href === '#home') {
@@ -298,9 +320,9 @@ const LandingPage = () => {
               <div className="px-6 pt-6 pb-4">
                 <p className="text-xs font-bold text-theme-auth-acc uppercase tracking-[0.2em] mb-2">LIVE PLATFORM VIEW</p>
                 <div className="flex items-start justify-between">
-                  <p className="text-xl font-extrabold text-white leading-snug pr-4">
+<h2 className="text-xl font-extrabold text-white leading-snug pr-4">
                     Secure assessments, real-time proctoring, and actionable results
-                  </p>
+                  </h2>
                   <div className="flex-shrink-0 bg-white/10 border border-white/15 rounded-xl px-3 py-2 text-center">
                     <p className="text-[10px] text-theme-auth-acc uppercase tracking-wider font-bold">Active</p>
                     <p className="text-[10px] text-theme-auth-acc uppercase tracking-wider font-bold">exams</p>
@@ -322,7 +344,7 @@ const LandingPage = () => {
                 </div>
                 <div className="flex gap-2 flex-wrap">
                   {['Test Builder', 'Live Proctoring', 'Reports'].map(t => (
-                    <span key={t} className="text-[11px] font-semibold text-theme-auth-acc bg-white/10 border border-white/10 px-2.5 py-1 rounded-lg">{t}</span>
+                    <span key={t} className="text-[11px] font-semibold text-white bg-white/10 border border-white/10 px-2.5 py-1 rounded-lg">{t}</span>
                   ))}
                 </div>
               </div>
@@ -360,6 +382,78 @@ const LandingPage = () => {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════════════════════
+          2.5 FIND JOBS — Discover opportunities
+          ══════════════════════════════════════════════════════════════════════ */}
+      <section id="find-jobs" className="landing-find-jobs bg-theme-panel/30 py-16 sm:py-24 px-4 sm:px-8 border-t border-theme-border/60">
+        <div className="max-w-[1280px] mx-auto text-center">
+          <span className="inline-block text-xs font-extrabold text-theme-accent uppercase tracking-[0.25em] mb-4 bg-theme-panel border border-theme-border px-3.5 py-1.5 rounded-full shadow-xs">FIND JOBS</span>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-theme-text mb-4 leading-tight tracking-tight">
+            Prove your skills and land your dream job
+          </h2>
+          <p className="text-base sm:text-lg text-theme-muted max-w-2xl mx-auto leading-relaxed font-normal mb-8">
+            Browse active recruitment drives and open positions from top organizations using SHNOOR Assessments. Apply, take proctored technical tests, and showcase your true potential directly through our platform.
+          </p>
+          <button 
+            onClick={() => setShowJobs(true)}
+            className="group inline-flex items-center gap-2 bg-theme-accent hover:bg-theme-accent2 text-white text-sm font-bold px-8 py-4 rounded-xl shadow-lg shadow-theme-accent/20 transition-all cursor-pointer">
+            Browse Job Board
+            <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+          </button>
+
+          {showJobs && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fadeIn text-left" onClick={() => setShowJobs(false)}>
+              <div className="bg-theme-card border border-theme-border rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl relative" onClick={e => e.stopPropagation()}>
+                {/* Modal Header */}
+                <div className="sticky top-0 bg-theme-card/95 backdrop-blur z-10 px-6 py-5 border-b border-theme-border flex justify-between items-center">
+                  <div>
+                    <h2 className="text-2xl font-bold text-theme-text">Featured Opportunities</h2>
+                    <p className="text-theme-muted text-sm mt-1">Top picks for you</p>
+                  </div>
+                  <button onClick={() => setShowJobs(false)} className="w-10 h-10 bg-theme-panel hover:bg-theme-border text-theme-muted hover:text-theme-text rounded-full flex items-center justify-center transition-colors cursor-pointer">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                  </button>
+                </div>
+
+                {/* Modal Body */}
+                <div className="p-6 grid gap-4">
+                  {(showAllJobs ? MOCK_JOBS : MOCK_JOBS.slice(0, 4)).map(job => (
+                    <Link to="/job-board" key={job.id} className="bg-theme-panel/50 border border-theme-border rounded-xl p-5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-theme-accent/50 hover:bg-theme-panel transition-all cursor-pointer group">
+                      <div>
+                        <h3 className="text-lg font-bold text-theme-text mb-1 group-hover:text-theme-accent transition-colors">{job.title}</h3>
+                        <div className="flex flex-wrap items-center gap-3 text-sm text-theme-muted">
+                          <span className="font-semibold text-theme-accent">{job.company}</span>
+                          <span>•</span>
+                          <span>{job.location}</span>
+                          <span>•</span>
+                          <span>{job.type}</span>
+                        </div>
+                      </div>
+                      <div className="shrink-0 text-theme-muted opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+                
+                {/* Modal Footer */}
+                <div className="p-6 border-t border-theme-border bg-theme-panel/30 text-center">
+                  {!showAllJobs ? (
+                    <button onClick={() => setShowAllJobs(true)} className="inline-flex items-center justify-center bg-theme-accent hover:bg-theme-accent2 text-white font-bold text-sm px-6 py-3 rounded-xl transition-colors shadow-sm cursor-pointer">
+                      View more positions ↓
+                    </button>
+                  ) : (
+                    <button onClick={() => setShowAllJobs(false)} className="inline-flex items-center justify-center bg-theme-panel hover:bg-theme-border text-theme-text border border-theme-border font-bold text-sm px-6 py-3 rounded-xl transition-colors shadow-sm cursor-pointer">
+                      View less positions ↑
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
@@ -728,28 +822,28 @@ const LandingPage = () => {
             </div>
             <div>
               <p className="text-xs font-extrabold text-theme-auth-acc uppercase tracking-widest mb-5">Contacts</p>
-              <ul className="flex flex-col gap-3.5 text-slate-300 text-sm">
+              <ul className="flex flex-col gap-1 text-slate-300 text-sm">
                 <li>
-                  <a href="mailto:info@shnoor.com" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start">
-                    <Icon d={ICON_MAIL} cls="w-4 h-4 text-theme-auth-acc flex-shrink-0" />
+                  <a href="mailto:info@shnoor.com" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start py-2">
+                    <Mail className="w-4 h-4 text-theme-auth-acc flex-shrink-0" />
                     <span>info@shnoor.com (General)</span>
                   </a>
                 </li>
                 <li>
-                  <a href="mailto:proc@shnoor.com" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start">
-                    <Icon d={ICON_MAIL} cls="w-4 h-4 text-theme-auth-acc flex-shrink-0" />
+                  <a href="mailto:proc@shnoor.com" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start py-2">
+                    <Mail className="w-4 h-4 text-theme-auth-acc flex-shrink-0" />
                     <span>proc@shnoor.com (Sales)</span>
                   </a>
                 </li>
                 <li>
-                  <a href="tel:+919429694298" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start">
-                    <Icon d={FLAG} cls="w-4 h-4 text-theme-auth-acc flex-shrink-0" />
+                  <a href="tel:+919429694298" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start py-2">
+                    <Phone className="w-4 h-4 text-theme-auth-acc flex-shrink-0" />
                     <span>+91-9429694298</span>
                   </a>
                 </li>
                 <li>
-                  <a href="tel:+919041914601" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start">
-                    <Icon d={FLAG} cls="w-4 h-4 text-theme-auth-acc flex-shrink-0" />
+                  <a href="tel:+919041914601" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start py-2">
+                    <Phone className="w-4 h-4 text-theme-auth-acc flex-shrink-0" />
                     <span>+91-9041914601</span>
                   </a>
                 </li>
@@ -757,22 +851,22 @@ const LandingPage = () => {
             </div>
             <div>
               <p className="text-xs font-extrabold text-theme-auth-acc uppercase tracking-widest mb-5">Useful Links</p>
-              <ul className="flex flex-col gap-2 text-slate-300 text-sm">
+              <ul className="flex flex-col gap-1 text-slate-300 text-sm">
                 <li>
-                  <a href="https://www.linkedin.com/company/shnoor-international/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start group py-1.5 min-h-[40px]">
-                    <svg className="w-4 h-4 text-[#0077B5] group-hover:scale-110 transition-transform flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                  <a href="https://www.linkedin.com/company/shnoor-international/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start group py-2">
+                    <img src={linkedinIcon} alt="LinkedIn" className="w-4 h-4 rounded-xs object-contain flex-shrink-0 group-hover:scale-110 transition-transform" />
                     <span>We are Social</span>
                   </a>
                 </li>
                 <li>
-                  <a href="https://api.whatsapp.com/qr/D6I7XIACKIKVD1?autoload=1&app_absent=0" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start group py-1.5 min-h-[40px]">
-                    <svg className="w-4 h-4 text-[#25D366] group-hover:scale-110 transition-transform flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                  <a href="https://api.whatsapp.com/qr/D6I7XIACKIKVD1?autoload=1&app_absent=0" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start group py-2">
+                    <img src={whatsappIcon} alt="WhatsApp" className="w-4 h-4 rounded-xs object-contain flex-shrink-0 group-hover:scale-110 transition-transform" />
                     <span>Let's Connect</span>
                   </a>
                 </li>
                 <li>
-                  <a href="/company-profile.pdf" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start group py-1.5 min-h-[40px]">
-                    <Icon d={DOC} cls="w-4 h-4 text-theme-auth-acc flex-shrink-0 group-hover:scale-110 transition-transform" />
+                  <a href="/company-profile.pdf" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors flex items-center gap-2.5 justify-center md:justify-start group py-2">
+                    <FileText className="w-4 h-4 text-theme-auth-acc flex-shrink-0 group-hover:scale-110 transition-transform" />
                     <span>Company Profile</span>
                   </a>
                 </li>
@@ -780,12 +874,12 @@ const LandingPage = () => {
             </div>
           </div>
           <div className="border-t border-white/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="flex flex-col sm:flex-row items-center gap-2 text-sm text-slate-400">
+            <div className="flex flex-col sm:flex-row items-center gap-2 text-sm text-slate-300">
               <p>© Copyrights 2025. All Rights Reserved. SHNOOR INTERNATIONAL LLC</p>
-              <div className="flex items-center gap-2">
-                <span className="text-white/20">•</span>
+              <div className="hidden sm:flex items-center gap-2">
+                <span className="text-slate-500">•</span>
                 <Link to="/privacy-policy" className="hover:text-white transition-colors py-2 px-1">Privacy Policy</Link>
-                <span className="text-white/20">•</span>
+                <span className="text-slate-500">•</span>
                 <Link to="/terms-and-conditions" className="hover:text-white transition-colors py-2 px-1">Terms &amp; Conditions</Link>
               </div>
             </div>
