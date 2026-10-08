@@ -284,7 +284,7 @@ const InstitutesTab = ({
                 return (
                   <div
                     key={institute.id}
-                    className={`border rounded-2xl p-6 bg-white dark:bg-[#1E1E38] hover:shadow-[0_8px_30px_rgba(14,14,39,0.06)] dark:hover:shadow-[0_8px_30px_rgba(0,0,0,0.3)] transition-all ${isInstituteSelected ? 'border-[#403f75] dark:border-indigo-500 border-2 bg-indigo-50/20 dark:bg-indigo-950/20' : 'border-slate-200 dark:border-slate-700/80'
+                    className={`border rounded-2xl p-6 bg-white dark:bg-[#1E1E38] hover:shadow-[0_8px_30px_rgba(14,14,39,0.06)] dark:hover:shadow-[0_8px_30px_rgba(0,0,0,0.3)] transition-all card-3d-lift shimmer-hover transform-style-3d border-glow-hover relative overflow-hidden group ${isInstituteSelected ? 'border-[#403f75] dark:border-indigo-500 border-2 bg-indigo-50/20 dark:bg-indigo-950/20' : 'border-slate-200 dark:border-slate-700/80'
                       }`}
                   >
                     <div className="flex items-start space-x-3 mb-4">
@@ -299,7 +299,7 @@ const InstitutesTab = ({
 
                       <div className="flex-1">
                         <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-bold text-lg text-slate-900 dark:text-white">
+                          <h4 className="font-bold text-lg text-slate-900 dark:text-white layer-3d-float">
                             {institute.display_name}
                           </h4>
                           <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${statusBadgeColor}`}>
@@ -332,14 +332,14 @@ const InstitutesTab = ({
                         <div className="grid grid-cols-2 gap-2 mt-4">
                           <button
                             onClick={() => handleViewAssignedTests(institute)}
-                            className="card-btn card-btn-indigo px-3 py-2 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#25254A] text-[#403f75] dark:text-indigo-300 hover:bg-slate-50 dark:hover:bg-[#2E2E5A] transition-colors cursor-pointer"
+                            className="card-btn card-btn-indigo px-3 py-2 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#25254A] text-[#403f75] dark:text-indigo-300 hover:bg-slate-50 dark:hover:bg-[#2E2E5A] transition-colors cursor-pointer btn-action-gesture"
                           >
                             <FileSpreadsheet size={16} className="inline mr-1" />
                             Tests
                           </button>
                           <button
                             onClick={() => handleManageStudents(institute)}
-                            className="card-btn card-btn-green px-3 py-2 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#25254A] text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition-colors cursor-pointer"
+                            className="card-btn card-btn-green px-3 py-2 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#25254A] text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition-colors cursor-pointer btn-action-gesture"
                           >
                             <Users size={16} className="inline mr-1" />
                             Students
@@ -349,14 +349,14 @@ const InstitutesTab = ({
                               setSelectedInstituteForRegistration(institute);
                               setShowRegistrationControlModal(true);
                             }}
-                            className="card-btn card-btn-indigo px-3 py-2 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#25254A] text-[#403f75] dark:text-indigo-300 hover:bg-slate-50 dark:hover:bg-[#2E2E5A] transition-colors cursor-pointer"
+                            className="card-btn card-btn-indigo px-3 py-2 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#25254A] text-[#403f75] dark:text-indigo-300 hover:bg-slate-50 dark:hover:bg-[#2E2E5A] transition-colors cursor-pointer btn-action-gesture"
                           >
                             <Calendar size={16} className="inline mr-1" />
                             Registration
                           </button>
                           <button
                             onClick={() => handleDeleteInstitute(institute.id, institute.display_name)}
-                            className="card-btn card-btn-danger px-3 py-2 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#25254A] text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
+                            className="card-btn card-btn-danger px-3 py-2 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#25254A] text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer btn-action-gesture"
                             title="Delete Institute"
                           >
                             <Trash2 size={16} className="inline mr-1" />

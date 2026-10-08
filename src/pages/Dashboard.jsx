@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState, useMemo, useCallback } from 'react';
-import { LogOut, Clock, BookOpen, AlertCircle, FileText, X, Video, Briefcase, ArrowRight } from 'lucide-react';
+import { LogOut, Clock, BookOpen, AlertCircle, FileText, X, Video, Briefcase, ArrowRight, CheckCircle2 } from 'lucide-react';
 import ExamSearchFilter from '../components/ExamSearchFilter';
 import StudentInterviews from '../components/StudentInterviews';
 import JobBoard from './JobBoard';
@@ -258,7 +258,7 @@ const Dashboard = () => {
     <div className="min-h-screen bg-[#F0F2F8] dark:bg-[#0E0E27] text-slate-900 dark:text-slate-100">
       {showJobModal && selectedTest && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4 animate-fade-in">
-          <div className="bg-white dark:bg-[#1E1E38] rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden">
+          <div className="bg-white dark:bg-[#1E1E38] rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden modal-3d-entrance">
             {/* Modal Header */}
             <div className="bg-[#403f75] dark:bg-indigo-600 text-white px-6 py-4 flex justify-between items-center flex-shrink-0">
               <div className="flex-1 pr-4 min-w-0">
@@ -427,6 +427,65 @@ const Dashboard = () => {
               </div>
             </div>
 
+            {/* 3D Quick Metrics Overview */}
+            {!loading && availableTests.length > 0 && (() => {
+              const totalCount = availableTests.length;
+              const completedCount = availableTests.filter(t => t.alreadyTaken).length;
+              const inProgressCount = availableTests.filter(t => testsWithProgress.has(t.id)).length;
+              const pendingCount = totalCount - completedCount;
+
+              return (
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 perspective-1000">
+                  <div className="bg-white dark:bg-[#1A1A32] border border-indigo-100/90 dark:border-slate-800 rounded-2xl p-4 sm:p-5 card-3d-lift shimmer-hover transform-style-3d border-glow-hover animate-entry-3d stagger-1">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Total Assigned</span>
+                      <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/70 text-[#403f75] dark:text-indigo-300 flex items-center justify-center layer-3d-deep icon-gesture shadow-2xs">
+                        <FileText size={16} />
+                      </div>
+                    </div>
+                    <p className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white layer-3d-float">{totalCount}</p>
+                    <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Assessments enrolled</p>
+                  </div>
+
+                  <div className="bg-white dark:bg-[#1A1A32] border border-indigo-100/90 dark:border-slate-800 rounded-2xl p-4 sm:p-5 card-3d-lift shimmer-hover transform-style-3d border-glow-hover animate-entry-3d stagger-2">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Available / Pending</span>
+                      <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/70 text-blue-600 dark:text-blue-300 flex items-center justify-center layer-3d-deep icon-gesture shadow-2xs">
+                        <Clock size={16} />
+                      </div>
+                    </div>
+                    <p className="text-2xl sm:text-3xl font-black text-blue-600 dark:text-blue-400 layer-3d-float">{pendingCount}</p>
+                    <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Ready to attempt</p>
+                  </div>
+
+                  <div className="bg-white dark:bg-[#1A1A32] border border-indigo-100/90 dark:border-slate-800 rounded-2xl p-4 sm:p-5 card-3d-lift shimmer-hover transform-style-3d border-glow-hover animate-entry-3d stagger-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-bold text-slate-500 dark:text-slate-400">In Progress</span>
+                      <div className="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950/70 text-amber-600 dark:text-amber-300 flex items-center justify-center layer-3d-deep icon-gesture shadow-2xs relative">
+                        {inProgressCount > 0 && (
+                          <span className="animate-ping-slow absolute inline-flex h-full w-full rounded-xl bg-amber-400 opacity-60"></span>
+                        )}
+                        <AlertCircle size={16} />
+                      </div>
+                    </div>
+                    <p className="text-2xl sm:text-3xl font-black text-amber-600 dark:text-amber-400 layer-3d-float">{inProgressCount}</p>
+                    <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Resume at any time</p>
+                  </div>
+
+                  <div className="bg-white dark:bg-[#1A1A32] border border-indigo-100/90 dark:border-slate-800 rounded-2xl p-4 sm:p-5 card-3d-lift shimmer-hover transform-style-3d border-glow-hover animate-entry-3d stagger-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Completed</span>
+                      <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/70 text-emerald-600 dark:text-emerald-300 flex items-center justify-center layer-3d-deep icon-gesture shadow-2xs">
+                        <CheckCircle2 size={16} />
+                      </div>
+                    </div>
+                    <p className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 layer-3d-float">{completedCount}</p>
+                    <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Submitted assessments</p>
+                  </div>
+                </div>
+              );
+            })()}
+
             {loading && (
               <div className="flex justify-center items-center h-64">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-shnoor-indigo"></div>
@@ -484,7 +543,7 @@ const Dashboard = () => {
                       return (
                         <div
                           key={test.id}
-                          className={`bg-white dark:bg-[#1A1A32] ${cardBorder} ${test.isMockTest ? 'col-span-full' : ''} rounded-2xl flex flex-col justify-between transition-all duration-200 shadow-[0_2px_12px_rgba(14,14,39,0.04)] hover:shadow-[0_12px_28px_rgba(64,63,117,0.12)] min-h-[320px] h-full overflow-hidden group`}
+                          className={`bg-white dark:bg-[#1A1A32] ${cardBorder} ${test.isMockTest ? 'col-span-full' : ''} rounded-2xl flex flex-col justify-between card-3d-lift shimmer-hover min-h-[320px] h-full overflow-hidden group transform-style-3d border-glow-hover`}
                         >
                           {/* Card top color accent bar (3-4px) */}
                           <div className={`h-[3.5px] w-full bg-gradient-to-r ${topAccentGradient}`} />
@@ -513,13 +572,13 @@ const Dashboard = () => {
                                   )}
 
                                   {!isCompleted && !test.isMockTest && test.isAvailable && (
-                                    <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-800/60">
+                                    <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-800/60 animate-pulse-subtle">
                                       Available
                                     </span>
                                   )}
 
                                   {isInProgress && (
-                                    <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-400 border border-teal-200/80 dark:border-teal-800/60">
+                                    <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-400 border border-teal-200/80 dark:border-teal-800/60 animate-pulse-subtle">
                                       In Progress
                                     </span>
                                   )}
@@ -531,13 +590,13 @@ const Dashboard = () => {
                                   )}
                                 </div>
 
-                                <div className={`w-8 h-8 rounded-xl ${iconBoxClass} flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-105`}>
+                                <div className={`w-8 h-8 rounded-xl ${iconBoxClass} flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110 group-hover:-rotate-3 layer-3d-deep shadow-2xs`}>
                                   <BookOpen size={15} />
                                 </div>
                               </div>
 
                               {/* Title */}
-                              <h3 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white capitalize tracking-tight mt-1 mb-1 break-words leading-snug line-clamp-2 min-h-[2.5rem]" title={test.title}>
+                              <h3 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white capitalize tracking-tight mt-1 mb-1 break-words leading-snug line-clamp-2 min-h-[2.5rem] group-hover:text-shnoor-indigo dark:group-hover:text-indigo-300 transition-colors layer-3d-float" title={test.title}>
                                 {test.title}
                               </h3>
 
@@ -590,7 +649,7 @@ const Dashboard = () => {
                             <div className="space-y-2.5 pt-2 mt-auto">
                               <button
                                 onClick={() => handleViewJobDescription(test)}
-                                className="w-full h-10 px-3.5 bg-slate-50 dark:bg-[#1E1E38] hover:bg-indigo-50/70 dark:hover:bg-indigo-950/40 text-slate-700 dark:text-slate-200 hover:text-[#403f75] dark:hover:text-indigo-300 font-bold rounded-xl border border-slate-200/90 dark:border-slate-700 hover:border-indigo-200/80 transition-all text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer shadow-2xs"
+                                className="w-full h-10 px-3.5 bg-slate-50 dark:bg-[#1E1E38] hover:bg-indigo-50/70 dark:hover:bg-indigo-950/40 text-slate-700 dark:text-slate-200 hover:text-[#403f75] dark:hover:text-indigo-300 font-bold rounded-xl border border-slate-200/90 dark:border-slate-700 hover:border-indigo-200/80 transition-all text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer shadow-2xs btn-action-gesture"
                               >
                                 <FileText size={15} />
                                 <span>View Job Description</span>
@@ -599,13 +658,13 @@ const Dashboard = () => {
                               <button
                                 onClick={() => test.isAvailable && !test.alreadyTaken && handleTakeTest(test.id)}
                                 disabled={!test.isAvailable || test.alreadyTaken}
-                                className={`w-full h-10 px-3.5 font-bold rounded-xl transition-all shadow-sm text-xs sm:text-sm flex items-center justify-center ${test.alreadyTaken
+                                className={`w-full h-10 px-3.5 font-bold rounded-xl transition-all shadow-sm text-xs sm:text-sm flex items-center justify-center btn-action-gesture ${test.alreadyTaken
                                   ? 'bg-slate-100 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 border border-slate-200/80 dark:border-slate-700/80 cursor-not-allowed'
                                   : test.testStatus === 'upcoming'
                                     ? 'bg-amber-500 text-white cursor-not-allowed'
                                     : test.testStatus === 'expired'
                                       ? 'bg-slate-100 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 border border-slate-200/80 dark:border-slate-700/80 cursor-not-allowed'
-                                      : 'bg-gradient-to-r from-[#403f75] to-[#57569b] hover:from-[#343360] hover:to-[#4a4988] text-white shadow-md shadow-[#403f75]/20 active:scale-[0.99] cursor-pointer'
+                                      : 'bg-gradient-to-r from-[#403f75] to-[#57569b] hover:from-[#343360] hover:to-[#4a4988] text-white shadow-md shadow-[#403f75]/20 hover:shadow-lg cursor-pointer'
                                   }`}
                               >
                                 {test.alreadyTaken

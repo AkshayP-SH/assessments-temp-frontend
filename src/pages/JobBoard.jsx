@@ -394,7 +394,7 @@ export default function JobBoard({ isEmbedded = false }) {
                                 return (
                                 <div
                                     key={job.id}
-                                    className={`bg-white dark:bg-[#1A1A32] ${cardBorder} rounded-2xl shadow-[0_2px_12px_rgba(14,14,39,0.04)] hover:shadow-[0_12px_28px_rgba(64,63,117,0.12)] transition-all duration-200 flex flex-col justify-between group relative min-h-[220px] h-full overflow-hidden`}
+                                    className={`bg-white dark:bg-[#1A1A32] ${cardBorder} rounded-2xl shadow-[0_2px_12px_rgba(14,14,39,0.04)] hover:shadow-[0_12px_28px_rgba(64,63,117,0.12)] transition-all duration-300 flex flex-col justify-between group relative min-h-[220px] h-full overflow-hidden card-3d-lift shimmer-hover transform-style-3d`}
                                 >
                                     {/* Top color accent strip (3-4px) */}
                                     <div className={`h-[3.5px] w-full bg-gradient-to-r ${topAccentGradient}`} />
@@ -403,7 +403,7 @@ export default function JobBoard({ isEmbedded = false }) {
                                         {/* Top Header Row */}
                                         <div>
                                             <div className="flex items-center justify-between gap-3 mb-3.5">
-                                                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/70 text-[#403f75] dark:text-indigo-300 flex items-center justify-center flex-shrink-0 border border-indigo-100/80 dark:border-indigo-900/60 shadow-2xs">
+                                                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/70 text-[#403f75] dark:text-indigo-300 flex items-center justify-center flex-shrink-0 border border-indigo-100/80 dark:border-indigo-900/60 shadow-2xs icon-gesture">
                                                     <Briefcase size={18} />
                                                 </div>
 
@@ -475,7 +475,7 @@ export default function JobBoard({ isEmbedded = false }) {
                                                     {applications.get(job.id).total_tests > applications.get(job.id).completed_tests ? (
                                                         <button
                                                             onClick={() => navigate('/student/my-applications')}
-                                                            className="h-full flex-1 inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#403f75] to-[#57569b] hover:from-[#343360] hover:to-[#4a4988] active:scale-98 text-white text-xs sm:text-sm font-bold rounded-xl transition-all shadow-md shadow-[#403f75]/20 cursor-pointer"
+                                                            className="h-full flex-1 inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#403f75] to-[#57569b] hover:from-[#343360] hover:to-[#4a4988] active:scale-98 text-white text-xs sm:text-sm font-bold rounded-xl transition-all shadow-md shadow-[#403f75]/20 cursor-pointer btn-action-gesture"
                                                         >
                                                             Take Pending Tests ({applications.get(job.id).total_tests - applications.get(job.id).completed_tests})
                                                         </button>
@@ -490,7 +490,7 @@ export default function JobBoard({ isEmbedded = false }) {
                                                                 setViewDetailsJob(job);
                                                                 setViewDetailsData(data);
                                                             }}
-                                                            className="h-full flex-1 inline-flex items-center justify-center gap-1.5 bg-slate-50 dark:bg-[#1E1E38] hover:bg-indigo-50/70 dark:hover:bg-indigo-950/40 text-slate-700 dark:text-slate-200 hover:text-[#403f75] dark:hover:text-indigo-300 text-xs sm:text-sm font-bold rounded-xl transition-all cursor-pointer border border-slate-200/90 dark:border-slate-700 hover:border-indigo-200/80 shadow-2xs"
+                                                            className="h-full flex-1 inline-flex items-center justify-center gap-1.5 bg-slate-50 dark:bg-[#1E1E38] hover:bg-indigo-50/70 dark:hover:bg-indigo-950/40 text-slate-700 dark:text-slate-200 hover:text-[#403f75] dark:hover:text-indigo-300 text-xs sm:text-sm font-bold rounded-xl transition-all cursor-pointer border border-slate-200/90 dark:border-slate-700 hover:border-indigo-200/80 shadow-2xs btn-action-gesture"
                                                         >
                                                             View Details
                                                         </button>
@@ -501,7 +501,7 @@ export default function JobBoard({ isEmbedded = false }) {
                                                     <button
                                                         onClick={() => handleEnrollClick(job)}
                                                         disabled={enrollingJobs.has(job.id) || isRegistrationClosed(job.registration_deadline)}
-                                                        className="h-full w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#403f75] to-[#57569b] hover:from-[#343360] hover:to-[#4a4988] disabled:opacity-50 disabled:cursor-not-allowed active:scale-98 text-white text-xs sm:text-sm font-bold rounded-xl transition-all shadow-md shadow-[#403f75]/20 cursor-pointer"
+                                                        className="h-full w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#403f75] to-[#57569b] hover:from-[#343360] hover:to-[#4a4988] disabled:opacity-50 disabled:cursor-not-allowed active:scale-98 text-white text-xs sm:text-sm font-bold rounded-xl transition-all shadow-md shadow-[#403f75]/20 cursor-pointer btn-action-gesture"
                                                     >
                                                         {enrollingJobs.has(job.id) ? (
                                                             <>
