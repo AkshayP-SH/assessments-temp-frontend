@@ -2491,9 +2491,13 @@ html[data-theme='dark'] .admin-status-pill.is-closed {
   border-bottom-color: rgb(var(--theme-header-border)) !important;
 }
 
-:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) body :is(.bg-shnoor-indigo, button.bg-shnoor-indigo, .\!bg-shnoor-indigo, .bg-\[\#44448E\], .bg-\[\#44448e\], .bg-\[\#403f75\], .bg-\[\#2d2c55\], .bg-\[\#4C4B82\]) {
+:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) body :is(.bg-shnoor-indigo, button.bg-shnoor-indigo, .\!bg-shnoor-indigo, .bg-shnoor-indigoMedium, .bg-\[\#44448E\], .bg-\[\#44448e\], .bg-\[\#403f75\], .bg-\[\#2d2c55\], .bg-\[\#4C4B82\], .bg-indigo-600, .bg-indigo-500) {
   background-color: rgb(var(--theme-accent)) !important;
   color: #fff !important;
+}
+
+:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) body :is(.hover\:bg-shnoor-indigo:hover, .hover\:bg-\[\#4d4d9c\]:hover, .hover\:bg-\[\#343360\]:hover, .hover\:bg-indigo-700:hover) {
+  background-color: rgb(var(--theme-accent-strong)) !important;
 }
 
 :is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) body :is(.text-shnoor-navy, .text-gray-900, .text-gray-800, .text-gray-700) {
@@ -2504,11 +2508,11 @@ html[data-theme='dark'] .admin-status-pill.is-closed {
   color: rgb(var(--theme-text-muted)) !important;
 }
 
-:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) body :is(.text-shnoor-indigo, .text-\[\#403f75\], .text-\[\#44448E\]) {
+:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) body :is(.text-shnoor-indigo, .text-\[\#403f75\], .text-\[\#44448E\], .text-indigo-600, .text-indigo-500, .dark\:text-indigo-400) {
   color: rgb(var(--theme-accent)) !important;
 }
 
-:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) body :is(.border-shnoor-mist, .border-shnoor-light, .border-gray-200, .border-gray-300, .border-shnoor-indigo, .border-\[\#403f75\]) {
+:is(html[data-theme='dark'], html[data-theme='green'], html[data-theme='leaf']) body :is(.border-shnoor-mist, .border-shnoor-light, .border-gray-200, .border-gray-300, .border-shnoor-indigo, .border-\[\#403f75\], .border-indigo-200) {
   border-color: rgb(var(--theme-border)) !important;
 }
 
@@ -3046,7 +3050,12 @@ html[data-theme='dark'] option {
   color: rgb(var(--theme-text-muted, 60 84 64)) !important;
 }
 
-:is(html[data-theme='green'], html[data-theme='leaf']) :is(.student-header-avatar, .student-profile-avatar) {
+.admin-profile-avatar {
+  background: linear-gradient(135deg, rgb(var(--theme-header, 14 14 39)) 0%, rgb(var(--theme-accent, 68 68 142)) 100%) !important;
+  color: #FFFFFF !important;
+}
+
+:is(html[data-theme='green'], html[data-theme='leaf']) :is(.student-header-avatar, .student-profile-avatar, .admin-profile-avatar) {
   background: linear-gradient(135deg, #5E7650, #738E62) !important;
   color: #FFFFFF !important;
   box-shadow: 0 2px 8px rgba(94, 118, 80, 0.3) !important;
