@@ -277,19 +277,21 @@ const StudentInterviews = () => {
               return (
                 <div
                   key={interview.id}
-                  className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-light p-6 hover:shadow-[0_8px_30px_rgba(14,14,39,0.12)] transition-shadow"
+                  className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-shnoor-light p-6 hover:shadow-[0_16px_36px_rgba(14,14,39,0.12)] transition-all card-3d-lift shimmer-hover transform-style-3d border-glow-hover relative overflow-hidden group"
                 >
                   <div className="flex flex-col sm:flex-row justify-between items-start gap-4 sm:gap-0">
                     <div className="flex-1 w-full">
                       <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-3">
-                        <h3 className="text-lg font-bold text-shnoor-navy">
+                        <h3 className="text-lg font-bold text-shnoor-navy layer-3d-float">
                           {interview.test_title}
                         </h3>
                         <span className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${getStatusColor(interview.status)}`}>
                           {interview.status.replace('_', ' ').toUpperCase()}
                         </span>
                         {interview.status === 'in_progress' && (
-                          <span className="px-2 py-1 rounded-full text-[10px] font-semibold bg-green-100 text-green-700 border border-green-200 whitespace-nowrap">
+                          <span className="relative flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-green-100 text-green-700 border border-green-200 whitespace-nowrap">
+                            <span className="animate-ping-slow absolute left-1.5 inline-flex h-2 w-2 rounded-full bg-green-500 opacity-75"></span>
+                            <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-600 mr-1.5"></span>
                             LIVE CALL
                           </span>
                         )}
@@ -354,12 +356,12 @@ const StudentInterviews = () => {
                       <button
                         onClick={() => canJoin && joinInterview(interview.id)}
                         disabled={!canJoin}
-                        className={`flex items-center justify-center w-full sm:w-auto space-x-2 px-6 py-3 rounded-xl font-semibold transition-colors shadow-[0_8px_30px_rgba(14,14,39,0.06)] ${canJoin
+                        className={`flex items-center justify-center w-full sm:w-auto space-x-2 px-6 py-3 rounded-xl font-semibold transition-all shadow-[0_8px_30px_rgba(14,14,39,0.06)] btn-action-gesture ${canJoin
                           ? 'bg-shnoor-indigo hover:bg-shnoor-navy text-white hover:shadow-[0_8px_30px_rgba(14,14,39,0.12)]'
                           : 'bg-shnoor-mist/40 text-shnoor-indigoMedium cursor-not-allowed'
                           }`}
                       >
-                        <Video size={20} />
+                        <Video size={20} className="icon-gesture" />
                         <span>{
                           interview.status === 'in_progress'
                             ? 'Answer Live Call'

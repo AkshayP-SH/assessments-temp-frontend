@@ -120,7 +120,7 @@ export default function StudentHeader({
             {showBackButton && (
               <button
                 onClick={handleBack}
-                className="student-header-back h-8 sm:h-10 px-2.5 sm:px-4 text-xs sm:text-sm font-bold text-[#403f75] dark:text-indigo-300 bg-[#F1F3FB] dark:bg-[#1E1E38] hover:bg-slate-200/80 dark:hover:bg-slate-700/80 border border-slate-200/80 dark:border-slate-700/80 rounded-xl transition-all flex items-center justify-center shadow-2xs active:scale-98 cursor-pointer"
+                className="student-header-back h-8 sm:h-10 px-2.5 sm:px-4 text-xs sm:text-sm font-bold text-[#403f75] dark:text-indigo-300 bg-[#F1F3FB] dark:bg-[#1E1E38] hover:bg-slate-200/80 dark:hover:bg-slate-700/80 border border-slate-200/80 dark:border-slate-700/80 rounded-xl transition-all flex items-center justify-center shadow-2xs active:scale-98 cursor-pointer btn-action-gesture"
                 title={backLabel}
               >
                 <ArrowLeft size={14} className="sm:mr-1.5" />
@@ -141,7 +141,7 @@ export default function StudentHeader({
                     {capitalizeInstitute(institute)} {studentId ? `• ID: ${studentId}` : ''}
                   </span>
                 </div>
-                <div className="student-header-avatar w-9 h-9 rounded-xl bg-gradient-to-br from-[#403F75] to-[#6868AC] text-white font-black text-xs flex items-center justify-center shadow-xs uppercase flex-shrink-0">
+                <div className="student-header-avatar w-9 h-9 rounded-xl bg-gradient-to-br from-[#403F75] to-[#6868AC] text-white font-black text-xs flex items-center justify-center shadow-xs uppercase flex-shrink-0 hover:scale-110 hover:rotate-3 transition-transform duration-300 cursor-pointer">
                   {studentName.split(' ').map(n => n[0]).slice(0, 2).join('') || 'ST'}
                 </div>
               </div>
@@ -240,7 +240,7 @@ export default function StudentHeader({
             {/* Logout button */}
             <button
               onClick={handleLogout}
-              className="student-header-logout h-8 sm:h-10 px-2.5 sm:px-3.5 text-xs sm:text-sm font-bold text-rose-600 dark:text-rose-400 bg-rose-50/90 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 border border-rose-200/80 dark:border-rose-800/60 rounded-xl transition-all flex items-center justify-center shadow-2xs cursor-pointer flex-shrink-0 active:scale-98 whitespace-nowrap"
+              className="student-header-logout h-8 sm:h-10 px-2.5 sm:px-3.5 text-xs sm:text-sm font-bold text-rose-600 dark:text-rose-400 bg-rose-50/90 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 border border-rose-200/80 dark:border-rose-800/60 rounded-xl transition-all flex items-center justify-center shadow-2xs cursor-pointer flex-shrink-0 active:scale-98 whitespace-nowrap btn-action-gesture"
               title="Logout"
             >
               <LogOut size={14} className="sm:mr-1.5 text-rose-600 dark:text-rose-400" />

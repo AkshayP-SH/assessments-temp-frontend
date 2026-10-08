@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, ArrowLeft, Briefcase, Loader2, RefreshCw, CheckCircle, Clock, FileText, AlertTriangle, XCircle, Trophy, PlayCircle, Award, ChevronDown } from 'lucide-react';
+import { LogOut, ArrowLeft, Briefcase, Loader2, RefreshCw, CheckCircle, Clock, FileText, AlertTriangle, XCircle, Trophy, PlayCircle, Award, ChevronDown, Building, MoreHorizontal, Archive, XSquare, Flag, User } from 'lucide-react';
 import { apiFetch } from '../config/api';
 import ThemeSelector from '../components/ThemeSelector';
 import StudentHeader from '../components/StudentHeader';
 import { clearStorageKeepTheme } from '../utils/theme';
+import { useQueryClient } from '@tanstack/react-query';
 import shnoorLogo from '../assets/shnoor-logo.png';
 
 const STATUS_CONFIG = {
@@ -48,12 +49,30 @@ const fmtDate = (iso) => {
 
 export default function MyApplications({ isEmbedded = false, onBrowseJobs }) {
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
     const [applications, setApplications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [expandedAppId, setExpandedAppId] = useState(null);
     const [appTests, setAppTests] = useState({}); // Map applicationId -> tests array
     const [loadingTests, setLoadingTests] = useState({});
+    const [activeMenuAppId, setActiveMenuAppId] = useState(null);
+    const [viewDetailsApp, setViewDetailsApp] = useState(null);
+    const [activeTab, setActiveTab] = useState('active'); // 'active' or 'archived'
+    const [archivedApplicationIds, setArchivedApplicationIds] = useState(() => {
+        try {
+            return new Set(JSON.parse(localStorage.getItem('student_archived_applications') || '[]').map(String));
+        } catch (error) {
+            console.error('Failed to load archived applications', error);
+            return new Set();
+        }
+    });
+
+    useEffect(() => {
+        const handleClickOutside = () => setActiveMenuAppId(null);
+        document.addEventListener('click', handleClickOutside);
+        return () => document.removeEventListener('click', handleClickOutside);
+    }, []);
 
     const [studentName, setStudentName] = useState('');
     const [studentId, setStudentId] = useState('');
@@ -81,12 +100,57 @@ export default function MyApplications({ isEmbedded = false, onBrowseJobs }) {
             });
 
             const data = await res.json();
+            
+            let allApps = [];
 
             if (data.success) {
-                setApplications(data.data);
+                allApps = data.data;
             } else {
                 setError(data.message || 'Failed to load applications');
             }
+
+            // Inject mock jobs from local storage
+            try {
+                const mockJobsMetadata = {
+                    'mock-1': { company_name: 'TechCorp', job_role: 'Data Analytics' },
+                    'mock-2': { company_name: 'WebSolutions', job_role: 'React Developer' },
+                    'mock-3': { company_name: 'DataSystems', job_role: 'Backend Developer' },
+                    'mock-4': { company_name: 'AI Innovations', job_role: 'Data Scientist' },
+                    'mock-5': { company_name: 'CloudNet', job_role: 'DevOps Engineer' },
+                    'mock-6': { company_name: 'CyberSec Systems', job_role: 'Security Analyst' },
+                    'mock-7': { company_name: 'MobileFirst', job_role: 'iOS Developer' },
+                    'mock-8': { company_name: 'FinTech Solutions', job_role: 'Java Developer' },
+                    'mock-9': { company_name: 'UX Studios', job_role: 'UI/UX Designer' },
+                    'mock-10': { company_name: 'NextGen AI', job_role: 'Machine Learning Engineer' },
+                    'mock-11': { company_name: 'GameDev Corp', job_role: 'Unity Developer' },
+                    'mock-12': { company_name: 'Quantum Computing', job_role: 'Research Scientist' }
+                };
+                
+                const savedData = JSON.parse(localStorage.getItem('student_job_applications') || '{}');
+                Object.keys(savedData).forEach(jobId => {
+                    if (mockJobsMetadata[jobId]) {
+                        // Avoid duplicates if it's somehow already in allApps
+                        if (!allApps.find(a => a.job_opening_id === jobId)) {
+                            allApps.push({
+                                id: `mock-app-${jobId}`,
+                                job_opening_id: jobId,
+                                status: 'submitted',
+                                applied_at: new Date().toISOString(), // Mock time
+                                total_tests: 0,
+                                completed_tests: 0,
+                                jobOpening: {
+                                    id: jobId,
+                                    job_role: mockJobsMetadata[jobId].job_role,
+                                    company_name: mockJobsMetadata[jobId].company_name
+                                },
+                                student_details: savedData[jobId]
+                            });
+                        }
+                    }
+                });
+            } catch(e) { console.error('Failed parsing local mock apps', e); }
+
+            setApplications(allApps);
         } catch {
             setError('Network error. Please check your connection.');
         } finally {
@@ -173,18 +237,80 @@ export default function MyApplications({ isEmbedded = false, onBrowseJobs }) {
         navigate('/login');
     };
 
-    const getTestProgress = (app) => {
-        const total = parseInt(app.total_tests) || 0;
-        const completed = parseInt(app.completed_tests) || 0;
+    const getApplicationId = (app) => app.application_id ?? app.id;
+    const isMockApplication = (app) => String(app.job_opening_id || '').startsWith('mock-');
+    const isApplicationArchived = (app) =>
+        Boolean(app.student_details?.isArchived) ||
+        archivedApplicationIds.has(String(getApplicationId(app)));
 
-        if (total === 0) return { text: 'No tests assigned', percentage: 0 };
+    const handleViewDetails = (app) => {
+        setViewDetailsApp(app);
+        setActiveMenuAppId(null);
+    };
 
-        const percentage = (completed / total) * 100;
-        return {
-            text: `${completed}/${total} tests completed`,
-            percentage,
-            isComplete: completed === total
-        };
+    const handleArchive = (app) => {
+        const appId = String(getApplicationId(app));
+        const shouldArchive = !isApplicationArchived(app);
+        const nextArchivedIds = new Set(archivedApplicationIds);
+
+        if (shouldArchive) nextArchivedIds.add(appId);
+        else nextArchivedIds.delete(appId);
+
+        try {
+            localStorage.setItem('student_archived_applications', JSON.stringify([...nextArchivedIds]));
+
+            if (isMockApplication(app)) {
+                const savedData = JSON.parse(localStorage.getItem('student_job_applications') || '{}');
+                const jobId = app.job_opening_id;
+                if (savedData[jobId]) {
+                    savedData[jobId].isArchived = shouldArchive;
+                    localStorage.setItem('student_job_applications', JSON.stringify(savedData));
+                }
+            }
+
+            setArchivedApplicationIds(nextArchivedIds);
+            setApplications(prev => prev.map(application =>
+                String(getApplicationId(application)) === appId
+                    ? {
+                        ...application,
+                        student_details: {
+                            ...application.student_details,
+                            isArchived: shouldArchive
+                        }
+                    }
+                    : application
+            ));
+        } catch (error) {
+            console.error('Failed to update archived applications', error);
+            window.alert('Could not update the archived application. Please try again.');
+        } finally {
+            setActiveMenuAppId(null);
+        }
+    };
+
+    const handleWithdraw = (app) => {
+        if (!isMockApplication(app)) return;
+
+        if (window.confirm('Are you sure you want to withdraw this application? This action cannot be undone.')) {
+            try {
+                const jobId = app.job_opening_id;
+                const savedData = JSON.parse(localStorage.getItem('student_job_applications') || '{}');
+                delete savedData[jobId];
+                localStorage.setItem('student_job_applications', JSON.stringify(savedData));
+                const nextArchivedIds = new Set(archivedApplicationIds);
+                nextArchivedIds.delete(String(getApplicationId(app)));
+                localStorage.setItem('student_archived_applications', JSON.stringify([...nextArchivedIds]));
+                setArchivedApplicationIds(nextArchivedIds);
+                setApplications(prev => prev.filter(application =>
+                    String(getApplicationId(application)) !== String(getApplicationId(app))
+                ));
+                queryClient.invalidateQueries({ queryKey: ['jobBoardData'] });
+            } catch (error) {
+                console.error('Failed to withdraw mock application', error);
+                window.alert('Could not withdraw this application. Please try again.');
+            }
+            setActiveMenuAppId(null);
+        }
     };
 
     return (
@@ -256,202 +382,256 @@ export default function MyApplications({ isEmbedded = false, onBrowseJobs }) {
                     </div>
                 )}
 
-                {/* Applications list */}
+                {/* Applications list & Tabs */}
                 {!loading && !error && applications.length > 0 && (
                     <div className="space-y-6">
-                        <p className="text-sm text-shnoor-indigoMedium font-medium">
-                            {applications.length} application{applications.length !== 1 ? 's' : ''}
-                        </p>
+                        {/* Tabs */}
+                        <div className="flex items-center space-x-1 border-b border-slate-200 dark:border-slate-800">
+                            <button
+                                onClick={() => setActiveTab('active')}
+                                className={`px-5 py-3 text-sm font-bold transition-colors relative ${activeTab === 'active' ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'}`}
+                            >
+                                Active Applications
+                                {activeTab === 'active' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 dark:bg-indigo-400" />}
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('archived')}
+                                className={`px-5 py-3 text-sm font-bold transition-colors relative ${activeTab === 'archived' ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'}`}
+                            >
+                                Archived
+                                {activeTab === 'archived' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 dark:bg-indigo-400" />}
+                            </button>
+                        </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-                            {applications.map((app) => {
-                                const testProgress = getTestProgress(app);
+                        {(() => {
+                            const filteredApps = applications.filter(app => {
+                                const isArchived = isApplicationArchived(app);
+                                return activeTab === 'archived' ? isArchived : !isArchived;
+                            });
 
+                            if (filteredApps.length === 0) {
                                 return (
-                                    <div
-                                        key={app.application_id}
-                                        className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border-2 border-shnoor-indigo overflow-hidden transition-all duration-200 hover:shadow-[0_8px_30px_rgba(14,14,39,0.08)]"
-                                    >
-                                        {/* Card header */}
-                                        <div className="bg-shnoor-lavender/50 border-b border-shnoor-mist px-6 py-5">
-                                            <div className="flex flex-col sm:flex-row items-start sm:justify-between gap-3">
-                                                <div className="w-full sm:w-auto">
-                                                    <h3 className="text-xl font-bold text-shnoor-navy break-words">
-                                                        {app.job_role}
-                                                    </h3>
-                                                    <p className="text-shnoor-indigoMedium text-sm mt-1 break-words">
-                                                        {app.company_name}
-                                                    </p>
-                                                </div>
-                                                <div className="shrink-0 mt-1 sm:mt-0">
+                                    <div className="text-center py-12">
+                                        <Archive size={48} className="mx-auto mb-4 text-slate-300 dark:text-slate-600" />
+                                        <p className="text-lg font-bold text-slate-700 dark:text-slate-300">
+                                            No {activeTab} applications
+                                        </p>
+                                    </div>
+                                );
+                            }
+
+                            return (
+                                <>
+                                    <p className="text-sm text-shnoor-indigoMedium font-medium">
+                                        {filteredApps.length} application{filteredApps.length !== 1 ? 's' : ''}
+                                    </p>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+                                        {filteredApps.map((app) => {
+                                            const applicationId = getApplicationId(app);
+                                            const applicationKey = String(applicationId);
+                                            const isMenuOpen = activeMenuAppId === applicationKey;
+
+                                            return (
+                                    <div key={applicationKey} className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-slate-200 dark:border-slate-800 p-6 flex flex-col sm:flex-row sm:items-start justify-between gap-4 transition-all hover:shadow-[0_8px_30px_rgba(14,14,39,0.08)]">
+                                        <div className="flex gap-4 w-full">
+                                            {/* Grey icon box */}
+                                            <div className="w-14 h-14 bg-slate-50 dark:bg-slate-800 rounded-xl flex items-center justify-center shrink-0 border border-slate-200 dark:border-slate-700 shadow-sm">
+                                                <Building size={28} className="text-slate-400 dark:text-slate-500" />
+                                            </div>
+
+                                            <div className="flex-1 min-w-0">
+                                                {/* Application status */}
+                                                <div className="mb-2">
                                                     <StatusBadge status={getDisplayStatus(app)} />
                                                 </div>
+                                                
+                                                {/* Job Info */}
+                                                <h3 className="font-bold text-xl text-slate-900 dark:text-white truncate mb-1">
+                                                    {app.job_role || app.jobOpening?.job_role || 'Software Developer Intern'}
+                                                </h3>
+                                                <p className="text-sm font-medium text-slate-700 dark:text-slate-300 truncate">
+                                                    {app.company_name || app.jobOpening?.company_name || 'SR NEXT'}
+                                                </p>
+                                                <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">
+                                                    Remote
+                                                </p>
+                                                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                                                    Applied on {fmtDate(app.applied_at)}
+                                                </p>
+
+                                                {/* If there are tests, show them cleanly inline below */}
+                                                {app.total_tests > 0 && (
+                                                    <div className="mt-5 pt-5 border-t border-slate-100 dark:border-slate-800/50 max-w-xl">
+                                                        <div className="flex items-center justify-between mb-3 cursor-pointer group" onClick={() => handleToggleExpand(app.application_id || app.id)}>
+                                                            <div className="flex items-center space-x-2">
+                                                                <FileText size={18} className="text-indigo-500" />
+                                                                <span className="font-semibold text-sm text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 transition-colors">
+                                                                    View Assessment Tests ({app.total_tests})
+                                                                </span>
+                                                            </div>
+                                                            <ChevronDown size={18} className={`text-slate-400 transition-transform ${expandedAppId === (app.application_id || app.id) ? 'rotate-180' : ''}`} />
+                                                        </div>
+
+                                                        {expandedAppId === (app.application_id || app.id) && (
+                                                            <div className="mt-3">
+                                                                {loadingTests[app.application_id || app.id] ? (
+                                                                    <div className="text-xs text-slate-500 py-2">Loading tests...</div>
+                                                                ) : appTests[app.application_id || app.id]?.length > 0 ? (
+                                                                    <div className="space-y-3">
+                                                                        {appTests[app.application_id || app.id].map((test) => (
+                                                                            <div key={test.test_id} className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-lg border border-slate-100 dark:border-slate-700">
+                                                                                <div>
+                                                                                    <p className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-0.5">{test.test_name}</p>
+                                                                                    <p className="text-[11px] font-medium text-slate-500">{test.duration} min • {test.total_marks} marks</p>
+                                                                                </div>
+                                                                                {!test.is_completed ? (
+                                                                                    <button
+                                                                                        onClick={(e) => { e.stopPropagation(); handleTakeTest(test.test_id, app.application_id || app.id); }}
+                                                                                        className="w-full sm:w-auto flex justify-center items-center space-x-2 px-4 py-2 bg-shnoor-indigo hover:bg-[#4d4d9c] text-white rounded-lg font-bold transition-all shadow-sm text-sm shrink-0 mt-2 sm:mt-0 btn-action-gesture"
+                                                                                    >
+                                                                                        Take Test
+                                                                                    </button>
+                                                                                ) : (
+                                                                                    <span className="text-emerald-600 text-xs font-bold flex items-center gap-1.5"><CheckCircle size={14}/> Completed</span>
+                                                                                )}
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                ) : (
+                                                                    <div className="text-xs text-slate-500 py-2">No tests assigned yet.</div>
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
 
-                                        {/* Card body */}
-                                        <div className="p-6 space-y-4">
-                                            {/* Application timeline */}
-                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                                <div>
-                                                    <p className="text-xs font-bold uppercase tracking-wider text-shnoor-indigoMedium mb-1">
-                                                        Applied On
-                                                    </p>
-                                                    <p className="text-sm font-semibold text-shnoor-navy">
-                                                        {fmtDate(app.applied_at)}
-                                                    </p>
-                                                </div>
+                                        {/* Actions */}
+                                        <div className="relative shrink-0 flex items-center">
+                                            <button 
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                        setActiveMenuAppId(isMenuOpen ? null : applicationKey);
+                                                }}
+                                                className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 p-2 rounded-full transition-colors cursor-pointer"
+                                            >
+                                                <MoreHorizontal size={20} />
+                                            </button>
 
-                                                {app.test_assigned_at && (
-                                                    <div>
-                                                        <p className="text-xs font-bold uppercase tracking-wider text-shnoor-indigoMedium mb-1">
-                                                            Tests Assigned
-                                                        </p>
-                                                        <p className="text-sm font-semibold text-shnoor-navy">
-                                                            {fmtDate(app.test_assigned_at)}
-                                                        </p>
-                                                    </div>
-                                                )}
-
-                                                {app.assessment_score !== null && (
-                                                    <div>
-                                                        <p className="text-xs font-bold uppercase tracking-wider text-shnoor-indigoMedium mb-1">
-                                                            Assessment Score
-                                                        </p>
-                                                        <p className="text-sm font-semibold text-shnoor-navy">
-                                                            {parseFloat(app.assessment_score).toFixed(1)}%
-                                                            {app.passed_assessment && (
-                                                                <span className="ml-2 text-green-600">✓ Passed</span>
-                                                            )}
-                                                        </p>
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            {/* Test progress */}
-                                            {app.total_tests > 0 && (
-                                                <div className="bg-shnoor-lavender rounded-xl p-4">
-                                                    <div className="flex items-center justify-between mb-2">
-                                                        <span className="text-sm font-semibold text-shnoor-navy">
-                                                            Assessment Progress
-                                                        </span>
-                                                        <span className={`text-sm font-bold ${testProgress.isComplete ? 'text-green-600' : 'text-shnoor-indigo'}`}>
-                                                            {testProgress.text}
-                                                        </span>
-                                                    </div>
-                                                    <div className="w-full bg-shnoor-mist rounded-full h-2.5">
-                                                        <div
-                                                            className="bg-shnoor-indigo h-2.5 rounded-full transition-all duration-500"
-                                                            style={{ width: `${testProgress.percentage}%` }}
-                                                        />
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {/* Tests section - expandable */}
-                                            {app.total_tests > 0 && (
-                                                <div className="border border-shnoor-mist rounded-xl overflow-hidden mt-2">
-                                                    <button
-                                                        onClick={() => handleToggleExpand(app.application_id)}
-                                                        className="w-full px-4 py-3 bg-white hover:bg-shnoor-lavender/50 transition-all flex items-center justify-between"
+                                            {/* Modal Popup Menu */}
+                                            {isMenuOpen && (
+                                                <>
+                                                    <div className="fixed inset-0 z-40 bg-black/20 backdrop-blur-[1px] sm:hidden" onClick={() => setActiveMenuAppId(null)}></div>
+                                                    <div 
+                                                        className="absolute right-0 top-12 sm:top-auto sm:right-full sm:mr-2 z-50 w-64 bg-white dark:bg-[#1A1A32] rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-slate-200 dark:border-slate-700 overflow-hidden animate-fade-in"
+                                                        onClick={(e) => e.stopPropagation()}
                                                     >
-                                                        <div className="flex items-center space-x-2">
-                                                            <FileText size={18} className="text-shnoor-indigo" />
-                                                            <span className="font-semibold text-shnoor-navy">
-                                                                View Assessment Tests ({app.total_tests})
-                                                            </span>
+                                                        <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/20">
+                                                            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Manage Application</span>
+                                                            <button onClick={() => setActiveMenuAppId(null)} className="text-slate-400 hover:text-slate-600 transition-colors">
+                                                                <XCircle size={16} />
+                                                            </button>
                                                         </div>
-                                                        <ChevronDown
-                                                            size={20}
-                                                            className={`text-shnoor-indigoMedium transition-transform ${expandedAppId === app.application_id ? 'rotate-180' : ''
-                                                                }`}
-                                                        />
-                                                    </button>
-
-                                                    {expandedAppId === app.application_id && (
-                                                        <div className="p-4 bg-white">
-                                                            {loadingTests[app.application_id] ? (
-                                                                <div className="flex items-center justify-center py-8 text-shnoor-indigoMedium">
-                                                                    <Loader2 size={24} className="animate-spin mr-2" />
-                                                                    <span>Loading tests...</span>
-                                                                </div>
-                                                            ) : appTests[app.application_id]?.length > 0 ? (
-                                                                <div className="space-y-3">
-                                                                    {appTests[app.application_id].map((test, idx) => (
-                                                                        <div
-                                                                            key={test.test_id}
-                                                                            className={`border rounded-lg p-4 transition-all ${test.is_completed
-                                                                                ? 'border-shnoor-success bg-shnoor-successLight'
-                                                                                : 'border-shnoor-mist bg-white hover:shadow-md'
-                                                                                }`}
-                                                                        >
-                                                                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                                                                                <div className="flex-1 w-full sm:w-auto">
-                                                                                    <div className="flex flex-wrap items-center gap-2 mb-2">
-                                                                                        <span className="font-bold text-shnoor-navy break-words">
-                                                                                            {idx + 1}. {test.test_name}
-                                                                                        </span>
-                                                                                        {test.is_completed && (
-                                                                                            <span className="bg-green-600 text-white px-2 py-0.5 rounded-full text-xs font-bold flex items-center space-x-1 shrink-0">
-                                                                                                <CheckCircle size={12} />
-                                                                                                <span>Completed</span>
-                                                                                            </span>
-                                                                                        )}
-                                                                                        {test.is_mandatory && (
-                                                                                            <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-xs font-bold shrink-0">
-                                                                                                Required
-                                                                                            </span>
-                                                                                        )}
-                                                                                    </div>
-                                                                                    <div className="text-xs text-shnoor-indigoMedium space-y-1">
-                                                                                        <p>⏱ {test.duration} min • {test.question_count} questions • {test.total_marks} marks</p>
-                                                                                    </div>
-                                                                                </div>
-                                                                                {!test.is_completed && (
-                                                                                    <button
-                                                                                        onClick={() => handleTakeTest(test.test_id, app.application_id)}
-                                                                                        className="w-full sm:w-auto flex justify-center items-center space-x-2 px-4 py-2 bg-shnoor-indigo hover:bg-[#4d4d9c] text-white rounded-lg font-bold transition-all shadow-sm text-sm shrink-0 mt-2 sm:mt-0"
-                                                                                    >
-                                                                                        <PlayCircle size={16} />
-                                                                                        <span>Take Test</span>
-                                                                                    </button>
-                                                                                )}
-                                                                            </div>
-                                                                        </div>
-                                                                    ))}
-                                                                </div>
-                                                            ) : (
-                                                                <div className="text-center py-6 text-shnoor-indigoMedium">
-                                                                    <AlertTriangle size={32} className="mx-auto mb-2 opacity-50" />
-                                                                    <p className="text-sm">No tests found for this application</p>
-                                                                </div>
+                                                        <div className="py-2">
+                                                            <button onClick={() => handleViewDetails(app)} className="w-full px-4 py-3 text-left text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-3 font-medium transition-colors">
+                                                                <User size={16} className="text-indigo-500" />
+                                                                View details
+                                                            </button>
+                                                            <button onClick={() => handleArchive(app)} className="w-full px-4 py-3 text-left text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-3 font-medium transition-colors">
+                                                                <Archive size={16} className="text-slate-500" />
+                                                                {isApplicationArchived(app) ? 'Unarchive' : 'Archive'}
+                                                            </button>
+                                                            {isMockApplication(app) && (
+                                                                <button onClick={() => handleWithdraw(app)} className="w-full px-4 py-3 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-3 font-medium transition-colors">
+                                                                    <XSquare size={16} className="text-red-500" />
+                                                                    Withdraw application
+                                                                </button>
                                                             )}
                                                         </div>
-                                                    )}
-                                                </div>
-                                            )}
-
-                                            {app.status === 'shortlisted' && (
-                                                <div className="bg-shnoor-successLight border border-shnoor-success rounded-xl p-4 flex items-start space-x-3 mt-4">
-                                                    <Trophy size={20} className="text-shnoor-success mt-0.5 shrink-0" />
-                                                    <div>
-                                                        <p className="text-sm font-bold text-shnoor-success mb-1">
-                                                            🎉 Congratulations!
-                                                        </p>
-                                                        <p className="text-sm text-shnoor-success">
-                                                            You've been shortlisted for this position. The recruitment team will contact you with next steps.
-                                                        </p>
                                                     </div>
-                                                </div>
+                                                </>
                                             )}
                                         </div>
                                     </div>
                                 );
                             })}
+
+                                </div>
+                            </>
+                        );
+                    })()}
+                </div>
+            )}
+        </main>
+
+            {/* View Details Modal */}
+            {viewDetailsApp && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+                        <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50">
+                            <div>
+                                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Application Details</h3>
+                                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                                    {viewDetailsApp.job_role || viewDetailsApp.jobOpening?.job_role} • {viewDetailsApp.company_name || viewDetailsApp.jobOpening?.company_name}
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => setViewDetailsApp(null)}
+                                className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
+                            >
+                                <XCircle size={24} />
+                            </button>
+                        </div>
+                        
+                        <div className="p-6 space-y-6">
+                            {viewDetailsApp.student_details ? (
+                                <>
+                                    <div>
+                                        <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">Primary Skill</label>
+                                        <div className="px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-800 dark:text-slate-200 font-medium">
+                                            {viewDetailsApp.student_details.primarySkill || 'Not provided'}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">Years of Experience</label>
+                                        <div className="px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-800 dark:text-slate-200 font-medium">
+                                            {viewDetailsApp.student_details.yearsOfExperience || 'Not provided'}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">Resume / Portfolio URL</label>
+                                        <div className="px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl">
+                                            {viewDetailsApp.student_details.githubUrl ? (
+                                                <a href={viewDetailsApp.student_details.githubUrl} target="_blank" rel="noopener noreferrer" className="text-indigo-600 dark:text-indigo-400 hover:underline font-medium break-all flex items-center gap-2">
+                                                    {viewDetailsApp.student_details.githubUrl}
+                                                </a>
+                                            ) : (
+                                                <span className="text-slate-500 dark:text-slate-400 font-medium">Not provided</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="text-center py-8 text-slate-500">
+                                    <AlertTriangle size={32} className="mx-auto mb-3 opacity-50" />
+                                    <p>No additional details were provided during the application.</p>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="px-6 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 flex justify-end">
+                            <button
+                                onClick={() => setViewDetailsApp(null)}
+                                className="px-5 py-2.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 font-bold rounded-lg transition-colors"
+                            >
+                                Close
+                            </button>
                         </div>
                     </div>
-                )}
-            </main>
+                </div>
+            )}
         </div>
     );
 }

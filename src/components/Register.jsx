@@ -85,15 +85,15 @@ const ResumeLinkRow = ({ label, value }) => (
 
 /* ─── Review Section Card ────────────────────────────────────────────────────── */
 const ReviewSection = ({ title, stepIndex, onEdit, children }) => (
-  <div className="bg-theme-card border border-theme-border rounded-xl overflow-hidden shadow-xs">
+  <div className="bg-theme-card border border-theme-border rounded-xl overflow-hidden shadow-xs card-3d-subtle hover:shadow-md transition-all duration-300 transform-style-3d border-glow-hover">
     <div className="flex items-center justify-between px-5 py-3 bg-theme-panel border-b border-theme-border">
       <p className="text-xs font-bold text-theme-text uppercase tracking-widest">{title}</p>
       <button
         type="button"
         onClick={() => onEdit(stepIndex)}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-theme-accent hover:text-white bg-theme-accent/10 hover:bg-theme-accent border border-theme-accent/30 hover:border-theme-accent rounded-lg transition-all duration-150 group cursor-pointer"
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-theme-accent hover:text-white bg-theme-accent/10 hover:bg-theme-accent border border-theme-accent/30 hover:border-theme-accent rounded-lg transition-all duration-150 group cursor-pointer btn-action-gesture"
       >
-        <svg className="w-3.5 h-3.5 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+        <svg className="w-3.5 h-3.5 transition-transform group-hover:scale-110 icon-gesture" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
         </svg>
         <span>Edit</span>
@@ -131,13 +131,6 @@ const Register = () => {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const dropdownRef = useRef(null);
-
-  // OTP-related states - COMMENTED OUT FOR NOW
-  // const [isOtpSent, setIsOtpSent] = useState(false);
-  // const [otp, setOtp] = useState('');
-  // const [otpError, setOtpError] = useState('');
-  // const [resendTimer, setResendTimer] = useState(0);
-  // const [isSendingOtp, setIsSendingOtp] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -188,118 +181,7 @@ const Register = () => {
     if (errors[name]) setErrors(p => ({ ...p, [name]: '' }));
     setApiError('');
 
-    // Reset OTP state if email is changed after OTP was sent - COMMENTED OUT
-    // if (name === 'email' && isOtpSent) {
-    //   setIsOtpSent(false);
-    //   setOtp('');
-    //   setOtpError('');
-    //   setResendTimer(0);
-    // }
   };
-
-  // COMMENTED OUT - Start resend timer
-  // const startResendTimer = () => {
-  //   setResendTimer(60); // 60 seconds
-  //   const interval = setInterval(() => {
-  //     setResendTimer((prev) => {
-  //       if (prev <= 1) {
-  //         clearInterval(interval);
-  //         return 0;
-  //       }
-  //       return prev - 1;
-  //     });
-  //   }, 1000);
-  // };
-
-  // COMMENTED OUT - Send OTP to email
-  // const handleSendOtp = async (e) => {
-  //   e.preventDefault();
-  //   setApiError('');
-  //   setOtpError('');
-
-  //   // Validate email and full name before sending OTP
-  //   if (!formData.email.trim()) {
-  //     setErrors(p => ({ ...p, email: 'Email is required' }));
-  //     return;
-  //   }
-  //   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-  //     setErrors(p => ({ ...p, email: 'Enter a valid email' }));
-  //     return;
-  //   }
-  //   if (!formData.fullName.trim()) {
-  //     setErrors(p => ({ ...p, fullName: 'Full name is required' }));
-  //     setStep(0); // Jump to personal info step
-  //     return;
-  //   }
-
-  //   setIsSendingOtp(true);
-
-  //   try {
-  //     const response = await apiFetch('api/send-otp', {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify({
-  //         email: formData.email.trim(),
-  //         fullName: formData.fullName.trim(),
-  //       }),
-  //     });
-
-  //     const data = await response.json();
-
-  //     if (!response.ok) {
-  //       throw new Error(data.message || 'Failed to send OTP');
-  //     }
-
-  //     // Success
-  //     setIsOtpSent(true);
-  //     setApiError(''); // Clear any previous errors
-  //     startResendTimer();
-
-  //   } catch (error) {
-  //     console.error('Send OTP error:', error);
-  //     setApiError(error.message || 'Failed to send verification code. Please try again.');
-  //   } finally {
-  //     setIsSendingOtp(false);
-  //   }
-  // };
-
-  // COMMENTED OUT - Resend OTP
-  // const handleResendOtp = async () => {
-  //   if (resendTimer > 0) return;
-
-  //   setOtpError('');
-  //   setIsSendingOtp(true);
-
-  //   try {
-  //     const response = await apiFetch('api/send-otp', {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify({
-  //         email: formData.email.trim(),
-  //         fullName: formData.fullName.trim(),
-  //       }),
-  //     });
-
-  //     const data = await response.json();
-
-  //     if (!response.ok) {
-  //       throw new Error(data.message || 'Failed to resend OTP');
-  //     }
-
-  //     startResendTimer();
-  //     setOtp(''); // Clear OTP input
-
-  //   } catch (error) {
-  //     console.error('Resend OTP error:', error);
-  //     setOtpError(error.message || 'Failed to resend verification code.');
-  //   } finally {
-  //     setIsSendingOtp(false);
-  //   }
-  // };
   /* ── Per-step validation ─────────────────────────────────────────────── */
   const validateStep = (s) => {
     const e = {};
@@ -347,43 +229,17 @@ const Register = () => {
 
   const handleSubmit = async () => {
     setApiError('');
-    // setOtpError(''); // COMMENTED OUT
-
-    // COMMENTED OUT - Verify OTP is entered
-    // if (!otp || otp.trim().length !== 6) {
-    //   setOtpError('Please enter the 6-digit verification code');
-    //   return;
-    // }
 
     setIsLoading(true);
     let firebaseUser = null;
+    let registrationCompleted = false;
 
     try {
-      // COMMENTED OUT - Step 1: Verify OTP
-      // const otpResponse = await apiFetch('api/verify-otp', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify({
-      //     email: formData.email.trim(),
-      //     otp: otp.trim(),
-      //   }),
-      // });
-
-      // const otpData = await otpResponse.json();
-
-      // if (!otpResponse.ok) {
-      //   throw new Error(otpData.message || 'OTP verification failed');
-      // }
-
-      // Step 2: Register user in Firebase (was Step 2, now Step 1)
       const { createUserWithEmailAndPassword, auth } = await import('../config/firebase');
       const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
       firebaseUser = userCredential.user;
       const idToken = await userCredential.user.getIdToken();
 
-      // Step 3: Send user data to backend with Firebase token (was Step 3, now Step 2)
       const response = await apiFetch('api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
@@ -404,21 +260,19 @@ const Register = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        // Backend registration failed - delete Firebase user
-        if (firebaseUser) {
-          try {
-            await firebaseUser.delete();
-            console.log('[REGISTRATION] Firebase user deleted due to backend failure');
-          } catch (deleteError) {
-            console.error('[REGISTRATION] Failed to delete Firebase user:', deleteError);
-          }
-        }
         throw new Error(data.message || 'Registration failed');
       }
 
-      // Success - navigate to login
+      registrationCompleted = true;
       navigate('/login', { state: { message: 'Registration successful. Please sign in to begin.' } });
     } catch (error) {
+      if (firebaseUser && !registrationCompleted) {
+        try {
+          await firebaseUser.delete();
+        } catch (deleteError) {
+          console.error('[REGISTRATION] Failed to delete Firebase user after registration failure:', deleteError);
+        }
+      }
       // Handle Firebase-specific errors
       if (error.code === 'auth/email-already-in-use') {
         setApiError('This email is already registered. Please login instead.');
@@ -547,92 +401,7 @@ const Register = () => {
           <InputField label="Email Address" type="email" name="email" placeholder="student@institution.edu" required
             value={formData.email} onChange={handleChange} disabled={isLoading} autoComplete="email" />
           <FieldError msg={errors.email} />
-
-          {/* COMMENTED OUT - Verify Email Button - Show only if OTP not sent */}
-          {/* {!isOtpSent && (
-            <button
-              type="button"
-              onClick={handleSendOtp}
-              disabled={isSendingOtp || !formData.email}
-              className={`w-full h-[50px] mt-3 bg-shnoor-indigo text-white rounded-lg text-sm font-semibold uppercase tracking-wider shadow-sm hover:bg-shnoor-navy hover:-translate-y-px hover:shadow-md active:translate-y-0 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none transition-all duration-200 ${isSendingOtp ? 'text-transparent relative' : ''}`}
-            >
-              {isSendingOtp && (
-                <div className="absolute top-1/2 left-1/2 -ml-2.5 -mt-2.5 w-5 h-5 border-[3px] border-white border-t-transparent rounded-full animate-spin"></div>
-              )}
-              {isSendingOtp ? 'Sending Code...' : '📧 Verify Email Address'}
-            </button>
-          )} */}
-
-          {/* COMMENTED OUT - OTP Sent Success Message */}
-          {/* {isOtpSent && (
-            <div className="bg-shnoor-successLight border-l-4 border-shnoor-success text-shnoor-success p-3 rounded-r-md text-xs font-medium flex items-center gap-2.5 mt-3">
-              <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor" className="flex-shrink-0">
-                <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zm3.97 4.97a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
-              </svg>
-              <span>Verification code sent to {formData.email}</span>
-            </div>
-          )} */}
         </div>
-
-        {/* COMMENTED OUT - OTP Input Field - Show only after OTP is sent */}
-        {/* {isOtpSent && (
-          <div className="flex flex-col gap-2 bg-shnoor-lavender p-5 rounded-lg border-2 border-shnoor-indigo/20">
-            <label className="text-[11px] font-semibold text-shnoor-navy mb-1.5 uppercase tracking-wide flex items-center gap-1">
-              Verification Code <span className="text-shnoor-danger">*</span>
-            </label>
-            <input
-              type="text"
-              name="otp"
-              maxLength="6"
-              className={`w-full h-[50px] px-4 rounded-lg border-2 bg-white text-shnoor-navy transition-colors focus:outline-none focus:ring-1 text-center tracking-[0.5em] font-mono text-xl
-                ${otpError ? 'border-shnoor-danger focus:ring-shnoor-danger' : 'border-shnoor-mist focus:border-shnoor-indigo focus:ring-shnoor-indigo'}`}
-              placeholder="000000"
-              value={otp}
-              onChange={(e) => {
-                const value = e.target.value.replace(/\D/g, '');
-                setOtp(value);
-                setOtpError('');
-              }}
-              disabled={isLoading}
-              autoComplete="off"
-            />
-            {otpError && (
-              <span className="text-xs text-shnoor-danger font-medium flex items-center gap-1.5 mt-1">
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" className="flex-shrink-0">
-                  <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zm0 12a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm0-9a1 1 0 0 0-1 1v6a1 1 0 0 0 2 0V4a1 1 0 0 0-1-1z" />
-                </svg>
-                {otpError}
-              </span>
-            )}
-            
-            <div className="flex items-center justify-between mt-2">
-              <span className="text-xs text-shnoor-soft">
-                Didn't receive the code?
-              </span>
-              {resendTimer > 0 ? (
-                <span className="text-xs text-shnoor-soft font-medium">
-                  Resend in {resendTimer}s
-                </span>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleResendOtp}
-                  disabled={isSendingOtp}
-                  className="text-xs text-shnoor-indigo font-semibold hover:text-shnoor-navy hover:underline transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Resend Code
-                </button>
-              )}
-            </div>
-
-            <div className="text-xs text-shnoor-soft italic mt-2 flex items-start gap-2">
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" className="flex-shrink-0 mt-0.5">
-                <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zM5.496 6.033h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286a.237.237 0 0 0 .241.247zm2.325 6.443c.61 0 1.029-.394 1.029-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94 0 .533.425.927 1.01.927z"/>
-              </svg>
-              <span>Check your email inbox (and spam folder) for the 6-digit code. Code expires in 5 minutes.</span>
-            </div>
-          </div>
-        )} */}
 
         <div className="relative">
           <InputField label="Password" type={showPassword ? 'text' : 'password'} name="password" placeholder="Minimum 8 characters" required
@@ -726,9 +495,13 @@ const Register = () => {
       </div>
       {/* ── LEFT PANEL ────────────────────────────────────── */}
       <div className="auth-left-panel hidden lg:flex lg:w-[38%] flex-col justify-between bg-shnoor-navy px-12 py-12 relative overflow-hidden">
+        {/* Floating Ambient 3D Glow Orbs */}
+        <div className="auth-glow-orb auth-glow-orb-primary w-96 h-96 -top-24 -left-24 pointer-events-none" />
+        <div className="auth-glow-orb auth-glow-orb-secondary w-80 h-80 bottom-8 -right-16 pointer-events-none" />
+
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-12">
-            <div className="site-header-logo flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl bg-white p-1 shadow-xs">
+            <div className="site-header-logo flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl bg-white p-1 shadow-md card-3d-lift shimmer-hover hover:scale-105 transition-all duration-300">
               <img src={shnoorLogo} alt="Shnoor" className="h-full w-full object-contain" width="44" height="44" loading="eager" fetchPriority="high" />
             </div>
             <div>
@@ -745,13 +518,18 @@ const Register = () => {
           </p>
 
           {/* Step list */}
-          <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-3">
             {STEP_META.map((s, i) => {
               const isDone = i < step;
               const isActive = i === step;
               return (
-                <div key={i} className={`flex items-start gap-4 transition-all duration-300 ${isActive ? 'opacity-100' : isDone ? 'opacity-90' : 'opacity-60'}`}>
-                  <div className={`auth-step-badge w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300 ${isDone ? 'is-complete' : isActive ? 'is-active' : 'is-pending'}`}>
+                <div
+                  key={i}
+                  className={`flex items-start gap-4 p-2.5 -mx-2.5 rounded-xl transition-all duration-300 card-3d-subtle hover:bg-white/[0.08] border border-transparent hover:border-white/10 group cursor-default transform-style-3d ${
+                    isActive ? 'opacity-100 bg-white/[0.06] border-white/10' : isDone ? 'opacity-90' : 'opacity-60'
+                  }`}
+                >
+                  <div className={`auth-step-badge w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300 icon-gesture group-hover:scale-110 ${isDone ? 'is-complete' : isActive ? 'is-active scale-105 shadow-md shadow-indigo-500/30' : 'is-pending'}`}>
                     {isDone ? (
                       <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -772,18 +550,22 @@ const Register = () => {
           </div>
         </div>
 
-        <div className="relative z-10">
+        <div className="relative z-10 card-3d-subtle hover:bg-white/[0.04] p-3 -mx-3 rounded-xl transition-all duration-200">
           <div className="flex gap-1 mb-3">
             {[1, 2, 3, 4, 5, 6, 7].map((index) => (
-              <div key={index} className="h-1.5 flex-1 rounded-full" style={{ backgroundColor: `rgb(var(--theme-progress-${index}))` }} />
+              <div key={index} className="h-1.5 flex-1 rounded-full transition-transform duration-300 hover:scale-y-125" style={{ backgroundColor: `rgb(var(--theme-progress-${index}))` }} />
             ))}
           </div>
           <p className="auth-bottom-copy text-xs">SHNOOR Recruitment & Assessment Portal</p>
         </div>
       </div>
       {/* ── RIGHT PANEL ───────────────────────────────────── */}
-      <div className="auth-right-panel flex-1 bg-white flex items-center justify-center px-6 py-10 overflow-auto">
-        <div className="w-full max-w-[500px]">
+      <div className="auth-right-panel flex-1 bg-white flex items-center justify-center px-6 py-10 overflow-auto relative">
+        {/* Soft Ambient Background Orbs */}
+        <div className="auth-glow-orb auth-glow-orb-primary w-80 h-80 -top-24 -right-24 pointer-events-none opacity-20" />
+        <div className="auth-glow-orb auth-glow-orb-secondary w-72 h-72 bottom-12 -left-20 pointer-events-none opacity-15" />
+
+        <div className="w-full max-w-[500px] relative z-10 animate-entry-3d perspective-1000">
           {/* Back navigation */}
           <div className="mb-5">
             <button
@@ -795,16 +577,16 @@ const Register = () => {
                   navigate('/');
                 }
               }}
-              className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-shnoor-soft hover:text-shnoor-indigo transition-colors group cursor-pointer"
+              className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-shnoor-soft hover:text-shnoor-indigo transition-colors group cursor-pointer nav-gesture-item"
             >
-              <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+              <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1.5" />
               <span>{step > 0 ? 'Back to previous step' : 'Back to home'}</span>
             </button>
           </div>
 
           {/* Mobile brand */}
           <div className="flex items-center gap-3 mb-6 lg:hidden">
-            <div className="site-header-logo flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-white shadow-xs p-1 flex-shrink-0">
+            <div className="site-header-logo flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-white shadow-xs p-1 flex-shrink-0 card-3d-lift shimmer-hover hover:scale-105 transition-transform">
               <img src={shnoorLogo} alt="Shnoor" className="h-full w-full object-contain" width="36" height="36" loading="lazy" decoding="async" />
             </div>
             <div>
@@ -815,8 +597,8 @@ const Register = () => {
 
           {/* Client org banner — shown when registering via a client token */}
           {clientInfo && (
-            <div className="mb-5 flex items-center gap-3 bg-shnoor-indigo/10 border border-shnoor-indigo/30 rounded-xl px-4 py-3">
-              <div className="w-8 h-8 rounded-lg bg-shnoor-indigo flex items-center justify-center flex-shrink-0">
+            <div className="mb-5 flex items-center gap-3 bg-shnoor-indigo/10 border border-shnoor-indigo/30 rounded-xl px-4 py-3 card-3d-subtle hover:shadow-sm transition-all">
+              <div className="w-8 h-8 rounded-lg bg-shnoor-indigo flex items-center justify-center flex-shrink-0 icon-gesture">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
                   <polyline points="9 22 9 12 15 12 15 22" />
@@ -855,14 +637,14 @@ const Register = () => {
 
           {/* Heading */}
           <div className="mb-6">
-            <h1 className="text-2xl font-extrabold text-shnoor-navy">{STEP_META[step].title}</h1>
+            <h1 className="text-2xl font-extrabold text-shnoor-navy tracking-tight">{STEP_META[step].title}</h1>
             <p className="text-sm text-shnoor-soft mt-0.5">{STEP_META[step].desc}</p>
           </div>
 
           {/* API error */}
           {apiError && (
-            <div className="mb-5 flex items-start gap-3 bg-shnoor-dangerLight border border-shnoor-dangerLight text-shnoor-danger rounded-xl px-4 py-3 text-sm">
-              <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 16 16">
+            <div className="mb-5 flex items-start gap-3 bg-shnoor-dangerLight border border-shnoor-dangerLight text-shnoor-danger rounded-xl px-4 py-3 text-sm modal-3d-entrance shadow-xs">
+              <svg className="w-4 h-4 mt-0.5 flex-shrink-0 animate-pulse-subtle" fill="currentColor" viewBox="0 0 16 16">
                 <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zm0 12a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm0-9a1 1 0 0 0-1 1v6a1 1 0 0 0 2 0V4a1 1 0 0 0-1-1z" />
               </svg>
               {apiError}
@@ -871,14 +653,16 @@ const Register = () => {
 
           {/* Step fields — wrapped in form for enter-key and validation */}
           <form onSubmit={step < TOTAL_STEPS - 1 ? (e) => { e.preventDefault(); goNext(); } : (e) => { e.preventDefault(); handleSubmit(); }}>
-            {renderStep()}
+            <div className="animate-entry-3d">
+              {renderStep()}
+            </div>
 
             {/* Navigation */}
             <div className={`flex flex-col-reverse sm:flex-row gap-3 mt-8 ${step === 0 ? 'justify-end' : 'justify-between'}`}>
               {step > 0 && (
                 <Button type="button" onClick={goBack} disabled={isLoading}
-                  className="w-full sm:w-auto h-[50px] px-6 rounded-lg font-semibold text-shnoor-navy border-2 border-shnoor-mist hover:border-shnoor-indigo hover:bg-shnoor-lavender transition-all flex items-center justify-center gap-2">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  className="w-full sm:w-auto h-[50px] px-6 rounded-lg font-semibold text-shnoor-navy border-2 border-shnoor-mist hover:border-shnoor-indigo hover:bg-shnoor-lavender transition-all flex items-center justify-center gap-2 btn-action-gesture">
+                  <svg className="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
                   </svg>
                   Back
@@ -886,14 +670,14 @@ const Register = () => {
               )}
 
               {step < TOTAL_STEPS - 1 ? (
-                <Button type="submit" variant="primary" className="w-full sm:flex-1 !h-[50px]">
+                <Button type="submit" variant="primary" className="w-full sm:flex-1 !h-[50px] btn-action-gesture shimmer-hover">
                   Continue
-                  <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                   </svg>
                 </Button>
               ) : (
-                <Button type="submit" variant="primary" className="w-full sm:flex-1 !h-[50px]" disabled={isLoading || !termsAccepted}>
+                <Button type="submit" variant="primary" className="w-full sm:flex-1 !h-[50px] btn-action-gesture shimmer-hover" disabled={isLoading || !termsAccepted}>
                   {isLoading ? (
                     <>
                       <div className="w-5 h-5 border-[3px] border-white border-t-transparent rounded-full animate-spin" />
@@ -901,7 +685,7 @@ const Register = () => {
                     </>
                   ) : (
                     <>
-                      <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 mr-1 icon-gesture" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       Confirm & Register
@@ -916,7 +700,7 @@ const Register = () => {
           <div className="mt-7 pt-6 border-t border-shnoor-lavender">
             <p className="text-center text-sm text-shnoor-soft">
               Already registered?{' '}
-              <Link to="/login" className="text-shnoor-indigo font-semibold hover:text-shnoor-navy transition-colors">
+              <Link to="/login" className="text-shnoor-indigo font-semibold hover:text-shnoor-navy transition-colors inline-block hover:underline">
                 Sign in
               </Link>
             </p>
@@ -932,15 +716,15 @@ const Register = () => {
 
       {/* Terms and Conditions Modal */}
       {showTermsModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-fadeIn">
+          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl modal-3d-entrance border border-shnoor-mist">
             {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-shnoor-mist bg-shnoor-lavender">
               <h2 className="text-xl font-extrabold text-shnoor-navy">Terms and Conditions</h2>
               <button
                 type="button"
                 onClick={() => setShowTermsModal(false)}
-                className="text-shnoor-soft hover:text-shnoor-navy transition-colors p-1"
+                className="text-shnoor-soft hover:text-shnoor-navy transition-all p-1.5 rounded-lg hover:bg-black/5 hover:scale-110 active:scale-95"
               >
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <line x1="18" y1="6" x2="6" y2="18"></line>

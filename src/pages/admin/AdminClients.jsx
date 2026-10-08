@@ -434,7 +434,7 @@ const CreateClientModal = ({ onClose, onCreated, subscriptionPlans = [] }) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white w-full h-auto max-h-[90vh] rounded-2xl shadow-2xl max-w-2xl flex flex-col animate-in zoom-in-95 duration-200">
+      <div className="bg-white w-full h-auto max-h-[90vh] rounded-2xl shadow-2xl max-w-2xl flex flex-col modal-3d-entrance">
         <div className="px-6 py-4 border-b border-[#D1D1E6] flex items-center justify-between rounded-t-2xl bg-white z-10 flex-shrink-0">
           <h2 className="text-lg font-bold text-gray-900">Create New Client</h2>
           <button type="button" onClick={onClose} className="text-[#9A9AC9] hover:text-gray-900 w-8 h-8 flex items-center justify-center bg-gray-50 hover:bg-gray-100 rounded-full transition-colors text-lg leading-none">✕</button>
@@ -789,7 +789,7 @@ const ClientDetailPanel = ({ client, onClose, onStatusChange, onDelete, onClient
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div className="bg-white dark:bg-[#11111d] w-full h-full sm:h-auto sm:max-h-[90vh] sm:rounded-2xl shadow-2xl sm:max-w-lg flex flex-col animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200">
+      <div className="bg-white dark:bg-[#11111d] w-full h-full sm:h-auto sm:max-h-[90vh] sm:rounded-2xl shadow-2xl sm:max-w-lg flex flex-col modal-3d-entrance">
         <div className="px-6 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between sticky top-0 bg-white dark:bg-[#11111d] z-10 flex-shrink-0">
           <div>
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">{client.company_name || client.name}</h2>
@@ -1075,52 +1075,56 @@ const AdminClients = ({ isEmbedded = false }) => {
                           <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
                             <Building2 size={18} className="text-[#6A6A9D] dark:text-gray-400" />
                           </div>
-                          <div>
-                            <p className="font-bold text-gray-900 dark:text-white">{client.company_name || client.name}</p>
-                            <p className="text-sm text-[#9A9AC9] dark:text-gray-400">{client.email}</p>
+                          <div className="min-w-0">
+                            <p className="font-semibold text-gray-900 dark:text-gray-200 truncate">
+                              {client.company_name || client.name}
+                            </p>
+                            <p className="text-xs text-[#9A9AC9] dark:text-gray-400 truncate">
+                              {client.email}
+                            </p>
                           </div>
                         </div>
                       </td>
-                      <td className="px-5 py-4 font-semibold text-gray-900 dark:text-gray-200">
-                        {client.plan_id === 'trial' ? '7-Day Trial' : (subscriptionPlans.find(p => p.plan_id === client.plan_id)?.name || client.plan_id || 'Basic')}
-                      </td>
-                      <td className="px-5 py-4 text-[#9A9AC9] dark:text-gray-400 capitalize">
-                        {client.plan_id === 'trial' ? '7 Days' : (client.subscription_duration?.toLowerCase().replace('_', ' ') || '30 Days')}
-                      </td>
-                      <td className="px-5 py-4">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${client.payment_status === 'PAID' ? 'bg-[#dcfce7] dark:bg-green-900/30 text-[#166534] dark:text-green-400' : 'bg-[#fee2e2] dark:bg-red-900/30 text-[#991b1b] dark:text-red-400'}`}>
-                          {client.payment_status || 'UNPAID'}
-                        </span>
-                      </td>
-                      <td className="px-5 py-4 text-[#9A9AC9] dark:text-gray-400">
-                        {client.subscription_end_date ? new Date(client.subscription_end_date).toLocaleDateString('en-GB') : '-'}
-                      </td>
-                      <td className="px-5 py-4 font-semibold text-gray-900 dark:text-gray-200">
-                        <span className={`${daysLeft === 'Expired' ? 'text-red-600 dark:text-red-400' : (parseInt(daysLeft) <= 7 ? 'text-amber-500 dark:text-amber-400' : 'text-gray-900 dark:text-gray-200')}`}>
-                          {daysLeft}
-                        </span>
-                      </td>
-                      <td className="px-5 py-4">
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold ${client.status === 'active' ? 'bg-[#dcfce7] dark:bg-green-900/30 text-[#166534] dark:text-green-400' : 'bg-[#fee2e2] dark:bg-red-900/30 text-[#991b1b] dark:text-red-400'}`}>
-                          {client.status === 'active' ? <CheckCircle size={12} /> : <XCircle size={12} />}
-                          {client.status === 'active' ? 'Active' : 'Suspended'}
-                        </span>
-                      </td>
-                      <td className="px-5 py-4 text-center">
-                        <button
-                          onClick={() => setSelectedClient(client)}
-                          className="h-8 px-4 bg-slate-100 dark:bg-[#383863] hover:bg-slate-200 dark:hover:bg-[#403f75] text-slate-800 dark:text-white rounded-lg text-xs font-bold transition-colors cursor-pointer"
-                        >
-                          Manage
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                        <td className="px-5 py-4 font-semibold text-gray-900 dark:text-gray-200">
+                          {client.plan_id === 'trial' ? '7-Day Trial' : (subscriptionPlans.find(p => p.plan_id === client.plan_id)?.name || client.plan_id || 'Basic')}
+                        </td>
+                        <td className="px-5 py-4 text-[#9A9AC9] dark:text-gray-400 capitalize">
+                          {client.plan_id === 'trial' ? '7 Days' : (client.subscription_duration?.toLowerCase().replace('_', ' ') || '30 Days')}
+                        </td>
+                        <td className="px-5 py-4">
+                          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${client.payment_status === 'PAID' ? 'bg-[#dcfce7] dark:bg-green-900/30 text-[#166534] dark:text-green-400' : 'bg-[#fee2e2] dark:bg-red-900/30 text-[#991b1b] dark:text-red-400'}`}>
+                            {client.payment_status || 'UNPAID'}
+                          </span>
+                        </td>
+                        <td className="px-5 py-4 text-[#9A9AC9] dark:text-gray-400">
+                          {client.subscription_end_date ? new Date(client.subscription_end_date).toLocaleDateString('en-GB') : '-'}
+                        </td>
+                        <td className="px-5 py-4 font-semibold text-gray-900 dark:text-gray-200">
+                          <span className={`${daysLeft === 'Expired' ? 'text-red-600 dark:text-red-400' : (parseInt(daysLeft) <= 7 ? 'text-amber-500 dark:text-amber-400' : 'text-gray-900 dark:text-gray-200')}`}>
+                            {daysLeft}
+                          </span>
+                        </td>
+                        <td className="px-5 py-4">
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold ${client.status === 'active' ? 'bg-[#dcfce7] dark:bg-green-900/30 text-[#166534] dark:text-green-400' : 'bg-[#fee2e2] dark:bg-red-900/30 text-[#991b1b] dark:text-red-400'}`}>
+                            {client.status === 'active' ? <CheckCircle size={12} /> : <XCircle size={12} />}
+                            {client.status === 'active' ? 'Active' : 'Suspended'}
+                          </span>
+                        </td>
+                        <td className="px-5 py-4 text-center">
+                          <button
+                            onClick={() => setSelectedClient(client)}
+                            className="h-8 px-4 bg-slate-100 dark:bg-[#383863] hover:bg-slate-200 dark:hover:bg-[#403f75] text-slate-800 dark:text-white rounded-lg text-xs font-bold transition-colors cursor-pointer btn-action-gesture"
+                          >
+                            Manage
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
       )}
 
       {/* Modals */}

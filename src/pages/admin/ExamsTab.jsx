@@ -175,7 +175,7 @@ const ExamsTab = ({
                   return (
                     <div
                       key={test.id}
-                      className={`bg-white dark:bg-[#1A1A32] ${cardBorder} rounded-2xl shadow-[0_2px_12px_rgba(14,14,39,0.04)] hover:shadow-[0_12px_28px_rgba(64,63,117,0.12)] transition-all duration-200 flex flex-col justify-between group relative min-h-[310px] h-full overflow-hidden`}
+                      className={`bg-white dark:bg-[#1A1A32] ${cardBorder} rounded-2xl shadow-[0_2px_12px_rgba(14,14,39,0.04)] hover:shadow-[0_12px_28px_rgba(64,63,117,0.12)] transition-all duration-300 flex flex-col justify-between group relative min-h-[310px] h-full overflow-hidden card-3d-lift shimmer-hover transform-style-3d border-glow-hover`}
                     >
                       {/* Top color accent strip (3-4px) */}
                       <div className={`h-[3.5px] w-full bg-gradient-to-r ${topAccentGradient}`} />
@@ -192,7 +192,7 @@ const ExamsTab = ({
                                 className="w-4 h-4 text-[#403f75] border-slate-300 rounded focus:ring-2 focus:ring-[#403f75] cursor-pointer"
                                 title="Select exam"
                               />
-                              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/70 text-[#403f75] dark:text-indigo-300 flex items-center justify-center flex-shrink-0 border border-indigo-100/80 dark:border-indigo-900/60 shadow-2xs">
+                              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/70 text-[#403f75] dark:text-indigo-300 flex items-center justify-center flex-shrink-0 border border-indigo-100/80 dark:border-indigo-900/60 shadow-2xs icon-gesture layer-3d-deep">
                                 <FileSpreadsheet size={18} />
                               </div>
                             </div>
@@ -282,7 +282,7 @@ const ExamsTab = ({
                           {/* Title & Metadata */}
                           <div className="space-y-2">
                             <h3
-                              className="font-bold text-base sm:text-lg text-slate-900 dark:text-white line-clamp-2 leading-snug break-words group-hover:text-[#403f75] dark:group-hover:text-indigo-300 transition-colors"
+                              className="font-bold text-base sm:text-lg text-slate-900 dark:text-white line-clamp-2 leading-snug break-words group-hover:text-[#403f75] dark:group-hover:text-indigo-300 transition-colors layer-3d-float"
                               title={test.name}
                             >
                               {test.name}
@@ -312,7 +312,7 @@ const ExamsTab = ({
                                 <Users size={16} />
                               </div>
                               <div className="min-w-0">
-                                <p className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white leading-tight truncate">{attempts}</p>
+                                <p className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white leading-tight truncate layer-3d-float">{attempts}</p>
                                 <p className="text-xs font-medium text-slate-500 dark:text-slate-400 leading-tight mt-0.5">Attempted</p>
                               </div>
                             </div>
@@ -322,7 +322,7 @@ const ExamsTab = ({
                                 <CheckCircle2 size={16} />
                               </div>
                               <div className="min-w-0">
-                                <p className="text-sm sm:text-base font-extrabold text-emerald-600 dark:text-emerald-400 leading-tight truncate">{passedCount} ({passRate}%)</p>
+                                <p className="text-sm sm:text-base font-extrabold text-emerald-600 dark:text-emerald-400 leading-tight truncate layer-3d-float">{passedCount} ({passRate}%)</p>
                                 <p className="text-xs font-medium text-slate-500 dark:text-slate-400 leading-tight mt-0.5">Passed</p>
                               </div>
                             </div>
@@ -337,7 +337,7 @@ const ExamsTab = ({
                                   e.stopPropagation();
                                   setSelectedExamId(test.id);
                                 }}
-                                className="h-full flex-1 inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#403f75] to-[#57569b] hover:from-[#343360] hover:to-[#4a4988] active:scale-98 text-white text-xs sm:text-sm font-bold rounded-xl transition-all shadow-md shadow-[#403f75]/20 cursor-pointer"
+                                className="h-full flex-1 inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#403f75] to-[#57569b] hover:from-[#343360] hover:to-[#4a4988] active:scale-98 text-white text-xs sm:text-sm font-bold rounded-xl transition-all shadow-md shadow-[#403f75]/20 cursor-pointer btn-action-gesture"
                               >
                                 <BarChart2 size={15} />
                                 <span>Results</span>
@@ -345,29 +345,29 @@ const ExamsTab = ({
                             ) : (
                               <>
                                 <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setEditingTest(test);
-                                    setShowCreateTest(true);
-                                  }}
-                                  className="h-full flex-1 inline-flex items-center justify-center gap-1.5 bg-slate-50 dark:bg-[#1E1E38] hover:bg-indigo-50/70 dark:hover:bg-indigo-950/40 text-slate-700 dark:text-slate-200 hover:text-[#403f75] dark:hover:text-indigo-300 text-xs sm:text-sm font-bold rounded-xl transition-all cursor-pointer border border-slate-200/90 dark:border-slate-700 hover:border-indigo-200/80 shadow-2xs"
-                                >
-                                  <Edit2 size={14} />
-                                  <span>Edit</span>
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleTogglePublish(test.id, test.status);
-                                  }}
-                                  className="btn-publish h-full flex-1 inline-flex items-center justify-center gap-1.5 bg-gradient-to-r from-[#403f75] to-[#57569b] hover:from-[#343360] hover:to-[#4a4988] active:scale-98 text-white text-xs sm:text-sm font-bold rounded-xl transition-all shadow-md shadow-[#403f75]/20 cursor-pointer"
-                                >
-                                  <CheckCircle2 size={14} className="text-white" />
-                                  <span>Publish</span>
-                                </button>
-                              </>
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setEditingTest(test);
+                                  setShowCreateTest(true);
+                                }}
+                                className="h-full flex-1 inline-flex items-center justify-center gap-1.5 bg-slate-50 dark:bg-[#1E1E38] hover:bg-indigo-50/70 dark:hover:bg-indigo-950/40 text-slate-700 dark:text-slate-200 hover:text-[#403f75] dark:hover:text-indigo-300 text-xs sm:text-sm font-bold rounded-xl transition-all cursor-pointer border border-slate-200/90 dark:border-slate-700 hover:border-indigo-200/80 shadow-2xs btn-action-gesture"
+                              >
+                                <Edit2 size={14} />
+                                <span>Edit</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleTogglePublish(test.id, test.status);
+                                }}
+                                className="btn-publish h-full flex-1 inline-flex items-center justify-center gap-1.5 bg-gradient-to-r from-[#403f75] to-[#57569b] hover:from-[#343360] hover:to-[#4a4988] active:scale-98 text-white text-xs sm:text-sm font-bold rounded-xl transition-all shadow-md shadow-[#403f75]/20 cursor-pointer btn-action-gesture"
+                              >
+                                <CheckCircle2 size={14} className="text-white" />
+                                <span>Publish</span>
+                              </button>
+                            </>
                             )}
 
                             {/* Delete Button with high-visibility hover state */}
@@ -377,7 +377,7 @@ const ExamsTab = ({
                                 e.stopPropagation();
                                 setTestToDelete(test);
                               }}
-                              className="h-full w-10 sm:w-11 rounded-xl text-slate-400 hover:text-red-600 bg-slate-50 dark:bg-slate-800/80 hover:bg-red-50 dark:hover:bg-red-950/60 border border-slate-200/80 dark:border-slate-700 hover:border-red-300 dark:hover:border-red-800/80 flex items-center justify-center transition-all cursor-pointer shadow-2xs hover:shadow-xs group/del active:scale-95 flex-shrink-0"
+                              className="h-full w-10 sm:w-11 rounded-xl text-slate-400 hover:text-red-600 bg-slate-50 dark:bg-slate-800/80 hover:bg-red-50 dark:hover:bg-red-950/60 border border-slate-200/80 dark:border-slate-700 hover:border-red-300 dark:hover:border-red-800/80 flex items-center justify-center transition-all cursor-pointer shadow-2xs hover:shadow-xs group/del active:scale-95 flex-shrink-0 btn-action-gesture"
                               title="Delete Exam"
                               aria-label={`Delete ${test.name}`}
                             >

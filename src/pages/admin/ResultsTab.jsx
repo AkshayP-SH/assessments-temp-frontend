@@ -218,32 +218,32 @@ const ResultsTab = React.memo(({
         const flaggedCount = selectedExamStudents.filter(s => s.flagged === true).length;
 
         return (
-          <div className="surface-card p-5">
+          <div className="surface-card p-5 card-3d-lift shimmer-hover border-glow-hover animate-entry-3d transform-style-3d">
             <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
               <div className="text-center">
                 <p className="text-xs text-slate-500 font-medium mb-1">Total Attempts</p>
-                <p className="text-2xl font-bold text-slate-900 dark:text-white">{selectedExamStudents.length}</p>
+                <p className="text-2xl font-bold text-slate-900 dark:text-white layer-3d-float">{selectedExamStudents.length}</p>
               </div>
               <div className="text-center md:border-l md:border-slate-200 dark:md:border-slate-800">
                 <p className="text-xs text-slate-500 font-medium mb-1">Average Score</p>
-                <p className="text-2xl font-bold text-[#403f75] dark:text-[#a5a4e8]">{avgScore.toFixed(1)}/{maxTotal}</p>
+                <p className="text-2xl font-bold text-[#403f75] dark:text-[#a5a4e8] layer-3d-float">{avgScore.toFixed(1)}/{maxTotal}</p>
               </div>
               <div className="text-center md:border-l md:border-slate-200 dark:md:border-slate-800">
                 <p className="text-xs text-slate-500 font-medium mb-1">Highest Score</p>
-                <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{highestScore}/{maxTotal}</p>
+                <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 layer-3d-float">{highestScore}/{maxTotal}</p>
               </div>
               <div className="text-center md:border-l md:border-slate-200 dark:md:border-slate-800">
                 <p className="text-xs text-slate-500 font-medium mb-1">Lowest Score</p>
-                <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">{lowestScore}/{maxTotal}</p>
+                <p className="text-2xl font-bold text-amber-600 dark:text-amber-400 layer-3d-float">{lowestScore}/{maxTotal}</p>
               </div>
               <div className="text-center md:border-l md:border-slate-200">
                 <p className="text-xs text-slate-500 font-medium mb-1">Pass Rate</p>
-                <p className="text-2xl font-bold text-emerald-600">{passRate.toFixed(0)}%</p>
+                <p className="text-2xl font-bold text-emerald-600 layer-3d-float">{passRate.toFixed(0)}%</p>
                 <p className="text-xs text-slate-400 mt-0.5">({passedCount}/{selectedExamStudents.length})</p>
               </div>
               <div className="text-center md:border-l md:border-slate-200">
                 <p className="text-xs text-slate-500 font-medium mb-1">Flagged</p>
-                <p className="text-2xl font-bold text-rose-600">{flaggedCount}</p>
+                <p className="text-2xl font-bold text-rose-600 layer-3d-float">{flaggedCount}</p>
                 <p className="text-xs text-slate-400 mt-0.5">(3+ violations)</p>
               </div>
             </div>
