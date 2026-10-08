@@ -47,7 +47,7 @@ const OrganisationSignup = () => {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showOtp, setShowOtp] = useState(false);
-  const { timeLeft, formattedTime } = useTimer(showOtp ? 60 : 0, () => {});
+  const { formattedTime } = useTimer(showOtp ? 60 : 0, () => {});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [emailError, setEmailError] = useState('');
@@ -59,6 +59,10 @@ const OrganisationSignup = () => {
     setError('');
 
     if (name === 'email') {
+      if (showOtp && value.trim().toLowerCase() !== formData.email.trim().toLowerCase()) {
+        setShowOtp(false);
+        setFormData(prev => ({ ...prev, email: value, otp: '' }));
+      }
       if (value && !isBusinessEmail(value)) {
         setEmailError("Please use your organization's work email address.");
       } else {
@@ -97,7 +101,7 @@ if (emailError) {
         const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/signup/organisation/send-otp`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: formData.email })
+          body: JSON.stringify({ email: formData.email, name: formData.orgName })
         });
         const data = await res.json();
         if (!res.ok || !data.success) throw new Error(data.message || 'Failed to send OTP');
@@ -405,7 +409,7 @@ if (emailError) {
                                     const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/signup/organisation/send-otp`, {
                                         method: 'POST',
                                         headers: { 'Content-Type': 'application/json' },
-                                        body: JSON.stringify({ email: formData.email })
+                                        body: JSON.stringify({ email: formData.email, name: formData.orgName })
                                     });
                                     const data = await res.json();
                                     if (!res.ok || !data.success) throw new Error(data.message || 'Failed to resend OTP');

@@ -1075,7 +1075,16 @@ const AdminClients = ({ isEmbedded = false }) => {
                           <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
                             <Building2 size={18} className="text-[#6A6A9D] dark:text-gray-400" />
                           </div>
-                        </td>
+                          <div className="min-w-0">
+                            <p className="font-semibold text-gray-900 dark:text-gray-200 truncate">
+                              {client.company_name || client.name}
+                            </p>
+                            <p className="text-xs text-[#9A9AC9] dark:text-gray-400 truncate">
+                              {client.email}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
                         <td className="px-5 py-4 font-semibold text-gray-900 dark:text-gray-200">
                           {client.plan_id === 'trial' ? '7-Day Trial' : (subscriptionPlans.find(p => p.plan_id === client.plan_id)?.name || client.plan_id || 'Basic')}
                         </td>
@@ -1116,7 +1125,6 @@ const AdminClients = ({ isEmbedded = false }) => {
               </table>
             </div>
           </div>
-        </div>
       )}
 
       {/* Modals */}
