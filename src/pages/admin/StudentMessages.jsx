@@ -94,25 +94,51 @@ const StudentMessages = () => {
   // Real-time socket for new student messages
   const { getSocket } = useSupportSocket({ isAdmin: true, enabled: true });
 
+  // Mark a student's conversation read in the DB and tell the header bell the new unread total
+  const markStudentRead = useCallback(async (studentId) => {
+    const token = localStorage.getItem('adminToken');
+    await fetch(`${API_URL}/api/student-messages/conversation/${encodeURIComponent(studentId)}/read`, {
+      method: 'PATCH',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const countRes = await fetch(`${API_URL}/api/student-messages/unread-count`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const countData = await countRes.json();
+    if (countData.success) {
+      window.dispatchEvent(new CustomEvent('admin-conversation-read', { detail: { studentId, count: countData.count } }));
+      if (countData.count === 0) {
+        window.dispatchEvent(new Event('admin-messages-all-read'));
+      }
+    }
+  }, []);
+
   useEffect(() => {
     const socket = getSocket();
     if (!socket) return;
 
     const handleNewStudentMessage = (data) => {
+      const current = selectedMessageRef.current;
+      const isOpenConversation = !!current && current.student_id === data.studentId;
+
       setMessages(prev => {
         const exists = prev.find(m => m.student_id === data.studentId);
         if (exists) {
           return prev.map(m =>
             m.student_id === data.studentId
-              ? { ...m, message: data.messagePreview, unread_count: (parseInt(m.unread_count) || 0) + 1, created_at: data.createdAt }
+              ? { ...m, message: data.messagePreview, unread_count: isOpenConversation ? 0 : (parseInt(m.unread_count) || 0) + 1, created_at: data.createdAt }
               : m
           );
         }
         return prev;
       });
 
-      const current = selectedMessageRef.current;
-      if (current && current.student_id === data.studentId) {
+      // The admin is already viewing this conversation, so the new message is read right away
+      if (isOpenConversation) {
+        markStudentRead(data.studentId).catch(err => console.error('Error marking new message as read:', err));
+      }
+
+      if (isOpenConversation) {
         // Real-time: Add message to conversation thread
         setConversationThread(prev => [...prev, {
           id: data.id,
@@ -126,7 +152,24 @@ const StudentMessages = () => {
 
     socket.on('support:new-student-message', handleNewStudentMessage);
     return () => socket.off('support:new-student-message', handleNewStudentMessage);
-  }, [getSocket]);
+  }, [getSocket, markStudentRead]);
+
+  // An open conversation is always read: clear any unread count it picks up (live message, list refresh, reconnect)
+  const markingReadRef = useRef(new Set());
+  useEffect(() => {
+    const studentId = selectedMessage?.student_id;
+    if (!studentId || markingReadRef.current.has(studentId)) return;
+    const thread = messages.find(m => m.student_id === studentId);
+    if (!thread || !(parseInt(thread.unread_count) > 0)) return;
+
+    markingReadRef.current.add(studentId);
+    setMessages(prev =>
+      prev.map(m => m.student_id === studentId ? { ...m, unread_count: 0, status: 'read' } : m)
+    );
+    markStudentRead(studentId)
+      .catch(err => console.error('Error marking open conversation as read:', err))
+      .finally(() => markingReadRef.current.delete(studentId));
+  }, [messages, selectedMessage, markStudentRead]);
 
   const fetchMessages = useCallback(async () => {
     try {
@@ -196,21 +239,10 @@ const StudentMessages = () => {
   const markConversationAsRead = async (msg) => {
     if (!msg.student_id || !parseInt(msg.unread_count)) return;
     try {
-      const token = localStorage.getItem('adminToken');
-      await fetch(`${API_URL}/api/student-messages/conversation/${encodeURIComponent(msg.student_id)}/read`, {
-        method: 'PATCH',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
       setMessages(prev =>
         prev.map(m => m.student_id === msg.student_id ? { ...m, unread_count: 0, status: 'read' } : m)
       );
-      const countRes = await fetch(`${API_URL}/api/student-messages/unread-count`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const countData = await countRes.json();
-      if (countData.success && countData.count === 0) {
-        window.dispatchEvent(new Event('admin-messages-all-read'));
-      }
+      await markStudentRead(msg.student_id);
     } catch (err) {
       console.error('Error marking conversation as read:', err);
     }
@@ -331,6 +363,15 @@ const StudentMessages = () => {
         setReplyMessage('');
         removeImage();
         setShowEmojiPicker(false);
+
+        // Replying means the admin has seen every student message in this conversation
+        const repliedStudentId = selectedMessage.student_id;
+        if (repliedStudentId) {
+          setMessages(prev =>
+            prev.map(m => m.student_id === repliedStudentId ? { ...m, unread_count: 0, status: 'read' } : m)
+          );
+          markStudentRead(repliedStudentId).catch(err => console.error('Error marking conversation as read after reply:', err));
+        }
       } else {
         throw new Error(data.message || 'Failed to send reply');
       }

@@ -419,6 +419,7 @@ const Dashboard = () => {
         studentId={studentId}
         institute={institute}
         onLogout={handleLogout}
+        showNotifications
       />
 
       {/* Main content */}
