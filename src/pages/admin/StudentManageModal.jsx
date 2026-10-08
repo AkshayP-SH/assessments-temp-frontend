@@ -45,7 +45,7 @@ const StudentManageModal = ({
   });
 
   return (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4 animate-fade-in">
       <div className="bg-white dark:bg-[#1E1E38] rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col border border-slate-200 dark:border-slate-800">
         <div className="bg-[#403f75] dark:bg-indigo-600 px-6 py-4 flex justify-between items-center text-white flex-shrink-0">
           <div>

@@ -56,78 +56,78 @@ const ViolationsTab = ({
             className="basic-single"
             classNamePrefix="select"
             styles={{
-                control: (base, state) => ({
-                    ...base,
-                    minHeight: '44px',
-                    borderRadius: '0.75rem',
-                    backgroundColor: 'rgb(var(--theme-card))',
-                    borderColor: state.isFocused ? '#403f75' : 'rgb(var(--theme-shell-stroke))',
-                    boxShadow: state.isFocused ? '0 0 0 2px rgba(64, 63, 117, 0.15)' : 'none',
-                    padding: '2px 4px',
-                    cursor: 'pointer',
-                    '&:hover': {
-                        borderColor: '#403f75'
-                    }
-                }),
-                valueContainer: (base) => ({
-                    ...base,
-                    padding: '2px 8px',
-                    gap: '4px',
-                }),
-                singleValue: (base) => ({
-                    ...base,
-                    color: 'rgb(var(--theme-text))',
-                }),
-                input: (base) => ({
-                    ...base,
-                    color: 'rgb(var(--theme-text))',
-                    margin: '0 4px',
-                    padding: 0,
-                }),
-                placeholder: (base) => ({
-                    ...base,
-                    color: 'rgb(var(--theme-text-muted))',
-                    fontSize: '0.875rem',
-                    marginLeft: '4px',
-                    marginRight: '4px',
-                }),
-                menu: (base) => ({
-                    ...base,
-                    maxHeight: '300px',
-                    backgroundColor: 'rgb(var(--theme-card))',
-                    border: '1px solid rgb(var(--theme-border))',
-                    zIndex: 9999,
-                }),
-                menuList: (base) => ({
-                    ...base,
-                    maxHeight: '300px',
-                    overflowY: 'auto',
-                    '::-webkit-scrollbar': {
-                        width: '8px',
-                    },
-                    '::-webkit-scrollbar-track': {
-                        background: 'rgb(var(--theme-panel))',
-                        borderRadius: '10px',
-                    },
-                    '::-webkit-scrollbar-thumb': {
-                        background: 'rgb(var(--theme-border))',
-                        borderRadius: '10px',
-                    },
-                    '::-webkit-scrollbar-thumb:hover': {
-                        background: 'rgb(var(--theme-accent))',
-                    },
-                }),
-                option: (base, state) => ({
-                    ...base,
-                    backgroundColor: state.isSelected
-                        ? 'rgb(var(--theme-accent))'
-                        : state.isFocused
-                            ? 'rgb(var(--theme-panel))'
-                            : 'rgb(var(--theme-card))',
-                    color: state.isSelected ? 'white' : 'rgb(var(--theme-text))',
-                    cursor: 'pointer',
-                    padding: '10px 12px',
-                }),
+              control: (base, state) => ({
+                ...base,
+                minHeight: '44px',
+                borderRadius: '0.75rem',
+                backgroundColor: 'rgb(var(--theme-card))',
+                borderColor: state.isFocused ? '#403f75' : 'rgb(var(--theme-shell-stroke))',
+                boxShadow: state.isFocused ? '0 0 0 2px rgba(64, 63, 117, 0.15)' : 'none',
+                padding: '2px 4px',
+                cursor: 'pointer',
+                '&:hover': {
+                  borderColor: '#403f75'
+                }
+              }),
+              valueContainer: (base) => ({
+                ...base,
+                padding: '2px 8px',
+                gap: '4px',
+              }),
+              singleValue: (base) => ({
+                ...base,
+                color: 'rgb(var(--theme-text))',
+              }),
+              input: (base) => ({
+                ...base,
+                color: 'rgb(var(--theme-text))',
+                margin: '0 4px',
+                padding: 0,
+              }),
+              placeholder: (base) => ({
+                ...base,
+                color: 'rgb(var(--theme-text-muted))',
+                fontSize: '0.875rem',
+                marginLeft: '4px',
+                marginRight: '4px',
+              }),
+              menu: (base) => ({
+                ...base,
+                maxHeight: '300px',
+                backgroundColor: 'rgb(var(--theme-card))',
+                border: '1px solid rgb(var(--theme-border))',
+                zIndex: 9999,
+              }),
+              menuList: (base) => ({
+                ...base,
+                maxHeight: '300px',
+                overflowY: 'auto',
+                '::-webkit-scrollbar': {
+                  width: '8px',
+                },
+                '::-webkit-scrollbar-track': {
+                  background: 'rgb(var(--theme-panel))',
+                  borderRadius: '10px',
+                },
+                '::-webkit-scrollbar-thumb': {
+                  background: 'rgb(var(--theme-border))',
+                  borderRadius: '10px',
+                },
+                '::-webkit-scrollbar-thumb:hover': {
+                  background: 'rgb(var(--theme-accent))',
+                },
+              }),
+              option: (base, state) => ({
+                ...base,
+                backgroundColor: state.isSelected
+                  ? 'rgb(var(--theme-accent))'
+                  : state.isFocused
+                    ? 'rgb(var(--theme-panel))'
+                    : 'rgb(var(--theme-card))',
+                color: state.isSelected ? 'white' : 'rgb(var(--theme-text))',
+                cursor: 'pointer',
+                padding: '10px 12px',
+              }),
             }}
             menuPortalTarget={document.body}
           />
@@ -211,9 +211,8 @@ const ViolationsTab = ({
                     {violationsByStudent.map((student) => (
                       <tr
                         key={student.student_id}
-                        className={`border-b border-shnoor-light hover:bg-shnoor-lavender transition-colors ${
-                          student.total_violations >= 5 ? 'bg-shnoor-lavender/50' : ''
-                        }`}
+                        className={`border-b border-shnoor-light hover:bg-shnoor-lavender transition-colors ${student.total_violations >= 5 ? 'bg-shnoor-lavender/50' : ''
+                          }`}
                       >
                         <td className="px-4 py-3 text-sm text-shnoor-indigoMedium">{student.student_id}</td>
                         <td className="px-4 py-3 text-sm font-medium text-shnoor-navy">{student.student_name}</td>
@@ -221,68 +220,62 @@ const ViolationsTab = ({
                         <td className="px-4 py-3 text-sm text-shnoor-indigoMedium">{student.student_phone || 'N/A'}</td>
                         <td className="px-4 py-3 text-center">
                           <span
-                            className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${
-                              student.no_face_count > 0
+                            className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${student.no_face_count > 0
                                 ? 'bg-shnoor-indigo/10 text-shnoor-indigo'
                                 : 'bg-shnoor-lavender text-shnoor-soft'
-                            }`}
+                              }`}
                           >
                             {student.no_face_count}
                           </span>
                         </td>
                         <td className="px-4 py-3 text-center">
                           <span
-                            className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${
-                              student.multiple_faces_count > 0
+                            className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${student.multiple_faces_count > 0
                                 ? 'bg-shnoor-indigo/10 text-shnoor-indigo'
                                 : 'bg-shnoor-lavender text-shnoor-soft'
-                            }`}
+                              }`}
                           >
                             {student.multiple_faces_count}
                           </span>
                         </td>
                         <td className="px-4 py-3 text-center">
                           <span
-                            className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${
-                              student.phone_detected_count > 0
+                            className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${student.phone_detected_count > 0
                                 ? 'bg-shnoor-indigoMedium/10 text-shnoor-indigoMedium'
                                 : 'bg-shnoor-lavender text-shnoor-soft'
-                            }`}
+                              }`}
                           >
                             {student.phone_detected_count}
                           </span>
                         </td>
                         <td className="px-4 py-3 text-center">
                           <span
-                            className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${
-                              student.loud_noise_count > 0
+                            className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${student.loud_noise_count > 0
                                 ? 'bg-shnoor-indigoMedium/10 text-shnoor-indigoMedium'
                                 : 'bg-shnoor-lavender text-shnoor-soft'
-                            }`}
+                              }`}
                           >
                             {student.loud_noise_count || 0}
                           </span>
                         </td>
                         <td className="px-4 py-3 text-center">
                           <span
-                            className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${
-                              student.voice_detected_count > 0
+                            className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${student.voice_detected_count > 0
                                 ? 'bg-shnoor-indigoMedium/10 text-shnoor-indigoMedium'
                                 : 'bg-shnoor-lavender text-shnoor-soft'
-                            }`}
+                              }`}
                           >
                             {student.voice_detected_count || 0}
                           </span>
                         </td>
                         <td className="px-4 py-3 text-center">
                           <span
-                            className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${
-                              student.total_violations >= 5
+                            className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${student.total_violations >= 5
                                 ? 'bg-shnoor-indigo text-white'
                                 : student.total_violations >= 3
-                                ? 'bg-shnoor-indigoMedium text-white'
-                                : 'bg-shnoor-lavender text-shnoor-indigo'
-                            }`}
+                                  ? 'bg-shnoor-indigoMedium text-white'
+                                  : 'bg-shnoor-lavender text-shnoor-indigo'
+                              }`}
                           >
                             {student.total_violations}
                           </span>

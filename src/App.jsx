@@ -117,12 +117,12 @@ const AppRoutes = () => {
         <Route path="/admin/dashboard" element={<AdminProtectedRoute><Suspense fallback={<LoadingFallback />}><AdminDashboard /></Suspense></AdminProtectedRoute>} />
         <Route path="/admin/reports" element={<AdminProtectedRoute><Suspense fallback={<LoadingFallback />}><AdminReports /></Suspense></AdminProtectedRoute>} />
         <Route path="/admin/live-proctoring" element={<AdminProtectedRoute><Suspense fallback={<LoadingFallback />}><LiveProctoring /></Suspense></AdminProtectedRoute>} />
-        <Route path="/admin/student-messages" element={<AdminProtectedRoute><Suspense fallback={<LoadingFallback />}><StudentMessages /></Suspense></AdminProtectedRoute>} />
-        <Route path="/admin/settings" element={<AdminProtectedRoute><Suspense fallback={<LoadingFallback />}><AdminSettings /></Suspense></AdminProtectedRoute>} />
+        <Route path="/admin/student-messages" element={<Navigate to="/admin/dashboard?tab=messages" replace />} />
+        <Route path="/admin/settings" element={<Navigate to="/admin/dashboard?tab=settings" replace />} />
         <Route path="/admin/job-applicants/:jobId" element={<AdminProtectedRoute><Suspense fallback={<LoadingFallback />}><AdminJobApplicants /></Suspense></AdminProtectedRoute>} />
         <Route path="/admin/interviews" element={<AdminProtectedRoute><Suspense fallback={<LoadingFallback />}><InterviewsList /></Suspense></AdminProtectedRoute>} />
         <Route path="/admin/interview-room/:interviewId" element={<AdminProtectedRoute><Suspense fallback={<LoadingFallback />}><InterviewRoom /></Suspense></AdminProtectedRoute>} />
-        <Route path="/admin/clients" element={<AdminProtectedRoute><Suspense fallback={<LoadingFallback />}><AdminClients /></Suspense></AdminProtectedRoute>} />
+        <Route path="/admin/clients" element={<Navigate to="/admin/dashboard?tab=clients" replace />} />
 
         {/* Client Portal Routes (multi-tenant, admin UI parity) */}
         <Route path="/client/login" element={<Navigate to="/login?portal=org" replace />} />
@@ -131,8 +131,8 @@ const AppRoutes = () => {
         <Route path="/client/dashboard" element={<ClientProtectedRoute><Suspense fallback={<LoadingFallback />}><AdminDashboard /></Suspense></ClientProtectedRoute>} />
         <Route path="/client/reports" element={<ClientProtectedRoute><Suspense fallback={<LoadingFallback />}><AdminReports /></Suspense></ClientProtectedRoute>} />
         <Route path="/client/live-proctoring" element={<ClientProtectedRoute><Suspense fallback={<LoadingFallback />}><LiveProctoring /></Suspense></ClientProtectedRoute>} />
-        <Route path="/client/student-messages" element={<ClientProtectedRoute><Suspense fallback={<LoadingFallback />}><StudentMessages /></Suspense></ClientProtectedRoute>} />
-        <Route path="/client/settings" element={<ClientProtectedRoute><Suspense fallback={<LoadingFallback />}><AdminSettings /></Suspense></ClientProtectedRoute>} />
+        <Route path="/client/student-messages" element={<Navigate to="/client/dashboard?tab=messages" replace />} />
+        <Route path="/client/settings" element={<Navigate to="/client/dashboard?tab=settings" replace />} />
         <Route path="/client/job-applicants/:jobId" element={<ClientProtectedRoute><Suspense fallback={<LoadingFallback />}><AdminJobApplicants /></Suspense></ClientProtectedRoute>} />
         <Route path="/client/interviews" element={<ClientProtectedRoute><Suspense fallback={<LoadingFallback />}><InterviewsList /></Suspense></ClientProtectedRoute>} />
         <Route path="/client/interview-room/:interviewId" element={<ClientProtectedRoute><Suspense fallback={<LoadingFallback />}><InterviewRoom /></Suspense></ClientProtectedRoute>} />
