@@ -103,8 +103,8 @@ const Login = () => {
     : 'student';
 
   const [portal, setPortal] = useState(initialPortal);
-  const [email, setEmail] = useState('admin@example.com');
-  const [password, setPassword] = useState('admin321');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState('');
@@ -115,8 +115,8 @@ const Login = () => {
   // Reset form when switching portals
   const handlePortalChange = (next) => {
     setPortal(next);
-    setEmail('admin@example.com');
-    setPassword('admin321');
+    setEmail('');
+    setPassword('');
     setErrors({});
     setApiError('');
     setSuccessMessage('');
