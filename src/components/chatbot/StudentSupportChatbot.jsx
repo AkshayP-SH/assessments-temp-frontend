@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { MessageCircle, X, ChevronLeft, Send, Upload, Image, AlertCircle, Check, RefreshCw, Bell } from 'lucide-react';
 import { CHATBOT_TOPICS, CHATBOT_QA, TOPIC_ICONS } from '../../data/chatbotData';
 import { apiFetch } from '../../config/api';
@@ -25,6 +25,7 @@ const StudentSupportChatbot = () => {
   const [conversationHistory, setConversationHistory] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadReplies, setUnreadReplies] = useState([]);
   const [showToastNotification, setShowToastNotification] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
   
@@ -85,6 +86,7 @@ const StudentSupportChatbot = () => {
         }
       });
       setUnreadCount(0);
+      setUnreadReplies([]);
       socketMarkAllRead();
     } catch (error) {
       console.error('Error marking messages as read:', error);
@@ -180,6 +182,34 @@ const StudentSupportChatbot = () => {
     }
   }, [notificationPermission, requestPermission]);
 
+  // Load the latest unread admin replies so the header bell can list them after a page refresh
+  const fetchUnreadReplies = useCallback(async (count) => {
+    if (!studentId || count <= 0) {
+      setUnreadReplies([]);
+      return;
+    }
+    try {
+      const token = localStorage.getItem('studentAuthToken');
+      const response = await apiFetch('api/student-messages/conversation', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!response.ok) return;
+      const data = await response.json();
+      if (!data.success) return;
+      const adminReplies = (data.messages || []).filter(m => m.sender_type === 'admin');
+      setUnreadReplies(adminReplies.slice(-count).reverse().map(m => ({
+        type: 'admin-reply',
+        id: m.id,
+        messagePreview: m.message,
+        timestamp: m.created_at,
+        hasImage: !!m.image_path,
+        read: false
+      })));
+    } catch (error) {
+      console.error('Error fetching unread replies:', error);
+    }
+  }, [studentId]);
+
   useEffect(() => {
     const fetchUnreadCount = async () => {
       if (!studentId) return;
@@ -191,7 +221,10 @@ const StudentSupportChatbot = () => {
         if (response.status === 401) return;
         if (response.ok) {
           const data = await response.json();
-          if (data.success) setUnreadCount(data.count);
+          if (data.success) {
+            setUnreadCount(data.count);
+            fetchUnreadReplies(data.count);
+          }
         }
       } catch (error) {
         if (!error.message?.includes('401')) console.error('Error fetching unread count:', error);
@@ -200,7 +233,7 @@ const StudentSupportChatbot = () => {
     fetchUnreadCount();
     const interval = setInterval(fetchUnreadCount, 60000);
     return () => clearInterval(interval);
-  }, [studentId]);
+  }, [studentId, fetchUnreadReplies]);
 
   useEffect(() => {
     if (notifications.length > 0) {
@@ -263,6 +296,48 @@ const StudentSupportChatbot = () => {
     setMessages([]);
     setSendStatus(null);
   };
+
+  const openContactView = () => {
+    handleOpen();
+    setSelectedTopic({ id: 'contact' });
+    setCurrentView('contact');
+    fetchConversationHistory();
+    markMessagesAsRead();
+  };
+
+  // Share unread state with the header bell (StudentHeader) without opening a second socket
+  // Live socket notifications first, then unread replies loaded from the DB (deduped by id)
+  const bellNotifications = useMemo(() => {
+    const live = notifications.filter(n => n.type === 'admin-reply');
+    const liveIds = new Set(live.map(n => n.id));
+    return [...live, ...unreadReplies.filter(r => !liveIds.has(r.id))];
+  }, [notifications, unreadReplies]);
+
+  const supportStateRef = useRef({ unreadCount, notifications: bellNotifications });
+  supportStateRef.current = { unreadCount, notifications: bellNotifications };
+  const headerActionsRef = useRef({});
+  headerActionsRef.current = { openContactView, markMessagesAsRead };
+
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent('student-support:state', { detail: { unreadCount, notifications: bellNotifications } }));
+  }, [unreadCount, bellNotifications]);
+
+  useEffect(() => {
+    const handleRequestState = () => {
+      window.dispatchEvent(new CustomEvent('student-support:state', { detail: supportStateRef.current }));
+    };
+    const handleOpenRequest = () => headerActionsRef.current.openContactView();
+    const handleMarkRead = () => headerActionsRef.current.markMessagesAsRead();
+
+    window.addEventListener('student-support:request-state', handleRequestState);
+    window.addEventListener('student-support:open', handleOpenRequest);
+    window.addEventListener('student-support:mark-read', handleMarkRead);
+    return () => {
+      window.removeEventListener('student-support:request-state', handleRequestState);
+      window.removeEventListener('student-support:open', handleOpenRequest);
+      window.removeEventListener('student-support:mark-read', handleMarkRead);
+    };
+  }, []);
 
   const handleClose = () => {
     setIsOpen(false);
@@ -835,12 +910,7 @@ const StudentSupportChatbot = () => {
             onClick={() => {
               setShowToastNotification(false);
               setToastMessage(null);
-              handleOpen();
-              // Directly go to contact view
-              setSelectedTopic({ id: 'contact' });
-              setCurrentView('contact');
-              fetchConversationHistory();
-              markMessagesAsRead();
+              openContactView();
             }}
           >
             <div className="flex items-start gap-3">
