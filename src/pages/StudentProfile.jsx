@@ -66,7 +66,7 @@ export default function StudentProfile() {
       const token = localStorage.getItem('studentAuthToken');
       if (!token) return;
 
-      const response = await apiFetch('api/profile', {
+      const response = await apiFetch('api/student/profile', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -74,17 +74,18 @@ export default function StudentProfile() {
 
       if (response.ok) {
         const data = await response.json();
-        if (data.success && data.user) {
-          setProfile(data.user);
+        const userData = data.student || data.user || data.data;
+        if (data.success && userData) {
+          setProfile(userData);
           setFormData({
-            full_name: data.user.full_name || '',
-            roll_number: data.user.roll_number || '',
-            phone: data.user.phone || '',
-            address: data.user.address || '',
-            course: data.user.course || '',
-            specialization: data.user.specialization || '',
-            resume_link: data.user.resume_link || '',
-            profile_image: data.user.profile_image || ''
+            full_name: userData.full_name || '',
+            roll_number: userData.roll_number || '',
+            phone: userData.phone || '',
+            address: userData.address || '',
+            course: userData.course || '',
+            specialization: userData.specialization || '',
+            resume_link: userData.resume_link || '',
+            profile_image: userData.profile_image || ''
           });
         }
       } else {

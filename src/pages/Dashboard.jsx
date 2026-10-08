@@ -721,7 +721,7 @@ const Dashboard = () => {
                 </p>
               </div>
             </div>
-            <JobBoard isEmbedded />
+            <JobBoard isEmbedded onTabChange={setActiveTab} />
           </>
         )}
 
