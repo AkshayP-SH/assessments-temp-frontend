@@ -28,7 +28,7 @@ const StudentSupportChatbot = () => {
   const [unreadReplies, setUnreadReplies] = useState([]);
   const [showToastNotification, setShowToastNotification] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
-  
+
   const [feedbackState, setFeedbackState] = useState({
     active: false,
     step: null,
@@ -138,7 +138,7 @@ const StudentSupportChatbot = () => {
           step: 'rating',
           data: { rating: null, helpful: null, responseTime: null, comments: null }
         });
-        
+
         setTimeout(() => {
           setConversationHistory(prev => {
             const newMessages = [...prev, {
@@ -164,7 +164,7 @@ const StudentSupportChatbot = () => {
     socket.on('support:new-admin-reply', handleAdminReply);
     socket.on('support:student-message-echo', handleStudentMessageEcho);
     socket.on('support:conversation-closed', handleConversationClosed);
-    
+
     return () => {
       socket.off('support:new-admin-reply', handleAdminReply);
       socket.off('support:student-message-echo', handleStudentMessageEcho);
@@ -502,14 +502,14 @@ const StudentSupportChatbot = () => {
 
     if (step === 'rating') {
       const rating = parseInt(response);
-      
+
       if (rating >= 1 && rating <= 5) {
         setFeedbackState(prev => ({
           ...prev,
           step: 'helpful',
           data: { ...prev.data, rating }
         }));
-        
+
         setTimeout(() => {
           setConversationHistory(prev => [...prev, {
             id: `feedback-q2-${Date.now()}`,
@@ -529,13 +529,13 @@ const StudentSupportChatbot = () => {
       }
     } else if (step === 'helpful') {
       const helpful = response.toLowerCase().includes('yes') || response.includes('👍');
-      
+
       setFeedbackState(prev => ({
         ...prev,
         step: 'responseTime',
         data: { ...prev.data, helpful }
       }));
-      
+
       setTimeout(() => {
         setConversationHistory(prev => [...prev, {
           id: `feedback-q3-${Date.now()}`,
@@ -558,16 +558,16 @@ const StudentSupportChatbot = () => {
         'slow': 'slow',
         'very slow': 'very_slow'
       };
-      
+
       const responseTime = timeMap[response.toLowerCase()] || timeMap[response];
-      
+
       if (responseTime) {
         setFeedbackState(prev => ({
           ...prev,
           step: 'comments',
           data: { ...prev.data, responseTime }
         }));
-        
+
         setTimeout(() => {
           setConversationHistory(prev => [...prev, {
             id: `feedback-q4-${Date.now()}`,
@@ -591,7 +591,7 @@ const StudentSupportChatbot = () => {
         ...feedbackState.data,
         comments
       };
-      
+
       try {
         const token = localStorage.getItem('studentAuthToken');
         const submitResponse = await fetch(
@@ -607,7 +607,7 @@ const StudentSupportChatbot = () => {
         );
 
         const result = await submitResponse.json();
-        
+
         if (result.success) {
           setConversationHistory(prev => [...prev, {
             id: `feedback-complete-${Date.now()}`,
@@ -615,7 +615,7 @@ const StudentSupportChatbot = () => {
             sender_type: 'system',
             created_at: new Date().toISOString()
           }]);
-          
+
           setFeedbackState({
             active: false,
             step: null,
@@ -675,13 +675,13 @@ const StudentSupportChatbot = () => {
           key={topic.id}
           onClick={() => handleTopicSelect(topic)}
           className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all group ${topic.id === 'contact'
-              ? 'border-shnoor-indigo bg-shnoor-lavender hover:bg-shnoor-indigo/20'
-              : 'border-shnoor-mist bg-white hover:bg-shnoor-lavender hover:border-shnoor-indigo/30'
+            ? 'border-shnoor-indigo bg-shnoor-lavender hover:bg-shnoor-indigo/20'
+            : 'border-shnoor-mist bg-white hover:bg-shnoor-lavender hover:border-shnoor-indigo/30'
             }`}
         >
           <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${topic.id === 'contact'
-              ? 'bg-shnoor-indigo/20 group-hover:bg-shnoor-indigo/30'
-              : 'bg-shnoor-lavender group-hover:bg-shnoor-indigo/20'
+            ? 'bg-shnoor-indigo/20 group-hover:bg-shnoor-indigo/30'
+            : 'bg-shnoor-lavender group-hover:bg-shnoor-indigo/20'
             }`}>
             <Icon d={TOPIC_ICONS[topic.icon]} className="w-5 h-5 text-shnoor-indigo" />
           </div>
@@ -723,8 +723,8 @@ const StudentSupportChatbot = () => {
         >
           <div
             className={`max-w-[85%] p-3 rounded-xl text-sm whitespace-pre-wrap ${msg.type === 'user'
-                ? 'bg-shnoor-indigo text-white rounded-tr-none'
-                : 'bg-shnoor-lavender text-shnoor-navy rounded-tl-none'
+              ? 'bg-shnoor-indigo text-white rounded-tr-none'
+              : 'bg-shnoor-lavender text-shnoor-navy rounded-tl-none'
               }`}
           >
             {msg.content}
@@ -785,13 +785,12 @@ const StudentSupportChatbot = () => {
                         <p className="text-xs text-shnoor-indigo font-medium mb-1 ml-1">Admin</p>
                       )}
                       <div
-                        className={`p-3 rounded-xl text-sm ${
-                          isSystem
+                        className={`p-3 rounded-xl text-sm ${isSystem
                             ? 'bg-yellow-50 border border-yellow-200 text-gray-800'
                             : isStudent
-                            ? 'bg-shnoor-indigo text-white rounded-tr-none'
-                            : 'bg-shnoor-lavender text-shnoor-navy rounded-tl-none'
-                        }`}
+                              ? 'bg-shnoor-indigo text-white rounded-tr-none'
+                              : 'bg-shnoor-lavender text-shnoor-navy rounded-tl-none'
+                          }`}
                       >
                         <p className="whitespace-pre-wrap">{msg.message}</p>
                         {msg.image_path && (
@@ -852,15 +851,14 @@ const StudentSupportChatbot = () => {
           </div>
         )}
 
-        <form onSubmit={handleSendMessage} className="flex items-end gap-2">
-          <div className="flex-1 relative">
+        <form onSubmit={handleSendMessage} className="flex items-center gap-2">
+          <div className="flex-1 relative flex items-center">
             <textarea
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               placeholder="Type your message..."
               rows={1}
-              className="w-full p-3 pr-10 rounded-xl border border-shnoor-mist focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo outline-none text-sm resize-none max-h-24"
-              style={{ minHeight: '44px' }}
+              className="w-full h-11 min-h-[44px] max-h-24 py-2.5 pl-3.5 pr-10 rounded-xl border border-shnoor-mist focus:border-shnoor-indigo focus:ring-1 focus:ring-shnoor-indigo outline-none text-sm resize-none leading-5 transition-all"
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
@@ -878,7 +876,7 @@ const StudentSupportChatbot = () => {
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="absolute right-3 bottom-3 text-shnoor-soft hover:text-shnoor-indigo transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-shnoor-soft hover:text-shnoor-indigo transition-colors flex items-center justify-center p-1 rounded-md"
               title="Attach image"
             >
               <Image size={18} />
@@ -887,7 +885,7 @@ const StudentSupportChatbot = () => {
           <button
             type="submit"
             disabled={isSending || (!newMessage.trim() && !selectedImage)}
-            className="p-3 rounded-xl bg-shnoor-indigo text-white hover:bg-shnoor-navy transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-11 h-11 flex-shrink-0 flex items-center justify-center rounded-xl bg-shnoor-indigo text-white hover:bg-shnoor-navy transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
           >
             {isSending ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

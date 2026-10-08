@@ -448,213 +448,213 @@ const CreateClientModal = ({ onClose, onCreated, subscriptionPlans = [] }) => {
               </div>
             )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <InputField
-              label="Organization Name"
-              name="name"
-              placeholder="e.g., Acme Corp"
-              required
-              value={form.name}
-              onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
-              disabled={loading}
-              error={errors.name}
-            />
-            <InputField
-              label="Company / Display Name"
-              name="company_name"
-              placeholder="e.g., Acme Corporation Pvt Ltd"
-              required
-              value={form.company_name}
-              onChange={e => setForm(p => ({ ...p, company_name: e.target.value }))}
-              disabled={loading}
-              error={errors.company_name}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <InputField
-              label="Admin Email"
-              name="email"
-              type="email"
-              placeholder="admin@example.com"
-              required
-              value={form.email}
-              onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
-              disabled={loading}
-              error={errors.email}
-            />
-            <InputField
-              label="Phone Number"
-              name="phone"
-              placeholder="+91 98765 43210"
-              value={form.phone}
-              onChange={e => setForm(p => ({ ...p, phone: e.target.value }))}
-              disabled={loading}
-              error={errors.phone}
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-gray-900 uppercase tracking-wide mb-1.5">
-              Password <span className="text-red-500">*</span>
-            </label>
-            <div className="relative">
-              <input
-                type={showPw ? 'text' : 'password'}
-                value={form.password}
-                onChange={e => setForm(p => ({ ...p, password: e.target.value }))}
-                placeholder="Min 6 chars, 1 uppercase, 1 number"
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <InputField
+                label="Organization Name"
+                name="name"
+                placeholder="e.g., Acme Corp"
+                required
+                value={form.name}
+                onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
                 disabled={loading}
-                className={`w-full h-10 px-3 pr-10 rounded-xl border ${errors.password ? 'border-red-500' : 'border-[#D1D1E6]'} bg-white text-sm text-gray-900 placeholder-[#9A9AC9] focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors`}
+                error={errors.name}
               />
-              <button
-                type="button"
-                onClick={() => setShowPw(v => !v)}
-                tabIndex={-1}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9A9AC9] hover:text-gray-900"
-              >
-                {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
+              <InputField
+                label="Company / Display Name"
+                name="company_name"
+                placeholder="e.g., Acme Corporation Pvt Ltd"
+                required
+                value={form.company_name}
+                onChange={e => setForm(p => ({ ...p, company_name: e.target.value }))}
+                disabled={loading}
+                error={errors.company_name}
+              />
             </div>
-            {errors.password && (
-              <p className="text-xs text-red-600 mt-1 flex items-center gap-1 font-bold">
-                <span>⚠</span> {errors.password}
-              </p>
-            )}
-          </div>
 
-          <InputField
-            label="Company Website"
-            name="company_website"
-            placeholder="https://www.acme.com"
-            value={form.company_website}
-            onChange={e => setForm(p => ({ ...p, company_website: e.target.value }))}
-            disabled={loading}
-            error={errors.company_website}
-          />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <InputField
+                label="Admin Email"
+                name="email"
+                type="email"
+                placeholder="admin@example.com"
+                required
+                value={form.email}
+                onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
+                disabled={loading}
+                error={errors.email}
+              />
+              <InputField
+                label="Phone Number"
+                name="phone"
+                placeholder="+91 98765 43210"
+                value={form.phone}
+                onChange={e => setForm(p => ({ ...p, phone: e.target.value }))}
+                disabled={loading}
+                error={errors.phone}
+              />
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-gray-900 uppercase tracking-wide mb-1.5">
+                Password <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <input
+                  type={showPw ? 'text' : 'password'}
+                  value={form.password}
+                  onChange={e => setForm(p => ({ ...p, password: e.target.value }))}
+                  placeholder="Min 6 chars, 1 uppercase, 1 number"
+                  disabled={loading}
+                  className={`w-full h-10 px-3 pr-10 rounded-xl border ${errors.password ? 'border-red-500' : 'border-[#D1D1E6]'} bg-white text-sm text-gray-900 placeholder-[#9A9AC9] focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPw(v => !v)}
+                  tabIndex={-1}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9A9AC9] hover:text-gray-900"
+                >
+                  {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+              {errors.password && (
+                <p className="text-xs text-red-600 mt-1 flex items-center gap-1 font-bold">
+                  <span>⚠</span> {errors.password}
+                </p>
+              )}
+            </div>
+
             <InputField
-              label="Company Size"
-              name="company_size"
-              value={form.company_size}
-              onChange={e => setForm(p => ({ ...p, company_size: e.target.value }))}
+              label="Company Website"
+              name="company_website"
+              placeholder="https://www.acme.com"
+              value={form.company_website}
+              onChange={e => setForm(p => ({ ...p, company_website: e.target.value }))}
               disabled={loading}
-              error={errors.company_size}
-              options={[
-                { value: '1-50', label: '1-50 employees' },
-                { value: '51-200', label: '51-200 employees' },
-                { value: '201-500', label: '201-500 employees' },
-                { value: '500+', label: '500+ employees' }
-              ]}
+              error={errors.company_website}
             />
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <InputField
+                label="Company Size"
+                name="company_size"
+                value={form.company_size}
+                onChange={e => setForm(p => ({ ...p, company_size: e.target.value }))}
+                disabled={loading}
+                error={errors.company_size}
+                options={[
+                  { value: '1-50', label: '1-50 employees' },
+                  { value: '51-200', label: '51-200 employees' },
+                  { value: '201-500', label: '201-500 employees' },
+                  { value: '500+', label: '500+ employees' }
+                ]}
+              />
+              <InputField
+                label="Industry"
+                name="industry"
+                value={form.industry}
+                onChange={e => setForm(p => ({ ...p, industry: e.target.value }))}
+                disabled={loading}
+                error={errors.industry}
+                options={[
+                  { value: 'IT/Software', label: 'IT/Software' },
+                  { value: 'Education', label: 'Education' },
+                  { value: 'Finance', label: 'Finance' },
+                  { value: 'Healthcare', label: 'Healthcare' },
+                  { value: 'Manufacturing', label: 'Manufacturing' },
+                  { value: 'Retail', label: 'Retail' },
+                  { value: 'Other', label: 'Other' }
+                ]}
+              />
+              <InputField
+                label="Country"
+                name="country"
+                placeholder="e.g., India"
+                value={form.country}
+                onChange={e => setForm(p => ({ ...p, country: e.target.value }))}
+                disabled={loading}
+                error={errors.country}
+              />
+            </div>
+
             <InputField
-              label="Industry"
-              name="industry"
-              value={form.industry}
-              onChange={e => setForm(p => ({ ...p, industry: e.target.value }))}
+              label="Primary Use Case"
+              name="use_case"
+              value={form.use_case}
+              onChange={e => setForm(p => ({ ...p, use_case: e.target.value }))}
               disabled={loading}
-              error={errors.industry}
+              error={errors.use_case}
               options={[
-                { value: 'IT/Software', label: 'IT/Software' },
+                { value: 'Campus Hiring', label: 'Campus Hiring' },
+                { value: 'Lateral Hiring', label: 'Lateral Hiring' },
+                { value: 'Internal Assessment', label: 'Internal Assessment' },
                 { value: 'Education', label: 'Education' },
-                { value: 'Finance', label: 'Finance' },
-                { value: 'Healthcare', label: 'Healthcare' },
-                { value: 'Manufacturing', label: 'Manufacturing' },
-                { value: 'Retail', label: 'Retail' },
+                { value: 'Certification', label: 'Certification' },
                 { value: 'Other', label: 'Other' }
               ]}
             />
-            <InputField
-              label="Country"
-              name="country"
-              placeholder="e.g., India"
-              value={form.country}
-              onChange={e => setForm(p => ({ ...p, country: e.target.value }))}
-              disabled={loading}
-              error={errors.country}
-            />
-          </div>
 
-          <InputField
-            label="Primary Use Case"
-            name="use_case"
-            value={form.use_case}
-            onChange={e => setForm(p => ({ ...p, use_case: e.target.value }))}
-            disabled={loading}
-            error={errors.use_case}
-            options={[
-              { value: 'Campus Hiring', label: 'Campus Hiring' },
-              { value: 'Lateral Hiring', label: 'Lateral Hiring' },
-              { value: 'Internal Assessment', label: 'Internal Assessment' },
-              { value: 'Education', label: 'Education' },
-              { value: 'Certification', label: 'Certification' },
-              { value: 'Other', label: 'Other' }
-            ]}
-          />
-
-          {/* Subscription Details Section */}
-          <div className="mt-2 pt-4 border-t border-shnoor-mist">
-            <h3 className="text-sm font-bold text-shnoor-navy mb-3">Subscription Details</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <InputField
-                label="Plan"
-                name="plan_id"
-                value={form.plan_id}
-                onChange={e => {
-                  const newPlanId = e.target.value;
-                  const selectedPlan = subscriptionPlans.find(p => p.plan_id === newPlanId);
-                  setForm(p => ({
-                    ...p,
-                    plan_id: newPlanId,
-                    ...(selectedPlan && {
-                      max_institutes: String(selectedPlan.max_institutes ?? p.max_institutes),
-                      max_tests: String(selectedPlan.max_tests ?? p.max_tests),
-                      max_students: String(selectedPlan.max_students ?? p.max_students),
-                    })
-                  }));
-                }}
-                disabled={loading}
-                required
-                options={subscriptionPlans.length > 0
-                  ? subscriptionPlans.map(plan => ({ value: plan.plan_id, label: plan.name }))
-                  : [
-                    { value: 'Basic', label: 'Basic' },
-                    { value: 'Premium', label: 'Premium' },
-                    { value: 'Super Premium', label: 'Super Premium' }
-                  ]
-                }
-              />
-              <InputField
-                label="Subscription Duration"
-                name="subscription_duration"
-                value={form.subscription_duration}
-                onChange={e => setForm(p => ({ ...p, subscription_duration: e.target.value }))}
-                disabled={loading}
-                required
-                options={[
-                  { value: '30_DAYS', label: '30 Days' },
-                  { value: '90_DAYS', label: '90 Days' },
-                  { value: '1_YEAR', label: '1 Year' }
-                ]}
-              />
-              <InputField
-                label="Payment Status"
-                name="payment_status"
-                value={form.payment_status}
-                onChange={e => setForm(p => ({ ...p, payment_status: e.target.value }))}
-                disabled={loading}
-                required
-                options={[
-                  { value: 'UNPAID', label: 'Unpaid' },
-                  { value: 'PAID', label: 'Paid' }
-                ]}
-              />
+            {/* Subscription Details Section */}
+            <div className="mt-2 pt-4 border-t border-shnoor-mist">
+              <h3 className="text-sm font-bold text-shnoor-navy mb-3">Subscription Details</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <InputField
+                  label="Plan"
+                  name="plan_id"
+                  value={form.plan_id}
+                  onChange={e => {
+                    const newPlanId = e.target.value;
+                    const selectedPlan = subscriptionPlans.find(p => p.plan_id === newPlanId);
+                    setForm(p => ({
+                      ...p,
+                      plan_id: newPlanId,
+                      ...(selectedPlan && {
+                        max_institutes: String(selectedPlan.max_institutes ?? p.max_institutes),
+                        max_tests: String(selectedPlan.max_tests ?? p.max_tests),
+                        max_students: String(selectedPlan.max_students ?? p.max_students),
+                      })
+                    }));
+                  }}
+                  disabled={loading}
+                  required
+                  options={subscriptionPlans.length > 0
+                    ? subscriptionPlans.map(plan => ({ value: plan.plan_id, label: plan.name }))
+                    : [
+                      { value: 'Basic', label: 'Basic' },
+                      { value: 'Premium', label: 'Premium' },
+                      { value: 'Super Premium', label: 'Super Premium' }
+                    ]
+                  }
+                />
+                <InputField
+                  label="Subscription Duration"
+                  name="subscription_duration"
+                  value={form.subscription_duration}
+                  onChange={e => setForm(p => ({ ...p, subscription_duration: e.target.value }))}
+                  disabled={loading}
+                  required
+                  options={[
+                    { value: '30_DAYS', label: '30 Days' },
+                    { value: '90_DAYS', label: '90 Days' },
+                    { value: '1_YEAR', label: '1 Year' }
+                  ]}
+                />
+                <InputField
+                  label="Payment Status"
+                  name="payment_status"
+                  value={form.payment_status}
+                  onChange={e => setForm(p => ({ ...p, payment_status: e.target.value }))}
+                  disabled={loading}
+                  required
+                  options={[
+                    { value: 'UNPAID', label: 'Unpaid' },
+                    { value: 'PAID', label: 'Paid' }
+                  ]}
+                />
+              </div>
+              <p className="text-xs text-shnoor-soft mt-2">
+                Note: Duration starts from today.
+              </p>
             </div>
-            <p className="text-xs text-shnoor-soft mt-2">
-              Note: Duration starts from today.
-            </p>
-          </div>
           </div>
           <div className="px-6 py-4 border-t border-[#D1D1E6] bg-white rounded-b-2xl z-10 flex-shrink-0 mt-auto">
             <div className="flex justify-end gap-3">
@@ -879,7 +879,7 @@ const ClientDetailPanel = ({ client, onClose, onStatusChange, onDelete, onClient
 };
 
 /* ─── Main AdminClients Page ──────────────────────────────────────────── */
-const AdminClients = () => {
+const AdminClients = ({ isEmbedded = false }) => {
   const navigate = useNavigate();
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -951,187 +951,202 @@ const AdminClients = () => {
 
   const activeCount = clients.filter(c => c.status === 'active').length;
 
-  return (
-    <AdminLayout title="Client Management">
-      <div className="flex flex-col gap-6">
+  const content = (
+    <div className="w-full space-y-6">
 
-        {/* Page header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+      {/* Page header */}
+      <div className="section-header">
+        <div className="section-header-left">
+          <h2 className="section-title">Client Management</h2>
+          <p className="section-subtitle">Manage client organizations, subscriptions, resource limits, and access permissions</p>
+        </div>
+        <div className="flex items-center gap-3">
+          {!isEmbedded && (
             <button
               onClick={() => navigate(-1)}
-              className="flex items-center gap-2 h-10 px-4 border border-[#D1D1E6] bg-transparent text-[#9A9AC9] rounded-xl text-sm font-semibold hover:bg-white hover:border-gray-300 transition-colors flex-shrink-0"
+              className="flex items-center gap-2 h-10 px-4 border border-[#D1D1E6] dark:border-slate-700 bg-white dark:bg-[#1E1E38] text-slate-700 dark:text-slate-300 rounded-xl text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer shadow-2xs"
             >
               <ArrowLeft size={16} />
               Back
             </button>
-            <div className="min-w-0">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Client Management</h2>
-              <p className="text-sm text-[#9A9AC9] mt-0.5">{clients.length} total · {activeCount} active</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3 sm:flex sm:items-center">
-            <button onClick={fetchClients} className="h-10 px-4 border border-[#D1D1E6] bg-transparent text-[#9A9AC9] rounded-xl text-sm font-semibold hover:bg-white hover:border-gray-300 transition-colors flex items-center gap-2">
-              <RefreshCw size={16} /> Refresh
-            </button>
-            <button onClick={() => setShowCreate(true)}
-              className="flex items-center justify-center gap-2 h-10 px-5 bg-[#403f75] text-white rounded-xl text-sm font-semibold hover:bg-[#2d2d53] transition-colors shadow-sm">
-              <Plus size={16} /> New Client
-            </button>
-          </div>
+          )}
+          <button
+            type="button"
+            onClick={fetchClients}
+            className="h-10 px-4 border border-[#D1D1E6] dark:border-slate-700 bg-white dark:bg-[#1E1E38] text-slate-700 dark:text-slate-300 rounded-xl text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-2 cursor-pointer shadow-2xs"
+          >
+            <RefreshCw size={16} /> Refresh
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowCreate(true)}
+            className="flex items-center justify-center gap-2 h-10 px-5 bg-[#403f75] dark:bg-indigo-600 hover:bg-[#343360] dark:hover:bg-indigo-700 text-white rounded-xl text-sm font-bold transition-all shadow-sm cursor-pointer"
+          >
+            <Plus size={16} /> New Client
+          </button>
         </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {[
-            { label: 'Total Clients', value: clients.length, icon: <Building2 size={20} />, color: 'bg-[#403f75]' },
-            { label: 'Active', value: activeCount, icon: <CheckCircle size={20} />, color: 'bg-emerald-500' },
-            { label: 'Suspended', value: clients.length - activeCount, icon: <XCircle size={20} />, color: 'bg-amber-500' },
-            { label: 'Total Students', value: clients.reduce((s, c) => s + (parseInt(c.students_count) || 0), 0), icon: <Users size={20} />, color: 'bg-[#9333ea]' },
-          ].map(({ label, value, icon, color }) => (
-            <div key={label} className="bg-white rounded-2xl p-5 flex items-center gap-4 shadow-sm">
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white flex-shrink-0 ${color}`}>{icon}</div>
-              <div>
-                <p className="text-2xl font-bold text-gray-900">{value}</p>
-                <p className="text-sm text-[#9A9AC9] mt-0.5">{label}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Search */}
-        <div className="relative">
-          <input value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Search by name, email or company..."
-            className="w-full h-[52px] pl-12 pr-4 rounded-2xl bg-white text-sm text-gray-900 placeholder-[#9A9AC9] focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors shadow-sm" />
-          <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9A9AC9]" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
-          </svg>
-        </div>
-
-        {/* Error */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm flex items-center justify-between">
-            {error}
-            <button onClick={fetchClients} className="flex items-center gap-1 text-xs font-semibold hover:underline ml-4 flex-shrink-0">
-              <RefreshCw size={12} /> Retry
-            </button>
-          </div>
-        )}
-
-        {/* List */}
-        {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <div className="animate-spin rounded-full h-10 w-10 border-4 border-shnoor-indigo border-t-transparent" />
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="bg-white rounded-xl border border-shnoor-mist p-12 text-center">
-            <Building2 size={40} className="mx-auto text-shnoor-mist mb-3" />
-            <p className="text-shnoor-soft text-sm font-medium">
-              {search ? 'No clients match your search.' : 'No clients yet. Create your first one.'}
-            </p>
-            {!search && (
-              <button onClick={() => setShowCreate(true)}
-                className="mt-4 inline-flex items-center gap-2 h-9 px-4 bg-shnoor-indigo text-white rounded-lg text-sm font-semibold hover:bg-shnoor-navy transition-colors">
-                <Plus size={14} /> Create Client
-              </button>
-            )}
-          </div>
-        ) : (
-          <div className="bg-white rounded-2xl shadow-sm overflow-hidden mb-8">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm whitespace-nowrap">
-                <thead className="bg-slate-100/90 dark:bg-[#1a1a2e] text-slate-900 dark:text-gray-200 border-b border-slate-200 dark:border-[#383863]">
-                  <tr>
-                    <th className="px-5 py-4 font-bold tracking-wide">Organization</th>
-                    <th className="px-5 py-4 font-bold tracking-wide">Plan</th>
-                    <th className="px-5 py-4 font-bold tracking-wide">Duration</th>
-                    <th className="px-5 py-4 font-bold tracking-wide">Payment</th>
-                    <th className="px-5 py-4 font-bold tracking-wide">Expiry Date</th>
-                    <th className="px-5 py-4 font-bold tracking-wide">Days Left</th>
-                    <th className="px-5 py-4 font-bold tracking-wide">Status</th>
-                    <th className="px-5 py-4 font-bold tracking-wide text-center">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {filtered.map(client => {
-                    let daysLeft = '-';
-                    if (client.subscription_end_date) {
-                      const diff = new Date(client.subscription_end_date).getTime() - new Date().getTime();
-                      const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-                      daysLeft = days > 0 ? `${days} days` : 'Expired';
-                    }
-
-                    return (
-                      <tr key={client.id} className="hover:bg-gray-50/50 dark:hover:bg-[#2a2a4a] transition-colors group">
-                        <td className="px-5 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
-                              <Building2 size={18} className="text-[#6A6A9D] dark:text-gray-400" />
-                            </div>
-                            <div>
-                              <p className="font-bold text-gray-900 dark:text-white">{client.company_name || client.name}</p>
-                              <p className="text-sm text-[#9A9AC9] dark:text-gray-400">{client.email}</p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-5 py-4 font-semibold text-gray-900 dark:text-gray-200">
-                          {client.plan_id === 'trial' ? '7-Day Trial' : (subscriptionPlans.find(p => p.plan_id === client.plan_id)?.name || client.plan_id || 'Basic')}
-                        </td>
-                        <td className="px-5 py-4 text-[#9A9AC9] dark:text-gray-400 capitalize">
-                          {client.plan_id === 'trial' ? '7 Days' : (client.subscription_duration?.toLowerCase().replace('_', ' ') || '30 Days')}
-                        </td>
-                        <td className="px-5 py-4">
-                          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${client.payment_status === 'PAID' ? 'bg-[#dcfce7] dark:bg-green-900/30 text-[#166534] dark:text-green-400' : 'bg-[#fee2e2] dark:bg-red-900/30 text-[#991b1b] dark:text-red-400'}`}>
-                            {client.payment_status || 'UNPAID'}
-                          </span>
-                        </td>
-                        <td className="px-5 py-4 text-[#9A9AC9] dark:text-gray-400">
-                          {client.subscription_end_date ? new Date(client.subscription_end_date).toLocaleDateString('en-GB') : '-'}
-                        </td>
-                        <td className="px-5 py-4 font-semibold text-gray-900 dark:text-gray-200">
-                          <span className={`${daysLeft === 'Expired' ? 'text-red-600 dark:text-red-400' : (parseInt(daysLeft) <= 7 ? 'text-amber-500 dark:text-amber-400' : 'text-gray-900 dark:text-gray-200')}`}>
-                            {daysLeft}
-                          </span>
-                        </td>
-                        <td className="px-5 py-4">
-                          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold ${client.status === 'active' ? 'bg-[#dcfce7] dark:bg-green-900/30 text-[#166534] dark:text-green-400' : 'bg-[#fee2e2] dark:bg-red-900/30 text-[#991b1b] dark:text-red-400'}`}>
-                            {client.status === 'active' ? <CheckCircle size={12} /> : <XCircle size={12} />}
-                            {client.status === 'active' ? 'Active' : 'Suspended'}
-                          </span>
-                        </td>
-                        <td className="px-5 py-4 text-center">
-                          <button
-                            onClick={() => setSelectedClient(client)}
-                            className="h-8 px-4 bg-slate-100 dark:bg-[#383863] hover:bg-slate-200 dark:hover:bg-[#403f75] text-slate-800 dark:text-white rounded-lg text-xs font-bold transition-colors cursor-pointer"
-                          >
-                            Manage
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* Modals */}
-        {showCreate && <CreateClientModal onClose={() => setShowCreate(false)} onCreated={handleCreated} subscriptionPlans={subscriptionPlans} />}
-        {createdClient && <CreatedModal client={createdClient} onClose={() => setCreatedClient(null)} />}
-        {selectedClient && (
-          <ClientDetailPanel
-            client={selectedClient}
-            onClose={() => setSelectedClient(null)}
-            onStatusChange={handleStatusChange}
-            onDelete={handleDelete}
-            onClientUpdated={handleClientUpdated}
-            subscriptionPlans={subscriptionPlans}
-          />
-        )}
-
       </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {[
+          { label: 'Total Clients', value: clients.length, icon: <Building2 size={20} />, color: 'bg-[#403f75]' },
+          { label: 'Active', value: activeCount, icon: <CheckCircle size={20} />, color: 'bg-emerald-500' },
+          { label: 'Suspended', value: clients.length - activeCount, icon: <XCircle size={20} />, color: 'bg-amber-500' },
+          { label: 'Total Students', value: clients.reduce((s, c) => s + (parseInt(c.students_count) || 0), 0), icon: <Users size={20} />, color: 'bg-[#9333ea]' },
+        ].map(({ label, value, icon, color }) => (
+          <div key={label} className="bg-white dark:bg-[#1E1E38] border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 flex items-center gap-4 shadow-sm">
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white flex-shrink-0 ${color}`}>{icon}</div>
+            <div>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
+              <p className="text-sm text-[#9A9AC9] dark:text-slate-400 mt-0.5">{label}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Search */}
+      <div className="relative">
+        <input value={search} onChange={e => setSearch(e.target.value)}
+          placeholder="Search by name, email or company..."
+          className="w-full h-[52px] pl-12 pr-4 rounded-2xl bg-white dark:bg-[#1E1E38] border border-slate-200/80 dark:border-slate-800 text-sm text-gray-900 dark:text-white placeholder-[#9A9AC9] focus:outline-none focus:ring-2 focus:ring-[#403f75] transition-colors shadow-sm" />
+        <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9A9AC9]" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+        </svg>
+      </div>
+
+      {/* Error */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm flex items-center justify-between">
+          {error}
+          <button onClick={fetchClients} className="flex items-center gap-1 text-xs font-semibold hover:underline ml-4 flex-shrink-0">
+            <RefreshCw size={12} /> Retry
+          </button>
+        </div>
+      )}
+
+      {/* List */}
+      {loading ? (
+        <div className="flex items-center justify-center py-16">
+          <div className="animate-spin rounded-full h-10 w-10 border-4 border-shnoor-indigo border-t-transparent" />
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="bg-white dark:bg-[#1E1E38] rounded-xl border border-slate-200 dark:border-slate-800 p-12 text-center">
+          <Building2 size={40} className="mx-auto text-shnoor-mist mb-3" />
+          <p className="text-shnoor-soft dark:text-slate-400 text-sm font-medium">
+            {search ? 'No clients match your search.' : 'No clients yet. Create your first one.'}
+          </p>
+          {!search && (
+            <button onClick={() => setShowCreate(true)}
+              className="mt-4 inline-flex items-center gap-2 h-9 px-4 bg-shnoor-indigo text-white rounded-lg text-sm font-semibold hover:bg-shnoor-navy transition-colors">
+              <Plus size={14} /> Create Client
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="bg-white dark:bg-[#1E1E38] rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800 overflow-hidden mb-8">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm whitespace-nowrap">
+              <thead className="bg-slate-100/90 dark:bg-[#1a1a2e] text-slate-900 dark:text-gray-200 border-b border-slate-200 dark:border-[#383863]">
+                <tr>
+                  <th className="px-5 py-4 font-bold tracking-wide">Organization</th>
+                  <th className="px-5 py-4 font-bold tracking-wide">Plan</th>
+                  <th className="px-5 py-4 font-bold tracking-wide">Duration</th>
+                  <th className="px-5 py-4 font-bold tracking-wide">Payment</th>
+                  <th className="px-5 py-4 font-bold tracking-wide">Expiry Date</th>
+                  <th className="px-5 py-4 font-bold tracking-wide">Days Left</th>
+                  <th className="px-5 py-4 font-bold tracking-wide">Status</th>
+                  <th className="px-5 py-4 font-bold tracking-wide text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
+                {filtered.map(client => {
+                  let daysLeft = '-';
+                  if (client.subscription_end_date) {
+                    const diff = new Date(client.subscription_end_date).getTime() - new Date().getTime();
+                    const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+                    daysLeft = days > 0 ? `${days} days` : 'Expired';
+                  }
+
+                  return (
+                    <tr key={client.id} className="hover:bg-gray-50/50 dark:hover:bg-[#2a2a4a] transition-colors group">
+                      <td className="px-5 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
+                            <Building2 size={18} className="text-[#6A6A9D] dark:text-gray-400" />
+                          </div>
+                          <div>
+                            <p className="font-bold text-gray-900 dark:text-white">{client.company_name || client.name}</p>
+                            <p className="text-sm text-[#9A9AC9] dark:text-gray-400">{client.email}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-5 py-4 font-semibold text-gray-900 dark:text-gray-200">
+                        {client.plan_id === 'trial' ? '7-Day Trial' : (subscriptionPlans.find(p => p.plan_id === client.plan_id)?.name || client.plan_id || 'Basic')}
+                      </td>
+                      <td className="px-5 py-4 text-[#9A9AC9] dark:text-gray-400 capitalize">
+                        {client.plan_id === 'trial' ? '7 Days' : (client.subscription_duration?.toLowerCase().replace('_', ' ') || '30 Days')}
+                      </td>
+                      <td className="px-5 py-4">
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${client.payment_status === 'PAID' ? 'bg-[#dcfce7] dark:bg-green-900/30 text-[#166534] dark:text-green-400' : 'bg-[#fee2e2] dark:bg-red-900/30 text-[#991b1b] dark:text-red-400'}`}>
+                          {client.payment_status || 'UNPAID'}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4 text-[#9A9AC9] dark:text-gray-400">
+                        {client.subscription_end_date ? new Date(client.subscription_end_date).toLocaleDateString('en-GB') : '-'}
+                      </td>
+                      <td className="px-5 py-4 font-semibold text-gray-900 dark:text-gray-200">
+                        <span className={`${daysLeft === 'Expired' ? 'text-red-600 dark:text-red-400' : (parseInt(daysLeft) <= 7 ? 'text-amber-500 dark:text-amber-400' : 'text-gray-900 dark:text-gray-200')}`}>
+                          {daysLeft}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4">
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold ${client.status === 'active' ? 'bg-[#dcfce7] dark:bg-green-900/30 text-[#166534] dark:text-green-400' : 'bg-[#fee2e2] dark:bg-red-900/30 text-[#991b1b] dark:text-red-400'}`}>
+                          {client.status === 'active' ? <CheckCircle size={12} /> : <XCircle size={12} />}
+                          {client.status === 'active' ? 'Active' : 'Suspended'}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4 text-center">
+                        <button
+                          onClick={() => setSelectedClient(client)}
+                          className="h-8 px-4 bg-slate-100 dark:bg-[#383863] hover:bg-slate-200 dark:hover:bg-[#403f75] text-slate-800 dark:text-white rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                        >
+                          Manage
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Modals */}
+      {showCreate && <CreateClientModal onClose={() => setShowCreate(false)} onCreated={handleCreated} subscriptionPlans={subscriptionPlans} />}
+      {createdClient && <CreatedModal client={createdClient} onClose={() => setCreatedClient(null)} />}
+      {selectedClient && (
+        <ClientDetailPanel
+          client={selectedClient}
+          onClose={() => setSelectedClient(null)}
+          onStatusChange={handleStatusChange}
+          onDelete={handleDelete}
+          onClientUpdated={handleClientUpdated}
+          subscriptionPlans={subscriptionPlans}
+        />
+      )}
+
+    </div>
+  );
+
+  if (isEmbedded) {
+    return content;
+  }
+
+  return (
+    <AdminLayout title="Client Management">
+      {content}
     </AdminLayout>
   );
 };

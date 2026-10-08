@@ -368,10 +368,10 @@ export default function AdminProfile() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-theme-text tracking-tight">
               My Profile
             </h2>
-            <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 mt-1 font-medium">
+            <p className="text-sm sm:text-base text-theme-muted mt-1 font-medium">
               View and manage your administrator details and account settings
             </p>
           </div>
@@ -380,16 +380,16 @@ export default function AdminProfile() {
             <button
               onClick={() => fetchProfileData(true)}
               disabled={refreshing}
-              className="inline-flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-[#1E1E38] hover:bg-slate-100 dark:hover:bg-slate-750 border border-slate-200 dark:border-slate-700 rounded-xl transition-all shadow-2xs cursor-pointer"
+              className="inline-flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-bold text-theme-text bg-theme-card hover:bg-theme-panel border border-theme-border rounded-xl transition-all shadow-2xs cursor-pointer"
               title="Refresh profile"
             >
-              <RefreshCw size={15} className={`${refreshing ? 'animate-spin text-indigo-600' : ''}`} />
+              <RefreshCw size={15} className={`${refreshing ? 'animate-spin text-theme-accent' : ''}`} />
               <span>Refresh</span>
             </button>
 
             <button
               onClick={() => setIsEditModalOpen(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-bold text-white bg-[#403f75] dark:bg-indigo-600 hover:bg-[#343360] dark:hover:bg-indigo-700 rounded-xl transition-all shadow-sm cursor-pointer"
+              className="inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-bold text-white bg-theme-accent hover:bg-theme-accent2 rounded-xl transition-all shadow-sm cursor-pointer"
             >
               <Edit3 size={15} />
               <span>Edit Profile</span>
@@ -398,8 +398,8 @@ export default function AdminProfile() {
         </div>
 
         {/* Profile Card */}
-        <div className="bg-white dark:bg-[#1A1A32] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 sm:p-7">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 pb-6 border-b border-slate-100 dark:border-slate-800/80">
+        <div className="bg-theme-card rounded-2xl border border-theme-border shadow-sm p-6 sm:p-7">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 pb-6 border-b border-theme-border">
             <div className="flex items-center gap-4 sm:gap-5">
               {/* Circular Avatar with Camera Upload */}
               <div className="relative group flex-shrink-0">
@@ -407,10 +407,10 @@ export default function AdminProfile() {
                   <img
                     src={profile.profile_image}
                     alt={profile.full_name || 'Admin'}
-                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover shadow-md border-2 border-indigo-100 dark:border-indigo-900/60"
+                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover shadow-md border-2 border-theme-accent/30"
                   />
                 ) : (
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-[#403f75] to-[#6868AC] text-white flex items-center justify-center text-xl sm:text-2xl font-black shadow-md">
+                  <div className="admin-profile-avatar w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center text-xl sm:text-2xl font-black shadow-md shrink-0">
                     {getInitials(profile?.full_name)}
                   </div>
                 )}
@@ -419,7 +419,7 @@ export default function AdminProfile() {
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploadingPhoto}
-                  className="absolute bottom-0 right-0 p-1.5 bg-[#403f75] hover:bg-[#343360] text-white rounded-full shadow-md transition-transform hover:scale-110 active:scale-95 cursor-pointer disabled:opacity-50"
+                  className="absolute bottom-0 right-0 p-1.5 bg-theme-accent hover:bg-theme-accent2 text-white rounded-full shadow-md transition-transform hover:scale-110 active:scale-95 cursor-pointer disabled:opacity-50"
                   title="Upload / Change Photo"
                 >
                   <Camera size={13} />
@@ -439,13 +439,13 @@ export default function AdminProfile() {
               </div>
 
               <div>
-                <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
+                <h3 className="text-xl sm:text-2xl font-black text-theme-text">
                   {profile?.full_name || 'Administrator'}
                 </h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+                <p className="text-sm text-theme-muted font-medium mt-0.5">
                   {profile?.email}
                 </p>
-                <p className="text-xs text-slate-400 dark:text-slate-500 font-medium mt-0.5">
+                <p className="text-xs text-theme-muted/80 font-medium mt-0.5">
                   {profile?.company_name || (isSuper ? 'Shnoor International' : 'Organization')}
                 </p>
               </div>
@@ -455,100 +455,100 @@ export default function AdminProfile() {
           {/* Details Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-6">
             {/* Full Name */}
-            <div className="bg-slate-50/70 dark:bg-[#14142B] p-4 rounded-xl border border-slate-100 dark:border-slate-800/80">
-              <div className="flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">
+            <div className="bg-theme-panel/70 p-4 rounded-xl border border-theme-border">
+              <div className="flex items-center justify-between text-xs font-bold text-theme-muted mb-1">
                 <span className="flex items-center gap-1.5">
-                  <User size={14} className="text-[#403f75] dark:text-indigo-400" />
+                  <User size={14} className="text-theme-accent" />
                   Full Name
                 </span>
                 <button
                   onClick={() => handleCopy(profile?.full_name, 'Full Name')}
-                  className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                  className="text-theme-muted hover:text-theme-text cursor-pointer"
                 >
                   {copiedField === 'Full Name' ? <Check size={13} className="text-emerald-500" /> : <Copy size={13} />}
                 </button>
               </div>
-              <p className="text-sm font-bold text-slate-900 dark:text-white truncate">
+              <p className="text-sm font-bold text-theme-text truncate">
                 {profile?.full_name || '—'}
               </p>
             </div>
 
             {/* Email */}
-            <div className="bg-slate-50/70 dark:bg-[#14142B] p-4 rounded-xl border border-slate-100 dark:border-slate-800/80">
-              <div className="flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">
+            <div className="bg-theme-panel/70 p-4 rounded-xl border border-theme-border">
+              <div className="flex items-center justify-between text-xs font-bold text-theme-muted mb-1">
                 <span className="flex items-center gap-1.5">
-                  <Mail size={14} className="text-[#403f75] dark:text-indigo-400" />
+                  <Mail size={14} className="text-theme-accent" />
                   Email Address
                 </span>
                 <button
                   onClick={() => handleCopy(profile?.email, 'Email')}
-                  className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                  className="text-theme-muted hover:text-theme-text cursor-pointer"
                 >
                   {copiedField === 'Email' ? <Check size={13} className="text-emerald-500" /> : <Copy size={13} />}
                 </button>
               </div>
-              <p className="text-sm font-bold text-slate-900 dark:text-white truncate">
+              <p className="text-sm font-bold text-theme-text truncate">
                 {profile?.email || '—'}
               </p>
             </div>
 
             {/* Organization */}
-            <div className="bg-slate-50/70 dark:bg-[#14142B] p-4 rounded-xl border border-slate-100 dark:border-slate-800/80">
-              <div className="flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">
+            <div className="bg-theme-panel/70 p-4 rounded-xl border border-theme-border">
+              <div className="flex items-center justify-between text-xs font-bold text-theme-muted mb-1">
                 <span className="flex items-center gap-1.5">
-                  <Building2 size={14} className="text-[#403f75] dark:text-indigo-400" />
+                  <Building2 size={14} className="text-theme-accent" />
                   Organization
                 </span>
                 <button
                   onClick={() => handleCopy(profile?.company_name, 'Organization')}
-                  className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                  className="text-theme-muted hover:text-theme-text cursor-pointer"
                 >
                   {copiedField === 'Organization' ? <Check size={13} className="text-emerald-500" /> : <Copy size={13} />}
                 </button>
               </div>
-              <p className="text-sm font-bold text-slate-900 dark:text-white truncate">
+              <p className="text-sm font-bold text-theme-text truncate">
                 {profile?.company_name || (isSuper ? 'Shnoor International' : '—')}
               </p>
             </div>
 
             {/* Phone */}
-            <div className="bg-slate-50/70 dark:bg-[#14142B] p-4 rounded-xl border border-slate-100 dark:border-slate-800/80">
-              <div className="flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">
+            <div className="bg-theme-panel/70 p-4 rounded-xl border border-theme-border">
+              <div className="flex items-center justify-between text-xs font-bold text-theme-muted mb-1">
                 <span className="flex items-center gap-1.5">
-                  <Phone size={14} className="text-[#403f75] dark:text-indigo-400" />
+                  <Phone size={14} className="text-theme-accent" />
                   Mobile Number
                 </span>
                 {profile?.phone && (
                   <button
                     onClick={() => handleCopy(profile.phone, 'Mobile Number')}
-                    className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                    className="text-theme-muted hover:text-theme-text cursor-pointer"
                   >
                     {copiedField === 'Mobile Number' ? <Check size={13} className="text-emerald-500" /> : <Copy size={13} />}
                   </button>
                 )}
               </div>
-              <p className="text-sm font-bold text-slate-900 dark:text-white">
+              <p className="text-sm font-bold text-theme-text">
                 {profile?.phone || '—'}
               </p>
             </div>
 
             {/* Address */}
-            <div className="bg-slate-50/70 dark:bg-[#14142B] p-4 rounded-xl border border-slate-100 dark:border-slate-800/80">
-              <div className="flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">
+            <div className="bg-theme-panel/70 p-4 rounded-xl border border-theme-border">
+              <div className="flex items-center justify-between text-xs font-bold text-theme-muted mb-1">
                 <span className="flex items-center gap-1.5">
-                  <MapPin size={14} className="text-[#403f75] dark:text-indigo-400" />
+                  <MapPin size={14} className="text-theme-accent" />
                   Office Location
                 </span>
                 {profile?.address && (
                   <button
                     onClick={() => handleCopy(profile.address, 'Office Location')}
-                    className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                    className="text-theme-muted hover:text-theme-text cursor-pointer"
                   >
                     {copiedField === 'Office Location' ? <Check size={13} className="text-emerald-500" /> : <Copy size={13} />}
                   </button>
                 )}
               </div>
-              <p className="text-sm font-bold text-slate-900 dark:text-white truncate">
+              <p className="text-sm font-bold text-theme-text truncate">
                 {profile?.address || '—'}
               </p>
             </div>
@@ -556,17 +556,17 @@ export default function AdminProfile() {
         </div>
 
         {/* Change Password Card */}
-        <div className="bg-white dark:bg-[#1A1A32] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 sm:p-7">
-          <div className="flex items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800/80">
+        <div className="bg-theme-card rounded-2xl border border-theme-border shadow-sm p-6 sm:p-7">
+          <div className="flex items-center justify-between gap-4 pb-4 border-b border-theme-border">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-[#403f75] dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/50">
+              <div className="p-2.5 rounded-xl bg-theme-panel text-theme-accent border border-theme-border">
                 <Lock size={18} />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                <h3 className="text-lg font-bold text-theme-text">
                   Change Password
                 </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                <p className="text-xs text-theme-muted font-medium">
                   Update your security password
                 </p>
               </div>
@@ -577,7 +577,7 @@ export default function AdminProfile() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {/* Current Password */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                <label className="block text-xs font-bold text-theme-text mb-1.5">
                   Current Password <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
@@ -587,13 +587,13 @@ export default function AdminProfile() {
                     value={passwordForm.currentPassword}
                     onChange={handlePasswordChangeInput}
                     placeholder="Enter current password"
-                    className="w-full px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-[#14142B] border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#403f75] dark:focus:ring-indigo-500 pr-10"
+                    className="w-full px-3.5 py-2.5 text-sm bg-theme-panel/60 border border-theme-border rounded-xl text-theme-text placeholder:text-theme-muted/60 focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent pr-10"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-theme-muted hover:text-theme-text cursor-pointer"
                   >
                     {showCurrentPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                   </button>
@@ -602,7 +602,7 @@ export default function AdminProfile() {
 
               {/* New Password */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                <label className="block text-xs font-bold text-theme-text mb-1.5">
                   New Password <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
@@ -612,13 +612,13 @@ export default function AdminProfile() {
                     value={passwordForm.newPassword}
                     onChange={handlePasswordChangeInput}
                     placeholder="Min 6 characters"
-                    className="w-full px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-[#14142B] border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#403f75] dark:focus:ring-indigo-500 pr-10"
+                    className="w-full px-3.5 py-2.5 text-sm bg-theme-panel/60 border border-theme-border rounded-xl text-theme-text placeholder:text-theme-muted/60 focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent pr-10"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowNewPassword(!showNewPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-theme-muted hover:text-theme-text cursor-pointer"
                   >
                     {showNewPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                   </button>
@@ -627,7 +627,7 @@ export default function AdminProfile() {
 
               {/* Confirm Password */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                <label className="block text-xs font-bold text-theme-text mb-1.5">
                   Confirm Password <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
@@ -637,13 +637,13 @@ export default function AdminProfile() {
                     value={passwordForm.confirmPassword}
                     onChange={handlePasswordChangeInput}
                     placeholder="Re-enter new password"
-                    className="w-full px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-[#14142B] border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#403f75] dark:focus:ring-indigo-500 pr-10"
+                    className="w-full px-3.5 py-2.5 text-sm bg-theme-panel/60 border border-theme-border rounded-xl text-theme-text placeholder:text-theme-muted/60 focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent pr-10"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-theme-muted hover:text-theme-text cursor-pointer"
                   >
                     {showConfirmPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                   </button>
@@ -655,7 +655,7 @@ export default function AdminProfile() {
               <button
                 type="submit"
                 disabled={!isPasswordFilled || isChangingPassword}
-                className="inline-flex items-center gap-2 px-5 py-2 text-xs sm:text-sm font-bold text-white bg-[#403f75] dark:bg-indigo-600 hover:bg-[#343360] dark:hover:bg-indigo-700 rounded-xl transition-all shadow-sm disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                className="inline-flex items-center gap-2 px-5 py-2 text-xs sm:text-sm font-bold text-white bg-theme-accent hover:bg-theme-accent2 rounded-xl transition-all shadow-sm disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
               >
                 <Lock size={14} />
                 <span>{isChangingPassword ? 'Changing Password...' : 'Change Password'}</span>
@@ -667,21 +667,21 @@ export default function AdminProfile() {
 
       {/* Edit Profile Modal */}
       {isEditModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-white dark:bg-[#1A1A32] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-theme-card rounded-2xl border border-theme-border shadow-xl animate-in fade-in zoom-in-95 duration-150">
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-5 sm:p-6 border-b border-slate-100 dark:border-slate-800">
+            <div className="flex items-center justify-between p-5 sm:p-6 border-b border-theme-border">
               <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-[#403f75] dark:text-indigo-400">
+                <div className="p-2 rounded-lg bg-theme-panel text-theme-accent border border-theme-border">
                   <Edit3 size={18} />
                 </div>
-                <h3 className="text-lg font-black text-slate-900 dark:text-white">
+                <h3 className="text-lg font-black text-theme-text">
                   Edit Profile
                 </h3>
               </div>
               <button
                 onClick={() => setIsEditModalOpen(false)}
-                className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-lg cursor-pointer"
+                className="p-1.5 text-theme-muted hover:text-theme-text rounded-lg cursor-pointer"
               >
                 <X size={18} />
               </button>
@@ -690,7 +690,7 @@ export default function AdminProfile() {
             {/* Modal Form */}
             <form onSubmit={handleSaveProfile} className="p-5 sm:p-6 space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-bold text-theme-text mb-1">
                   Full Name
                 </label>
                 <input
@@ -699,12 +699,12 @@ export default function AdminProfile() {
                   value={formData.full_name}
                   onChange={handleInputChange}
                   placeholder="Enter full name"
-                  className="w-full px-3.5 py-2 text-sm bg-slate-50 dark:bg-[#14142B] border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#403f75] dark:focus:ring-indigo-500"
+                  className="w-full px-3.5 py-2 text-sm bg-theme-panel/60 border border-theme-border rounded-xl text-theme-text placeholder:text-theme-muted/60 focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-bold text-theme-text mb-1">
                   Organization / Company Name
                 </label>
                 <input
@@ -713,12 +713,12 @@ export default function AdminProfile() {
                   value={formData.company_name}
                   onChange={handleInputChange}
                   placeholder="Enter organization name"
-                  className="w-full px-3.5 py-2 text-sm bg-slate-50 dark:bg-[#14142B] border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#403f75] dark:focus:ring-indigo-500"
+                  className="w-full px-3.5 py-2 text-sm bg-theme-panel/60 border border-theme-border rounded-xl text-theme-text placeholder:text-theme-muted/60 focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-bold text-theme-text mb-1">
                   Mobile Number
                 </label>
                 <input
@@ -727,12 +727,12 @@ export default function AdminProfile() {
                   value={formData.phone}
                   onChange={handleInputChange}
                   placeholder="e.g. +91 9876543210"
-                  className="w-full px-3.5 py-2 text-sm bg-slate-50 dark:bg-[#14142B] border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#403f75] dark:focus:ring-indigo-500"
+                  className="w-full px-3.5 py-2 text-sm bg-theme-panel/60 border border-theme-border rounded-xl text-theme-text placeholder:text-theme-muted/60 focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-bold text-theme-text mb-1">
                   Office / Address Location
                 </label>
                 <textarea
@@ -741,23 +741,23 @@ export default function AdminProfile() {
                   onChange={handleInputChange}
                   rows={3}
                   placeholder="Enter location / address"
-                  className="w-full px-3.5 py-2 text-sm bg-slate-50 dark:bg-[#14142B] border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#403f75] dark:focus:ring-indigo-500"
+                  className="w-full px-3.5 py-2 text-sm bg-theme-panel/60 border border-theme-border rounded-xl text-theme-text placeholder:text-theme-muted/60 focus:outline-none focus:ring-2 focus:ring-theme-accent/20 focus:border-theme-accent"
                 />
               </div>
 
               {/* Modal Actions */}
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-theme-border">
                 <button
                   type="button"
                   onClick={() => setIsEditModalOpen(false)}
-                  className="px-4 py-2 text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl cursor-pointer"
+                  className="px-4 py-2 text-xs sm:text-sm font-bold text-theme-muted hover:text-theme-text rounded-xl cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSaving}
-                  className="px-5 py-2 text-xs sm:text-sm font-bold text-white bg-[#403f75] dark:bg-indigo-600 hover:bg-[#343360] dark:hover:bg-indigo-700 rounded-xl shadow-sm disabled:opacity-50 cursor-pointer"
+                  className="px-5 py-2 text-xs sm:text-sm font-bold text-white bg-theme-accent hover:bg-theme-accent2 rounded-xl shadow-sm disabled:opacity-50 cursor-pointer"
                 >
                   {isSaving ? 'Saving...' : 'Save Changes'}
                 </button>

@@ -24,6 +24,7 @@
     "dompurify": "3.4.16",
     "firebase": "12.19.0",
     "lucide-react": "^0.563.0",
+    "mcq-exam-portal": "file:",
     "p-limit": "^7.3.0",
     "peerjs": "^1.5.5",
     "react": "^19.2.0",

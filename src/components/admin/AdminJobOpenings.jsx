@@ -473,7 +473,7 @@ export default function AdminJobOpenings({ clientId }) {
                                                 <button
                                                     onClick={() => navigate(`/admin/job-applicants/${job.id}`)}
                                                     title="View applicants"
-                                                    className="flex-1 sm:flex-none min-w-0 min-h-[40px] flex items-center justify-center gap-1.5 px-2 sm:px-4 py-2 bg-shnoor-indigo hover:bg-[#4d4d9c] text-white rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all shadow-sm"
+                                                    className="flex-1 sm:flex-none min-w-0 min-h-[40px] flex items-center justify-center gap-1.5 px-2 sm:px-4 py-2 bg-theme-accent hover:bg-theme-accent2 text-white rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all shadow-sm cursor-pointer"
                                                 >
                                                     <Users size={16} className="hidden sm:block shrink-0" />
                                                     <span>View Applicants</span>
@@ -482,7 +482,7 @@ export default function AdminJobOpenings({ clientId }) {
                                                 <button
                                                     onClick={() => openTestLinkModal(job.id)}
                                                     title="Link tests to this job"
-                                                    className="flex-1 sm:flex-none min-w-0 min-h-[40px] flex items-center justify-center gap-1.5 px-2 sm:px-4 py-2 bg-shnoor-indigoMedium hover:bg-shnoor-indigo text-white rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all shadow-sm"
+                                                    className="flex-1 sm:flex-none min-w-0 min-h-[40px] flex items-center justify-center gap-1.5 px-2 sm:px-4 py-2 bg-theme-accent2 hover:bg-theme-accent text-white rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all shadow-sm cursor-pointer"
                                                 >
                                                     <TestTube size={16} className="hidden sm:block shrink-0" />
                                                     <span>Link Tests</span>
@@ -495,7 +495,7 @@ export default function AdminJobOpenings({ clientId }) {
                                                 onClick={() => handlePublish(job.id)}
                                                 disabled={publishingId === job.id}
                                                 title="Publish & send emails"
-                                                className="flex-1 sm:flex-none min-h-[40px] flex items-center justify-center gap-1.5 px-4 py-2 bg-shnoor-indigo hover:bg-shnoor-navy text-white rounded-xl text-sm font-semibold whitespace-nowrap transition-all disabled:opacity-60"
+                                                className="flex-1 sm:flex-none min-h-[40px] flex items-center justify-center gap-1.5 px-4 py-2 bg-theme-accent hover:bg-theme-accent2 text-white rounded-xl text-sm font-semibold whitespace-nowrap transition-all disabled:opacity-60 cursor-pointer"
                                             >
                                                 {publishingId === job.id
                                                     ? <Loader2 size={16} className="animate-spin" />
@@ -508,7 +508,7 @@ export default function AdminJobOpenings({ clientId }) {
                                             onClick={() => handleDelete(job.id)}
                                             disabled={deletingId === job.id}
                                             title="Delete"
-                                            className="shrink-0 ml-auto sm:ml-0 flex items-center justify-center w-10 h-10 sm:w-auto sm:h-auto sm:p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors disabled:opacity-60"
+                                            className="shrink-0 ml-auto sm:ml-0 flex items-center justify-center w-10 h-10 sm:w-auto sm:h-auto sm:p-2 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors disabled:opacity-60 cursor-pointer"
                                         >
                                             {deletingId === job.id
                                                 ? <Loader2 size={18} className="animate-spin" />
@@ -519,26 +519,26 @@ export default function AdminJobOpenings({ clientId }) {
 
                                 {/* Expanded details */}
                                 {expandedId === job.id && (
-                                    <div className="mt-4 space-y-3 text-sm text-shnoor-navy bg-shnoor-lavender rounded-xl p-4 sm:p-5 break-words">
+                                    <div className="mt-4 space-y-3 text-sm text-theme-text bg-theme-panel border border-theme-border rounded-xl p-4 sm:p-5 break-words">
                                         <div>
-                                            <p className="font-semibold text-shnoor-indigoMedium uppercase text-xs tracking-wider mb-1">Job Description</p>
+                                            <p className="font-semibold text-theme-muted uppercase text-xs tracking-wider mb-1">Job Description</p>
                                             <p className="whitespace-pre-wrap">{job.job_description}</p>
                                         </div>
                                         <div>
-                                            <p className="font-semibold text-shnoor-indigoMedium uppercase text-xs tracking-wider mb-1">Eligibility Criteria</p>
+                                            <p className="font-semibold text-theme-muted uppercase text-xs tracking-wider mb-1">Eligibility Criteria</p>
                                             <p className="whitespace-pre-wrap">{job.eligibility_criteria}</p>
                                         </div>
                                         <div>
-                                            <p className="font-semibold text-shnoor-indigoMedium uppercase text-xs tracking-wider mb-1">Application Link</p>
+                                            <p className="font-semibold text-theme-muted uppercase text-xs tracking-wider mb-1">Application Link</p>
                                             <a href={job.application_link} target="_blank" rel="noopener noreferrer"
-                                                className="text-shnoor-indigo underline flex items-center space-x-1 break-all">
+                                                className="text-theme-accent underline flex items-center space-x-1 break-all font-medium">
                                                 <span>{job.application_link}</span>
                                                 <ExternalLink size={13} />
                                             </a>
                                         </div>
                                         {job.published_at && (
                                             <div>
-                                                <p className="font-semibold text-shnoor-indigoMedium uppercase text-xs tracking-wider mb-1">Published At</p>
+                                                <p className="font-semibold text-theme-muted uppercase text-xs tracking-wider mb-1">Published At</p>
                                                 <p>{fmtDate(job.published_at)}</p>
                                             </div>
                                         )}
@@ -552,16 +552,16 @@ export default function AdminJobOpenings({ clientId }) {
 
             {/* Test Link Modal */}
             {showTestLinkModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-                    <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-                        <div className="bg-shnoor-indigo px-4 py-4 sm:px-6 sm:py-5 flex items-center justify-between gap-3 sticky top-0 z-10">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                    <div className="bg-theme-card border border-theme-border rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+                        <div className="bg-theme-header px-4 py-4 sm:px-6 sm:py-5 flex items-center justify-between gap-3 sticky top-0 z-10">
                             <div className="flex items-center gap-3 min-w-0">
                                 <TestTube size={24} className="text-white shrink-0" />
                                 <h3 className="text-lg sm:text-xl font-bold text-white truncate">Link Tests to Job</h3>
                             </div>
                             <button
                                 onClick={() => setShowTestLinkModal(null)}
-                                className="text-white hover:bg-white/20 rounded-lg p-2 transition-colors"
+                                className="text-white hover:bg-white/20 rounded-lg p-2 transition-colors cursor-pointer"
                             >
                                 <X size={20} />
                             </button>
@@ -571,24 +571,24 @@ export default function AdminJobOpenings({ clientId }) {
                             {/* All Tests - Single List with Toggle */}
                             <div>
                                 <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-                                    <h4 className="text-sm font-bold uppercase text-shnoor-navy">
+                                    <h4 className="text-sm font-bold uppercase text-theme-text">
                                         Available Tests
                                     </h4>
                                     <div className="flex items-center space-x-2">
-                                        <span className="bg-shnoor-successLight text-shnoor-success px-3 py-1 rounded-full text-xs font-bold border border-shnoor-successLight">
+                                        <span className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 px-3 py-1 rounded-full text-xs font-bold border border-emerald-500/30">
                                             {linkedTests[showTestLinkModal]?.length || 0} Linked
                                         </span>
-                                        <span className="bg-shnoor-lavender text-shnoor-indigo px-3 py-1 rounded-full text-xs font-bold border border-shnoor-mist">
+                                        <span className="bg-theme-panel text-theme-accent px-3 py-1 rounded-full text-xs font-bold border border-theme-border">
                                             {tests.length} Total
                                         </span>
                                     </div>
                                 </div>
 
                                 {tests.length === 0 ? (
-                                    <div className="bg-shnoor-warningLight border border-shnoor-warning rounded-xl p-6 text-center">
-                                        <AlertCircle size={32} className="mx-auto text-shnoor-warning mb-2" />
-                                        <p className="text-sm text-shnoor-warning font-bold">No tests available</p>
-                                        <p className="text-xs text-shnoor-navy mt-1">Create and publish tests from "Manage Exams" first</p>
+                                    <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-6 text-center">
+                                        <AlertCircle size={32} className="mx-auto text-amber-500 mb-2" />
+                                        <p className="text-sm text-amber-600 dark:text-amber-400 font-bold">No tests available</p>
+                                        <p className="text-xs text-theme-muted mt-1">Create and publish tests from "Manage Exams" first</p>
                                     </div>
                                 ) : (
                                     <div className="space-y-2 max-h-[500px] overflow-y-auto pr-2">
@@ -598,16 +598,16 @@ export default function AdminJobOpenings({ clientId }) {
                                                 <div
                                                     key={test.id}
                                                     className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl p-4 transition-all ${isLinked
-                                                            ? 'bg-shnoor-successLight border-2 border-shnoor-success shadow-sm'
-                                                            : 'bg-white border border-shnoor-mist hover:border-shnoor-indigo hover:shadow-md'
+                                                            ? 'bg-emerald-500/10 border-2 border-emerald-500/40 shadow-sm'
+                                                            : 'bg-theme-card border border-theme-border hover:border-theme-accent hover:shadow-md'
                                                         }`}
                                                 >
                                                     <div className="flex-1 min-w-0">
                                                         <div className="flex items-center gap-2 mb-1">
-                                                            {isLinked && <CheckCircle size={18} className="text-green-600 shrink-0" />}
-                                                            <p className="font-bold text-shnoor-navy break-words min-w-0">{test.display_name}</p>
+                                                            {isLinked && <CheckCircle size={18} className="text-emerald-600 dark:text-emerald-400 shrink-0" />}
+                                                            <p className="font-bold text-theme-text break-words min-w-0">{test.display_name}</p>
                                                         </div>
-                                                        <p className="text-xs text-shnoor-indigoMedium ml-6">
+                                                        <p className="text-xs text-theme-muted ml-6">
                                                             {test.display_duration} min • {test.display_question_count} questions • {test.display_total_marks} marks
                                                         </p>
                                                     </div>
@@ -617,9 +617,9 @@ export default function AdminJobOpenings({ clientId }) {
                                                             : handleLinkTest(showTestLinkModal, test.id)
                                                         }
                                                         disabled={linkingTest}
-                                                        className={`shrink-0 w-full sm:w-auto flex items-center justify-center space-x-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all disabled:opacity-50 shadow-sm hover:shadow-md ${isLinked
-                                                                ? 'bg-shnoor-success hover:opacity-90 text-white'
-                                                                : 'bg-shnoor-indigo hover:bg-[#4d4d9c] text-white'
+                                                        className={`shrink-0 w-full sm:w-auto flex items-center justify-center space-x-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all disabled:opacity-50 shadow-sm hover:shadow-md cursor-pointer ${isLinked
+                                                                ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                                                                : 'bg-theme-accent hover:bg-theme-accent2 text-white'
                                                             }`}
                                                     >
                                                         {linkingTest ? (

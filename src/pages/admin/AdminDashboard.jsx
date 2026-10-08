@@ -23,6 +23,9 @@ const AdminJobOpenings = lazy(() => import('../../components/admin/AdminJobOpeni
 const AdminReports = lazy(() => import('./AdminReports'));
 const SubscriptionPlansSettings = lazy(() => import('./SubscriptionPlansSettings'));
 const AdminProfile = lazy(() => import('./AdminProfile'));
+const AdminSettings = lazy(() => import('./AdminSettings'));
+const AdminClients = lazy(() => import('./AdminClients'));
+const StudentMessages = lazy(() => import('./StudentMessages'));
 
 // Modular Admin Components
 import ExamsTab from './ExamsTab';
@@ -44,7 +47,19 @@ const AdminDashboard = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const [activeTab, setActiveTab] = useState('exams');
+  const [activeTab, setActiveTab] = useState(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get('tab') || location.state?.activeTab || 'exams';
+  });
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tabParam = params.get('tab');
+    if (tabParam && tabParam !== activeTab) {
+      setActiveTab(tabParam);
+    }
+  }, [location.search]);
+
   const [showCreateTest, setShowCreateTest] = useState(false);
   const [editingTest, setEditingTest] = useState(null);
   const [selectedExamId, setSelectedExamId] = useState(null);
@@ -242,11 +257,11 @@ const AdminDashboard = () => {
     { id: 'violations', label: 'Violations', icon: ShieldAlert },
     { id: 'interviews', label: 'Interviews', icon: Video },
     { id: 'job-openings', label: 'Job Openings', icon: Briefcase },
-    { id: 'messages', label: 'Messages', icon: MessageSquare, isRoute: true, path: `${basePath}/student-messages`, badge: unreadMessageCount },
-    ...(!isClientAdmin ? [{ id: 'clients', label: 'Clients', icon: Building2, isRoute: true, path: '/admin/clients' }] : []),
+    { id: 'messages', label: 'Messages', icon: MessageSquare, badge: unreadMessageCount },
+    ...(!isClientAdmin ? [{ id: 'clients', label: 'Clients', icon: Building2 }] : []),
     ...(isSuperAdmin ? [{ id: 'subscription-plans', label: 'Subscription Plans', icon: CreditCard }] : []),
     { id: 'profile', label: 'My Profile', icon: User },
-    { id: 'settings', label: 'Settings', icon: Settings, isRoute: true, path: `${basePath}/settings` }
+    { id: 'settings', label: 'Settings', icon: Settings }
   ], [basePath, isClientAdmin, isSuperAdmin, unreadMessageCount]);
 
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(() => {
@@ -2266,6 +2281,8 @@ className="p-0.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-sl
                             if (tab.isRoute) {
                               navigate(tab.path);
                             } else {
+                              if (selectedExamId) setSelectedExamId(null);
+                              if (showCreateTest) setShowCreateTest(false);
                               setActiveTab(tab.id);
                             }
                           }}
@@ -2316,6 +2333,8 @@ className="p-0.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-sl
                             if (tab.isRoute) {
                               navigate(tab.path);
                             } else {
+                              if (selectedExamId) setSelectedExamId(null);
+                              if (showCreateTest) setShowCreateTest(false);
                               setActiveTab(tab.id);
                             }
                           }}
@@ -2524,6 +2543,27 @@ className="p-0.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-sl
                 {activeTab === 'profile' && (
                   <div className="animate-fade-in">
                     <AdminProfile />
+                  </div>
+                )}
+
+                {/* Messages Tab */}
+                {activeTab === 'messages' && (
+                  <div className="animate-fade-in">
+                    <StudentMessages isEmbedded={true} />
+                  </div>
+                )}
+
+                {/* Clients Management Tab */}
+                {activeTab === 'clients' && !isClientAdmin && (
+                  <div className="animate-fade-in">
+                    <AdminClients isEmbedded={true} />
+                  </div>
+                )}
+
+                {/* Settings Tab */}
+                {activeTab === 'settings' && (
+                  <div className="animate-fade-in">
+                    <AdminSettings isEmbedded={true} />
                   </div>
                 )}
               </>

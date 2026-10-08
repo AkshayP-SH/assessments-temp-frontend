@@ -15,7 +15,7 @@ const EMOJI_OPTIONS = [
   '😐', '😑', '😶', '😬', '😮', '😯', '😲', '😳', '🥲', '😭', '😤', '😓', '😰', '😵', '🤯', '😇'
 ];
 
-const StudentMessages = () => {
+const StudentMessages = ({ isEmbedded = false }) => {
   const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
   const [colleges, setColleges] = useState([]);
@@ -48,6 +48,7 @@ const StudentMessages = () => {
   const selectedMessageRef = useRef(null);
   const fileInputRef = useRef(null);
   const emojiPickerRef = useRef(null);
+  const textareaRef = useRef(null);
 
   const showAlert = (message) => alert(message);
   const showConfirm = (message) => window.confirm(message);
@@ -56,6 +57,16 @@ const StudentMessages = () => {
   useEffect(() => {
     selectedMessageRef.current = selectedMessage;
   }, [selectedMessage]);
+
+  // Dynamically auto-resize reply textarea
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = '44px';
+      if (textareaRef.current.scrollHeight > 48) {
+        textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 128)}px`;
+      }
+    }
+  }, [replyMessage]);
 
   const dedupeById = useCallback((items = []) => {
     const map = new Map();
@@ -552,109 +563,115 @@ const StudentMessages = () => {
   const unreadCount = messages.reduce((total, msg) => total + (parseInt(msg.unread_count) || 0), 0);
 
 
-  return (
-    <AdminLayout title="Student Support">
-      {/* Header, Actions and Filters */}
-      <div className={`bg-theme-card rounded-xl border border-theme-border shadow-sm p-4 sm:p-5 mb-4 sm:mb-6 ${selectedMessage ? 'hidden lg:block' : ''}`}>
-        {/* Row 1: Title and Actions */}
-        <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-theme-border">
-          <div className="flex items-center gap-3 min-w-0">
-            <button
-              onClick={() => navigate('/admin/dashboard')}
-              aria-label="Back to Dashboard"
-              className="w-10 h-10 sm:w-9 sm:h-9 shrink-0 flex items-center justify-center rounded-lg border border-theme-border bg-theme-card hover:bg-theme-panel text-theme-accent transition-colors cursor-pointer"
-            >
-              <ArrowLeft size={16} />
-            </button>
-            <div className="min-w-0">
-              <p className="text-xs text-theme-muted">Back to Dashboard</p>
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                <h1 className="text-xl font-bold text-theme-text">Student Support</h1>
+  const content = (
+    <div className="w-full space-y-6">
+      {/* Page Header */}
+      <div className={`section-header ${selectedMessage ? 'hidden lg:flex' : 'flex'}`}>
+        <div className="section-header-left">
+          <div className="flex items-center gap-3">
+            {!isEmbedded && (
+              <button
+                onClick={() => navigate(-1)}
+                className="flex items-center gap-2 h-10 px-4 border border-[#D1D1E6] dark:border-slate-700 bg-white dark:bg-[#1E1E38] text-slate-700 dark:text-slate-300 rounded-xl text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer shadow-2xs"
+              >
+                <ArrowLeft size={16} />
+                Back
+              </button>
+            )}
+            <div>
+              <div className="flex items-center gap-2.5">
+                <h2 className="section-title">Student Support</h2>
                 {unreadCount > 0 && (
-                  <span className="px-2 py-0.5 bg-red-100 text-red-600 rounded-full text-xs font-medium">
+                  <span className="px-2.5 py-0.5 bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-300 rounded-full text-xs font-bold">
                     {unreadCount} unread
                   </span>
                 )}
               </div>
+              <p className="section-subtitle">Review student inquiries, resolve support tickets, and manage real-time communication</p>
             </div>
-          </div>
-
-          <div className="grid grid-cols-3 gap-2 w-full sm:flex sm:flex-wrap sm:items-center sm:gap-3 sm:w-auto">
-            <button
-              onClick={() => setShowAnalytics(!showAnalytics)}
-              className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 min-h-[48px] sm:min-h-0 px-2 sm:px-4 py-2 text-xs sm:text-sm whitespace-nowrap rounded-lg transition-all font-semibold cursor-pointer border ${showAnalytics
-                ? 'bg-theme-accent text-white border-theme-accent shadow-xs'
-                : 'bg-theme-card text-theme-text hover:bg-theme-panel border-theme-border'
-                }`}
-            >
-              <BarChart3 size={14} className={showAnalytics ? '' : 'text-theme-accent'} />
-              Analytics
-            </button>
-            <button
-              onClick={fetchMessages}
-              className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 min-h-[48px] sm:min-h-0 px-2 sm:px-4 py-2 text-xs sm:text-sm whitespace-nowrap bg-theme-card text-theme-text hover:bg-theme-panel border border-theme-border rounded-lg transition-all font-semibold cursor-pointer"
-            >
-              <RefreshCw size={14} />
-              Refresh
-            </button>
-            <button
-              onClick={() => {
-                setBulkDeleteMode(!bulkDeleteMode);
-                setSelectedConversations(new Set());
-              }}
-              className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 min-h-[48px] sm:min-h-0 px-2 sm:px-4 py-2 text-xs sm:text-sm whitespace-nowrap rounded-lg transition-all font-semibold cursor-pointer border ${bulkDeleteMode
-                ? 'bg-red-600 text-white border-red-600'
-                : 'bg-theme-card text-red-600 border-red-200 hover:bg-red-50'
-                }`}
-            >
-              <Trash2 size={14} />
-              {bulkDeleteMode ? 'Cancel' : 'Bulk Delete'}
-            </button>
-            {unreadCount > 0 && (
-              <button
-                onClick={markAllAsRead}
-                className="col-span-3 flex items-center justify-center gap-2 min-h-[40px] sm:min-h-0 px-4 py-2 text-sm bg-theme-accent text-white hover:bg-theme-accent2 rounded-lg transition-all font-semibold cursor-pointer shadow-xs"
-              >
-                <CheckCheck size={14} />
-                Mark All Read
-              </button>
-            )}
           </div>
         </div>
 
-        {/* Row 2: Filters */}
-        <div className="pt-4 flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            onClick={() => setShowAnalytics(!showAnalytics)}
+            className={`flex items-center justify-center gap-2 h-10 px-4 text-sm whitespace-nowrap rounded-xl transition-all font-semibold cursor-pointer border ${showAnalytics
+              ? 'bg-[#403f75] dark:bg-indigo-600 text-white border-transparent shadow-sm'
+              : 'bg-white dark:bg-[#1E1E38] text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-800 shadow-2xs'
+              }`}
+          >
+            <BarChart3 size={16} className={showAnalytics ? '' : 'text-[#403f75] dark:text-indigo-400'} />
+            Analytics
+          </button>
+          <button
+            onClick={fetchMessages}
+            className="flex items-center justify-center gap-2 h-10 px-4 text-sm whitespace-nowrap bg-white dark:bg-[#1E1E38] text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-800 rounded-xl transition-all font-semibold cursor-pointer shadow-2xs"
+          >
+            <RefreshCw size={16} />
+            Refresh
+          </button>
+          <button
+            onClick={() => {
+              setBulkDeleteMode(!bulkDeleteMode);
+              setSelectedConversations(new Set());
+            }}
+            className={`flex items-center justify-center gap-2 h-10 px-4 text-sm whitespace-nowrap rounded-xl transition-all font-semibold cursor-pointer border ${bulkDeleteMode
+              ? 'bg-red-600 text-white border-red-600'
+              : 'bg-white dark:bg-[#1E1E38] text-red-600 border border-red-200 dark:border-red-900/40 hover:bg-red-50 dark:hover:bg-red-900/20 shadow-2xs'
+              }`}
+          >
+            <Trash2 size={16} />
+            {bulkDeleteMode ? 'Cancel' : 'Bulk Delete'}
+          </button>
+          {unreadCount > 0 && (
+            <button
+              onClick={markAllAsRead}
+              className="flex items-center justify-center gap-2 h-10 px-4 text-sm bg-[#403f75] dark:bg-indigo-600 text-white hover:bg-[#343360] dark:hover:bg-indigo-700 rounded-xl transition-all font-semibold cursor-pointer shadow-sm"
+            >
+              <CheckCheck size={16} />
+              Mark All Read
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Row 2: Filters */}
+      <div className={`bg-white dark:bg-[#1E1E38] rounded-2xl border border-slate-200/80 dark:border-slate-800 p-4 shadow-sm flex flex-wrap items-center justify-between gap-4 ${selectedMessage ? 'hidden lg:flex' : 'flex'}`}>
+        <div className="flex flex-wrap items-center gap-2">
           {[{ key: 'all', label: 'All Messages' }, { key: 'unread', label: 'Unread' }].map(({ key, label }) => (
             <button
               key={key}
               onClick={() => { setFilter(key); setPagination(prev => ({ ...prev, page: 1 })); }}
-              className={`px-4 py-2 text-sm rounded-lg transition-all flex items-center gap-1.5 font-semibold cursor-pointer ${
+              className={`px-4 py-2 text-sm rounded-xl transition-all flex items-center gap-1.5 font-semibold cursor-pointer ${
                 filter === key
-                  ? 'bg-theme-accent text-white shadow-xs'
-                  : 'bg-theme-accent/10 text-theme-accent hover:bg-theme-accent/15'
+                  ? 'bg-[#403f75] dark:bg-indigo-600 text-white shadow-xs'
+                  : 'bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
               }`}
             >
               {label}
               {key === 'unread' && unreadCount > 0 && (
                 <span className={`px-1.5 py-0.5 rounded-full text-xs font-bold ${
-                  filter === 'unread' ? 'bg-white text-theme-accent' : 'bg-red-500 text-white'
+                  filter === 'unread' ? 'bg-white text-[#403f75]' : 'bg-red-500 text-white'
                 }`}>{unreadCount}</span>
               )}
             </button>
           ))}
-          <div className="relative flex items-center gap-2 w-full sm:w-auto min-w-0 min-h-[40px] border border-theme-border rounded-lg px-3 py-2 bg-theme-card">
-            <Building size={14} className="text-theme-muted shrink-0" />
+        </div>
+
+        {colleges.length > 0 && (
+          <div className="relative flex items-center gap-2 w-full sm:w-auto min-w-0 min-h-[40px] border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 bg-slate-50 dark:bg-slate-800">
+            <Building size={14} className="text-[#9A9AC9] dark:text-slate-400 shrink-0" />
             <select
               value={selectedCollege}
               onChange={(e) => { setSelectedCollege(e.target.value); setPagination(prev => ({ ...prev, page: 1 })); }}
-              className="appearance-none text-sm text-theme-text focus:outline-none bg-transparent w-full min-w-0 sm:w-auto sm:min-w-[200px] sm:max-w-xs truncate pr-6 cursor-pointer"
+              className="appearance-none text-sm text-slate-800 dark:text-slate-200 focus:outline-none bg-transparent w-full min-w-0 sm:w-auto sm:min-w-[200px] sm:max-w-xs truncate pr-6 cursor-pointer"
             >
-              <option value="" className="bg-theme-card text-theme-text">All Colleges</option>
-              {colleges.map(college => <option key={college} value={college} className="bg-theme-card text-theme-text">{college}</option>)}
+              <option value="" className="bg-white dark:bg-[#1E1E38] text-slate-900 dark:text-white">All Colleges</option>
+              {colleges.map(college => <option key={college} value={college} className="bg-white dark:bg-[#1E1E38] text-slate-900 dark:text-white">{college}</option>)}
             </select>
-            <ChevronDown size={14} className="absolute right-3 text-theme-muted pointer-events-none" />
+            <ChevronDown size={14} className="absolute right-3 text-[#9A9AC9] dark:text-slate-400 pointer-events-none" />
           </div>
-        </div>
+        )}
       </div>
 
       {/* Analytics Section */}
@@ -1082,12 +1099,12 @@ const StudentMessages = () => {
                       </button>
                     </div>
                   )}
-                  <div className="flex items-end gap-2 sm:gap-3">
-                    <div className="relative shrink-0" ref={emojiPickerRef}>
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="relative shrink-0 flex items-center" ref={emojiPickerRef}>
                       <button
                         type="button"
                         onClick={() => setShowEmojiPicker((prev) => !prev)}
-                        className="p-2.5 sm:p-3 rounded-xl border border-theme-border text-theme-muted hover:text-theme-accent hover:border-theme-accent transition-colors"
+                        className="h-11 w-11 flex items-center justify-center rounded-xl border border-theme-border text-theme-muted hover:text-theme-accent hover:border-theme-accent transition-colors cursor-pointer bg-theme-card shrink-0 box-border"
                         title="Add emoji"
                       >
                         <Smile size={18} />
@@ -1110,14 +1127,15 @@ const StudentMessages = () => {
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="shrink-0 p-2.5 sm:p-3 rounded-xl border border-theme-border text-theme-muted hover:text-theme-accent hover:border-theme-accent transition-colors"
+                      className="h-11 w-11 flex items-center justify-center rounded-xl border border-theme-border text-theme-muted hover:text-theme-accent hover:border-theme-accent transition-colors shrink-0 cursor-pointer bg-theme-card box-border"
                       title="Upload file or screenshot"
                     >
                       <Paperclip size={18} />
                     </button>
                     <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
-                    <div className="flex-1 min-w-0">
+                    <div className="flex-1 min-w-0 flex items-center">
                       <textarea
+                        ref={textareaRef}
                         value={replyMessage}
                         onChange={(e) => setReplyMessage(e.target.value)}
                         onPaste={(e) => {
@@ -1126,8 +1144,8 @@ const StudentMessages = () => {
                           if (pastedFile) { e.preventDefault(); handleImageSelect(pastedFile); }
                         }}
                         placeholder="Type your reply..."
-                        rows={2}
-                        className="w-full p-3 rounded-xl border border-theme-border focus:border-theme-accent focus:ring-1 focus:ring-theme-accent outline-none text-sm resize-none bg-theme-card text-theme-text placeholder:text-theme-muted/70"
+                        rows={1}
+                        className="w-full h-11 py-2.5 px-3.5 rounded-xl border border-theme-border focus:border-theme-accent focus:ring-1 focus:ring-theme-accent outline-none text-sm resize-none bg-theme-card text-theme-text placeholder:text-theme-muted/70 block leading-normal box-border"
                         onKeyDown={(e) => {
                           if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendReply(e); }
                         }}
@@ -1136,7 +1154,7 @@ const StudentMessages = () => {
                     <button
                       type="submit"
                       disabled={sendingReply || (!replyMessage.trim() && !selectedImage)}
-                      className="shrink-0 p-2.5 sm:p-3 rounded-xl bg-theme-accent text-white hover:bg-theme-accent2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xs cursor-pointer"
+                      className="h-11 w-11 flex items-center justify-center rounded-xl bg-theme-accent text-white hover:bg-theme-accent2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xs cursor-pointer shrink-0 box-border"
                     >
                       {sendingReply ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Send size={18} />}
                     </button>
@@ -1157,11 +1175,11 @@ const StudentMessages = () => {
       {/* Image Modal */}
       {imageModalOpen && (
         <div
-          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
+          className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4"
           onClick={() => setImageModalOpen(false)}
         >
           <button
-            className="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors"
+            className="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors cursor-pointer"
             onClick={() => setImageModalOpen(false)}
           >
             <X size={32} />
@@ -1174,6 +1192,16 @@ const StudentMessages = () => {
           />
         </div>
       )}
+    </div>
+  );
+
+  if (isEmbedded) {
+    return content;
+  }
+
+  return (
+    <AdminLayout title="Student Support">
+      {content}
     </AdminLayout>
   );
 };
