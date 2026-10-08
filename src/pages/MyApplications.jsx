@@ -59,6 +59,14 @@ export default function MyApplications({ isEmbedded = false, onBrowseJobs }) {
     const [activeMenuAppId, setActiveMenuAppId] = useState(null);
     const [viewDetailsApp, setViewDetailsApp] = useState(null);
     const [activeTab, setActiveTab] = useState('active'); // 'active' or 'archived'
+    const [archivedApplicationIds, setArchivedApplicationIds] = useState(() => {
+        try {
+            return new Set(JSON.parse(localStorage.getItem('student_archived_applications') || '[]').map(String));
+        } catch (error) {
+            console.error('Failed to load archived applications', error);
+            return new Set();
+        }
+    });
 
     useEffect(() => {
         const handleClickOutside = () => setActiveMenuAppId(null);
@@ -229,57 +237,78 @@ export default function MyApplications({ isEmbedded = false, onBrowseJobs }) {
         navigate('/login');
     };
 
-    const getTestProgress = (app) => {
-        const total = parseInt(app.total_tests) || 0;
-        const completed = parseInt(app.completed_tests) || 0;
-
-        if (total === 0) return { text: 'No tests assigned', percentage: 0 };
-
-        const percentage = (completed / total) * 100;
-        return {
-            text: `${completed}/${total} tests completed`,
-            percentage,
-            isComplete: completed === total
-        };
-    };
+    const getApplicationId = (app) => app.application_id ?? app.id;
+    const isMockApplication = (app) => String(app.job_opening_id || '').startsWith('mock-');
+    const isApplicationArchived = (app) =>
+        Boolean(app.student_details?.isArchived) ||
+        archivedApplicationIds.has(String(getApplicationId(app)));
 
     const handleViewDetails = (app) => {
         setViewDetailsApp(app);
         setActiveMenuAppId(null);
     };
 
-    const handleArchive = (appId) => {
-        try {
-            const jobId = appId.replace('mock-app-', '');
-            const savedData = JSON.parse(localStorage.getItem('student_job_applications') || '{}');
-            if (savedData[jobId]) {
-                const isCurrentlyArchived = savedData[jobId].isArchived;
-                savedData[jobId].isArchived = !isCurrentlyArchived;
-                localStorage.setItem('student_job_applications', JSON.stringify(savedData));
-                
-                // Update state without removing it entirely
-                setApplications(prev => prev.map(a => 
-                    a.id === appId ? { ...a, student_details: { ...a.student_details, isArchived: !isCurrentlyArchived } } : a
-                ));
-            }
-        } catch (e) { console.error('Failed to update local storage', e); }
+    const handleArchive = (app) => {
+        const appId = String(getApplicationId(app));
+        const shouldArchive = !isApplicationArchived(app);
+        const nextArchivedIds = new Set(archivedApplicationIds);
 
-        setActiveMenuAppId(null);
+        if (shouldArchive) nextArchivedIds.add(appId);
+        else nextArchivedIds.delete(appId);
+
+        try {
+            localStorage.setItem('student_archived_applications', JSON.stringify([...nextArchivedIds]));
+
+            if (isMockApplication(app)) {
+                const savedData = JSON.parse(localStorage.getItem('student_job_applications') || '{}');
+                const jobId = app.job_opening_id;
+                if (savedData[jobId]) {
+                    savedData[jobId].isArchived = shouldArchive;
+                    localStorage.setItem('student_job_applications', JSON.stringify(savedData));
+                }
+            }
+
+            setArchivedApplicationIds(nextArchivedIds);
+            setApplications(prev => prev.map(application =>
+                String(getApplicationId(application)) === appId
+                    ? {
+                        ...application,
+                        student_details: {
+                            ...application.student_details,
+                            isArchived: shouldArchive
+                        }
+                    }
+                    : application
+            ));
+        } catch (error) {
+            console.error('Failed to update archived applications', error);
+            window.alert('Could not update the archived application. Please try again.');
+        } finally {
+            setActiveMenuAppId(null);
+        }
     };
 
-    const handleWithdraw = (appId) => {
+    const handleWithdraw = (app) => {
+        if (!isMockApplication(app)) return;
+
         if (window.confirm('Are you sure you want to withdraw this application? This action cannot be undone.')) {
             try {
-                const jobId = appId.replace('mock-app-', '');
+                const jobId = app.job_opening_id;
                 const savedData = JSON.parse(localStorage.getItem('student_job_applications') || '{}');
-                if (savedData[jobId]) {
-                    delete savedData[jobId];
-                    localStorage.setItem('student_job_applications', JSON.stringify(savedData));
-                    queryClient.invalidateQueries({ queryKey: ['jobBoardData'] });
-                }
-            } catch (e) { console.error('Failed to update local storage', e); }
-            
-            setApplications(prev => prev.filter(a => a.id !== appId));
+                delete savedData[jobId];
+                localStorage.setItem('student_job_applications', JSON.stringify(savedData));
+                const nextArchivedIds = new Set(archivedApplicationIds);
+                nextArchivedIds.delete(String(getApplicationId(app)));
+                localStorage.setItem('student_archived_applications', JSON.stringify([...nextArchivedIds]));
+                setArchivedApplicationIds(nextArchivedIds);
+                setApplications(prev => prev.filter(application =>
+                    String(getApplicationId(application)) !== String(getApplicationId(app))
+                ));
+                queryClient.invalidateQueries({ queryKey: ['jobBoardData'] });
+            } catch (error) {
+                console.error('Failed to withdraw mock application', error);
+                window.alert('Could not withdraw this application. Please try again.');
+            }
             setActiveMenuAppId(null);
         }
     };
@@ -376,7 +405,7 @@ export default function MyApplications({ isEmbedded = false, onBrowseJobs }) {
 
                         {(() => {
                             const filteredApps = applications.filter(app => {
-                                const isArchived = Boolean(app.student_details?.isArchived);
+                                const isArchived = isApplicationArchived(app);
                                 return activeTab === 'archived' ? isArchived : !isArchived;
                             });
 
@@ -399,11 +428,12 @@ export default function MyApplications({ isEmbedded = false, onBrowseJobs }) {
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                                         {filteredApps.map((app) => {
-                                            const testProgress = getTestProgress(app);
-                                            const isMenuOpen = activeMenuAppId === app.id;
+                                            const applicationId = getApplicationId(app);
+                                            const applicationKey = String(applicationId);
+                                            const isMenuOpen = activeMenuAppId === applicationKey;
 
                                             return (
-                                    <div key={app.id} className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-slate-200 dark:border-slate-800 p-6 flex flex-col sm:flex-row sm:items-start justify-between gap-4 transition-all hover:shadow-[0_8px_30px_rgba(14,14,39,0.08)]">
+                                    <div key={applicationKey} className="bg-white rounded-xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-slate-200 dark:border-slate-800 p-6 flex flex-col sm:flex-row sm:items-start justify-between gap-4 transition-all hover:shadow-[0_8px_30px_rgba(14,14,39,0.08)]">
                                         <div className="flex gap-4 w-full">
                                             {/* Grey icon box */}
                                             <div className="w-14 h-14 bg-slate-50 dark:bg-slate-800 rounded-xl flex items-center justify-center shrink-0 border border-slate-200 dark:border-slate-700 shadow-sm">
@@ -411,9 +441,9 @@ export default function MyApplications({ isEmbedded = false, onBrowseJobs }) {
                                             </div>
 
                                             <div className="flex-1 min-w-0">
-                                                {/* Applied Badge */}
-                                                <div className="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold px-2.5 py-1 rounded-md w-max mb-2 flex items-center uppercase tracking-wide">
-                                                    Applied
+                                                {/* Application status */}
+                                                <div className="mb-2">
+                                                    <StatusBadge status={getDisplayStatus(app)} />
                                                 </div>
                                                 
                                                 {/* Job Info */}
@@ -449,7 +479,7 @@ export default function MyApplications({ isEmbedded = false, onBrowseJobs }) {
                                                                     <div className="text-xs text-slate-500 py-2">Loading tests...</div>
                                                                 ) : appTests[app.application_id || app.id]?.length > 0 ? (
                                                                     <div className="space-y-3">
-                                                                        {appTests[app.application_id || app.id].map((test, idx) => (
+                                                                        {appTests[app.application_id || app.id].map((test) => (
                                                                             <div key={test.test_id} className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-lg border border-slate-100 dark:border-slate-700">
                                                                                 <div>
                                                                                     <p className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-0.5">{test.test_name}</p>
@@ -483,7 +513,7 @@ export default function MyApplications({ isEmbedded = false, onBrowseJobs }) {
                                             <button 
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    setActiveMenuAppId(isMenuOpen ? null : app.id);
+                                        setActiveMenuAppId(isMenuOpen ? null : applicationKey);
                                                 }}
                                                 className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 p-2 rounded-full transition-colors cursor-pointer"
                                             >
@@ -509,14 +539,16 @@ export default function MyApplications({ isEmbedded = false, onBrowseJobs }) {
                                                                 <User size={16} className="text-indigo-500" />
                                                                 View details
                                                             </button>
-                                                            <button onClick={() => handleArchive(app.id)} className="w-full px-4 py-3 text-left text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-3 font-medium transition-colors">
+                                                            <button onClick={() => handleArchive(app)} className="w-full px-4 py-3 text-left text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-3 font-medium transition-colors">
                                                                 <Archive size={16} className="text-slate-500" />
-                                                                {app.student_details?.isArchived ? 'Unarchive' : 'Archive'}
+                                                                {isApplicationArchived(app) ? 'Unarchive' : 'Archive'}
                                                             </button>
-                                                            <button onClick={() => handleWithdraw(app.id)} className="w-full px-4 py-3 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-3 font-medium transition-colors">
-                                                                <XSquare size={16} className="text-red-500" />
-                                                                Withdraw application
-                                                            </button>
+                                                            {isMockApplication(app) && (
+                                                                <button onClick={() => handleWithdraw(app)} className="w-full px-4 py-3 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-3 font-medium transition-colors">
+                                                                    <XSquare size={16} className="text-red-500" />
+                                                                    Withdraw application
+                                                                </button>
+                                                            )}
                                                         </div>
                                                     </div>
                                                 </>

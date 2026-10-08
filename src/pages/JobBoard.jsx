@@ -23,12 +23,6 @@ const fmtDeadline = (iso) =>
         })
         : 'No deadline specified';
 
-const isExpiringSoon = (iso) => {
-    if (!iso) return false;
-    const ms = new Date(iso) - new Date();
-    return ms > 0 && ms < 3 * 24 * 60 * 60 * 1000; // within 3 days
-};
-
 const isRegistrationClosed = (iso) => {
     if (!iso) return false;
     return new Date(iso) < new Date();
@@ -503,7 +497,9 @@ We offer a competitive salary, comprehensive health benefits, and a flexible wor
                                                                     try {
                                                                         const savedData = JSON.parse(localStorage.getItem('student_job_applications') || '{}');
                                                                         data = savedData[viewDescriptionJob.id] || null;
-                                                                    } catch(e) {}
+                                                                    } catch (error) {
+                                                                        console.error('Failed to load saved application details', error);
+                                                                    }
                                                                     setViewDetailsJob(viewDescriptionJob);
                                                                     setViewDetailsData(data);
                                                                 }}
