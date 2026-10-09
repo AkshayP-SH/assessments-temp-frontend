@@ -794,12 +794,14 @@ const StudentSupportChatbot = () => {
                       >
                         <p className="whitespace-pre-wrap">{msg.message}</p>
                         {msg.image_path && (
-                          <img
-                            src={`${API_URL}${msg.image_path}`}
-                            alt="Attachment"
-                            className="mt-2 max-w-full rounded-lg cursor-pointer"
-                            onClick={() => window.open(`${API_URL}${msg.image_path}`, '_blank')}
-                          />
+                          <div className="mt-2 relative group inline-block max-w-full">
+                            <img
+                              src={`${API_URL}${msg.image_path}`}
+                              alt="Attachment"
+                              className="max-h-52 sm:max-h-60 w-auto max-w-full rounded-lg object-contain bg-black/5 border border-shnoor-mist/50 cursor-pointer transition-all hover:opacity-90 hover:scale-[1.01]"
+                              onClick={() => window.open(`${API_URL}${msg.image_path}`, '_blank')}
+                            />
+                          </div>
                         )}
                       </div>
                       {!isSystem && (

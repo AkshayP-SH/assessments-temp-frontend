@@ -1042,12 +1042,14 @@ const StudentMessages = ({ isEmbedded = false }) => {
                       <div className="bg-theme-card border border-theme-border p-4 rounded-xl rounded-tl-none shadow-sm">
                         <p className="text-theme-text whitespace-pre-wrap break-words">{selectedMessage.message}</p>
                         {selectedMessage.image_path && (
-                          <img
-                            src={`${API_URL}${selectedMessage.image_path}`}
-                            alt="Attachment"
-                            className="mt-3 max-w-full rounded-lg cursor-pointer hover:opacity-90 border border-theme-border"
-                            onClick={() => openImageModal(selectedMessage.image_path)}
-                          />
+                          <div className="mt-3 relative group inline-block max-w-full">
+                            <img
+                              src={`${API_URL}${selectedMessage.image_path}`}
+                              alt="Attachment"
+                              className="max-h-60 sm:max-h-72 w-auto max-w-full rounded-lg object-contain bg-black/5 dark:bg-black/20 border border-theme-border cursor-pointer transition-all hover:opacity-90 hover:scale-[1.01]"
+                              onClick={() => openImageModal(selectedMessage.image_path)}
+                            />
+                          </div>
                         )}
                       </div>
                       <p className="text-xs text-theme-muted mt-1 ml-1">{formatTime(selectedMessage.created_at)}</p>
@@ -1065,12 +1067,14 @@ const StudentMessages = ({ isEmbedded = false }) => {
                             }`}>
                             <p className="whitespace-pre-wrap break-words">{msg.message}</p>
                             {msg.image_path && (
-                              <img
-                                src={`${API_URL}${msg.image_path}`}
-                                alt="Attachment"
-                                className="mt-3 max-w-full rounded-lg cursor-pointer hover:opacity-90 border border-theme-border"
-                                onClick={() => openImageModal(msg.image_path)}
-                              />
+                              <div className="mt-3 relative group inline-block max-w-full">
+                                <img
+                                  src={`${API_URL}${msg.image_path}`}
+                                  alt="Attachment"
+                                  className="max-h-60 sm:max-h-72 w-auto max-w-full rounded-lg object-contain bg-black/5 dark:bg-black/20 border border-theme-border cursor-pointer transition-all hover:opacity-90 hover:scale-[1.01]"
+                                  onClick={() => openImageModal(msg.image_path)}
+                                />
+                              </div>
                             )}
                           </div>
                           <p className={`text-xs text-theme-muted mt-1 ${isAdmin ? 'text-right mr-1' : 'ml-1'}`}>
@@ -1175,21 +1179,24 @@ const StudentMessages = ({ isEmbedded = false }) => {
       {/* Image Modal */}
       {imageModalOpen && (
         <div
-          className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4"
+          className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6"
           onClick={() => setImageModalOpen(false)}
         >
-          <button
-            className="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors cursor-pointer"
-            onClick={() => setImageModalOpen(false)}
-          >
-            <X size={32} />
-          </button>
-          <img
-            src={imageUrl}
-            alt="Full size attachment"
-            className="max-w-full max-h-[90vh] object-contain"
-            onClick={(e) => e.stopPropagation()}
-          />
+          <div className="relative max-w-5xl max-h-[90vh] flex flex-col items-center">
+            <button
+              className="absolute -top-12 right-0 p-2 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full transition-colors cursor-pointer"
+              onClick={() => setImageModalOpen(false)}
+              aria-label="Close image preview"
+            >
+              <X size={22} />
+            </button>
+            <img
+              src={imageUrl}
+              alt="Full size attachment"
+              className="max-w-full max-h-[85vh] rounded-xl object-contain shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
         </div>
       )}
     </div>
