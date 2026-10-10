@@ -27,6 +27,9 @@ const AdminReports = () => {
 
             if (data.success) {
                 const options = data.institutes.map(i => ({ value: i, label: i }));
+                if (!options.some(opt => opt.value === 'Off Campus')) {
+                    options.unshift({ value: 'Off Campus', label: 'Off Campus' });
+                }
                 setInstitutes(options);
             } else {
                 setError('Failed to load institutes');

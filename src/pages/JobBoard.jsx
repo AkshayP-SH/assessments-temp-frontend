@@ -72,7 +72,10 @@ export default function JobBoard({ isEmbedded = false, onTabChange }) {
     const [applicationForm, setApplicationForm] = useState({
         primarySkill: '',
         yearsOfExperience: '',
-        githubUrl: ''
+        githubUrl: '',
+        resumeUrl: '',
+        location: '',
+        highestEducation: ''
     });
 
     // View Details state
@@ -240,7 +243,7 @@ We offer a competitive salary, comprehensive health benefits, and a flexible wor
         }
 
         setSelectedJob(job);
-        setApplicationForm({ primarySkill: '', yearsOfExperience: '', githubUrl: '' });
+        setApplicationForm({ primarySkill: '', yearsOfExperience: '', githubUrl: '', resumeUrl: '', location: '', highestEducation: '' });
         setShowApplicationModal(true);
     };
 
@@ -481,7 +484,7 @@ We offer a competitive salary, comprehensive health benefits, and a flexible wor
                                                 {applications.has(viewDescriptionJob.id) ? (
                                                     <div className="flex items-center gap-3">
                                                         <div className="px-6 py-2.5 bg-indigo-50 dark:bg-indigo-900/20 text-[#403f75] dark:text-indigo-400 font-bold rounded-xl flex items-center gap-2 border border-indigo-100 dark:border-indigo-800/50">
-                                                            <CheckCircle2 size={18} /> Enrolled
+                                                            <CheckCircle2 size={18} /> Applied
                                                         </div>
                                                         {applications.get(viewDescriptionJob.id).total_tests > applications.get(viewDescriptionJob.id).completed_tests ? (
                                                             <button
@@ -688,7 +691,7 @@ We offer a competitive salary, comprehensive health benefits, and a flexible wor
                     onClick={() => setShowApplicationModal(false)}
                 >
                     <div 
-                        className="bg-white dark:bg-[#1E1E38] rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-slate-200 dark:border-slate-700 max-w-md w-full overflow-hidden"
+                        className="bg-white dark:bg-[#1E1E38] rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-slate-200 dark:border-slate-700 max-w-2xl w-full overflow-hidden"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
@@ -704,7 +707,8 @@ We offer a competitive salary, comprehensive health benefits, and a flexible wor
                             </button>
                         </div>
                         
-                        <form onSubmit={submitApplication} className="p-6 space-y-5">
+                        <form onSubmit={submitApplication} className="p-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div>
                                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Primary Technical Skill</label>
                                 <input 
@@ -744,7 +748,49 @@ We offer a competitive salary, comprehensive health benefits, and a flexible wor
                                 />
                             </div>
 
-                            <div className="pt-2">
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Resume / CV URL</label>
+                                <input 
+                                    type="url" 
+                                    required
+                                    placeholder="Link to Google Drive, Dropbox, etc."
+                                    value={applicationForm.resumeUrl}
+                                    onChange={(e) => setApplicationForm({...applicationForm, resumeUrl: e.target.value})}
+                                    className="w-full px-4 py-2.5 bg-white dark:bg-[#1A1A32] border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#403f75]/50 dark:text-white transition-all"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Current Location</label>
+                                <input 
+                                    type="text" 
+                                    required
+                                    placeholder="e.g. New York, NY"
+                                    value={applicationForm.location}
+                                    onChange={(e) => setApplicationForm({...applicationForm, location: e.target.value})}
+                                    className="w-full px-4 py-2.5 bg-white dark:bg-[#1A1A32] border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#403f75]/50 dark:text-white transition-all"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Highest Education</label>
+                                <select 
+                                    required
+                                    value={applicationForm.highestEducation}
+                                    onChange={(e) => setApplicationForm({...applicationForm, highestEducation: e.target.value})}
+                                    className="w-full px-4 py-2.5 bg-white dark:bg-[#1A1A32] border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#403f75]/50 dark:text-white transition-all appearance-none"
+                                >
+                                    <option value="" disabled>Select education level</option>
+                                    <option value="High School">High School</option>
+                                    <option value="Associate Degree">Associate Degree</option>
+                                    <option value="Bachelor's Degree">Bachelor's Degree</option>
+                                    <option value="Master's Degree">Master's Degree</option>
+                                    <option value="Ph.D. or Higher">Ph.D. or Higher</option>
+                                </select>
+                            </div>
+                            </div>
+
+                            <div className="pt-2 mt-4 border-t border-slate-100 dark:border-slate-800">
                                 <button
                                     type="submit"
                                     className="w-full py-3 bg-gradient-to-r from-[#403f75] to-[#57569b] hover:from-[#343360] hover:to-[#4a4988] text-white rounded-xl font-bold text-sm shadow-md shadow-[#403f75]/20 active:scale-[0.98] transition-all cursor-pointer"
