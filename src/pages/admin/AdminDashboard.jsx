@@ -2131,7 +2131,7 @@ const AdminDashboard = () => {
                           setTests([]);
                           setAllInstitutes([]);
                         }}
-                        className="view-as-select appearance-none !bg-transparent bg-transparent !border-0 border-0 !p-0 p-0 text-xs font-bold text-slate-800 dark:text-slate-100 focus:outline-none cursor-pointer max-w-[185px] truncate leading-tight pr-3.5 pl-0 ml-0"
+                        className="view-as-select appearance-none bg-transparent border-0 p-0 text-xs font-bold text-slate-800 dark:text-slate-100 focus:outline-none cursor-pointer max-w-[185px] truncate leading-tight pr-3.5 pl-0 ml-0"
                       >
                         <option value="" className="text-slate-800 bg-white dark:bg-[#1E1E38] dark:text-white font-medium">
                           All Clients (Platform View)
