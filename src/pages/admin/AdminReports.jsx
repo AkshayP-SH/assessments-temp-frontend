@@ -27,8 +27,8 @@ const AdminReports = () => {
 
             if (data.success) {
                 const options = data.institutes.map(i => ({ value: i, label: i }));
-                if (!options.some(opt => opt.value === 'Off Campus')) {
-                    options.unshift({ value: 'Off Campus', label: 'Off Campus' });
+                if (!options.some(opt => opt.value === 'Others')) {
+                    options.unshift({ value: 'Others', label: 'Others' });
                 }
                 setInstitutes(options);
             } else {

@@ -123,7 +123,7 @@ const AdminDashboard = () => {
     full_name: '',
     email: '',
     roll_number: '',
-    institute: 'Off Campus'
+    institute: 'Others'
   });
   const [isAddingStudent, setIsAddingStudent] = useState(false);
   const [expandedStudentTests, setExpandedStudentTests] = useState({});
@@ -2707,7 +2707,7 @@ className="p-0.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-sl
                     full_name: '',
                     email: '',
                     roll_number: '',
-                    institute: 'Off Campus'
+                    institute: 'Others'
                   });
                 }}
               />
