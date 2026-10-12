@@ -43,8 +43,8 @@ export const apiFetch = async (endpoint, options = {}) => {
   const shouldHandleGlobalRedirect = !options.skipGlobalErrorRedirect && !isAuthEndpoint(endpoint);
 
   // Don't apply tight timeouts to upload routes or report generations
-  const isLongRequest = endpoint.includes('/upload') || endpoint.includes('/export') || endpoint.includes('/predict');
-  let timeoutDuration = isLongRequest ? 120000 : API_TIMEOUT;
+  const isLongRequest = endpoint.includes('/upload') || endpoint.includes('/export') || endpoint.includes('/predict') || endpoint.includes('/company-video');
+  let timeoutDuration = isLongRequest ? 180000 : API_TIMEOUT;
   if (endpoint.includes('coding-questions/submit')) timeoutDuration = 300000;
 
   // If external signal provided, listen to it and abort our controller

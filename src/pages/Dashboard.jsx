@@ -10,6 +10,7 @@ import StudentSupportChatbot from '../components/chatbot/StudentSupportChatbot';
 import ThemeSelector from '../components/ThemeSelector';
 import StudentHeader from '../components/StudentHeader';
 import StudentSidebar from '../components/StudentSidebar';
+import CompanyProfileVideoModal from '../components/student/CompanyProfileVideoModal';
 import { clearStorageKeepTheme } from '../utils/theme';
 import { apiFetch } from '../config/api';
 import { useSEO } from '../hooks/useSEO';
@@ -73,6 +74,26 @@ const Dashboard = () => {
     dateRange: 'all'
   });
   const [sortBy, setSortBy] = useState('latest');
+  const [pendingCompanyVideo, setPendingCompanyVideo] = useState(null);
+
+  useEffect(() => {
+    const checkCompanyVideo = async () => {
+      const token = localStorage.getItem('studentAuthToken');
+      if (!token) return;
+      try {
+        const res = await apiFetch('api/student/company-video', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (data.success && data.video && !data.completed) {
+          setPendingCompanyVideo(data.video);
+        }
+      } catch (err) {
+        console.error('Failed to check company video status:', err);
+      }
+    };
+    checkCompanyVideo();
+  }, []);
 
   const { data: dashboardData, isLoading: loading } = useQuery({
     queryKey: ['studentTests'],
@@ -779,6 +800,14 @@ const Dashboard = () => {
         )}
       </main>
       <StudentSupportChatbot />
+
+      {/* Company Profile Video Modal (Mandatory first-watch orientation) */}
+      {pendingCompanyVideo && (
+        <CompanyProfileVideoModal
+          video={pendingCompanyVideo}
+          onComplete={() => setPendingCompanyVideo(null)}
+        />
+      )}
     </div>
   );
 };
