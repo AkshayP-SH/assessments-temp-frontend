@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { io } from 'socket.io-client';
 import { API_URL } from '../config/api';
+import { SOCKET_TRANSPORTS } from '../config/socket';
 
 const SOCKET_URL = API_URL;
 
@@ -173,7 +174,7 @@ export const useSupportSocket = ({
       const adminToken = isAdmin ? localStorage.getItem('adminToken') : null;
 
       socket = io(SOCKET_URL, {
-        transports: ['polling', 'websocket'],
+        transports: [...SOCKET_TRANSPORTS],
         reconnection: true,
         reconnectionAttempts: MAX_ATTEMPTS,
         reconnectionDelay: 2000,
@@ -315,4 +316,3 @@ export const useSupportSocket = ({
 };
 
 export default useSupportSocket;
-
