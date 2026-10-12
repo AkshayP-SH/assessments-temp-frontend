@@ -315,17 +315,6 @@ const Login = () => {
         </div>
       )}
 
-      {/* Top Left: Persistent Back to Home Button */}
-      <div className="absolute left-4 top-4 z-30 sm:left-6 sm:top-6 lg:left-8 lg:top-8">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-theme-panel/85 hover:bg-theme-panel border border-theme-border/60 text-xs sm:text-sm font-bold text-theme-text hover:text-theme-accent shadow-xs hover:shadow-sm transition-all group backdrop-blur-md cursor-pointer"
-        >
-          <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-          <span>Back to home</span>
-        </Link>
-      </div>
-
       <div className="absolute right-4 top-4 z-20 sm:right-6 sm:top-6 lg:right-8 lg:top-8">
         <ThemeSelector variant="light" />
       </div>
