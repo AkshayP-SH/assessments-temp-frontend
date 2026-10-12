@@ -4,6 +4,7 @@ import { io } from 'socket.io-client';
 import { ArrowLeft, Users, Wifi, WifiOff, Camera, Clock, MessageCircle, StopCircle, AlertTriangle, Mic, MicOff } from 'lucide-react';
 import AdminChatModal from '../../components/admin/AdminChatModal';
 import { API_URL } from '../../config/api';
+import { SOCKET_TRANSPORTS } from '../../config/socket';
 
 const SOCKET_URL = API_URL;
 
@@ -105,7 +106,7 @@ const LiveProctoring = () => {
 
     // Pass JWT in socket handshake so the server can verify identity and scope the room
     const socket = io(SOCKET_URL, {
-      transports: ['polling', 'websocket'],
+      transports: [...SOCKET_TRANSPORTS],
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionAttempts: 5,
@@ -591,4 +592,3 @@ const LiveProctoring = () => {
 };
 
 export default LiveProctoring;
-

@@ -2172,12 +2172,16 @@ className="p-0.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-sl
           <div className="bg-white border-b border-shnoor-mist">
             <div className="w-full px-4 sm:px-6 lg:pr-6 lg:pl-[88px] py-2 flex flex-wrap items-center gap-4">
               {[
-                { label: 'Tests', used: quota.limits?.tests?.used, max: quota.limits?.tests?.max },
-                { label: 'Institutes', used: quota.limits?.institutes?.used, max: quota.limits?.institutes?.max },
-                { label: 'Students', used: quota.limits?.students?.used, max: quota.limits?.students?.max },
+                { label: 'Tests', used: quota.tests?.used, max: quota.tests?.max },
+                { label: 'Institutes', used: quota.institutes?.used, max: quota.institutes?.max },
+                { label: 'Students', used: quota.students?.used, max: quota.students?.max },
               ].map(({ label, used, max }) => {
-                if (max == null || max <= 0) return null;
-                const pct = Math.min(100, Math.round((used / max) * 100));
+                const isUnlimited = max == null || Number(max) === -1;
+                const numericMax = Number(max);
+                const numericUsed = Number(used) || 0;
+                const pct = isUnlimited || numericMax === 0
+                  ? 0
+                  : Math.min(100, Math.round((numericUsed / numericMax) * 100));
                 const warn = pct >= 90;
                 return (
                   <div key={label} className="flex items-center gap-2 min-w-[140px]">
@@ -2186,7 +2190,7 @@ className="p-0.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-sl
                       <div className={`h-full rounded-full transition-all ${warn ? 'bg-shnoor-danger' : 'bg-shnoor-indigo'}`} style={{ width: `${pct}%` }} />
                     </div>
                     <span className={`text-xs font-medium flex-shrink-0 ${warn ? 'text-shnoor-danger' : 'text-shnoor-indigoMedium'}`}>
-                      {used}/{max}
+                      {numericUsed}/{isUnlimited ? 'Unlimited' : max}
                     </span>
                   </div>
                 );
