@@ -207,19 +207,29 @@ const LandingPage = () => {
     if (isLoggedIn) {
       navigate('/job-board');
     } else {
+      const isClientJob = job?.is_client_job || (Boolean(job?.client_registration_token) && !job?.admin_id && job?.client_id && job?.client_id !== 1);
       const clientToken = job?.client_registration_token;
-      const targetUrl = clientToken
-        ? `/register?clientToken=${encodeURIComponent(clientToken)}`
-        : '/register';
 
-      navigate(targetUrl, {
-        state: {
-          returnUrl: '/job-board',
-          selectedJobId: job?.id,
-          clientToken: clientToken,
-          message: `Please complete registration with ${job?.client_name || job?.company_name || 'the organization'} to apply for ${job?.job_role || 'this position'}.`
-        }
-      });
+      if (isClientJob && clientToken) {
+        // Job posted by client -> open client student registration page
+        navigate(`/register?clientToken=${encodeURIComponent(clientToken)}`, {
+          state: {
+            returnUrl: '/job-board',
+            selectedJobId: job?.id,
+            clientToken: clientToken,
+            message: `Please complete registration with ${job?.client_name || job?.company_name || 'the organization'} to apply for ${job?.job_role || 'this position'}.`
+          }
+        });
+      } else {
+        // Job assigned/posted by admin -> open sign-in page as before
+        navigate('/login', {
+          state: {
+            returnUrl: '/job-board',
+            selectedJobId: job?.id,
+            message: `Please sign in to apply for ${job?.job_role || 'this position'} at ${job?.company_name || 'the company'}`
+          }
+        });
+      }
     }
   };
 
@@ -609,12 +619,12 @@ const LandingPage = () => {
                                 <span className="text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1.5">
                                   <CheckCircle2 className="w-3.5 h-3.5" /> Logged in — ready to enroll.
                                 </span>
-                              ) : (
+                              ) : (selectedJob?.is_client_job && selectedJob?.client_registration_token) ? (
                                 <div>
                                   <span>
                                     {selectedJob.client_name
                                       ? `Register with ${selectedJob.client_name} student portal to apply and take the assessment.`
-                                      : 'Sign in or register with your student account to apply and take the assessment.'}
+                                      : 'Register with client student portal to apply and take the assessment.'}
                                   </span>
                                   <div className="mt-1">
                                     <span className="text-slate-400">Already registered? </span>
@@ -633,6 +643,8 @@ const LandingPage = () => {
                                     </button>
                                   </div>
                                 </div>
+                              ) : (
+                                <span>Sign in with your student account to apply and take the assessment.</span>
                               )}
                             </div>
 
