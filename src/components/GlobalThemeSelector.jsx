@@ -10,11 +10,17 @@ const GlobalThemeSelector = () => {
         pathname === '/privacy-policy' ||
         pathname === '/terms-and-conditions' ||
         pathname === '/job-board' ||
-        pathname === '/student/my-applications' ||
         pathname.startsWith('/admin') ||
         pathname.startsWith('/client') ||
         pathname.startsWith('/dashboard') ||
-        pathname.startsWith('/test');
+        pathname.startsWith('/student') ||
+        pathname.startsWith('/test') ||
+        pathname.startsWith('/instructions') ||
+        pathname.startsWith('/result') ||
+        pathname.startsWith('/feedback') ||
+        pathname.startsWith('/interview-room') ||
+        pathname.startsWith('/server-down') ||
+        pathname.startsWith('/maintenance');
 
     if (isHiddenRoute) return null;
 

@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import {
@@ -40,29 +40,81 @@ import PreviewModal from './PreviewModal';
 import TestHistoryModal from './TestHistoryModal';
 
 const AdminDashboard = () => {
-  useSEO({
-    title: "Admin Dashboard - SHNOOR Assessments",
-    description: "Manage tests, users, and settings"
-  });
-
   const navigate = useNavigate();
   const location = useLocation();
-  const [activeTab, setActiveTab] = useState(() => {
-    const params = new URLSearchParams(location.search);
-    return params.get('tab') || location.state?.activeTab || 'exams';
-  });
+  const { examId: routeExamId } = useParams();
 
-  useEffect(() => {
+  const isClientPortal = location.pathname.startsWith('/client');
+  const basePath = isClientPortal ? '/client' : '/admin';
+
+  const getTabFromLocation = useCallback(() => {
+    const path = location.pathname.replace(/\/+$/, '');
     const params = new URLSearchParams(location.search);
     const tabParam = params.get('tab');
-    if (tabParam && tabParam !== activeTab) {
-      setActiveTab(tabParam);
-    }
-  }, [location.search]);
+    if (tabParam) return tabParam;
 
-  const [showCreateTest, setShowCreateTest] = useState(false);
+    if (path.endsWith('/institutes')) return 'institutes';
+    if (path.endsWith('/reports')) return 'reports';
+    if (path.endsWith('/bulk-upload')) return 'bulk-upload';
+    if (path.endsWith('/violations')) return 'violations';
+    if (path.endsWith('/interviews')) return 'interviews';
+    if (path.endsWith('/job-openings')) return 'job-openings';
+    if (path.endsWith('/student-messages') || path.endsWith('/messages')) return 'messages';
+    if (path.endsWith('/clients')) return 'clients';
+    if (path.endsWith('/subscription-plans')) return 'subscription-plans';
+    if (path.endsWith('/profile')) return 'profile';
+    if (path.endsWith('/settings')) return 'settings';
+    if (path.includes('/tests/create')) return 'create-test';
+    if (path.includes('/results')) return 'results';
+    return location.state?.activeTab || 'exams';
+  }, [location.pathname, location.search, location.state]);
+
+  const [activeTab, setActiveTab] = useState(getTabFromLocation);
+
+  const isCreateTestRoute = location.pathname.includes('/tests/create');
+  const [showCreateTest, setShowCreateTest] = useState(isCreateTestRoute);
   const [editingTest, setEditingTest] = useState(null);
-  const [selectedExamId, setSelectedExamId] = useState(null);
+  const [selectedExamId, setSelectedExamId] = useState(() => routeExamId || null);
+
+  useEffect(() => {
+    const isCreate = location.pathname.includes('/tests/create');
+    setShowCreateTest(isCreate);
+
+    if (routeExamId) {
+      setSelectedExamId(routeExamId);
+    } else if (!location.pathname.includes('/results')) {
+      setSelectedExamId(null);
+    }
+
+    const tab = getTabFromLocation();
+    if (tab !== 'create-test' && tab !== 'results') {
+      setActiveTab(tab);
+    }
+  }, [location.pathname, location.search, routeExamId, getTabFromLocation]);
+
+  const pageTitles = useMemo(() => ({
+    exams: "Manage Exams - SHNOOR Assessments",
+    institutes: "Manage Institutes - SHNOOR Assessments",
+    reports: "Reports & Analytics - SHNOOR Assessments",
+    'bulk-upload': "Bulk Student Upload - SHNOOR Assessments",
+    violations: "Proctoring Violations - SHNOOR Assessments",
+    interviews: "Interviews - SHNOOR Assessments",
+    'job-openings': "Job Openings - SHNOOR Assessments",
+    messages: "Student Messages - SHNOOR Assessments",
+    clients: "Client Management - SHNOOR Assessments",
+    'subscription-plans': "Subscription Plans - SHNOOR Assessments",
+    profile: "Admin Profile - SHNOOR Assessments",
+    settings: "Admin Settings - SHNOOR Assessments",
+  }), []);
+
+  useSEO({
+    title: showCreateTest
+      ? (editingTest ? "Edit Test - SHNOOR Assessments" : "Create Test - SHNOOR Assessments")
+      : selectedExamId
+        ? `Results - SHNOOR Assessments`
+        : (pageTitles[activeTab] || "Admin Dashboard - SHNOOR Assessments"),
+    description: "Manage tests, users, and settings"
+  });
   const [tests, setTests] = useState([]);
   const [selectedTests, setSelectedTests] = useState([]);
   const [selectedStudentsForDelete, setSelectedStudentsForDelete] = useState([]);
@@ -219,9 +271,7 @@ const AdminDashboard = () => {
     return Math.ceil(diff / (1000 * 60 * 60 * 24));
   }, [currentUser]);
 
-  const isClientPortal = location.pathname.startsWith('/client');
   const isClientAdmin = currentUser?.role === 'client_admin' || !!localStorage.getItem('clientToken');
-  const basePath = isClientPortal ? '/client' : '/admin';
 
   const [unreadMessageCount, setUnreadMessageCount] = useState(0);
 
@@ -250,18 +300,18 @@ const AdminDashboard = () => {
   }, []);
 
   const sidebarNavItems = useMemo(() => [
-    { id: 'exams', label: 'Manage Exams', icon: FileSpreadsheet },
-    { id: 'institutes', label: 'Manage Institutes', icon: Landmark },
-    { id: 'reports', label: 'Reports', icon: BarChart3 },
-    { id: 'bulk-upload', label: 'Bulk Upload', icon: UploadCloud },
-    { id: 'violations', label: 'Violations', icon: ShieldAlert },
-    { id: 'interviews', label: 'Interviews', icon: Video },
-    { id: 'job-openings', label: 'Job Openings', icon: Briefcase },
-    { id: 'messages', label: 'Messages', icon: MessageSquare, badge: unreadMessageCount },
-    ...(!isClientAdmin ? [{ id: 'clients', label: 'Clients', icon: Building2 }] : []),
-    ...(isSuperAdmin ? [{ id: 'subscription-plans', label: 'Subscription Plans', icon: CreditCard }] : []),
-    { id: 'profile', label: 'My Profile', icon: User },
-    { id: 'settings', label: 'Settings', icon: Settings }
+    { id: 'exams', label: 'Manage Exams', icon: FileSpreadsheet, path: `${basePath}/exams` },
+    { id: 'institutes', label: 'Manage Institutes', icon: Landmark, path: `${basePath}/institutes` },
+    { id: 'reports', label: 'Reports', icon: BarChart3, path: `${basePath}/reports` },
+    { id: 'bulk-upload', label: 'Bulk Upload', icon: UploadCloud, path: `${basePath}/bulk-upload` },
+    { id: 'violations', label: 'Violations', icon: ShieldAlert, path: `${basePath}/violations` },
+    { id: 'interviews', label: 'Interviews', icon: Video, path: `${basePath}/interviews` },
+    { id: 'job-openings', label: 'Job Openings', icon: Briefcase, path: `${basePath}/job-openings` },
+    { id: 'messages', label: 'Messages', icon: MessageSquare, badge: unreadMessageCount, path: `${basePath}/student-messages` },
+    ...(!isClientAdmin ? [{ id: 'clients', label: 'Clients', icon: Building2, path: `${basePath}/clients` }] : []),
+    ...(isSuperAdmin ? [{ id: 'subscription-plans', label: 'Subscription Plans', icon: CreditCard, path: `${basePath}/subscription-plans` }] : []),
+    { id: 'profile', label: 'My Profile', icon: User, path: `${basePath}/profile` },
+    { id: 'settings', label: 'Settings', icon: Settings, path: `${basePath}/settings` }
   ], [basePath, isClientAdmin, isSuperAdmin, unreadMessageCount]);
 
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(() => {
@@ -328,7 +378,13 @@ const AdminDashboard = () => {
   const clientParam = (isSuperAdmin && viewAsClientId) ? `?clientId=${viewAsClientId}` : '';
 
   const handleSelectExam = (examId) => {
-    setSelectedExamId(examId);
+    if (examId) {
+      setSelectedExamId(examId);
+      navigate(`${basePath}/results/${examId}`);
+    } else {
+      setSelectedExamId(null);
+      navigate(`${basePath}/exams`);
+    }
     setSelectedCandidates([]);
     setResultsCurrentPage(1);
     setStatusFilter('all');
@@ -2271,18 +2327,18 @@ className="p-0.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-sl
 
                   <div className="flex flex-col gap-1.5 w-full px-2.5 overflow-y-auto flex-1 scrollbar-none">
                     {sidebarNavItems.map((tab) => {
-                      const isActive = !tab.isRoute && activeTab === tab.id;
+                      const isActive = !showCreateTest && !selectedExamId && activeTab === tab.id;
                       const Icon = tab.icon;
                       return (
                         <button
                           key={tab.id}
                           type="button"
                           onClick={() => {
-                            if (tab.isRoute) {
+                            if (selectedExamId) setSelectedExamId(null);
+                            if (showCreateTest) setShowCreateTest(false);
+                            if (tab.path) {
                               navigate(tab.path);
                             } else {
-                              if (selectedExamId) setSelectedExamId(null);
-                              if (showCreateTest) setShowCreateTest(false);
                               setActiveTab(tab.id);
                             }
                           }}
@@ -2323,18 +2379,18 @@ className="p-0.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-sl
                 <div className="lg:hidden mb-6 w-full">
                   <div className="bg-white/95 dark:bg-[#1A1A32]/95 backdrop-blur-md p-1.5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-2xs inline-flex flex-nowrap items-center gap-1.5 max-w-full overflow-x-auto scrollbar-none" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                     {sidebarNavItems.map((tab) => {
-                      const isActive = !tab.isRoute && activeTab === tab.id;
+                      const isActive = !showCreateTest && !selectedExamId && activeTab === tab.id;
                       const Icon = tab.icon;
                       return (
                         <button
                           key={tab.id}
                           type="button"
                           onClick={() => {
-                            if (tab.isRoute) {
+                            if (selectedExamId) setSelectedExamId(null);
+                            if (showCreateTest) setShowCreateTest(false);
+                            if (tab.path) {
                               navigate(tab.path);
                             } else {
-                              if (selectedExamId) setSelectedExamId(null);
-                              if (showCreateTest) setShowCreateTest(false);
                               setActiveTab(tab.id);
                             }
                           }}
@@ -2368,13 +2424,17 @@ className="p-0.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-sl
             {showCreateTest ? (
               <div className="space-y-4 mb-6 bg-[#F4F4F9] rounded-2xl">
                 <CreateTestSection
-                  onComplete={handleCreateTestComplete}
+                  onComplete={() => {
+                    handleCreateTestComplete();
+                    navigate(`${basePath}/exams`);
+                  }}
                   onSaved={fetchTests}
                   editingTest={editingTest}
                   clientId={viewAsClientId || null}
                   onBack={() => {
                     setShowCreateTest(false);
                     setEditingTest(null);
+                    navigate(`${basePath}/exams`);
                   }}
                 />
               </div>
@@ -2388,6 +2448,7 @@ className="p-0.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-sl
                   setSelectedCandidates([]);
                   setResultsCurrentPage(1);
                   setDetailViewTab('results');
+                  navigate(`${basePath}/exams`);
                 }}
                 showQuickSelectMenu={showQuickSelectMenu}
                 setShowQuickSelectMenu={setShowQuickSelectMenu}
@@ -2441,7 +2502,14 @@ className="p-0.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-sl
                     handleViewJob={handleViewJob}
                     handleOpenCloneModal={handleOpenCloneModal}
                     handleViewTestDetails={handleViewTestDetails}
-                    setShowCreateTest={setShowCreateTest}
+                    setShowCreateTest={(val) => {
+                      if (val) {
+                        navigate(`${basePath}/tests/create`);
+                      } else {
+                        setShowCreateTest(false);
+                        navigate(`${basePath}/exams`);
+                      }
+                    }}
                     handleTogglePublish={handleTogglePublish}
                     handleDeleteTest={handleDeleteTest}
                     setSelectedExamId={handleSelectExam}

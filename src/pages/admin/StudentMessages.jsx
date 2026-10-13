@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Mail, MailOpen, Trash2, ChevronDown, RefreshCw, CheckCheck, User, AlertCircle, X, Send, Building, MessageCircle, Paperclip, Smile, CheckCircle, Clock, BarChart3, TrendingUp, ThumbsUp, ThumbsDown, Star } from 'lucide-react';
+import { ArrowLeft, Mail, MailOpen, Trash2, ChevronDown, CheckCheck, User, AlertCircle, X, Send, Building, MessageCircle, Paperclip, Smile, CheckCircle, Clock, BarChart3, TrendingUp, ThumbsUp, ThumbsDown, Star } from 'lucide-react';
 import AdminLayout from '../../components/AdminLayout';
 import { useSupportSocket } from '../../hooks/useSupportSocket';
 import { API_URL } from '../../config/api';
@@ -565,79 +565,19 @@ const StudentMessages = ({ isEmbedded = false }) => {
 
   const content = (
     <div className="w-full space-y-6">
-      {/* Page Header */}
-      <div className={`section-header ${selectedMessage ? 'hidden lg:flex' : 'flex'}`}>
-        <div className="section-header-left">
-          <div className="flex items-center gap-3">
-            {!isEmbedded && (
-              <button
-                onClick={() => navigate(-1)}
-                className="flex items-center gap-2 h-10 px-4 border border-[#D1D1E6] dark:border-slate-700 bg-white dark:bg-[#1E1E38] text-slate-700 dark:text-slate-300 rounded-xl text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer shadow-2xs"
-              >
-                <ArrowLeft size={16} />
-                Back
-              </button>
-            )}
-            <div>
-              <div className="flex items-center gap-2.5">
-                <h2 className="section-title">Student Support</h2>
-                {unreadCount > 0 && (
-                  <span className="px-2.5 py-0.5 bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-300 rounded-full text-xs font-bold">
-                    {unreadCount} unread
-                  </span>
-                )}
-              </div>
-              <p className="section-subtitle">Review student inquiries, resolve support tickets, and manage real-time communication</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-3">
-          <button
-            onClick={() => setShowAnalytics(!showAnalytics)}
-            className={`flex items-center justify-center gap-2 h-10 px-4 text-sm whitespace-nowrap rounded-xl transition-all font-semibold cursor-pointer border ${showAnalytics
-              ? 'bg-[#403f75] dark:bg-indigo-600 text-white border-transparent shadow-sm'
-              : 'bg-white dark:bg-[#1E1E38] text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-800 shadow-2xs'
-              }`}
-          >
-            <BarChart3 size={16} className={showAnalytics ? '' : 'text-[#403f75] dark:text-indigo-400'} />
-            Analytics
-          </button>
-          <button
-            onClick={fetchMessages}
-            className="flex items-center justify-center gap-2 h-10 px-4 text-sm whitespace-nowrap bg-white dark:bg-[#1E1E38] text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-800 rounded-xl transition-all font-semibold cursor-pointer shadow-2xs"
-          >
-            <RefreshCw size={16} />
-            Refresh
-          </button>
-          <button
-            onClick={() => {
-              setBulkDeleteMode(!bulkDeleteMode);
-              setSelectedConversations(new Set());
-            }}
-            className={`flex items-center justify-center gap-2 h-10 px-4 text-sm whitespace-nowrap rounded-xl transition-all font-semibold cursor-pointer border ${bulkDeleteMode
-              ? 'bg-red-600 text-white border-red-600'
-              : 'bg-white dark:bg-[#1E1E38] text-red-600 border border-red-200 dark:border-red-900/40 hover:bg-red-50 dark:hover:bg-red-900/20 shadow-2xs'
-              }`}
-          >
-            <Trash2 size={16} />
-            {bulkDeleteMode ? 'Cancel' : 'Bulk Delete'}
-          </button>
-          {unreadCount > 0 && (
-            <button
-              onClick={markAllAsRead}
-              className="flex items-center justify-center gap-2 h-10 px-4 text-sm bg-[#403f75] dark:bg-indigo-600 text-white hover:bg-[#343360] dark:hover:bg-indigo-700 rounded-xl transition-all font-semibold cursor-pointer shadow-sm"
-            >
-              <CheckCheck size={16} />
-              Mark All Read
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Row 2: Filters */}
+      {/* Filters Toolbar */}
       <div className={`bg-white dark:bg-[#1E1E38] rounded-2xl border border-slate-200/80 dark:border-slate-800 p-4 shadow-sm flex flex-wrap items-center justify-between gap-4 ${selectedMessage ? 'hidden lg:flex' : 'flex'}`}>
         <div className="flex flex-wrap items-center gap-2">
+          {!isEmbedded && (
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center gap-2 h-9 px-3 border border-[#D1D1E6] dark:border-slate-700 bg-white dark:bg-[#1E1E38] text-slate-700 dark:text-slate-300 rounded-xl text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer shadow-2xs mr-1"
+            >
+              <ArrowLeft size={16} />
+              Back
+            </button>
+          )}
+
           {[{ key: 'all', label: 'All Messages' }, { key: 'unread', label: 'Unread' }].map(({ key, label }) => (
             <button
               key={key}
@@ -656,22 +596,60 @@ const StudentMessages = ({ isEmbedded = false }) => {
               )}
             </button>
           ))}
+
+          <button
+            onClick={() => {
+              setBulkDeleteMode(!bulkDeleteMode);
+              setSelectedConversations(new Set());
+            }}
+            className={`px-3.5 py-2 text-sm rounded-xl transition-all flex items-center gap-1.5 font-semibold cursor-pointer border ${
+              bulkDeleteMode
+                ? 'bg-red-600 text-white border-red-600 shadow-xs'
+                : 'bg-slate-100 dark:bg-slate-800/80 text-red-600 dark:text-red-400 border-slate-200/80 dark:border-slate-700 hover:bg-red-50 dark:hover:bg-red-950/30'
+            }`}
+          >
+            <Trash2 size={15} />
+            {bulkDeleteMode ? 'Cancel Selection' : 'Bulk Delete'}
+          </button>
+
+          {unreadCount > 0 && (
+            <button
+              onClick={markAllAsRead}
+              className="px-3.5 py-2 text-sm rounded-xl transition-all flex items-center gap-1.5 font-semibold cursor-pointer bg-[#403f75] dark:bg-indigo-600 text-white hover:bg-[#343360] dark:hover:bg-indigo-700 shadow-xs"
+            >
+              <CheckCheck size={15} />
+              Mark All Read
+            </button>
+          )}
         </div>
 
-        {colleges.length > 0 && (
-          <div className="relative flex items-center gap-2 w-full sm:w-auto min-w-0 min-h-[40px] border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 bg-slate-50 dark:bg-slate-800">
-            <Building size={14} className="text-[#9A9AC9] dark:text-slate-400 shrink-0" />
-            <select
-              value={selectedCollege}
-              onChange={(e) => { setSelectedCollege(e.target.value); setPagination(prev => ({ ...prev, page: 1 })); }}
-              className="appearance-none text-sm text-slate-800 dark:text-slate-200 focus:outline-none bg-transparent w-full min-w-0 sm:w-auto sm:min-w-[200px] sm:max-w-xs truncate pr-6 cursor-pointer"
-            >
-              <option value="" className="bg-white dark:bg-[#1E1E38] text-slate-900 dark:text-white">All Colleges</option>
-              {colleges.map(college => <option key={college} value={college} className="bg-white dark:bg-[#1E1E38] text-slate-900 dark:text-white">{college}</option>)}
-            </select>
-            <ChevronDown size={14} className="absolute right-3 text-[#9A9AC9] dark:text-slate-400 pointer-events-none" />
-          </div>
-        )}
+        <div className="flex flex-wrap items-center gap-3">
+          {colleges.length > 0 && (
+            <div className="relative flex items-center gap-2 w-full sm:w-auto min-w-0 min-h-[40px] border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 bg-slate-50 dark:bg-slate-800">
+              <Building size={14} className="text-[#9A9AC9] dark:text-slate-400 shrink-0" />
+              <select
+                value={selectedCollege}
+                onChange={(e) => { setSelectedCollege(e.target.value); setPagination(prev => ({ ...prev, page: 1 })); }}
+                className="appearance-none text-sm text-slate-800 dark:text-slate-200 focus:outline-none bg-transparent w-full min-w-0 sm:w-auto sm:min-w-[200px] sm:max-w-xs truncate pr-6 cursor-pointer"
+              >
+                <option value="" className="bg-white dark:bg-[#1E1E38] text-slate-900 dark:text-white">All Colleges</option>
+                {colleges.map(college => <option key={college} value={college} className="bg-white dark:bg-[#1E1E38] text-slate-900 dark:text-white">{college}</option>)}
+              </select>
+              <ChevronDown size={14} className="absolute right-3 text-[#9A9AC9] dark:text-slate-400 pointer-events-none" />
+            </div>
+          )}
+
+          <button
+            onClick={() => setShowAnalytics(!showAnalytics)}
+            className={`flex items-center justify-center gap-2 h-10 px-4 text-sm whitespace-nowrap rounded-xl transition-all font-semibold cursor-pointer border ${showAnalytics
+              ? 'bg-[#403f75] dark:bg-indigo-600 text-white border-transparent shadow-sm'
+              : 'bg-white dark:bg-[#1E1E38] text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-800 shadow-2xs'
+              }`}
+          >
+            <BarChart3 size={16} className={showAnalytics ? '' : 'text-[#403f75] dark:text-indigo-400'} />
+            Analytics
+          </button>
+        </div>
       </div>
 
       {/* Analytics Section */}
@@ -857,14 +835,14 @@ const StudentMessages = ({ isEmbedded = false }) => {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={selectAllConversations}
-                    className="text-xs px-3 py-2 lg:px-2 lg:py-1 bg-white/20 hover:bg-white/30 text-white rounded font-medium"
+                    className="text-xs px-2.5 py-1 bg-white text-slate-800 hover:bg-slate-100 rounded-lg font-semibold cursor-pointer shadow-xs"
                   >
                     {selectedConversations.size === messages.length ? 'Deselect All' : 'Select All'}
                   </button>
                   {selectedConversations.size > 0 && (
                     <button
                       onClick={handleBulkDelete}
-                      className="text-xs px-3 py-2 lg:px-2 lg:py-1 bg-red-600 text-white rounded hover:bg-red-700 font-medium"
+                      className="text-xs px-3 py-2 lg:px-2 lg:py-1 bg-red-600 text-white rounded hover:bg-red-700 font-medium cursor-pointer"
                     >
                       Delete ({selectedConversations.size})
                     </button>
@@ -1207,7 +1185,7 @@ const StudentMessages = ({ isEmbedded = false }) => {
   }
 
   return (
-    <AdminLayout title="Student Support">
+    <AdminLayout title="Messages">
       {content}
     </AdminLayout>
   );
