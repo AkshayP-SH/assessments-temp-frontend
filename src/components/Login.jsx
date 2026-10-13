@@ -60,11 +60,10 @@ const PortalTabs = ({ active, onChange }) => (
     <button
       type="button"
       onClick={() => onChange('student')}
-      className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer btn-action-gesture ${
-        active === 'student'
+      className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer btn-action-gesture ${active === 'student'
           ? 'bg-theme-card text-theme-text shadow-sm card-3d-subtle scale-[1.01]'
           : 'text-theme-muted hover:text-theme-text hover:bg-theme-card/40'
-      }`}
+        }`}
     >
       <span className="icon-gesture"><StudentIcon /></span>
       <span>Student / Candidate</span>
@@ -72,11 +71,10 @@ const PortalTabs = ({ active, onChange }) => (
     <button
       type="button"
       onClick={() => onChange('org')}
-      className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer btn-action-gesture ${
-        active === 'org'
+      className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer btn-action-gesture ${active === 'org'
           ? 'bg-theme-card text-theme-text shadow-sm card-3d-subtle scale-[1.01]'
           : 'text-theme-muted hover:text-theme-text hover:bg-theme-card/40'
-      }`}
+        }`}
     >
       <span className="icon-gesture"><OrgIcon /></span>
       <span>Organisation</span>

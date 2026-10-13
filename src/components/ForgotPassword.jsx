@@ -17,13 +17,13 @@ const ForgotPassword = () => {
 
   const navigate = useNavigate();
   const [step, setStep] = useState(1); // 1 = Email, 2 = OTP, 3 = New Password
-  
+
   // State variables for form fields
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  
+
   // State variable for the reset token
   const [resetToken, setResetToken] = useState('');
 
@@ -38,10 +38,10 @@ const ForgotPassword = () => {
       setApiError('Please enter a valid email address');
       return;
     }
-    
+
     setApiError('');
     setIsLoading(true);
-    
+
     try {
       const response = await apiFetch('api/forgot-password-otp', {
         method: 'POST',
@@ -49,7 +49,7 @@ const ForgotPassword = () => {
         body: JSON.stringify({ email: email.trim() }),
       });
       const data = await response.json();
-      
+
       if (response.ok && data.success) {
         setSuccessMessage('OTP sent successfully to your email');
         setStep(2);
@@ -69,11 +69,11 @@ const ForgotPassword = () => {
       setApiError('Please enter a valid 6-digit OTP');
       return;
     }
-    
+
     setApiError('');
     setSuccessMessage('');
     setIsLoading(true);
-    
+
     try {
       const response = await apiFetch('api/verify-reset-otp', {
         method: 'POST',
@@ -81,7 +81,7 @@ const ForgotPassword = () => {
         body: JSON.stringify({ email: email.trim(), otp: otp.trim() }),
       });
       const data = await response.json();
-      
+
       if (response.ok && data.success && data.resetToken) {
         setResetToken(data.resetToken);
         setSuccessMessage('OTP verified successfully');
@@ -106,11 +106,11 @@ const ForgotPassword = () => {
       setApiError('Passwords do not match');
       return;
     }
-    
+
     setApiError('');
     setSuccessMessage('');
     setIsLoading(true);
-    
+
     try {
       const response = await apiFetch('api/reset-password', {
         method: 'POST',
@@ -118,7 +118,7 @@ const ForgotPassword = () => {
         body: JSON.stringify({ resetToken, newPassword }),
       });
       const data = await response.json();
-      
+
       if (response.ok && data.success) {
         navigate('/login', { state: { message: 'Password has been reset successfully. Please log in with your new password.' } });
       } else {
@@ -229,9 +229,9 @@ const ForgotPassword = () => {
           <div className="mb-8">
             <h1 className="text-2xl font-extrabold text-shnoor-navy mb-1 tracking-tight">Reset Password</h1>
             <p className="text-sm text-shnoor-indigoMedium">
-               {step === 1 && "Enter your email to receive a verification OTP."}
-               {step === 2 && "Enter the 6-digit OTP sent to your email."}
-               {step === 3 && "Create a new secure password."}
+              {step === 1 && "Enter your email to receive a verification OTP."}
+              {step === 2 && "Enter the 6-digit OTP sent to your email."}
+              {step === 3 && "Create a new secure password."}
             </p>
           </div>
 
@@ -294,14 +294,14 @@ const ForgotPassword = () => {
                 {isLoading ? 'Verifying...' : 'Verify OTP'}
               </Button>
               <div className="text-center">
-                 <button 
-                   type="button" 
-                   className="text-shnoor-indigo text-sm font-semibold hover:underline btn-action-gesture cursor-pointer"
-                   onClick={() => { setStep(1); setOtp(''); setApiError(''); setSuccessMessage(''); }}
-                   disabled={isLoading}
-                 >
-                   Use a different email or resend OTP
-                 </button>
+                <button
+                  type="button"
+                  className="text-shnoor-indigo text-sm font-semibold hover:underline btn-action-gesture cursor-pointer"
+                  onClick={() => { setStep(1); setOtp(''); setApiError(''); setSuccessMessage(''); }}
+                  disabled={isLoading}
+                >
+                  Use a different email or resend OTP
+                </button>
               </div>
             </form>
           )}

@@ -247,7 +247,7 @@ const AdminHeader = ({ viewAsControl, title }) => {
               </div>
               <div className="flex-shrink-0">
                 <h1 className="admin-header-title font-extrabold text-base sm:text-lg lg:text-xl leading-tight whitespace-nowrap text-slate-900 dark:text-white tracking-tight">
-                  Shnoor Assessment
+                  {title || 'SHNOOR Assessments'}
                 </h1>
                 <p className="admin-header-subtitle text-xs font-semibold text-[#403f75] dark:text-indigo-400 whitespace-nowrap leading-tight mt-0.5">
                   {isClientPortal ? 'Client Portal' : 'Admin Dashboard'}
@@ -308,65 +308,65 @@ const AdminHeader = ({ viewAsControl, title }) => {
                 </button>
 
                 {bellOpen && (
-                    <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-[#1E1E38] border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl overflow-hidden z-50">
-                      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-slate-700">
-                        <p className="text-sm font-bold text-slate-900 dark:text-white">
-                          Notifications{unreadCount > 0 ? ` (${unreadCount})` : ''}
-                        </p>
-                        {unreadCount > 0 && (
-                          <button
-                            type="button"
-                            className="text-xs font-semibold text-[#403f75] dark:text-indigo-300 hover:underline"
-                            onClick={handleMarkAllRead}
-                          >
-                            Mark all read
-                          </button>
-                        )}
-                      </div>
-
-                      <div className="max-h-80 overflow-y-auto">
-                        {bellNotifications.length === 0 ? (
-                          <p className="px-4 py-6 text-center text-xs text-slate-500 dark:text-slate-400">
-                            {unreadCount > 0
-                              ? `${unreadCount} unread student message${unreadCount === 1 ? '' : 's'}`
-                              : 'No new notifications'}
-                          </p>
-                        ) : (
-                          bellNotifications.map(n => (
-                            <button
-                              key={n.id}
-                              type="button"
-                              className={`w-full text-left px-4 py-3 flex items-start gap-3 border-b border-slate-50 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60 ${n.read ? '' : 'bg-indigo-50/50 dark:bg-indigo-950/30'}`}
-                              onClick={openMessages}
-                            >
-                              <div className="w-8 h-8 bg-shnoor-indigo/10 rounded-full flex items-center justify-center flex-shrink-0">
-                                <MessageSquare size={15} className="text-shnoor-indigo" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-xs font-semibold text-slate-900 dark:text-white truncate">
-                                  {n.studentName || 'Student'}
-                                  {n.topic && <span className="font-normal text-slate-500 dark:text-slate-400"> · {n.topic}</span>}
-                                  {n.unread > 1 && <span className="ml-1 text-[10px] font-bold text-rose-500">({n.unread} new)</span>}
-                                </p>
-                                <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2 mt-0.5">
-                                  {n.messagePreview || (n.hasImage ? 'Sent an image' : '')}
-                                </p>
-                                <p className="text-[10px] text-slate-400 mt-1">{formatTime(n.timestamp)}</p>
-                              </div>
-                            </button>
-                          ))
-                        )}
-                      </div>
-
-                      <button
-                        type="button"
-                        className="w-full px-4 py-2.5 text-xs font-semibold text-center text-[#403f75] dark:text-indigo-300 hover:bg-slate-50 dark:hover:bg-slate-800/60"
-                        onClick={openMessages}
-                      >
-                        View all messages
-                      </button>
+                  <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-[#1E1E38] border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl overflow-hidden z-50">
+                    <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-slate-700">
+                      <p className="text-sm font-bold text-slate-900 dark:text-white">
+                        Notifications{unreadCount > 0 ? ` (${unreadCount})` : ''}
+                      </p>
+                      {unreadCount > 0 && (
+                        <button
+                          type="button"
+                          className="text-xs font-semibold text-[#403f75] dark:text-indigo-300 hover:underline"
+                          onClick={handleMarkAllRead}
+                        >
+                          Mark all read
+                        </button>
+                      )}
                     </div>
-                  )}
+
+                    <div className="max-h-80 overflow-y-auto">
+                      {bellNotifications.length === 0 ? (
+                        <p className="px-4 py-6 text-center text-xs text-slate-500 dark:text-slate-400">
+                          {unreadCount > 0
+                            ? `${unreadCount} unread student message${unreadCount === 1 ? '' : 's'}`
+                            : 'No new notifications'}
+                        </p>
+                      ) : (
+                        bellNotifications.map(n => (
+                          <button
+                            key={n.id}
+                            type="button"
+                            className={`w-full text-left px-4 py-3 flex items-start gap-3 border-b border-slate-50 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60 ${n.read ? '' : 'bg-indigo-50/50 dark:bg-indigo-950/30'}`}
+                            onClick={openMessages}
+                          >
+                            <div className="w-8 h-8 bg-shnoor-indigo/10 rounded-full flex items-center justify-center flex-shrink-0">
+                              <MessageSquare size={15} className="text-shnoor-indigo" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-semibold text-slate-900 dark:text-white truncate">
+                                {n.studentName || 'Student'}
+                                {n.topic && <span className="font-normal text-slate-500 dark:text-slate-400"> · {n.topic}</span>}
+                                {n.unread > 1 && <span className="ml-1 text-[10px] font-bold text-rose-500">({n.unread} new)</span>}
+                              </p>
+                              <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2 mt-0.5">
+                                {n.messagePreview || (n.hasImage ? 'Sent an image' : '')}
+                              </p>
+                              <p className="text-[10px] text-slate-400 mt-1">{formatTime(n.timestamp)}</p>
+                            </div>
+                          </button>
+                        ))
+                      )}
+                    </div>
+
+                    <button
+                      type="button"
+                      className="w-full px-4 py-2.5 text-xs font-semibold text-center text-[#403f75] dark:text-indigo-300 hover:bg-slate-50 dark:hover:bg-slate-800/60"
+                      onClick={openMessages}
+                    >
+                      View all messages
+                    </button>
+                  </div>
+                )}
               </div>
 
               <button
@@ -466,7 +466,7 @@ const AdminHeader = ({ viewAsControl, title }) => {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-shnoor-navy">
-                  {toastNotification.type === 'job-application' 
+                  {toastNotification.type === 'job-application'
                     ? `New Application from ${toastNotification.studentName || 'Student'}`
                     : `New Message from ${toastNotification.studentName || 'Student'}`
                   }
