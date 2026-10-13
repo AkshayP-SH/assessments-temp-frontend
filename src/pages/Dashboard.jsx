@@ -76,10 +76,16 @@ const Dashboard = () => {
     canonical: `https://assessments.shnoor.com${location.pathname}`
   });
 
-  const [studentName, setStudentName] = useState('');
-  const [studentId, setStudentId] = useState('');
-  const [institute, setInstitute] = useState('');
+  const [studentName, setStudentName] = useState(() => localStorage.getItem('studentName') || '');
+  const [studentId, setStudentId] = useState(() => localStorage.getItem('studentId') || '');
+  const [institute, setInstitute] = useState(() => localStorage.getItem('institute') || '');
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    setStudentName(localStorage.getItem('studentName') || '');
+    setStudentId(localStorage.getItem('studentId') || '');
+    setInstitute(localStorage.getItem('institute') || '');
+  }, []);
 
   useEffect(() => {
     const studentId = localStorage.getItem('studentId');
@@ -175,52 +181,52 @@ const Dashboard = () => {
       }
 
       const data = await response.json();
-      
+
       if (!data.success) {
         throw new Error('Failed to load tests');
       }
 
       const availableTests = data.tests || [];
 
-          // Check for saved progress for each test
-          const progressChecks = await Promise.all(
-            availableTests.map(async (test) => {
-              // Skip progress check if test is not available, already taken, or no attempts left
-              if (!test.isAvailable || test.alreadyTaken || !test.hasAttemptsLeft) {
-                return { testId: test.id, hasProgress: false };
+      // Check for saved progress for each test
+      const progressChecks = await Promise.all(
+        availableTests.map(async (test) => {
+          // Skip progress check if test is not available, already taken, or no attempts left
+          if (!test.isAvailable || test.alreadyTaken || !test.hasAttemptsLeft) {
+            return { testId: test.id, hasProgress: false };
+          }
+
+          try {
+            const progressResponse = await apiFetch(`api/student/test/${test.id}`, {
+              headers: {
+                'Authorization': `Bearer ${token}`
               }
+            });
 
-              try {
-                const progressResponse = await apiFetch(`api/student/test/${test.id}`, {
-                  headers: {
-                    'Authorization': `Bearer ${token}`
-                  }
-                });
+            if (progressResponse.ok) {
+              const progressData = await progressResponse.json();
+              return {
+                testId: test.id,
+                hasProgress: progressData.savedProgress !== null
+              };
+            }
+          } catch (err) {
+            console.error(`Error checking progress for test ${test.id}:`, err);
+          }
+          return { testId: test.id, hasProgress: false };
+        })
+      );
 
-                if (progressResponse.ok) {
-                  const progressData = await progressResponse.json();
-                  return {
-                    testId: test.id,
-                    hasProgress: progressData.savedProgress !== null
-                  };
-                }
-              } catch (err) {
-                console.error(`Error checking progress for test ${test.id}:`, err);
-              }
-              return { testId: test.id, hasProgress: false };
-            })
-          );
+      const testsWithProgress = new Set(
+        progressChecks
+          .filter(p => p.hasProgress)
+          .map(p => p.testId)
+      );
 
-          const testsWithProgress = new Set(
-            progressChecks
-              .filter(p => p.hasProgress)
-              .map(p => p.testId)
-          );
-
-          return { availableTests, testsWithProgress };
-        },
-        refetchInterval: 30000
-      });
+      return { availableTests, testsWithProgress };
+    },
+    refetchInterval: 30000
+  });
 
   const availableTests = dashboardData?.availableTests || [];
   const testsWithProgress = dashboardData?.testsWithProgress || new Set();

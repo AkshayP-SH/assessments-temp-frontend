@@ -47,7 +47,7 @@ const OrganisationSignup = () => {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showOtp, setShowOtp] = useState(false);
-  const { formattedTime } = useTimer(showOtp ? 60 : 0, () => {});
+  const { formattedTime } = useTimer(showOtp ? 60 : 0, () => { });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [emailError, setEmailError] = useState('');
@@ -78,7 +78,7 @@ const OrganisationSignup = () => {
       return;
     }
 
-if (emailError) {
+    if (emailError) {
       setError('Please resolve the email error before submitting.');
       return;
     }
@@ -397,33 +397,33 @@ if (emailError) {
                       required
                     />
                     <div className="mt-3 flex justify-between items-center">
-                        <span className="text-xs text-shnoor-soft font-mono">
-                            Time remaining: {formattedTime}
-                        </span>
-                        <button
-                            type="button"
-                            onClick={async () => {
-                                setLoading(true);
-                                setError('');
-                                try {
-                                    const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/signup/organisation/send-otp`, {
-                                        method: 'POST',
-                                        headers: { 'Content-Type': 'application/json' },
-                                        body: JSON.stringify({ email: formData.email, name: formData.orgName })
-                                    });
-                                    const data = await res.json();
-                                    if (!res.ok || !data.success) throw new Error(data.message || 'Failed to resend OTP');
-                                    alert('OTP resent successfully!');
-                                } catch (err) {
-                                    setError(err.message);
-                                } finally {
-                                    setLoading(false);
-                                }
-                            }}
-                            className="text-xs font-semibold text-shnoor-indigo hover:underline btn-action-gesture cursor-pointer"
-                        >
-                            Resend Code
-                        </button>
+                      <span className="text-xs text-shnoor-soft font-mono">
+                        Time remaining: {formattedTime}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          setLoading(true);
+                          setError('');
+                          try {
+                            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/signup/organisation/send-otp`, {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ email: formData.email, name: formData.orgName })
+                            });
+                            const data = await res.json();
+                            if (!res.ok || !data.success) throw new Error(data.message || 'Failed to resend OTP');
+                            alert('OTP resent successfully!');
+                          } catch (err) {
+                            setError(err.message);
+                          } finally {
+                            setLoading(false);
+                          }
+                        }}
+                        className="text-xs font-semibold text-shnoor-indigo hover:underline btn-action-gesture cursor-pointer"
+                      >
+                        Resend Code
+                      </button>
                     </div>
                   </div>
                 </div>

@@ -72,16 +72,21 @@ export default function MyApplications({ isEmbedded = false, onBrowseJobs }) {
         return () => document.removeEventListener('click', handleClickOutside);
     }, []);
 
-    const [studentName, setStudentName] = useState('');
-    const [studentId, setStudentId] = useState('');
-    const [institute, setInstitute] = useState('');
+    const [studentName, setStudentName] = useState(() => localStorage.getItem('studentName') || '');
+    const [studentId, setStudentId] = useState(() => localStorage.getItem('studentId') || '');
+    const [institute, setInstitute] = useState(() => localStorage.getItem('institute') || '');
 
     const capitalizeInstitute = (name) => {
         if (!name) return '';
         return name
             .toLowerCase()
             .split(' ')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .map(word => {
+                if (word === 'shnoor') return 'SHNOOR';
+                if (word === 'international') return 'international';
+                if (word === 'llc') return 'LLC';
+                return word.charAt(0).toUpperCase() + word.slice(1);
+            })
             .join(' ');
     };
 

@@ -111,7 +111,7 @@ const isRegistrationClosed = (iso) => {
 /* ─── Main Component ──────────────────────────────────────────────────────── */
 const LandingPage = () => {
   useSEO({
-    title: "SHNOOR Assessments - Secure Exam Portal",
+    title: "SHNOOR international LLC - Secure Exam Portal",
     description: "AI-powered assessment platform for organizations and candidates.",
     canonical: "https://assessments.shnoor.com/",
     ogImage: "https://assessments.shnoor.com/og-image.png"
@@ -123,7 +123,7 @@ const LandingPage = () => {
       {
         "@type": "Organization",
         "@id": "https://assessments.shnoor.com/#organization",
-        "name": "SHNOOR International",
+        "name": "SHNOOR international LLC",
         "url": "https://assessments.shnoor.com",
         "logo": "https://assessments.shnoor.com/favicon.png",
         "description": "AI-powered secure examination and assessment platform for organizations and candidates."
@@ -243,7 +243,7 @@ const LandingPage = () => {
             setPlans(data.plans.filter(p => p.is_active));
           }
         })
-        .catch(() => {});
+        .catch(() => { });
     };
 
     if ('requestIdleCallback' in window) {
@@ -297,7 +297,7 @@ const LandingPage = () => {
               <img src={shnoorLogo} alt="Shnoor" className="h-full w-full object-contain" width="44" height="44" loading="eager" fetchPriority="high" />
             </div>
             <div className="min-w-0">
-              <p className="font-extrabold text-theme-text text-[11px] sm:text-sm md:text-[15px] leading-tight tracking-tight sm:tracking-wide uppercase truncate sm:whitespace-normal">SHNOOR INTERNATIONAL</p>
+              <p className="font-extrabold text-theme-text text-[11px] sm:text-sm md:text-[15px] leading-tight tracking-tight sm:tracking-wide truncate sm:whitespace-normal">SHNOOR international LLC</p>
               <p className="text-[8px] sm:text-[10px] text-theme-muted font-semibold tracking-wider sm:tracking-widest uppercase truncate sm:whitespace-normal">Assessment Platform</p>
             </div>
           </div>
@@ -586,7 +586,7 @@ const LandingPage = () => {
                             <div className="flex items-start gap-3 text-slate-700 dark:text-slate-300 text-sm">
                               <Clock size={18} className="mt-0.5 text-slate-400 shrink-0" />
                               <div>
-                                <p className="font-medium text-slate-900 dark:text-white">Registration Deadline</p>
+                                <p className="font-medium text-slate-900 dark:text-white">Job Deadline</p>
                                 <p>{fmtDeadline(selectedJob.registration_deadline)}</p>
                               </div>
                             </div>
@@ -1143,7 +1143,7 @@ const LandingPage = () => {
                 <div className="landing-footer-logo flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-white p-1 shadow-xs">
                   <img src={shnoorLogo} alt="Shnoor" className="h-full w-full object-contain" loading="lazy" width="36" height="36" decoding="async" />
                 </div>
-                <span className="font-extrabold text-white text-lg">SHNOOR Assessments</span>
+                <span className="font-extrabold text-white text-lg">SHNOOR international LLC</span>
               </div>
               <p className="text-slate-300 mb-6 leading-relaxed text-sm">Secure assessment platform for campus recruitment drives and enterprise hiring.</p>
               <div className="flex items-center gap-2 mb-2 justify-center md:justify-start">
@@ -1207,7 +1207,7 @@ const LandingPage = () => {
           </div>
           <div className="border-t border-white/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="flex flex-col sm:flex-row items-center gap-2 text-sm text-slate-300">
-              <p>© Copyrights 2025. All Rights Reserved. SHNOOR INTERNATIONAL LLC</p>
+              <p>© Copyrights 2025. All Rights Reserved. SHNOOR international LLC</p>
               <div className="hidden sm:flex items-center gap-2">
                 <span className="text-slate-500">•</span>
                 <Link to="/privacy-policy" className="hover:text-white transition-colors py-2 px-1">Privacy Policy</Link>

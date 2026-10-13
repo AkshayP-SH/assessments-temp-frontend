@@ -6,10 +6,10 @@ import ThemeSelector from './ThemeSelector';
 import { clearStorageKeepTheme } from '../utils/theme';
 
 export default function StudentHeader({
-  studentName = '',
-  studentId = '',
-  institute = '',
-  title = 'Shnoor Assessment',
+  studentName: propStudentName,
+  studentId: propStudentId,
+  institute: propInstitute,
+  title = 'SHNOOR Assessments',
   subtitle = 'Student Dashboard',
   showBackButton = false,
   backTo = '/dashboard',
@@ -20,6 +20,9 @@ export default function StudentHeader({
   children
 }) {
   const navigate = useNavigate();
+  const studentName = propStudentName || localStorage.getItem('studentName') || '';
+  const studentId = propStudentId || localStorage.getItem('studentId') || '';
+  const institute = propInstitute || localStorage.getItem('institute') || '';
   const [unreadCount, setUnreadCount] = useState(0);
   const [notifications, setNotifications] = useState([]);
   const [bellOpen, setBellOpen] = useState(false);
@@ -71,7 +74,12 @@ export default function StudentHeader({
     return name
       .toLowerCase()
       .split(' ')
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .map((word) => {
+        if (word === 'shnoor') return 'SHNOOR';
+        if (word === 'international') return 'international';
+        if (word === 'llc') return 'LLC';
+        return word.charAt(0).toUpperCase() + word.slice(1);
+      })
       .join(' ');
   };
 

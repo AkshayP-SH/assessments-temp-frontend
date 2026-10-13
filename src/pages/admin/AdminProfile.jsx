@@ -446,7 +446,7 @@ export default function AdminProfile() {
                   {profile?.email}
                 </p>
                 <p className="text-xs text-theme-muted/80 font-medium mt-0.5">
-                  {profile?.company_name || (isSuper ? 'Shnoor International' : 'Organization')}
+                  {profile?.company_name || (isSuper ? 'SHNOOR international LLC' : 'Organization')}
                 </p>
               </div>
             </div>
@@ -507,7 +507,7 @@ export default function AdminProfile() {
                 </button>
               </div>
               <p className="text-sm font-bold text-theme-text truncate">
-                {profile?.company_name || (isSuper ? 'Shnoor International' : '—')}
+                {profile?.company_name || (isSuper ? 'SHNOOR international LLC' : '—')}
               </p>
             </div>
 

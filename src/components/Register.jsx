@@ -525,9 +525,8 @@ const Register = () => {
               return (
                 <div
                   key={i}
-                  className={`flex items-start gap-4 p-2.5 -mx-2.5 rounded-xl transition-all duration-300 card-3d-subtle hover:bg-white/[0.08] border border-transparent hover:border-white/10 group cursor-default transform-style-3d ${
-                    isActive ? 'opacity-100 bg-white/[0.06] border-white/10' : isDone ? 'opacity-90' : 'opacity-60'
-                  }`}
+                  className={`flex items-start gap-4 p-2.5 -mx-2.5 rounded-xl transition-all duration-300 card-3d-subtle hover:bg-white/[0.08] border border-transparent hover:border-white/10 group cursor-default transform-style-3d ${isActive ? 'opacity-100 bg-white/[0.06] border-white/10' : isDone ? 'opacity-90' : 'opacity-60'
+                    }`}
                 >
                   <div className={`auth-step-badge w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300 icon-gesture group-hover:scale-110 ${isDone ? 'is-complete' : isActive ? 'is-active scale-105 shadow-md shadow-indigo-500/30' : 'is-pending'}`}>
                     {isDone ? (

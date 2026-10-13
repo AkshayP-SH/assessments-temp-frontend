@@ -2209,7 +2209,7 @@ const AdminDashboard = () => {
                           setTests([]);
                           setAllInstitutes([]);
                         }}
-className="p-0.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-all cursor-pointer flex items-center justify-center ml-0.5"
+                        className="p-0.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-all cursor-pointer flex items-center justify-center ml-0.5"
                         title="Remove filter (Reset to Global View)"
                         aria-label="Remove filter"
                       >

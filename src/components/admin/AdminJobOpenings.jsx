@@ -332,7 +332,7 @@ export default function AdminJobOpenings({ clientId }) {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div>
                                 <label className="form-label">
-                                    Registration Deadline <span className="required">*</span>
+                                    Job Deadline <span className="required">*</span>
                                 </label>
                                 <input
                                     type="datetime-local"

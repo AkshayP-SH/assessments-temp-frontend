@@ -63,7 +63,7 @@ export default function JobBoard({ isEmbedded = false, onTabChange }) {
             return newSet;
         });
     };
-    
+
     // Application form state
     const [showApplicationModal, setShowApplicationModal] = useState(false);
     const [selectedJob, setSelectedJob] = useState(null);
@@ -84,16 +84,21 @@ export default function JobBoard({ isEmbedded = false, onTabChange }) {
     const [viewDescriptionJob, setViewDescriptionJob] = useState(null);
     const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
-    const [studentName, setStudentName] = useState('');
-    const [studentId, setStudentId] = useState('');
-    const [institute, setInstitute] = useState('');
+    const [studentName, setStudentName] = useState(() => localStorage.getItem('studentName') || '');
+    const [studentId, setStudentId] = useState(() => localStorage.getItem('studentId') || '');
+    const [institute, setInstitute] = useState(() => localStorage.getItem('institute') || '');
 
     const capitalizeInstitute = (name) => {
         if (!name) return '';
         return name
             .toLowerCase()
             .split(' ')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .map(word => {
+                if (word === 'shnoor') return 'SHNOOR';
+                if (word === 'international') return 'international';
+                if (word === 'llc') return 'LLC';
+                return word.charAt(0).toUpperCase() + word.slice(1);
+            })
             .join(' ');
     };
 
@@ -121,13 +126,13 @@ export default function JobBoard({ isEmbedded = false, onTabChange }) {
                 const enrolledRes = await apiFetch('/api/job-applications/my-applications', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                
+
                 if (enrolledRes.status === 401) {
                     clearStorageKeepTheme();
                     window.location.href = '/login';
                     return { jobs: [], applications: applicationsMap };
                 }
-                
+
                 const enrolledData = await enrolledRes.json();
                 if (enrolledData.success) {
                     enrolledData.data.forEach(app => {
@@ -148,6 +153,7 @@ export default function JobBoard({ isEmbedded = false, onTabChange }) {
                     });
                 }
             }
+
 
             return { jobs: allJobs, applications: applicationsMap };
         }
@@ -209,7 +215,7 @@ export default function JobBoard({ isEmbedded = false, onTabChange }) {
             const savedData = JSON.parse(localStorage.getItem('student_job_applications') || '{}');
             savedData[job.id] = applicationForm;
             localStorage.setItem('student_job_applications', JSON.stringify(savedData));
-        } catch(e) { console.error('Failed to save local app data', e); }
+        } catch (e) { console.error('Failed to save local app data', e); }
 
         setShowApplicationModal(false);
         setEnrollingJobs(prev => new Set([...prev, job.id]));
@@ -349,10 +355,10 @@ export default function JobBoard({ isEmbedded = false, onTabChange }) {
                             <div className="w-full lg:w-[40%] xl:w-[35%] flex-shrink-0 flex flex-col gap-4">
                                 {filtered.map(job => {
                                     const isSelected = viewDescriptionJob?.id === job.id;
-                                    const cardBorder = isSelected 
-                                        ? 'border-[#403f75] dark:border-indigo-500 shadow-md ring-1 ring-[#403f75] dark:ring-indigo-500' 
+                                    const cardBorder = isSelected
+                                        ? 'border-[#403f75] dark:border-indigo-500 shadow-md ring-1 ring-[#403f75] dark:ring-indigo-500'
                                         : 'border-slate-200 dark:border-slate-800 hover:border-[#403f75]/50 dark:hover:border-indigo-500/50';
-                                    
+
                                     return (
                                         <div
                                             key={job.id}
@@ -365,9 +371,9 @@ export default function JobBoard({ isEmbedded = false, onTabChange }) {
                                                     <Briefcase size={16} />
                                                 </div>
                                             </div>
-                                            
+
                                             <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">{job.company_name}</p>
-                                            
+
                                             <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-400 mb-4">
                                                 <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800">{job.location || 'Remote'}</span>
                                                 <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-indigo-50 dark:bg-indigo-900/30 text-[#403f75] dark:text-indigo-400">{job.job_type || 'Full-time'}</span>
@@ -397,13 +403,13 @@ export default function JobBoard({ isEmbedded = false, onTabChange }) {
                             </div>
 
                             {/* Right Column: Sticky Detail Pane (Desktop only) */}
-                            <div className="hidden lg:flex flex-col flex-1 sticky top-24 border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-[#1A1A32] shadow-sm overflow-hidden" style={{height: 'calc(100vh - 8rem)'}}>
+                            <div className="hidden lg:flex flex-col flex-1 sticky top-24 border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-[#1A1A32] shadow-sm overflow-hidden" style={{ height: 'calc(100vh - 8rem)' }}>
                                 {viewDescriptionJob ? (
                                     <div className="overflow-y-auto custom-scrollbar flex-1 relative">
                                         <div className="p-6 sm:p-8 border-b border-slate-100 dark:border-slate-800">
                                             <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">{viewDescriptionJob.job_role}</h2>
                                             <p className="text-base text-[#403f75] dark:text-indigo-400 font-medium hover:underline cursor-pointer mb-6">{viewDescriptionJob.company_name}</p>
-                                            
+
                                             <div className="flex flex-wrap items-center gap-3">
                                                 {applications.has(viewDescriptionJob.id) ? (
                                                     <div className="flex items-center gap-3">
@@ -437,7 +443,7 @@ export default function JobBoard({ isEmbedded = false, onTabChange }) {
                                                         )}
                                                     </div>
                                                 ) : (
-                                                    <button 
+                                                    <button
                                                         onClick={() => handleEnrollClick(viewDescriptionJob)}
                                                         disabled={enrollingJobs.has(viewDescriptionJob.id) || isRegistrationClosed(viewDescriptionJob.registration_deadline)}
                                                         className="px-8 py-2.5 bg-gradient-to-r from-[#403f75] to-[#57569b] hover:from-[#343360] hover:to-[#4a4988] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-colors shadow-sm flex items-center gap-2 cursor-pointer"
@@ -451,7 +457,7 @@ export default function JobBoard({ isEmbedded = false, onTabChange }) {
                                                         )}
                                                     </button>
                                                 )}
-                                                <button 
+                                                <button
                                                     onClick={() => toggleSaveJob(viewDescriptionJob.id)}
                                                     className={`w-11 h-11 rounded-xl flex items-center justify-center transition-colors border ${savedJobs.has(viewDescriptionJob.id) ? 'bg-indigo-50 border-indigo-200 text-indigo-600 dark:bg-indigo-900/30 dark:border-indigo-800 dark:text-indigo-400' : 'bg-slate-50 border-slate-200 text-slate-600 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'}`}
                                                 >
@@ -473,7 +479,7 @@ export default function JobBoard({ isEmbedded = false, onTabChange }) {
                                                 <div className="flex items-start gap-3 text-slate-700 dark:text-slate-300 text-sm">
                                                     <Clock size={18} className="mt-0.5 text-slate-400" />
                                                     <div>
-                                                        <p className="font-medium text-slate-900 dark:text-white">Registration Deadline</p>
+                                                        <p className="font-medium text-slate-900 dark:text-white">Job Deadline</p>
                                                         <p>{fmtDeadline(viewDescriptionJob.registration_deadline)}</p>
                                                     </div>
                                                 </div>
@@ -543,9 +549,9 @@ export default function JobBoard({ isEmbedded = false, onTabChange }) {
                             <p className={`text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-line break-words ${!isDescriptionExpanded ? 'line-clamp-4' : ''}`}>
                                 {viewDescriptionJob.job_description || 'No description available for this role.'}
                             </p>
-                            
+
                             {viewDescriptionJob.job_description?.length > 150 && !isDescriptionExpanded && (
-                                <button 
+                                <button
                                     onClick={() => setIsDescriptionExpanded(true)}
                                     className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 text-sm font-bold mt-2"
                                 >
@@ -556,7 +562,7 @@ export default function JobBoard({ isEmbedded = false, onTabChange }) {
                             {(isDescriptionExpanded || (viewDescriptionJob.job_description?.length || 0) <= 150) && (
                                 <div className="animate-fade-in">
                                     {viewDescriptionJob.job_description?.length > 150 && (
-                                        <button 
+                                        <button
                                             onClick={() => setIsDescriptionExpanded(false)}
                                             className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 text-sm font-bold mt-3 block"
                                         >
@@ -582,9 +588,9 @@ export default function JobBoard({ isEmbedded = false, onTabChange }) {
                                                 <Link2 size={16} className="text-indigo-500" />
                                                 Application Link
                                             </h4>
-                                            <a 
-                                                href={viewDescriptionJob.application_link} 
-                                                target="_blank" 
+                                            <a
+                                                href={viewDescriptionJob.application_link}
+                                                target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 underline break-all flex items-center gap-1.5 pl-6"
                                             >
@@ -610,11 +616,11 @@ export default function JobBoard({ isEmbedded = false, onTabChange }) {
 
             {/* Application Modal */}
             {showApplicationModal && selectedJob && (
-                <div 
+                <div
                     className="fixed inset-0 bg-[#0E0E27]/40 backdrop-blur-sm flex items-center justify-center z-[100] p-4 font-sans animate-fade-in"
                     onClick={() => setShowApplicationModal(false)}
                 >
-                    <div 
+                    <div
                         className="bg-white dark:bg-[#1E1E38] rounded-2xl shadow-[0_8px_30px_rgba(14,14,39,0.06)] border border-slate-200 dark:border-slate-700 max-w-2xl w-full overflow-hidden"
                         onClick={(e) => e.stopPropagation()}
                     >
@@ -630,88 +636,88 @@ export default function JobBoard({ isEmbedded = false, onTabChange }) {
                                 <X size={20} />
                             </button>
                         </div>
-                        
+
                         <form onSubmit={submitApplication} className="p-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Primary Technical Skill</label>
-                                <input 
-                                    type="text" 
-                                    required
-                                    placeholder="e.g. React, Python, Data Analysis"
-                                    value={applicationForm.primarySkill}
-                                    onChange={(e) => setApplicationForm({...applicationForm, primarySkill: e.target.value})}
-                                    className="w-full px-4 py-2.5 bg-white dark:bg-[#1A1A32] border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#403f75]/50 dark:text-white transition-all"
-                                />
-                            </div>
-                            
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Years of Experience</label>
-                                <select 
-                                    required
-                                    value={applicationForm.yearsOfExperience}
-                                    onChange={(e) => setApplicationForm({...applicationForm, yearsOfExperience: e.target.value})}
-                                    className="w-full px-4 py-2.5 bg-white dark:bg-[#1A1A32] border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#403f75]/50 dark:text-white transition-all appearance-none"
-                                >
-                                    <option value="" disabled>Select experience level</option>
-                                    <option value="Fresher (0 years)">Fresher (0 years)</option>
-                                    <option value="1-2 years">1-2 years</option>
-                                    <option value="3-5 years">3-5 years</option>
-                                    <option value="5+ years">5+ years</option>
-                                </select>
-                            </div>
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Primary Technical Skill</label>
+                                    <input
+                                        type="text"
+                                        required
+                                        placeholder="e.g. React, Python, Data Analysis"
+                                        value={applicationForm.primarySkill}
+                                        onChange={(e) => setApplicationForm({ ...applicationForm, primarySkill: e.target.value })}
+                                        className="w-full px-4 py-2.5 bg-white dark:bg-[#1A1A32] border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#403f75]/50 dark:text-white transition-all"
+                                    />
+                                </div>
 
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Portfolio / GitHub / LinkedIn URL <span className="text-slate-400 font-normal">(Optional)</span></label>
-                                <input 
-                                    type="url" 
-                                    placeholder="https://..."
-                                    value={applicationForm.githubUrl}
-                                    onChange={(e) => setApplicationForm({...applicationForm, githubUrl: e.target.value})}
-                                    className="w-full px-4 py-2.5 bg-white dark:bg-[#1A1A32] border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#403f75]/50 dark:text-white transition-all"
-                                />
-                            </div>
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Years of Experience</label>
+                                    <select
+                                        required
+                                        value={applicationForm.yearsOfExperience}
+                                        onChange={(e) => setApplicationForm({ ...applicationForm, yearsOfExperience: e.target.value })}
+                                        className="w-full px-4 py-2.5 bg-white dark:bg-[#1A1A32] border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#403f75]/50 dark:text-white transition-all appearance-none"
+                                    >
+                                        <option value="" disabled>Select experience level</option>
+                                        <option value="Fresher (0 years)">Fresher (0 years)</option>
+                                        <option value="1-2 years">1-2 years</option>
+                                        <option value="3-5 years">3-5 years</option>
+                                        <option value="5+ years">5+ years</option>
+                                    </select>
+                                </div>
 
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Resume / CV URL</label>
-                                <input 
-                                    type="url" 
-                                    required
-                                    placeholder="Link to Google Drive, Dropbox, etc."
-                                    value={applicationForm.resumeUrl}
-                                    onChange={(e) => setApplicationForm({...applicationForm, resumeUrl: e.target.value})}
-                                    className="w-full px-4 py-2.5 bg-white dark:bg-[#1A1A32] border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#403f75]/50 dark:text-white transition-all"
-                                />
-                            </div>
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Portfolio / GitHub / LinkedIn URL <span className="text-slate-400 font-normal">(Optional)</span></label>
+                                    <input
+                                        type="url"
+                                        placeholder="https://..."
+                                        value={applicationForm.githubUrl}
+                                        onChange={(e) => setApplicationForm({ ...applicationForm, githubUrl: e.target.value })}
+                                        className="w-full px-4 py-2.5 bg-white dark:bg-[#1A1A32] border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#403f75]/50 dark:text-white transition-all"
+                                    />
+                                </div>
 
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Current Location</label>
-                                <input 
-                                    type="text" 
-                                    required
-                                    placeholder="e.g. New York, NY"
-                                    value={applicationForm.location}
-                                    onChange={(e) => setApplicationForm({...applicationForm, location: e.target.value})}
-                                    className="w-full px-4 py-2.5 bg-white dark:bg-[#1A1A32] border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#403f75]/50 dark:text-white transition-all"
-                                />
-                            </div>
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Resume / CV URL</label>
+                                    <input
+                                        type="url"
+                                        required
+                                        placeholder="Link to Google Drive, Dropbox, etc."
+                                        value={applicationForm.resumeUrl}
+                                        onChange={(e) => setApplicationForm({ ...applicationForm, resumeUrl: e.target.value })}
+                                        className="w-full px-4 py-2.5 bg-white dark:bg-[#1A1A32] border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#403f75]/50 dark:text-white transition-all"
+                                    />
+                                </div>
 
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Highest Education</label>
-                                <select 
-                                    required
-                                    value={applicationForm.highestEducation}
-                                    onChange={(e) => setApplicationForm({...applicationForm, highestEducation: e.target.value})}
-                                    className="w-full px-4 py-2.5 bg-white dark:bg-[#1A1A32] border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#403f75]/50 dark:text-white transition-all appearance-none"
-                                >
-                                    <option value="" disabled>Select education level</option>
-                                    <option value="High School">High School</option>
-                                    <option value="Associate Degree">Associate Degree</option>
-                                    <option value="Bachelor's Degree">Bachelor's Degree</option>
-                                    <option value="Master's Degree">Master's Degree</option>
-                                    <option value="Ph.D. or Higher">Ph.D. or Higher</option>
-                                </select>
-                            </div>
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Current Location</label>
+                                    <input
+                                        type="text"
+                                        required
+                                        placeholder="e.g. New York, NY"
+                                        value={applicationForm.location}
+                                        onChange={(e) => setApplicationForm({ ...applicationForm, location: e.target.value })}
+                                        className="w-full px-4 py-2.5 bg-white dark:bg-[#1A1A32] border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#403f75]/50 dark:text-white transition-all"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Highest Education</label>
+                                    <select
+                                        required
+                                        value={applicationForm.highestEducation}
+                                        onChange={(e) => setApplicationForm({ ...applicationForm, highestEducation: e.target.value })}
+                                        className="w-full px-4 py-2.5 bg-white dark:bg-[#1A1A32] border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#403f75]/50 dark:text-white transition-all appearance-none"
+                                    >
+                                        <option value="" disabled>Select education level</option>
+                                        <option value="High School">High School</option>
+                                        <option value="Associate Degree">Associate Degree</option>
+                                        <option value="Bachelor's Degree">Bachelor's Degree</option>
+                                        <option value="Master's Degree">Master's Degree</option>
+                                        <option value="Ph.D. or Higher">Ph.D. or Higher</option>
+                                    </select>
+                                </div>
                             </div>
 
                             <div className="pt-2 mt-4 border-t border-slate-100 dark:border-slate-800">

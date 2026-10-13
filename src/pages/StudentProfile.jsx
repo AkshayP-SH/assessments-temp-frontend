@@ -485,6 +485,8 @@ export default function StudentProfile() {
       .toLowerCase()
       .split(' ')
       .map(word => {
+        if (word === 'shnoor') return 'SHNOOR';
+        if (word === 'international') return 'international';
         if (word === 'llc') return 'LLC';
         return word.charAt(0).toUpperCase() + word.slice(1);
       })
