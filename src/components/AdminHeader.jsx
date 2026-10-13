@@ -243,7 +243,7 @@ const AdminHeader = ({ viewAsControl, title: _title }) => {
               </div>
               <div className="flex-shrink-0">
                 <h1 className="admin-header-title font-extrabold text-base sm:text-lg lg:text-xl leading-tight whitespace-nowrap text-slate-900 dark:text-white tracking-tight">
-                  {title || 'SHNOOR Assessments'}
+                  {_title || 'SHNOOR Assessments'}
                 </h1>
                 <p className="admin-header-subtitle text-xs font-semibold text-[#403f75] dark:text-indigo-400 whitespace-nowrap leading-tight mt-0.5">
                   {isClientPortal ? 'Client Portal' : 'Admin Dashboard'}
