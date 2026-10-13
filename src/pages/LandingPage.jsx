@@ -586,7 +586,7 @@ const LandingPage = () => {
                             <div className="flex items-start gap-3 text-slate-700 dark:text-slate-300 text-sm">
                               <Clock size={18} className="mt-0.5 text-slate-400 shrink-0" />
                               <div>
-                                <p className="font-medium text-slate-900 dark:text-white">Registration Deadline</p>
+                                <p className="font-medium text-slate-900 dark:text-white">Job Deadline</p>
                                 <p>{fmtDeadline(selectedJob.registration_deadline)}</p>
                               </div>
                             </div>
