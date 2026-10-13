@@ -169,7 +169,8 @@ export const useSupportSocket = ({
     let socket;
 
     try {
-      const adminToken = isAdmin ? localStorage.getItem('adminToken') : null;
+      // Students send their session token too, so the server can verify the room they join
+      const authToken = localStorage.getItem(isAdmin ? 'adminToken' : 'studentAuthToken');
 
       socket = io(SOCKET_URL, {
         transports: [...SOCKET_TRANSPORTS],
@@ -177,7 +178,7 @@ export const useSupportSocket = ({
         reconnectionDelay: 2000,
         timeout: 10000,
         autoConnect: true,
-        auth: adminToken ? { token: adminToken } : undefined,
+        auth: authToken ? { token: authToken } : undefined,
       });
 
       socketRef.current = socket;

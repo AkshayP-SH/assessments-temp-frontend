@@ -42,6 +42,7 @@ const PrivacyPolicy = React.lazy(() => import('./pages/PrivacyPolicy'));
 const TermsAndConditions = React.lazy(() => import('./pages/TermsAndConditions'));
 const JobBoard = React.lazy(() => import('./pages/JobBoard'));
 const MyApplications = React.lazy(() => import('./pages/MyApplications'));
+const Notifications = React.lazy(() => import('./pages/Notifications'));
 
 // Client portal (multi-tenant)
 const AdminClients = React.lazy(() => import('./pages/admin/AdminClients'));
@@ -119,6 +120,7 @@ const AppRoutes = () => {
         <Route path="/result" element={<StudentRoute><Suspense fallback={<LoadingFallback />}><Result /></Suspense></StudentRoute>} />
         <Route path="/feedback" element={<StudentRoute><Suspense fallback={<LoadingFallback />}><Feedback /></Suspense></StudentRoute>} />
         <Route path="/interview-room/:interviewId" element={<StudentRoute><Suspense fallback={<LoadingFallback />}><InterviewRoom /></Suspense></StudentRoute>} />
+        <Route path="/notifications" element={<StudentRoute><Suspense fallback={<LoadingFallback />}><Notifications role="student" /></Suspense></StudentRoute>} />
 
         {/* Admin Multi-Page Routes */}
         <Route path="/admin/dashboard" element={<AdminProtectedRoute><Suspense fallback={<LoadingFallback />}><AdminDashboard /></Suspense></AdminProtectedRoute>} />
@@ -141,6 +143,7 @@ const AppRoutes = () => {
         <Route path="/admin/live-proctoring" element={<AdminProtectedRoute><Suspense fallback={<LoadingFallback />}><LiveProctoring /></Suspense></AdminProtectedRoute>} />
         <Route path="/admin/job-applicants/:jobId" element={<AdminProtectedRoute><Suspense fallback={<LoadingFallback />}><AdminJobApplicants /></Suspense></AdminProtectedRoute>} />
         <Route path="/admin/interview-room/:interviewId" element={<AdminProtectedRoute><Suspense fallback={<LoadingFallback />}><InterviewRoom /></Suspense></AdminProtectedRoute>} />
+        <Route path="/admin/notifications" element={<AdminProtectedRoute><Suspense fallback={<LoadingFallback />}><Notifications role="admin" /></Suspense></AdminProtectedRoute>} />
 
         {/* Client Portal Routes (multi-tenant, admin UI parity) */}
         <Route path="/client/login" element={<Navigate to="/login?portal=org" replace />} />
@@ -163,6 +166,7 @@ const AppRoutes = () => {
         <Route path="/client/live-proctoring" element={<ClientProtectedRoute><Suspense fallback={<LoadingFallback />}><LiveProctoring /></Suspense></ClientProtectedRoute>} />
         <Route path="/client/job-applicants/:jobId" element={<ClientProtectedRoute><Suspense fallback={<LoadingFallback />}><AdminJobApplicants /></Suspense></ClientProtectedRoute>} />
         <Route path="/client/interview-room/:interviewId" element={<ClientProtectedRoute><Suspense fallback={<LoadingFallback />}><InterviewRoom /></Suspense></ClientProtectedRoute>} />
+        <Route path="/client/notifications" element={<ClientProtectedRoute><Suspense fallback={<LoadingFallback />}><Notifications role="admin" /></Suspense></ClientProtectedRoute>} />
         <Route path="/client" element={<Navigate to="/client/dashboard" replace />} />
 
         {/* Default */}
