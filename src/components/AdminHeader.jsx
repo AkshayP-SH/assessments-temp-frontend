@@ -7,7 +7,7 @@ import { API_URL } from '../config/api';
 import OrganizationLogo from './OrganizationLogo';
 import ThemeSelector from './ThemeSelector';
 
-const AdminHeader = ({ viewAsControl, title: _title }) => {
+const AdminHeader = ({ viewAsControl, title }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [unreadCount, setUnreadCount] = useState(0);
