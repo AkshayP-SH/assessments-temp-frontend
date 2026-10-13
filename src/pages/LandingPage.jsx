@@ -106,31 +106,7 @@ const isRegistrationClosed = (iso) => {
   return new Date(iso) < new Date();
 };
 
-const getStudentPortalJobDesc = (role) => `We are looking for an exceptional ${role} to join our team and help build our next-generation platform. In this role, you will be responsible for designing, developing, and maintaining high-performance, scalable, and reliable systems tailored for our ${role} capabilities. You will work closely with cross-functional teams including product managers, designers, and other engineers to deliver impactful solutions. 
-Key Responsibilities for the ${role} position:
-- Write clean, maintainable, and efficient code.
-- Participate in all phases of the software development lifecycle.
-- Drive continuous improvement and innovation within the team.
-- Troubleshoot, debug, and upgrade existing systems.
-- Collaborate with internal teams to fix issues and improve performance.
-- Stay updated with industry trends and emerging technologies.
 
-We offer a competitive salary, comprehensive health benefits, and a flexible work environment. Join us to make a real impact!`;
-
-const STUDENT_PORTAL_JOBS = [
-  { id: 'mock-1', company_name: 'TechCorp', job_role: 'Data Analytics', job_type: 'Full-time', location: 'Remote', job_description: getStudentPortalJobDesc('Data Analytics'), registration_deadline: new Date(Date.now() + 864000000).toISOString(), eligibility_criteria: 'B.Tech/B.E. in Computer Science or related field.' },
-  { id: 'mock-2', company_name: 'WebSolutions', job_role: 'React Developer', job_type: 'Contract', location: 'Hybrid', job_description: getStudentPortalJobDesc('React Developer'), registration_deadline: new Date(Date.now() + 432000000).toISOString(), eligibility_criteria: '2+ years of experience in React.' },
-  { id: 'mock-3', company_name: 'DataSystems', job_role: 'Backend Developer', job_type: 'Full-time', location: 'On-site', job_description: getStudentPortalJobDesc('Backend Developer'), registration_deadline: new Date(Date.now() + 1728000000).toISOString(), eligibility_criteria: 'Proficiency in Node.js and SQL.' },
-  { id: 'mock-4', company_name: 'AI Innovations', job_role: 'Data Scientist', job_type: 'Full-time', location: 'Remote', job_description: getStudentPortalJobDesc('Data Scientist'), registration_deadline: new Date(Date.now() + 604800000).toISOString(), eligibility_criteria: 'Experience with Python, Pandas, and Scikit-learn.' },
-  { id: 'mock-5', company_name: 'CloudNet', job_role: 'DevOps Engineer', job_type: 'Contract', location: 'Remote', job_description: getStudentPortalJobDesc('DevOps Engineer'), registration_deadline: new Date(Date.now() + 259200000).toISOString(), eligibility_criteria: 'AWS Certification preferred. Terraform knowledge.' },
-  { id: 'mock-6', company_name: 'CyberSec Systems', job_role: 'Security Analyst', job_type: 'Full-time', location: 'Hybrid', job_description: getStudentPortalJobDesc('Security Analyst'), registration_deadline: new Date(Date.now() + 864000000).toISOString(), eligibility_criteria: 'CISSP or equivalent certification.' },
-  { id: 'mock-7', company_name: 'MobileFirst', job_role: 'iOS Developer', job_type: 'Full-time', location: 'On-site', job_description: getStudentPortalJobDesc('iOS Developer'), registration_deadline: new Date(Date.now() + 1209600000).toISOString(), eligibility_criteria: '3+ years of iOS development experience.' },
-  { id: 'mock-8', company_name: 'FinTech Solutions', job_role: 'Java Developer', job_type: 'Full-time', location: 'Remote', job_description: getStudentPortalJobDesc('Java Developer'), registration_deadline: new Date(Date.now() + 345600000).toISOString(), eligibility_criteria: 'Strong knowledge of Java Spring Boot.' },
-  { id: 'mock-9', company_name: 'UX Studios', job_role: 'UI/UX Designer', job_type: 'Contract', location: 'Hybrid', job_description: getStudentPortalJobDesc('UI/UX Designer'), registration_deadline: new Date(Date.now() + 777600000).toISOString(), eligibility_criteria: 'Portfolio demonstrating web and mobile design.' },
-  { id: 'mock-10', company_name: 'NextGen AI', job_role: 'Machine Learning Engineer', job_type: 'Full-time', location: 'Remote', job_description: getStudentPortalJobDesc('Machine Learning Engineer'), registration_deadline: new Date(Date.now() + 1036800000).toISOString(), eligibility_criteria: 'Experience with PyTorch or TensorFlow.' },
-  { id: 'mock-11', company_name: 'GameDev Corp', job_role: 'Unity Developer', job_type: 'Internship', location: 'On-site', job_description: getStudentPortalJobDesc('Unity Developer'), registration_deadline: new Date(Date.now() + 518400000).toISOString(), eligibility_criteria: 'Experience in C# and Unity3D.' },
-  { id: 'mock-12', company_name: 'Quantum Computing', job_role: 'Research Scientist', job_type: 'Full-time', location: 'Hybrid', job_description: getStudentPortalJobDesc('Research Scientist'), registration_deadline: new Date(Date.now() + 1468800000).toISOString(), eligibility_criteria: 'Ph.D. in Physics or Computer Science.' }
-];
 
 /* ─── Main Component ──────────────────────────────────────────────────────── */
 const LandingPage = () => {
@@ -207,18 +183,7 @@ const LandingPage = () => {
         console.warn('Backend job openings fetch skipped:', apiErr);
       }
 
-      // Combine admin-posted jobs with the complete student portal jobs catalog
-      const allJobs = [...realJobs];
-      const existingIds = new Set(realJobs.map(j => String(j.id)));
-
-      STUDENT_PORTAL_JOBS.forEach(spJob => {
-        if (!existingIds.has(String(spJob.id))) {
-          allJobs.push(spJob);
-          existingIds.add(String(spJob.id));
-        }
-      });
-
-      setJobs(allJobs);
+      setJobs(realJobs);
     } catch (err) {
       console.error('Failed to load published jobs:', err);
       setJobsError('Could not load current job openings. Please check your network and try again.');
