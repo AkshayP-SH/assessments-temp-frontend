@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { BookOpen, Video, Briefcase, FileText, User, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const STUDENT_TABS = [
-  { id: 'tests', label: 'My Tests', icon: BookOpen },
-  { id: 'interviews', label: 'Interviews', icon: Video },
-  { id: 'job-board', label: 'Job Board', icon: Briefcase },
-  { id: 'my-applications', label: 'My Applications', icon: FileText },
-  { id: 'profile', label: 'My Profile', icon: User }
+  { id: 'tests', label: 'My Tests', icon: BookOpen, path: '/dashboard' },
+  { id: 'interviews', label: 'Interviews', icon: Video, path: '/student/interviews' },
+  { id: 'job-board', label: 'Job Board', icon: Briefcase, path: '/student/job-board' },
+  { id: 'my-applications', label: 'My Applications', icon: FileText, path: '/student/my-applications' },
+  { id: 'profile', label: 'My Profile', icon: User, path: '/student/profile' }
 ];
 
 export default function StudentSidebar({ activeTab, onTabChange, badges = {}, onExpandChange }) {
+  const navigate = useNavigate();
   const [isPinned, setIsPinned] = useState(() => {
     const saved = localStorage.getItem('studentSidebarPinned');
     return saved === null ? true : saved === 'true';
@@ -80,7 +82,10 @@ export default function StudentSidebar({ activeTab, onTabChange, badges = {}, on
               <button
                 key={tab.id}
                 type="button"
-                onClick={() => onTabChange(tab.id)}
+                onClick={() => {
+                  if (tab.path) navigate(tab.path);
+                  if (onTabChange) onTabChange(tab.id);
+                }}
                 className={`flex items-center h-11 px-3 w-full rounded-xl nav-gesture-item cursor-pointer relative group/item ${isActive
                   ? 'bg-gradient-to-r from-[#403f75] to-[#57569b] text-white font-bold shadow-md shadow-[#403f75]/25 translate-x-1'
                   : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/90 dark:hover:bg-slate-800/80'
@@ -136,7 +141,10 @@ export default function StudentSidebar({ activeTab, onTabChange, badges = {}, on
               <button
                 key={tab.id}
                 type="button"
-                onClick={() => onTabChange(tab.id)}
+                onClick={() => {
+                  if (tab.path) navigate(tab.path);
+                  if (onTabChange) onTabChange(tab.id);
+                }}
                 className={`group inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-[13px] font-semibold rounded-xl transition-all duration-150 whitespace-nowrap flex-shrink-0 cursor-pointer ${isActive
                   ? 'bg-[#403f75] dark:bg-indigo-600 text-white font-bold shadow-xs'
                   : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/90 dark:hover:bg-slate-800/70'

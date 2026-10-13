@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { LogOut, Clock, BookOpen, AlertCircle, FileText, X, Video, Briefcase, ArrowRight, CheckCircle2 } from 'lucide-react';
 import ExamSearchFilter from '../components/ExamSearchFilter';
@@ -20,13 +20,62 @@ import { SOCKET_TRANSPORTS } from '../config/socket';
 const STUDENT_DASHBOARD_TABS = ['tests', 'interviews', 'job-board', 'my-applications', 'profile'];
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const getStudentTabFromLocation = useCallback(() => {
+    const path = location.pathname.replace(/\/+$/, '');
+    const params = new URLSearchParams(location.search);
+    const tabParam = params.get('tab');
+    if (tabParam && STUDENT_DASHBOARD_TABS.includes(tabParam)) return tabParam;
+
+    if (path.endsWith('/interviews')) return 'interviews';
+    if (path.endsWith('/job-board')) return 'job-board';
+    if (path.endsWith('/my-applications')) return 'my-applications';
+    if (path.endsWith('/profile')) return 'profile';
+    if (path.endsWith('/tests') || path === '/dashboard') return 'tests';
+
+    const savedTab = localStorage.getItem('studentDashboardTab');
+    return STUDENT_DASHBOARD_TABS.includes(savedTab) ? savedTab : 'tests';
+  }, [location.pathname, location.search]);
+
+  const [activeTab, setActiveTab] = useState(getStudentTabFromLocation);
+
+  useEffect(() => {
+    const currentTab = getStudentTabFromLocation();
+    setActiveTab(currentTab);
+  }, [getStudentTabFromLocation]);
+
+  const handleStudentTabChange = useCallback((tabId) => {
+    setActiveTab(tabId);
+    localStorage.setItem('studentDashboardTab', tabId);
+    const tabRouteMap = {
+      'tests': '/dashboard',
+      'interviews': '/student/interviews',
+      'job-board': '/student/job-board',
+      'my-applications': '/student/my-applications',
+      'profile': '/student/profile',
+    };
+    const targetPath = tabRouteMap[tabId];
+    if (targetPath && location.pathname !== targetPath) {
+      navigate(targetPath);
+    }
+  }, [navigate, location.pathname]);
+
+  const studentTitles = useMemo(() => ({
+    tests: "My Tests - Student Dashboard - SHNOOR Assessments",
+    interviews: "Interviews - Student Dashboard - SHNOOR Assessments",
+    'job-board': "Job Board - SHNOOR Assessments",
+    'my-applications': "My Applications - SHNOOR Assessments",
+    profile: "Student Profile - SHNOOR Assessments",
+  }), []);
+
   useSEO({
-    title: "Student Dashboard - SHNOOR Assessments",
+    title: studentTitles[activeTab] || "Student Dashboard - SHNOOR Assessments",
     description: "View and take your assigned tests",
-    canonical: "https://assessments.shnoor.com/dashboard"
+    canonical: `https://assessments.shnoor.com${location.pathname}`
   });
 
-  const navigate = useNavigate();
   const [studentName, setStudentName] = useState('');
   const [studentId, setStudentId] = useState('');
   const [institute, setInstitute] = useState('');
@@ -58,10 +107,6 @@ const Dashboard = () => {
   const [selectedTest, setSelectedTest] = useState(null);
   const [showJobModal, setShowJobModal] = useState(false);
   const [selectedJobRoleIndex, setSelectedJobRoleIndex] = useState(0);
-  const [activeTab, setActiveTab] = useState(() => {
-    const savedTab = localStorage.getItem('studentDashboardTab');
-    return STUDENT_DASHBOARD_TABS.includes(savedTab) ? savedTab : 'tests';
-  });
 
   // Search, Filter, Sort States
   const [searchTerm, setSearchTerm] = useState('');
@@ -430,7 +475,7 @@ const Dashboard = () => {
         {/* Sidebar Navigation */}
         <StudentSidebar
           activeTab={activeTab}
-          onTabChange={setActiveTab}
+          onTabChange={handleStudentTabChange}
           onExpandChange={setIsSidebarExpanded}
         />
 
@@ -743,7 +788,7 @@ const Dashboard = () => {
                 </p>
               </div>
             </div>
-            <JobBoard isEmbedded onTabChange={setActiveTab} />
+            <JobBoard isEmbedded onTabChange={handleStudentTabChange} />
           </>
         )}
 
@@ -761,7 +806,7 @@ const Dashboard = () => {
                 </p>
               </div>
             </div>
-            <MyApplications isEmbedded onBrowseJobs={() => setActiveTab('job-board')} />
+            <MyApplications isEmbedded onBrowseJobs={() => handleStudentTabChange('job-board')} />
           </>
         )}
 

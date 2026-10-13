@@ -105,7 +105,7 @@ const StudentSupportChatbot = () => {
           message: data.messagePreview,
           sender_type: 'admin',
           created_at: data.createdAt,
-          image_path: null
+          image_path: data.imagePath || null
         }];
       });
 
