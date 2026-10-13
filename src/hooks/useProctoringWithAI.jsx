@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { io } from 'socket.io-client';
 import { useAICheatingDetection } from './useAICheatingDetection';
 import { API_URL } from '../config/api';
+import { SOCKET_TRANSPORTS } from '../config/socket';
 
 const SOCKET_URL = API_URL;
 const FRAME_RATE = 2; // Reduced from 5 to lower CPU usage during active exam screens
@@ -358,7 +359,7 @@ export const useProctoringWithAI = (onCameraLost, onAIViolation, onMessageReceiv
     const studentToken = localStorage.getItem('studentAuthToken');
 
     const socket = io(SOCKET_URL, {
-      transports: ['polling', 'websocket'],
+      transports: [...SOCKET_TRANSPORTS],
       reconnection: true,
       reconnectionDelay: 2000,
       reconnectionDelayMax: 10000,
@@ -767,4 +768,3 @@ export const useProctoringWithAI = (onCameraLost, onAIViolation, onMessageReceiv
     acknowledgeMessage,
   };
 };
-

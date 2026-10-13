@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Settings, BookOpen, CreditCard, ArrowLeft } from 'lucide-react';
+import { Settings, BookOpen, CreditCard, ArrowLeft, Image } from 'lucide-react';
 import AdminLayout from '../../components/AdminLayout';
 import SystemSettingsTab from '../../components/admin/SystemSettingsTab';
 import QuestionBankTab from '../../components/admin/QuestionBankTab';
+import ClientBrandingTab from '../../components/admin/ClientBrandingTab';
 import MySubscriptionTab from './MySubscriptionTab';
 
 const AdminSettings = ({ isEmbedded = false }) => {
@@ -19,7 +20,7 @@ const AdminSettings = ({ isEmbedded = false }) => {
     React.useEffect(() => {
         const params = new URLSearchParams(location.search);
         const subtab = params.get('subtab') || (params.get('tab') !== 'settings' ? params.get('tab') : null);
-        if (subtab && ['system', 'questionbank', 'subscription'].includes(subtab)) {
+        if (subtab && ['system', 'questionbank', 'subscription', 'branding'].includes(subtab)) {
             setActiveTab(subtab);
         }
     }, [location.search]);
@@ -42,6 +43,11 @@ const AdminSettings = ({ isEmbedded = false }) => {
             label: 'My Subscription',
             icon: CreditCard,
             component: MySubscriptionTab
+        }, {
+            id: 'branding',
+            label: 'Organization Branding',
+            icon: Image,
+            component: ClientBrandingTab
         }] : [])
     ];
 
@@ -53,7 +59,11 @@ const AdminSettings = ({ isEmbedded = false }) => {
             <div className="section-header">
                 <div className="section-header-left">
                     <h2 className="section-title">Settings</h2>
-                    <p className="section-subtitle">Configure global application behaviors, question bank, and system preferences</p>
+                    <p className="section-subtitle">
+                        {isSuperAdmin
+                            ? 'Configure global application behaviors, question bank, and system preferences'
+                            : 'Manage your organization’s portal settings, logo, and subscription'}
+                    </p>
                 </div>
             </div>
 

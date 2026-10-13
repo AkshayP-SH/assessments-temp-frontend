@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, ArrowLeft, Bell, MessageSquare } from 'lucide-react';
-import shnoorLogo from '../assets/shnoor-logo.png';
+import OrganizationLogo from './OrganizationLogo';
 import ThemeSelector from './ThemeSelector';
 import { clearStorageKeepTheme } from '../utils/theme';
 
@@ -99,11 +99,7 @@ export default function StudentHeader({
           {/* Logo and Title */}
           <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
             <div className="site-header-logo w-8 h-8 sm:w-10 sm:h-10 rounded-xl overflow-hidden flex items-center justify-center flex-shrink-0 bg-white border border-[#D1D1E6] dark:border-transparent shadow-2xs">
-              <img
-                src={shnoorLogo}
-                alt="Shnoor Logo"
-                className="w-full h-full object-contain"
-              />
+              <OrganizationLogo className="w-full h-full object-contain" />
             </div>
             <div className="min-w-0 flex flex-col justify-center">
               <h1 className="admin-header-title font-extrabold text-sm sm:text-lg lg:text-xl leading-tight truncate text-slate-900 dark:text-white tracking-tight">
