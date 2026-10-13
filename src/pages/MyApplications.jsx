@@ -5,7 +5,6 @@ import { apiFetch } from '../config/api';
 import ThemeSelector from '../components/ThemeSelector';
 import StudentHeader from '../components/StudentHeader';
 import { clearStorageKeepTheme } from '../utils/theme';
-import { useQueryClient } from '@tanstack/react-query';
 import shnoorLogo from '../assets/shnoor-logo.png';
 
 const STATUS_CONFIG = {
@@ -49,7 +48,6 @@ const fmtDate = (iso) => {
 
 export default function MyApplications({ isEmbedded = false, onBrowseJobs }) {
     const navigate = useNavigate();
-    const queryClient = useQueryClient();
     const [applications, setApplications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');

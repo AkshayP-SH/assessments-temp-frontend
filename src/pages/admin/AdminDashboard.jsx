@@ -51,6 +51,7 @@ const AdminDashboard = () => {
     const path = location.pathname.replace(/\/+$/, '');
     const params = new URLSearchParams(location.search);
     const tabParam = params.get('tab');
+    if (path.endsWith('/settings')) return 'settings';
     if (tabParam) return tabParam;
 
     if (path.endsWith('/institutes')) return 'institutes';
@@ -63,7 +64,6 @@ const AdminDashboard = () => {
     if (path.endsWith('/clients')) return 'clients';
     if (path.endsWith('/subscription-plans')) return 'subscription-plans';
     if (path.endsWith('/profile')) return 'profile';
-    if (path.endsWith('/settings')) return 'settings';
     if (path.includes('/tests/create')) return 'create-test';
     if (path.includes('/results')) return 'results';
     return location.state?.activeTab || 'exams';
