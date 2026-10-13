@@ -118,7 +118,7 @@ const Register = () => {
   const [clientInfo, setClientInfo] = useState(null); // { name, company_name } if clientToken valid
   const [formData, setFormData] = useState({
     fullName: '', rollNumber: '', phone: '', address: '',
-    institute: 'Off Campus', course: '', specialization: '', resumeLink: '',
+    institute: 'Others', course: '', specialization: '', resumeLink: '',
     email: '', password: '', confirmPassword: '',
   });
   const [errors, setErrors] = useState({});

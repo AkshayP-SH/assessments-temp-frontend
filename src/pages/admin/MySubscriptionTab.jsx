@@ -68,18 +68,19 @@ const MySubscriptionTab = ({ quota: propQuota, user: propUser }) => {
 
   const renderProgressBar = (label, used, max) => {
     const safeUsed = Number.isFinite(Number(used)) ? Number(used) : 0;
+    const isUnlimited = max == null || Number(max) === -1;
     const safeMax = Number.isFinite(Number(max)) ? Number(max) : 0;
     const percentage = safeMax > 0
       ? Math.max(0, Math.min((safeUsed / safeMax) * 100, 100))
       : 0;
-    const isNearingLimit = percentage > 85;
+    const isNearingLimit = !isUnlimited && percentage > 85;
 
     return (
       <div className="mb-6 last:mb-0">
         <div className="flex justify-between text-sm mb-2">
           <span className="font-medium text-shnoor-indigoMedium">{label}</span>
           <span className="font-semibold text-shnoor-indigo">
-            {safeUsed} / {safeMax}
+            {safeUsed} / {isUnlimited ? 'Unlimited' : safeMax}
           </span>
         </div>
         <div className="w-full bg-shnoor-mist rounded-full h-2.5 overflow-hidden">

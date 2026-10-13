@@ -51,6 +51,7 @@ const AdminDashboard = () => {
     const path = location.pathname.replace(/\/+$/, '');
     const params = new URLSearchParams(location.search);
     const tabParam = params.get('tab');
+    if (path.endsWith('/settings')) return 'settings';
     if (tabParam) return tabParam;
 
     if (path.endsWith('/institutes')) return 'institutes';
@@ -63,7 +64,6 @@ const AdminDashboard = () => {
     if (path.endsWith('/clients')) return 'clients';
     if (path.endsWith('/subscription-plans')) return 'subscription-plans';
     if (path.endsWith('/profile')) return 'profile';
-    if (path.endsWith('/settings')) return 'settings';
     if (path.includes('/tests/create')) return 'create-test';
     if (path.includes('/results')) return 'results';
     return location.state?.activeTab || 'exams';
@@ -175,7 +175,7 @@ const AdminDashboard = () => {
     full_name: '',
     email: '',
     roll_number: '',
-    institute: 'Off Campus'
+    institute: 'Others'
   });
   const [isAddingStudent, setIsAddingStudent] = useState(false);
   const [expandedStudentTests, setExpandedStudentTests] = useState({});
@@ -2187,7 +2187,7 @@ const AdminDashboard = () => {
                           setTests([]);
                           setAllInstitutes([]);
                         }}
-                        className="view-as-select appearance-none !bg-transparent bg-transparent !border-0 border-0 !p-0 p-0 text-xs font-bold text-slate-800 dark:text-slate-100 focus:outline-none cursor-pointer max-w-[185px] truncate leading-tight pr-3.5 pl-0 ml-0"
+                        className="view-as-select appearance-none bg-transparent border-0 p-0 text-xs font-bold text-slate-800 dark:text-slate-100 focus:outline-none cursor-pointer max-w-[185px] truncate leading-tight pr-3.5 pl-0 ml-0"
                       >
                         <option value="" className="text-slate-800 bg-white dark:bg-[#1E1E38] dark:text-white font-medium">
                           All Clients (Platform View)
@@ -2228,12 +2228,16 @@ const AdminDashboard = () => {
           <div className="bg-white border-b border-shnoor-mist">
             <div className="w-full px-4 sm:px-6 lg:pr-6 lg:pl-[88px] py-2 flex flex-wrap items-center gap-4">
               {[
-                { label: 'Tests', used: quota.limits?.tests?.used, max: quota.limits?.tests?.max },
-                { label: 'Institutes', used: quota.limits?.institutes?.used, max: quota.limits?.institutes?.max },
-                { label: 'Students', used: quota.limits?.students?.used, max: quota.limits?.students?.max },
+                { label: 'Tests', used: quota.tests?.used, max: quota.tests?.max },
+                { label: 'Institutes', used: quota.institutes?.used, max: quota.institutes?.max },
+                { label: 'Students', used: quota.students?.used, max: quota.students?.max },
               ].map(({ label, used, max }) => {
-                if (max == null || max <= 0) return null;
-                const pct = Math.min(100, Math.round((used / max) * 100));
+                const isUnlimited = max == null || Number(max) === -1;
+                const numericMax = Number(max);
+                const numericUsed = Number(used) || 0;
+                const pct = isUnlimited || numericMax === 0
+                  ? 0
+                  : Math.min(100, Math.round((numericUsed / numericMax) * 100));
                 const warn = pct >= 90;
                 return (
                   <div key={label} className="flex items-center gap-2 min-w-[140px]">
@@ -2242,7 +2246,7 @@ const AdminDashboard = () => {
                       <div className={`h-full rounded-full transition-all ${warn ? 'bg-shnoor-danger' : 'bg-shnoor-indigo'}`} style={{ width: `${pct}%` }} />
                     </div>
                     <span className={`text-xs font-medium flex-shrink-0 ${warn ? 'text-shnoor-danger' : 'text-shnoor-indigoMedium'}`}>
-                      {used}/{max}
+                      {numericUsed}/{isUnlimited ? 'Unlimited' : max}
                     </span>
                   </div>
                 );
@@ -2775,7 +2779,7 @@ const AdminDashboard = () => {
                     full_name: '',
                     email: '',
                     roll_number: '',
-                    institute: 'Off Campus'
+                    institute: 'Others'
                   });
                 }}
               />

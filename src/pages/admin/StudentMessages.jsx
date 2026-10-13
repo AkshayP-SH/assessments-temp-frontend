@@ -182,9 +182,9 @@ const StudentMessages = ({ isEmbedded = false }) => {
       .finally(() => markingReadRef.current.delete(studentId));
   }, [messages, selectedMessage, markStudentRead]);
 
-  const fetchMessages = useCallback(async () => {
+  const fetchMessages = useCallback(async ({ silent = false } = {}) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       const token = localStorage.getItem('adminToken');
       let url = `${API_URL}/api/student-messages?page=${pagination.page}&limit=${pagination.limit}`;
       if (filter !== 'all') url += `&status=${filter}`;
@@ -204,13 +204,13 @@ const StudentMessages = ({ isEmbedded = false }) => {
     } catch (err) {
       setError(err.message);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [filter, selectedCollege, pagination.page, pagination.limit, dedupeById, buildUniqueThreads]);
 
-  const fetchConversationThread = useCallback(async (messageId) => {
+  const fetchConversationThread = useCallback(async (messageId, { silent = false } = {}) => {
     try {
-      setLoadingThread(true);
+      if (!silent) setLoadingThread(true);
       const token = localStorage.getItem('adminToken');
       const response = await fetch(`${API_URL}/api/student-messages/${messageId}/thread`, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -220,9 +220,35 @@ const StudentMessages = ({ isEmbedded = false }) => {
     } catch (err) {
       console.error('Error fetching thread:', err);
     } finally {
-      setLoadingThread(false);
+      if (!silent) setLoadingThread(false);
     }
   }, [dedupeById]);
+
+  useEffect(() => {
+    let refreshInProgress = false;
+    const refreshMessages = async () => {
+      if (document.visibilityState !== 'visible' || refreshInProgress) return;
+      refreshInProgress = true;
+      try {
+        await fetchMessages({ silent: true });
+        const openConversation = selectedMessageRef.current;
+        if (openConversation) {
+          await fetchConversationThread(openConversation.id, { silent: true });
+        }
+      } finally {
+        refreshInProgress = false;
+      }
+    };
+
+    const intervalId = window.setInterval(refreshMessages, 30_000);
+    window.addEventListener('focus', refreshMessages);
+    document.addEventListener('visibilitychange', refreshMessages);
+    return () => {
+      window.clearInterval(intervalId);
+      window.removeEventListener('focus', refreshMessages);
+      document.removeEventListener('visibilitychange', refreshMessages);
+    };
+  }, [fetchMessages, fetchConversationThread]);
 
   useEffect(() => {
     const token = localStorage.getItem('adminToken');

@@ -124,6 +124,10 @@ const Login = () => {
     if (location.state?.message) {
       setSuccessMessage(location.state.message);
       window.history.replaceState({}, document.title);
+      const timer = setTimeout(() => {
+        setSuccessMessage('');
+      }, 3000);
+      return () => clearTimeout(timer);
     }
   }, [location]);
 
@@ -291,6 +295,24 @@ const Login = () => {
 
   return (
     <main className="h-screen w-full flex flex-col lg:flex-row font-['Plus_Jakarta_Sans',sans-serif] relative overflow-hidden bg-theme-page">
+      {/* 3-second floating popup alert (doesn't stick to the form) */}
+      {successMessage && (
+        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2.5 bg-emerald-600 text-white px-5 py-3 rounded-2xl shadow-xl shadow-emerald-900/20 text-xs sm:text-sm font-semibold animate-entry-3d border border-emerald-400/40 backdrop-blur-md max-w-[90vw] text-center">
+          <svg className="w-4 h-4 flex-shrink-0 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+          <span>{successMessage}</span>
+          <button
+            type="button"
+            onClick={() => setSuccessMessage('')}
+            className="ml-2 text-white/80 hover:text-white cursor-pointer text-xs"
+            aria-label="Dismiss notification"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       <div className="absolute right-4 top-4 z-20 sm:right-6 sm:top-6 lg:right-8 lg:top-8">
         <ThemeSelector variant="light" />
       </div>
@@ -350,12 +372,12 @@ const Login = () => {
       </div>
 
       {/* ── RIGHT PANEL ─────────────────────────────────────────────────── */}
-      <div className="auth-right-panel flex-1 flex items-center justify-center bg-theme-card px-6 sm:px-10 py-10 h-full overflow-y-auto relative">
+      <div className="auth-right-panel flex-1 flex flex-col items-center justify-start bg-theme-card px-6 sm:px-10 pt-20 pb-12 sm:pt-24 sm:pb-16 h-full overflow-y-auto relative">
         {/* Soft Ambient Background Orbs */}
         <div className="auth-glow-orb auth-glow-orb-primary w-80 h-80 -top-24 -right-24 pointer-events-none opacity-20" />
         <div className="auth-glow-orb auth-glow-orb-secondary w-72 h-72 bottom-12 -left-20 pointer-events-none opacity-15" />
 
-        <div className="w-full max-w-[440px] relative z-10 animate-entry-3d perspective-1000">
+        <div className="w-full max-w-[440px] relative z-10 animate-entry-3d perspective-1000 my-auto">
           {/* Mobile brand */}
           <div className="flex items-center justify-center gap-3 mb-8 lg:hidden">
             <div className="site-header-logo flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white shadow-xs p-1 flex-shrink-0 card-3d-lift shimmer-hover hover:scale-105 transition-transform">
@@ -390,15 +412,6 @@ const Login = () => {
           </div>
 
           {/* Alerts */}
-          {successMessage && (
-            <div className="mb-5 flex items-start gap-3 bg-shnoor-successLight border border-shnoor-success/30 text-shnoor-navy rounded-xl px-4 py-3 text-sm modal-3d-entrance shadow-xs">
-              <svg className="w-4 h-4 mt-0.5 flex-shrink-0 text-shnoor-success animate-pulse-subtle" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zm3.97 4.97a.75.75 0 0 0-1.08-.022L6.477 9.417 4.384 7.323a.75.75 0 0 0-1.06 1.06l2.75 2.75a.75.75 0 0 0 1.137-.089l4-5.5a.75.75 0 0 0-.24-1.573z" />
-              </svg>
-              <span>{successMessage}</span>
-            </div>
-          )}
-
           {apiError && (
             <div className="mb-5 flex items-start gap-3 bg-shnoor-dangerLight border border-shnoor-danger/30 text-shnoor-danger rounded-xl px-4 py-3 text-sm modal-3d-entrance shadow-xs">
               <svg className="w-4 h-4 mt-0.5 flex-shrink-0 animate-pulse-subtle" fill="currentColor" viewBox="0 0 16 16">

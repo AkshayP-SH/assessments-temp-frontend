@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { io } from 'socket.io-client';
 import { API_URL } from '../config/api';
+import { SOCKET_TRANSPORTS } from '../config/socket';
 
 const SOCKET_URL = API_URL;
 
@@ -166,16 +167,13 @@ export const useSupportSocket = ({
 
     // Create socket connection with error handling
     let socket;
-    let connectionAttempts = 0;
-    const MAX_ATTEMPTS = 3;
 
     try {
       const adminToken = isAdmin ? localStorage.getItem('adminToken') : null;
 
       socket = io(SOCKET_URL, {
-        transports: ['polling', 'websocket'],
+        transports: [...SOCKET_TRANSPORTS],
         reconnection: true,
-        reconnectionAttempts: MAX_ATTEMPTS,
         reconnectionDelay: 2000,
         timeout: 10000,
         autoConnect: true,
@@ -186,7 +184,6 @@ export const useSupportSocket = ({
 
       socket.on('connect', () => {
         setIsConnected(true);
-        connectionAttempts = 0; // Reset on successful connection
 
         // Join appropriate room based on user type
         if (isAdmin) {
@@ -201,21 +198,10 @@ export const useSupportSocket = ({
       });
 
       socket.on('connect_error', (error) => {
-        connectionAttempts++;
-        console.warn(`[SupportSocket] Connection error (${connectionAttempts}/${MAX_ATTEMPTS}):`, error.message);
+        console.warn('[SupportSocket] Connection error:', error.message);
         setIsConnected(false);
-        
-        // Stop trying after max attempts
-        if (connectionAttempts >= MAX_ATTEMPTS) {
-          console.warn('[SupportSocket] Max connection attempts reached, stopping reconnection');
-          socket.disconnect();
-        }
       });
 
-      socket.on('reconnect_failed', () => {
-        console.warn('[SupportSocket] Reconnection failed after max attempts');
-        setIsConnected(false);
-      });
     } catch (error) {
       console.error('[SupportSocket] Failed to initialize socket:', error);
     }
@@ -281,7 +267,6 @@ export const useSupportSocket = ({
         socket.off('connect');
         socket.off('disconnect');
         socket.off('connect_error');
-        socket.off('reconnect_failed');
         socket.off('support:new-student-message');
         socket.off('support:unread-count-update');
         socket.off('support:new-admin-reply');
@@ -315,4 +300,3 @@ export const useSupportSocket = ({
 };
 
 export default useSupportSocket;
-

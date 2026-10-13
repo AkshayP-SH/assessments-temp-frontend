@@ -1,14 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import shnoorLogo from '../assets/shnoor-logo.webp';
 import linkedinIcon from '../assets/linkedin.png';
 import whatsappIcon from '../assets/whatsapp.png';
 import ThemeSelector from '../components/ThemeSelector';
 import { useSEO } from '../hooks/useSEO';
-import { getApiUrl } from '../config/api';
+import { getApiUrl, apiFetch } from '../config/api';
 import { usePrefetch } from '../hooks/usePrefetch';
 import { useJsonLd } from '../hooks/useJsonLd';
-import { Mail, Phone, FileText } from 'lucide-react';
+import { Mail, Phone, FileText, LogIn, ChevronDown, ChevronRight, Briefcase, MapPin, Clock, ArrowRight, ArrowLeft, CheckCircle2, Calendar, Building2, Loader2, RefreshCw } from 'lucide-react';
 
 
 /* ─── SVG Icon helper ─────────────────────────────────────────────────────── */
@@ -89,20 +89,24 @@ const DEFAULT_PLANS = [
   },
 ];
 
-const MOCK_JOBS = [
-  { id: 1, title: 'Data Analytics', company: 'TechCorp', location: 'Remote', type: 'Full-time' },
-  { id: 2, title: 'React Developer', company: 'WebSolutions', location: 'New York, NY', type: 'Contract' },
-  { id: 3, title: 'Backend Developer', company: 'DataSystems', location: 'San Francisco, CA', type: 'Full-time' },
-  { id: 4, title: 'Data Scientist', company: 'AI Innovations', location: 'Remote', type: 'Full-time' },
-  { id: 5, title: 'DevOps Engineer', company: 'CloudNet', location: 'Remote', type: 'Full-time' },
-  { id: 6, title: 'Security Analyst', company: 'CyberSec Systems', location: 'Austin, TX', type: 'Contract' },
-  { id: 7, title: 'iOS Developer', company: 'MobileFirst', location: 'London, UK', type: 'Full-time' },
-  { id: 8, title: 'Java Developer', company: 'FinTech Solutions', location: 'New York, NY', type: 'Full-time' },
-  { id: 9, title: 'UI/UX Designer', company: 'UX Studios', location: 'Berlin, DE', type: 'Contract' },
-  { id: 10, title: 'Machine Learning Engineer', company: 'NextGen AI', location: 'Remote', type: 'Full-time' },
-  { id: 11, title: 'Unity Developer', company: 'GameDev Corp', location: 'Tokyo, JP', type: 'Full-time' },
-  { id: 12, title: 'Research Scientist', company: 'Quantum Computing', location: 'Boston, MA', type: 'Full-time' }
-];
+const fmtDeadline = (iso) =>
+  iso
+    ? new Date(iso).toLocaleString('en-IN', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    : 'No deadline specified';
+
+const isRegistrationClosed = (iso) => {
+  if (!iso) return false;
+  return new Date(iso) < new Date();
+};
+
+
 
 /* ─── Main Component ──────────────────────────────────────────────────────── */
 const LandingPage = () => {
@@ -149,7 +153,85 @@ const LandingPage = () => {
   const [scrolled, setScrolled] = useState(false);
   const [showJobs, setShowJobs] = useState(false);
   const [showAllJobs, setShowAllJobs] = useState(false);
+  const [selectedJob, setSelectedJob] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [jobs, setJobs] = useState([]);
+  const [jobsLoading, setJobsLoading] = useState(false);
+  const [jobsError, setJobsError] = useState(null);
   const navRef = useRef(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    setIsLoggedIn(!!localStorage.getItem('studentAuthToken'));
+  }, []);
+
+  const fetchDynamicJobs = useCallback(async () => {
+    setJobsLoading(true);
+    setJobsError(null);
+    try {
+      let realJobs = [];
+      try {
+        let res = await apiFetch('/api/job-openings/public/all');
+        if (res.status === 404) {
+          res = await apiFetch('/api/job-openings/public/active');
+        }
+        const data = await res.json();
+        if (res.ok && data.success && Array.isArray(data.data)) {
+          realJobs = data.data;
+        }
+      } catch (apiErr) {
+        console.warn('Backend job openings fetch skipped:', apiErr);
+      }
+
+      setJobs(realJobs);
+    } catch (err) {
+      console.error('Failed to load published jobs:', err);
+      setJobsError('Could not load current job openings. Please check your network and try again.');
+    } finally {
+      setJobsLoading(false);
+    }
+  }, []);
+
+  // Fetch published jobs on mount and when modal opens
+  useEffect(() => {
+    fetchDynamicJobs();
+  }, [fetchDynamicJobs]);
+
+  const handleOpenJobsModal = () => {
+    setShowJobs(true);
+    setSelectedJob(null);
+    fetchDynamicJobs();
+  };
+
+  const handleApplyClick = (job) => {
+    if (isLoggedIn) {
+      navigate('/job-board');
+    } else {
+      const isClientJob = job?.is_client_job || (Boolean(job?.client_registration_token) && !job?.admin_id && job?.client_id && job?.client_id !== 1);
+      const clientToken = job?.client_registration_token;
+
+      if (isClientJob && clientToken) {
+        // Job posted by client -> open client student registration page
+        navigate(`/register?clientToken=${encodeURIComponent(clientToken)}`, {
+          state: {
+            returnUrl: '/job-board',
+            selectedJobId: job?.id,
+            clientToken: clientToken,
+            message: `Please complete registration with ${job?.client_name || job?.company_name || 'the organization'} to apply for ${job?.job_role || 'this position'}.`
+          }
+        });
+      } else {
+        // Job assigned/posted by admin -> open sign-in page as before
+        navigate('/login', {
+          state: {
+            returnUrl: '/job-board',
+            selectedJobId: job?.id,
+            message: `Please sign in to apply for ${job?.job_role || 'this position'} at ${job?.company_name || 'the company'}`
+          }
+        });
+      }
+    }
+  };
 
   // Fetch live pricing plans during idle time
   useEffect(() => {
@@ -404,60 +486,303 @@ const LandingPage = () => {
           <p className="text-base sm:text-lg text-theme-muted max-w-2xl mx-auto leading-relaxed font-normal mb-8">
             Browse active recruitment drives and open positions from top organizations using SHNOOR Assessments. Apply, take proctored technical tests, and showcase your true potential directly through our platform.
           </p>
-          <button
-            onClick={() => setShowJobs(true)}
+          <button 
+            onClick={handleOpenJobsModal}
             className="group inline-flex items-center gap-2 bg-theme-accent hover:bg-theme-accent2 text-white text-sm font-bold px-8 py-4 rounded-xl shadow-lg shadow-theme-accent/20 transition-all cursor-pointer">
             Browse Job Board
             <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
           </button>
 
           {showJobs && (
-            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fadeIn text-left" onClick={() => setShowJobs(false)}>
+            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fadeIn text-left" onClick={() => { setShowJobs(false); setSelectedJob(null); }}>
               <div className="bg-theme-card border border-theme-border rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl relative" onClick={e => e.stopPropagation()}>
                 {/* Modal Header */}
                 <div className="sticky top-0 bg-theme-card/95 backdrop-blur z-10 px-6 py-5 border-b border-theme-border flex justify-between items-center">
-                  <div>
-                    <h2 className="text-2xl font-bold text-theme-text">Featured Opportunities</h2>
-                    <p className="text-theme-muted text-sm mt-1">Top picks for you</p>
+                  {selectedJob ? (
+                    <button
+                      onClick={() => setSelectedJob(null)}
+                      className="inline-flex items-center gap-2 text-sm font-bold text-theme-accent hover:text-theme-accent2 transition-colors cursor-pointer group px-3 py-1.5 rounded-lg hover:bg-theme-panel"
+                    >
+                      <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                      <span>Back to all jobs</span>
+                    </button>
+                  ) : (
+                    <div>
+                      <h2 className="text-2xl font-bold text-theme-text">Active Job Openings</h2>
+                      <p className="text-theme-muted text-sm mt-1">
+                        {jobsLoading 
+                          ? 'Fetching latest opportunities...' 
+                          : `${jobs.length} opening${jobs.length !== 1 ? 's' : ''} posted by organizations`}
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-2">
+                    {!selectedJob && (
+                      <button
+                        onClick={fetchDynamicJobs}
+                        disabled={jobsLoading}
+                        title="Refresh job openings"
+                        className="w-10 h-10 bg-theme-panel hover:bg-theme-border text-theme-muted hover:text-theme-text rounded-full flex items-center justify-center transition-colors cursor-pointer disabled:opacity-50"
+                      >
+                        <RefreshCw className={`w-4 h-4 ${jobsLoading ? 'animate-spin' : ''}`} />
+                      </button>
+                    )}
+                    <button 
+                      onClick={() => { setShowJobs(false); setSelectedJob(null); }} 
+                      className="w-10 h-10 bg-theme-panel hover:bg-theme-border text-theme-muted hover:text-theme-text rounded-full flex items-center justify-center transition-colors cursor-pointer"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
                   </div>
-                  <button onClick={() => setShowJobs(false)} className="w-10 h-10 bg-theme-panel hover:bg-theme-border text-theme-muted hover:text-theme-text rounded-full flex items-center justify-center transition-colors cursor-pointer">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                  </button>
                 </div>
 
                 {/* Modal Body */}
-                <div className="p-6 grid gap-4">
-                  {(showAllJobs ? MOCK_JOBS : MOCK_JOBS.slice(0, 4)).map(job => (
-                    <Link to="/job-board" key={job.id} className="bg-theme-panel/50 border border-theme-border rounded-xl p-5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-theme-accent/50 hover:bg-theme-panel transition-all cursor-pointer group">
-                      <div>
-                        <h3 className="text-lg font-bold text-theme-text mb-1 group-hover:text-theme-accent transition-colors">{job.title}</h3>
-                        <div className="flex flex-wrap items-center gap-3 text-sm text-theme-muted">
-                          <span className="font-semibold text-theme-accent">{job.company}</span>
-                          <span>•</span>
-                          <span>{job.location}</span>
-                          <span>•</span>
-                          <span>{job.type}</span>
-                        </div>
-                      </div>
-                      <div className="shrink-0 text-theme-muted opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
+                <div className="p-6">
+                  {selectedJob ? (
+                    /* Dedicated Single Job Detail Card (Matches Student Dashboard UI) */
+                    (() => {
+                      const isClosed = isRegistrationClosed(selectedJob.registration_deadline);
+                      return (
+                        <div className="bg-theme-panel/40 border border-theme-border rounded-2xl p-6 sm:p-8 animate-fadeIn shadow-sm">
+                          {/* Card Header */}
+                          <div className="mb-6">
+                            <h2 className="text-2xl sm:text-3xl font-extrabold text-theme-text mb-2">
+                              {selectedJob.job_role}
+                            </h2>
+                            <p className="text-base sm:text-lg font-semibold text-theme-accent mb-3">
+                              {selectedJob.company_name}
+                            </p>
+                            <div className="flex flex-wrap items-center gap-3 text-xs">
+                              {isClosed ? (
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-bold bg-rose-500/10 text-rose-500 border border-rose-500/20">
+                                  <Clock className="w-3.5 h-3.5" /> Registration Closed
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> Registration Open
+                                </span>
+                              )}
+                              {selectedJob.registration_deadline && (
+                                <span className="text-theme-muted font-medium">
+                                  Deadline: {fmtDeadline(selectedJob.registration_deadline)}
+                                </span>
+                              )}
+                            </div>
+                          </div>
 
-                {/* Modal Footer */}
-                <div className="p-6 border-t border-theme-border bg-theme-panel/30 text-center">
-                  {!showAllJobs ? (
-                    <button onClick={() => setShowAllJobs(true)} className="inline-flex items-center justify-center bg-theme-accent hover:bg-theme-accent2 text-white font-bold text-sm px-6 py-3 rounded-xl transition-colors shadow-sm cursor-pointer">
-                      View more positions ↓
-                    </button>
+                          <div className="border-t border-theme-border/60 my-6" />
+
+                          {/* Job details Section */}
+                          <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white mb-4">Job details</h3>
+                          <div className="space-y-4 mb-8">
+                            <div className="flex items-start gap-3 text-slate-700 dark:text-slate-300 text-sm">
+                              <Briefcase size={18} className="mt-0.5 text-slate-400 shrink-0" />
+                              <div>
+                                <p className="font-medium text-slate-900 dark:text-white">Job type</p>
+                                <p>{selectedJob.job_type || 'Full-time'}, {selectedJob.location || 'Remote'}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-start gap-3 text-slate-700 dark:text-slate-300 text-sm">
+                              <Clock size={18} className="mt-0.5 text-slate-400 shrink-0" />
+                              <div>
+                                <p className="font-medium text-slate-900 dark:text-white">Registration Deadline</p>
+                                <p>{fmtDeadline(selectedJob.registration_deadline)}</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Full job description Section */}
+                          <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white mb-4">Full job description</h3>
+                          <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-line mb-8">
+                            {selectedJob.job_description || 'No description provided.'}
+                          </p>
+
+                          {/* Eligibility Criteria Section */}
+                          {selectedJob.eligibility_criteria && (
+                            <>
+                              <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white mb-4">Eligibility Criteria</h3>
+                              <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-line mb-8">
+                                {selectedJob.eligibility_criteria}
+                              </p>
+                            </>
+                          )}
+
+                          {/* Card Footer: Sign In to Apply Button */}
+                          <div className="pt-6 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div className="text-xs text-slate-500 dark:text-slate-400">
+                              {isClosed ? (
+                                <span className="text-rose-500 font-semibold flex items-center gap-1.5">
+                                  <Clock className="w-3.5 h-3.5" /> Registration has closed for this position.
+                                </span>
+                              ) : isLoggedIn ? (
+                                <span className="text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1.5">
+                                  <CheckCircle2 className="w-3.5 h-3.5" /> Logged in — ready to enroll.
+                                </span>
+                              ) : (selectedJob?.is_client_job && selectedJob?.client_registration_token) ? (
+                                <div>
+                                  <span>
+                                    {selectedJob.client_name
+                                      ? `Register with ${selectedJob.client_name} student portal to apply and take the assessment.`
+                                      : 'Register with client student portal to apply and take the assessment.'}
+                                  </span>
+                                  <div className="mt-1">
+                                    <span className="text-slate-400">Already registered? </span>
+                                    <button
+                                      type="button"
+                                      onClick={() => navigate('/login', {
+                                        state: {
+                                          returnUrl: '/job-board',
+                                          selectedJobId: selectedJob.id,
+                                          message: `Please sign in to apply for ${selectedJob.job_role || 'this position'}.`
+                                        }
+                                      })}
+                                      className="text-theme-accent hover:underline font-bold cursor-pointer inline-flex items-center gap-1"
+                                    >
+                                      Sign in to account
+                                    </button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <span>Sign in with your student account to apply and take the assessment.</span>
+                              )}
+                            </div>
+
+                            <div className="flex items-center justify-end">
+                              <button
+                                type="button"
+                                disabled={isClosed}
+                                onClick={() => handleApplyClick(selectedJob)}
+                                className="inline-flex items-center justify-center gap-2 bg-theme-accent hover:bg-theme-accent2 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs sm:text-sm font-bold px-6 py-2.5 rounded-xl shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer whitespace-nowrap"
+                              >
+                                <LogIn className="w-4 h-4" />
+                                <span>{isClosed ? 'Registration Closed' : isLoggedIn ? 'Apply Now' : 'Sign in to Apply'}</span>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()
                   ) : (
-                    <button onClick={() => setShowAllJobs(false)} className="inline-flex items-center justify-center bg-theme-panel hover:bg-theme-border text-theme-text border border-theme-border font-bold text-sm px-6 py-3 rounded-xl transition-colors shadow-sm cursor-pointer">
-                      View less positions ↑
-                    </button>
+                    /* Job Openings List View */
+                    <>
+                      {jobsLoading && (
+                        <div className="py-16 text-center">
+                          <Loader2 className="w-8 h-8 animate-spin mx-auto text-theme-accent mb-3" />
+                          <p className="text-sm font-semibold text-theme-muted">Loading active job openings from admin portal...</p>
+                        </div>
+                      )}
+
+                      {!jobsLoading && jobsError && (
+                        <div className="bg-rose-500/10 border border-rose-500/20 rounded-xl p-6 text-center">
+                          <p className="text-sm font-semibold text-rose-500 mb-3">{jobsError}</p>
+                          <button
+                            onClick={fetchDynamicJobs}
+                            className="inline-flex items-center gap-1.5 px-4 py-2 bg-theme-panel hover:bg-theme-border text-theme-text rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                          >
+                            <RefreshCw className="w-3.5 h-3.5" /> Try Again
+                          </button>
+                        </div>
+                      )}
+
+                      {!jobsLoading && !jobsError && jobs.length === 0 && (
+                        <div className="bg-theme-panel/40 border border-theme-border rounded-xl p-12 text-center">
+                          <Briefcase className="mx-auto h-12 w-12 text-theme-muted mb-3 opacity-60" />
+                          <h3 className="text-lg font-bold text-theme-text mb-1">No Active Job Openings</h3>
+                          <p className="text-sm text-theme-muted max-w-md mx-auto">
+                            Check back soon — new job drives and opportunities are posted regularly by administrators and partner companies.
+                          </p>
+                        </div>
+                      )}
+
+                      {!jobsLoading && !jobsError && jobs.length > 0 && (
+                        <div className="grid gap-4">
+                          {(showAllJobs ? jobs : jobs.slice(0, 4)).map(job => {
+                            const isClosed = isRegistrationClosed(job.registration_deadline);
+                            return (
+                              <div
+                                key={job.id}
+                                onClick={() => setSelectedJob(job)}
+                                role="button"
+                                tabIndex={0}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    setSelectedJob(job);
+                                  }
+                                }}
+                                className="p-5 bg-theme-panel/50 hover:bg-theme-panel border border-theme-border hover:border-theme-accent/50 rounded-xl transition-all duration-200 cursor-pointer select-none group flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                              >
+                                <div className="min-w-0 flex-1">
+                                  <h3 className="text-lg font-bold text-theme-text group-hover:text-theme-accent transition-colors mb-1">
+                                    {job.job_role}
+                                  </h3>
+                                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-sm text-theme-muted">
+                                    <span className="font-semibold text-theme-accent">{job.company_name}</span>
+                                    {job.location && (
+                                      <>
+                                        <span>•</span>
+                                        <span>{job.location}</span>
+                                      </>
+                                    )}
+                                    {job.job_type && (
+                                      <>
+                                        <span>•</span>
+                                        <span>{job.job_type}</span>
+                                      </>
+                                    )}
+                                  </div>
+                                  <div className="mt-2.5 flex flex-wrap items-center gap-3 text-xs">
+                                    {isClosed ? (
+                                      <span className="inline-flex items-center gap-1 font-bold text-rose-500">
+                                        <Clock className="w-3.5 h-3.5" /> Registration Closed
+                                      </span>
+                                    ) : (
+                                      <span className="inline-flex items-center gap-1.5 font-bold text-emerald-500">
+                                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> Registration Open
+                                      </span>
+                                    )}
+                                    {job.registration_deadline && (
+                                      <span className="text-theme-muted">
+                                        Deadline: {fmtDeadline(job.registration_deadline)}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
+                                  <span className="text-xs font-semibold text-theme-accent hidden sm:inline-block">
+                                    View Details
+                                  </span>
+                                  <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-theme-card border border-theme-border/60 text-theme-muted group-hover:text-theme-accent group-hover:border-theme-accent/40 transition-colors">
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
+                
+                {/* Modal Footer (Only shown in list view when > 4 jobs) */}
+                {!selectedJob && jobs.length > 4 && (
+                  <div className="p-6 border-t border-theme-border bg-theme-panel/30 text-center">
+                    {!showAllJobs ? (
+                      <button onClick={() => setShowAllJobs(true)} className="inline-flex items-center justify-center bg-theme-accent hover:bg-theme-accent2 text-white font-bold text-sm px-6 py-3 rounded-xl transition-colors shadow-sm cursor-pointer">
+                        View more positions ({jobs.length - 4} more) ↓
+                      </button>
+                    ) : (
+                      <button onClick={() => setShowAllJobs(false)} className="inline-flex items-center justify-center bg-theme-panel hover:bg-theme-border text-theme-text border border-theme-border font-bold text-sm px-6 py-3 rounded-xl transition-colors shadow-sm cursor-pointer">
+                        View less positions ↑
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           )}

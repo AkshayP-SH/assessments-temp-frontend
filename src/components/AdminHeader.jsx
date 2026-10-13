@@ -4,10 +4,10 @@ import { Video, LogOut, Settings, MessageSquare, X, Menu, Building2, Bell, Brief
 import Button from './Button';
 import { useSupportSocket } from '../hooks/useSupportSocket';
 import { API_URL } from '../config/api';
-import shnoorLogo from '../assets/shnoor-logo.png';
+import OrganizationLogo from './OrganizationLogo';
 import ThemeSelector from './ThemeSelector';
 
-const AdminHeader = ({ viewAsControl, title }) => {
+const AdminHeader = ({ viewAsControl, title: _title }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [unreadCount, setUnreadCount] = useState(0);
@@ -239,11 +239,7 @@ const AdminHeader = ({ viewAsControl, title }) => {
             {/* Left: Brand Logo & Title + Tenant Scope Switcher */}
             <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
               <div className="site-header-logo w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center flex-shrink-0 bg-white border border-[#D1D1E6] dark:border-transparent shadow-2xs">
-                <img
-                  src={shnoorLogo}
-                  alt="Shnoor Logo"
-                  className="w-full h-full object-contain"
-                />
+                <OrganizationLogo className="w-full h-full object-contain" />
               </div>
               <div className="flex-shrink-0">
                 <h1 className="admin-header-title font-extrabold text-base sm:text-lg lg:text-xl leading-tight whitespace-nowrap text-slate-900 dark:text-white tracking-tight">

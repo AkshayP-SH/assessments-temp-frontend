@@ -16,6 +16,7 @@ import { apiFetch } from '../config/api';
 import { useSEO } from '../hooks/useSEO';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { io } from 'socket.io-client';
+import { SOCKET_TRANSPORTS } from '../config/socket';
 const STUDENT_DASHBOARD_TABS = ['tests', 'interviews', 'job-board', 'my-applications', 'profile'];
 
 const Dashboard = () => {
@@ -92,7 +93,7 @@ const Dashboard = () => {
 
     const socketUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? window.location.origin : 'http://localhost:5000');
     const socket = io(socketUrl, {
-      transports: ['polling', 'websocket'],
+      transports: [...SOCKET_TRANSPORTS],
     });
 
     socket.on('connect', () => {
@@ -864,4 +865,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-

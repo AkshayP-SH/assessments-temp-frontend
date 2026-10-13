@@ -4,6 +4,7 @@ import './App.css';
 import ErrorBoundary from './components/ErrorBoundary';
 import { AdminAuthProvider } from './contexts/AdminAuthContext';
 import { ClientAuthProvider } from './contexts/ClientAuthContext';
+import { TenantBrandingProvider } from './contexts/TenantBrandingProvider';
 import AdminProtectedRoute from './components/AdminProtectedRoute';
 import ClientProtectedRoute from './components/ClientProtectedRoute';
 import GlobalThemeSelector from './components/GlobalThemeSelector';
@@ -190,8 +191,10 @@ function App() {
         <AdminAuthProvider>
           <ClientAuthProvider>
             <Router>
-              {/* Per-route Suspense boundaries are defined inside AppRoutes */}
-              <AppRoutes />
+              <TenantBrandingProvider>
+                {/* Per-route Suspense boundaries are defined inside AppRoutes */}
+                <AppRoutes />
+              </TenantBrandingProvider>
             </Router>
           </ClientAuthProvider>
         </AdminAuthProvider>

@@ -5,7 +5,6 @@ import { apiFetch } from '../config/api';
 import ThemeSelector from '../components/ThemeSelector';
 import StudentHeader from '../components/StudentHeader';
 import { clearStorageKeepTheme } from '../utils/theme';
-import { useQueryClient } from '@tanstack/react-query';
 import shnoorLogo from '../assets/shnoor-logo.png';
 
 const STATUS_CONFIG = {
@@ -49,7 +48,6 @@ const fmtDate = (iso) => {
 
 export default function MyApplications({ isEmbedded = false, onBrowseJobs }) {
     const navigate = useNavigate();
-    const queryClient = useQueryClient();
     const [applications, setApplications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -114,46 +112,7 @@ export default function MyApplications({ isEmbedded = false, onBrowseJobs }) {
                 setError(data.message || 'Failed to load applications');
             }
 
-            // Inject mock jobs from local storage
-            try {
-                const mockJobsMetadata = {
-                    'mock-1': { company_name: 'TechCorp', job_role: 'Data Analytics' },
-                    'mock-2': { company_name: 'WebSolutions', job_role: 'React Developer' },
-                    'mock-3': { company_name: 'DataSystems', job_role: 'Backend Developer' },
-                    'mock-4': { company_name: 'AI Innovations', job_role: 'Data Scientist' },
-                    'mock-5': { company_name: 'CloudNet', job_role: 'DevOps Engineer' },
-                    'mock-6': { company_name: 'CyberSec Systems', job_role: 'Security Analyst' },
-                    'mock-7': { company_name: 'MobileFirst', job_role: 'iOS Developer' },
-                    'mock-8': { company_name: 'FinTech Solutions', job_role: 'Java Developer' },
-                    'mock-9': { company_name: 'UX Studios', job_role: 'UI/UX Designer' },
-                    'mock-10': { company_name: 'NextGen AI', job_role: 'Machine Learning Engineer' },
-                    'mock-11': { company_name: 'GameDev Corp', job_role: 'Unity Developer' },
-                    'mock-12': { company_name: 'Quantum Computing', job_role: 'Research Scientist' }
-                };
-                
-                const savedData = JSON.parse(localStorage.getItem('student_job_applications') || '{}');
-                Object.keys(savedData).forEach(jobId => {
-                    if (mockJobsMetadata[jobId]) {
-                        // Avoid duplicates if it's somehow already in allApps
-                        if (!allApps.find(a => a.job_opening_id === jobId)) {
-                            allApps.push({
-                                id: `mock-app-${jobId}`,
-                                job_opening_id: jobId,
-                                status: 'submitted',
-                                applied_at: new Date().toISOString(), // Mock time
-                                total_tests: 0,
-                                completed_tests: 0,
-                                jobOpening: {
-                                    id: jobId,
-                                    job_role: mockJobsMetadata[jobId].job_role,
-                                    company_name: mockJobsMetadata[jobId].company_name
-                                },
-                                student_details: savedData[jobId]
-                            });
-                        }
-                    }
-                });
-            } catch(e) { console.error('Failed parsing local mock apps', e); }
+
 
             setApplications(allApps);
         } catch {
@@ -243,7 +202,6 @@ export default function MyApplications({ isEmbedded = false, onBrowseJobs }) {
     };
 
     const getApplicationId = (app) => app.application_id ?? app.id;
-    const isMockApplication = (app) => String(app.job_opening_id || '').startsWith('mock-');
     const isApplicationArchived = (app) =>
         Boolean(app.student_details?.isArchived) ||
         archivedApplicationIds.has(String(getApplicationId(app)));
@@ -263,16 +221,6 @@ export default function MyApplications({ isEmbedded = false, onBrowseJobs }) {
 
         try {
             localStorage.setItem('student_archived_applications', JSON.stringify([...nextArchivedIds]));
-
-            if (isMockApplication(app)) {
-                const savedData = JSON.parse(localStorage.getItem('student_job_applications') || '{}');
-                const jobId = app.job_opening_id;
-                if (savedData[jobId]) {
-                    savedData[jobId].isArchived = shouldArchive;
-                    localStorage.setItem('student_job_applications', JSON.stringify(savedData));
-                }
-            }
-
             setArchivedApplicationIds(nextArchivedIds);
             setApplications(prev => prev.map(application =>
                 String(getApplicationId(application)) === appId
@@ -289,31 +237,6 @@ export default function MyApplications({ isEmbedded = false, onBrowseJobs }) {
             console.error('Failed to update archived applications', error);
             window.alert('Could not update the archived application. Please try again.');
         } finally {
-            setActiveMenuAppId(null);
-        }
-    };
-
-    const handleWithdraw = (app) => {
-        if (!isMockApplication(app)) return;
-
-        if (window.confirm('Are you sure you want to withdraw this application? This action cannot be undone.')) {
-            try {
-                const jobId = app.job_opening_id;
-                const savedData = JSON.parse(localStorage.getItem('student_job_applications') || '{}');
-                delete savedData[jobId];
-                localStorage.setItem('student_job_applications', JSON.stringify(savedData));
-                const nextArchivedIds = new Set(archivedApplicationIds);
-                nextArchivedIds.delete(String(getApplicationId(app)));
-                localStorage.setItem('student_archived_applications', JSON.stringify([...nextArchivedIds]));
-                setArchivedApplicationIds(nextArchivedIds);
-                setApplications(prev => prev.filter(application =>
-                    String(getApplicationId(application)) !== String(getApplicationId(app))
-                ));
-                queryClient.invalidateQueries({ queryKey: ['jobBoardData'] });
-            } catch (error) {
-                console.error('Failed to withdraw mock application', error);
-                window.alert('Could not withdraw this application. Please try again.');
-            }
             setActiveMenuAppId(null);
         }
     };
@@ -548,12 +471,7 @@ export default function MyApplications({ isEmbedded = false, onBrowseJobs }) {
                                                                 <Archive size={16} className="text-slate-500" />
                                                                 {isApplicationArchived(app) ? 'Unarchive' : 'Archive'}
                                                             </button>
-                                                            {isMockApplication(app) && (
-                                                                <button onClick={() => handleWithdraw(app)} className="w-full px-4 py-3 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-3 font-medium transition-colors">
-                                                                    <XSquare size={16} className="text-red-500" />
-                                                                    Withdraw application
-                                                                </button>
-                                                            )}
+
                                                         </div>
                                                     </div>
                                                 </>

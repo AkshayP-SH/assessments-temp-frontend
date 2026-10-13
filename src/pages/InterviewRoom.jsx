@@ -4,6 +4,7 @@ import { Video, VideoOff, Mic, MicOff, Monitor, MonitorOff, PhoneOff, MessageSqu
 import Peer from 'peerjs';
 import { io } from 'socket.io-client';
 import { apiFetch } from '../config/api';
+import { SOCKET_TRANSPORTS } from '../config/socket';
 
 const SOCKET_ENABLED = true;
 
@@ -274,7 +275,7 @@ const InterviewRoom = () => {
       const jwtToken = localStorage.getItem('adminToken') || localStorage.getItem('studentAuthToken');
 
       const socket = io(socketUrl, {
-        transports: ['polling', 'websocket'],
+        transports: [...SOCKET_TRANSPORTS],
         reconnection: true,
         reconnectionDelay: 1000,
         reconnectionAttempts: 10,
@@ -1378,4 +1379,3 @@ const InterviewRoom = () => {
 };
 
 export default InterviewRoom;
-

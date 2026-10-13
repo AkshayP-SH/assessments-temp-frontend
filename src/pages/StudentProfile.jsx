@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   User,
   Mail,
@@ -21,7 +21,9 @@ import {
   Eye,
   EyeOff,
   Camera,
-  Trash2
+  Trash2,
+  Search,
+  ChevronDown
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { apiFetch } from '../config/api';
@@ -35,9 +37,16 @@ export default function StudentProfile() {
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const fileInputRef = useRef(null);
 
+  const [openInstitutes, setOpenInstitutes] = useState([]);
+  const [loadingInstitutes, setLoadingInstitutes] = useState(false);
+  const [isInstituteDropdownOpen, setIsInstituteDropdownOpen] = useState(false);
+  const [instituteSearch, setInstituteSearch] = useState('');
+  const instituteDropdownRef = useRef(null);
+
   const [formData, setFormData] = useState({
     full_name: '',
     roll_number: '',
+    institute: '',
     phone: '',
     address: '',
     course: '',
@@ -56,6 +65,43 @@ export default function StudentProfile() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+
+  // Fetch open institutes from admin manage institutes
+  const fetchOpenInstitutes = useCallback(async () => {
+    try {
+      setLoadingInstitutes(true);
+      const token = localStorage.getItem('studentAuthToken');
+      let response = await apiFetch('api/student/open-institutes', {
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+      });
+
+      if (!response.ok) {
+        response = await apiFetch('api/institutes/public');
+      }
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && Array.isArray(data.institutes)) {
+          setOpenInstitutes(data.institutes);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load open institutes:', err);
+      try {
+        const fallbackRes = await apiFetch('api/institutes/public');
+        if (fallbackRes.ok) {
+          const fallbackData = await fallbackRes.json();
+          if (fallbackData.success && Array.isArray(fallbackData.institutes)) {
+            setOpenInstitutes(fallbackData.institutes);
+          }
+        }
+      } catch (fErr) {
+        console.error('Fallback error:', fErr);
+      }
+    } finally {
+      setLoadingInstitutes(false);
+    }
+  }, []);
 
   // Fetch student profile details
   const fetchProfileData = useCallback(async (isRefresh = false) => {
@@ -80,6 +126,7 @@ export default function StudentProfile() {
           setFormData({
             full_name: userData.full_name || '',
             roll_number: userData.roll_number || '',
+            institute: userData.display_institute || userData.institute || '',
             phone: userData.phone || '',
             address: userData.address || '',
             course: userData.course || '',
@@ -102,7 +149,23 @@ export default function StudentProfile() {
 
   useEffect(() => {
     fetchProfileData();
-  }, [fetchProfileData]);
+    fetchOpenInstitutes();
+  }, [fetchProfileData, fetchOpenInstitutes]);
+
+  // Handle outside click to close institute dropdown
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (instituteDropdownRef.current && !instituteDropdownRef.current.contains(e.target)) {
+        setIsInstituteDropdownOpen(false);
+      }
+    };
+    if (isInstituteDropdownOpen) {
+      document.addEventListener('mousedown', handleOutsideClick);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+    };
+  }, [isInstituteDropdownOpen]);
 
   // Copy field value to clipboard
   const handleCopy = (text, fieldName) => {
@@ -260,6 +323,9 @@ export default function StudentProfile() {
         if (data.student.roll_number) {
           localStorage.setItem('rollNumber', data.student.roll_number);
         }
+        if (data.student.institute) {
+          localStorage.setItem('studentInstitute', data.student.institute);
+        }
         setIsEditModalOpen(false);
       } else {
         toast.error(data.message || 'Failed to update profile');
@@ -270,6 +336,59 @@ export default function StudentProfile() {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  // Open edit modal and ensure fresh state
+  const handleOpenEditModal = () => {
+    if (profile) {
+      setFormData({
+        full_name: profile.full_name || '',
+        roll_number: profile.roll_number || '',
+        institute: profile.display_institute || profile.institute || '',
+        phone: profile.phone || '',
+        address: profile.address || '',
+        course: profile.course || '',
+        specialization: profile.specialization || '',
+        resume_link: profile.resume_link || '',
+        profile_image: profile.profile_image || ''
+      });
+    }
+    setIsInstituteDropdownOpen(false);
+    setInstituteSearch('');
+    fetchOpenInstitutes();
+    setIsEditModalOpen(true);
+  };
+
+  // Filter open institutes based on search input
+  const filteredOpenInstitutes = useMemo(() => {
+    if (!instituteSearch.trim()) return openInstitutes;
+    const term = instituteSearch.toLowerCase().trim();
+    return openInstitutes.filter(inst =>
+      (inst.display_name && inst.display_name.toLowerCase().includes(term)) ||
+      (inst.name && inst.name.toLowerCase().includes(term))
+    );
+  }, [openInstitutes, instituteSearch]);
+
+  // Check if an institute is currently selected
+  const isInstSelected = (inst) => {
+    if (!formData.institute) return false;
+    const current = formData.institute.toLowerCase().trim();
+    return (
+      (inst.name && inst.name.toLowerCase().trim() === current) ||
+      (inst.display_name && inst.display_name.toLowerCase().trim() === current)
+    );
+  };
+
+  // Get display name for the currently selected institute
+  const getSelectedInstituteDisplayName = () => {
+    if (!formData.institute) return '';
+    const match = openInstitutes.find(
+      inst =>
+        (inst.name && inst.name.toLowerCase().trim() === formData.institute.toLowerCase().trim()) ||
+        (inst.display_name && inst.display_name.toLowerCase().trim() === formData.institute.toLowerCase().trim())
+    );
+    if (match) return match.display_name;
+    return formatText(formData.institute);
   };
 
   // Change student password with manual current password verification
@@ -436,7 +555,7 @@ export default function StudentProfile() {
           </button>
 
           <button
-            onClick={() => setIsEditModalOpen(true)}
+            onClick={handleOpenEditModal}
             className="inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-bold text-white bg-[#403f75] dark:bg-indigo-600 hover:bg-[#343360] dark:hover:bg-indigo-700 rounded-xl transition-all shadow-sm cursor-pointer"
           >
             <Edit3 size={15} />
@@ -484,7 +603,7 @@ export default function StudentProfile() {
                 {profile?.full_name || 'Student Name'}
               </h3>
               <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-0.5">
-                {formatText(profile?.institute) || 'Institute not assigned'}
+                {profile?.display_institute || formatText(profile?.institute) || 'Institute not assigned'}
               </p>
 
               {profile?.profile_image && (
@@ -572,7 +691,7 @@ export default function StudentProfile() {
               <Building2 size={14} /> Institute / College
             </span>
             <span className="text-sm font-bold text-slate-800 dark:text-slate-100 block">
-              {formatText(profile?.institute) || '—'}
+              {profile?.display_institute || formatText(profile?.institute) || '—'}
             </span>
           </div>
 
@@ -837,6 +956,107 @@ export default function StudentProfile() {
                     className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#181830] text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
                   />
                 </div>
+              </div>
+
+              {/* Institution / College Selector */}
+              <div className="relative" ref={instituteDropdownRef}>
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-200 block mb-1 flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <Building2 size={13} className="text-[#403f75] dark:text-indigo-400" />
+                    Institution / College
+                  </span>
+                  {openInstitutes.length > 0 && (
+                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
+                      {openInstitutes.length} open {openInstitutes.length === 1 ? 'institute' : 'institutes'}
+                    </span>
+                  )}
+                </label>
+
+                {/* Dropdown Trigger */}
+                <button
+                  type="button"
+                  onClick={() => setIsInstituteDropdownOpen(prev => !prev)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#181830] text-sm text-left flex items-center justify-between hover:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-medium cursor-pointer"
+                >
+                  <div className="flex items-center gap-2 truncate flex-1 min-w-0 mr-2">
+                    <Building2 size={16} className="text-slate-400 dark:text-slate-500 flex-shrink-0" />
+                    <span className={formData.institute ? "text-slate-900 dark:text-white truncate" : "text-slate-400 dark:text-slate-500 truncate"}>
+                      {getSelectedInstituteDisplayName() || 'Select an open institute...'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    {formData.institute && (
+                      <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                        open
+                      </span>
+                    )}
+                    <ChevronDown size={16} className={`text-slate-400 transition-transform duration-200 ${isInstituteDropdownOpen ? 'rotate-180' : ''}`} />
+                  </div>
+                </button>
+
+                {/* Dropdown Menu */}
+                {isInstituteDropdownOpen && (
+                  <div className="absolute left-0 right-0 top-full mt-1.5 z-50 bg-white dark:bg-[#1E1E38] rounded-xl border border-slate-200 dark:border-slate-700 shadow-xl overflow-hidden animate-in fade-in duration-100">
+                    <div className="p-2 border-b border-slate-100 dark:border-slate-700/80 bg-slate-50/50 dark:bg-[#181830]/50">
+                      <div className="relative">
+                        <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                        <input
+                          type="text"
+                          value={instituteSearch}
+                          onChange={(e) => setInstituteSearch(e.target.value)}
+                          placeholder="Search open institutes..."
+                          className="w-full pl-8 pr-3 py-1.5 text-xs bg-white dark:bg-[#1E1E38] border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                          autoFocus
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="max-h-56 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60">
+                      {loadingInstitutes ? (
+                        <div className="p-4 text-center text-xs text-slate-500 dark:text-slate-400 flex items-center justify-center gap-2">
+                          <Loader2 size={14} className="animate-spin text-indigo-500" />
+                          <span>Loading open institutes...</span>
+                        </div>
+                      ) : filteredOpenInstitutes.length === 0 ? (
+                        <div className="p-4 text-center text-xs text-slate-500 dark:text-slate-400">
+                          {openInstitutes.length === 0
+                            ? 'No open institutes currently available in Manage Institutes.'
+                            : `No institutes match "${instituteSearch}"`}
+                        </div>
+                      ) : (
+                        filteredOpenInstitutes.map((inst) => {
+                          const isSelected = isInstSelected(inst);
+                          return (
+                            <button
+                              key={inst.id}
+                              type="button"
+                              onClick={() => {
+                                setFormData(prev => ({ ...prev, institute: inst.name || inst.display_name }));
+                                setIsInstituteDropdownOpen(false);
+                                setInstituteSearch('');
+                              }}
+                              className={`w-full px-3.5 py-2.5 text-left text-xs sm:text-sm flex items-center justify-between hover:bg-slate-50 dark:hover:bg-[#25254A] transition-colors cursor-pointer ${
+                                isSelected ? 'bg-indigo-50/70 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 font-bold' : 'text-slate-800 dark:text-slate-200'
+                              }`}
+                            >
+                              <div className="flex items-center gap-2 truncate mr-2">
+                                <Building2 size={14} className={isSelected ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400'} />
+                                <span className="truncate">{inst.display_name}</span>
+                              </div>
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                                  open
+                                </span>
+                                {isSelected && <Check size={14} className="text-indigo-600 dark:text-indigo-400" />}
+                              </div>
+                            </button>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

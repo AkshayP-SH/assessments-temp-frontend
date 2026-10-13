@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useClientAuth } from '../../contexts/ClientAuthContext';
 import { apiFetch } from '../../config/api';
-import shnoorLogo from '../../assets/shnoor-logo.png';
+import OrganizationLogo from '../../components/OrganizationLogo';
 
 /* ─── helpers ─────────────────────────────────────────────────────────────── */
 const authHeaders = () => ({
@@ -199,7 +199,7 @@ const ClientDashboard = () => {
         {/* Logo */}
         <div className="px-6 py-5 border-b border-shnoor-mist flex items-center gap-3">
           <div className="site-header-logo flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white shadow-xs p-1 flex-shrink-0">
-            <img src={shnoorLogo} alt="Shnoor" className="h-full w-full object-contain" />
+            <OrganizationLogo className="h-full w-full object-contain" />
           </div>
           <div>
             <p className="font-extrabold text-theme-text text-sm leading-tight tracking-tight uppercase">SHNOOR</p>
