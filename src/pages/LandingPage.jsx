@@ -207,11 +207,17 @@ const LandingPage = () => {
     if (isLoggedIn) {
       navigate('/job-board');
     } else {
-      navigate('/login', {
+      const clientToken = job?.client_registration_token;
+      const targetUrl = clientToken
+        ? `/register?clientToken=${encodeURIComponent(clientToken)}`
+        : '/register';
+
+      navigate(targetUrl, {
         state: {
           returnUrl: '/job-board',
-          selectedJobId: job.id,
-          message: `Please sign in to apply for ${job.job_role || 'this position'} at ${job.company_name || 'the company'}`
+          selectedJobId: job?.id,
+          clientToken: clientToken,
+          message: `Please complete registration with ${job?.client_name || job?.company_name || 'the organization'} to apply for ${job?.job_role || 'this position'}.`
         }
       });
     }
@@ -604,7 +610,29 @@ const LandingPage = () => {
                                   <CheckCircle2 className="w-3.5 h-3.5" /> Logged in — ready to enroll.
                                 </span>
                               ) : (
-                                <span>Sign in with your student account to apply and take the assessment.</span>
+                                <div>
+                                  <span>
+                                    {selectedJob.client_name
+                                      ? `Register with ${selectedJob.client_name} student portal to apply and take the assessment.`
+                                      : 'Sign in or register with your student account to apply and take the assessment.'}
+                                  </span>
+                                  <div className="mt-1">
+                                    <span className="text-slate-400">Already registered? </span>
+                                    <button
+                                      type="button"
+                                      onClick={() => navigate('/login', {
+                                        state: {
+                                          returnUrl: '/job-board',
+                                          selectedJobId: selectedJob.id,
+                                          message: `Please sign in to apply for ${selectedJob.job_role || 'this position'}.`
+                                        }
+                                      })}
+                                      className="text-theme-accent hover:underline font-bold cursor-pointer inline-flex items-center gap-1"
+                                    >
+                                      Sign in to account
+                                    </button>
+                                  </div>
+                                </div>
                               )}
                             </div>
 
