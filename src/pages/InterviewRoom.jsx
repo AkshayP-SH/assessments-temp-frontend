@@ -292,6 +292,20 @@ const InterviewRoom = () => {
         console.log('User role:', role, 'Interview ID:', interviewId);
         setConnectionStatus('Connected to server');
 
+        // If we already have a Peer ID, re-register immediately with server on socket reconnect
+        if (peerIdRef.current) {
+          console.log('Re-registering peer on socket reconnect:', peerIdRef.current);
+          socket.emit('interview:reconnect', {
+            interviewId,
+            peerId: peerIdRef.current,
+            role
+          });
+          socket.emit('interview:signal-peer', {
+            interviewId,
+            peerId: peerIdRef.current
+          });
+        }
+
         if (isAdmin) {
           setAdminInRoom(true);
           setConnectionStatus('Ready to call student');
@@ -330,17 +344,16 @@ const InterviewRoom = () => {
 
       // Initialize PeerJS pointing to our own backend signaling server
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      const isSecure = apiUrl.startsWith('https');
+      const isSecure = apiUrl.startsWith('https') || window.location.protocol === 'https:';
 
-      let backendHost = 'localhost';
-      // PeerJS runs on a dedicated port (see backend PEER_PORT) — not the main API port
-      let backendPort = parseInt(import.meta.env.VITE_PEER_PORT || '5002', 10);
+      let backendHost = window.location.hostname || 'localhost';
+      // PeerJS runs on a dedicated port (see backend PEER_PORT) — default 5005
+      let backendPort = parseInt(import.meta.env.VITE_PEER_PORT || '5005', 10);
       let peerPath = '/peerjs';
 
       try {
         const parsedUrl = new URL(apiUrl);
         backendHost = parsedUrl.hostname;
-        peerPath = '/peerjs';
       } catch (e) {
         console.error('Error parsing API URL for PeerJS:', e);
       }
@@ -414,10 +427,28 @@ const InterviewRoom = () => {
 
       setupSocketEventHandlers(socket, newPeer);
 
+      newPeer.on('disconnected', () => {
+        console.warn('PeerJS disconnected from signaling server. Attempting reconnect...');
+        setConnectionStatus('Reconnecting signaling...');
+        if (!newPeer.destroyed) {
+          setTimeout(() => {
+            if (!newPeer.destroyed && newPeer.disconnected) {
+              newPeer.reconnect();
+            }
+          }, 1500);
+        }
+      });
+
       newPeer.on('error', (err) => {
         console.error('Peer error:', err);
-        if (err.type === 'server-error' || err.message.includes('timeout')) {
-          console.error('PeerJS server connection failed. The public 0.peerjs.com server may be blocked or overwhelmed.');
+        if (err.type === 'peer-unavailable') {
+          console.warn('Remote peer not yet available, ready for retry');
+          setIsCallInProgress(false);
+          setConnectionStatus('Remote peer not available - Ready to retry');
+          return;
+        }
+        if (err.type === 'server-error' || err.message?.includes('timeout')) {
+          console.error('PeerJS server connection failed on port', backendPort);
         }
         setConnectionStatus('Connection error - ' + err.type);
         setError('WebRTC connection failed: ' + err.message);
@@ -445,10 +476,8 @@ const InterviewRoom = () => {
     // Listen for peer joining
     socket.on('interview:peer-joined', (data) => {
       console.log('Peer joined:', data);
-      const peerIdString = typeof data.peerId === 'string' ? data.peerId : String(data.peerId);
-
-      if (remotePeerId !== peerIdString) {
-        console.log('Setting remotePeerId to:', peerIdString);
+      if (data && data.peerId) {
+        const peerIdString = String(data.peerId);
         setRemotePeerId(peerIdString);
 
         if (data.role === 'admin') {
@@ -459,6 +488,44 @@ const InterviewRoom = () => {
           setConnectionStatus('Student joined');
         }
       }
+    });
+
+    // Listen for peer available (broadcast from signal-peer)
+    socket.on('interview:peer-available', (data) => {
+      console.log('Peer available event:', data);
+      if (data && data.peerId) {
+        const peerIdString = String(data.peerId);
+        setRemotePeerId(peerIdString);
+        if (data.role === 'admin') {
+          setAdminInRoom(true);
+          setConnectionStatus('Interviewer ready');
+        } else {
+          setStudentInRoom(true);
+          setConnectionStatus('Student ready');
+        }
+      }
+    });
+
+    // Listen for peer reconnected
+    socket.on('interview:peer-reconnected', (data) => {
+      console.log('Peer reconnected event:', data);
+      if (data && data.peerId) {
+        const peerIdString = String(data.peerId);
+        setRemotePeerId(peerIdString);
+        if (data.role === 'admin') {
+          setAdminInRoom(true);
+          setConnectionStatus('Interviewer reconnected');
+        } else {
+          setStudentInRoom(true);
+          setConnectionStatus('Student reconnected');
+        }
+      }
+    });
+
+    // Listen for peer temporary disconnect
+    socket.on('interview:peer-disconnected', (data) => {
+      console.log('Peer disconnected event:', data);
+      setConnectionStatus(data.role === 'admin' ? 'Interviewer temporarily disconnected...' : 'Student temporarily disconnected...');
     });
 
     // Listen for existing participants when joining
@@ -493,9 +560,10 @@ const InterviewRoom = () => {
       }
 
       if (callRef.current) {
-        callRef.current.close();
+        try { callRef.current.close(); } catch (_) {}
+        callRef.current = null;
         setCall(null);
-        setCallState('ended');
+        setCallState('idle');
       }
     });
 
@@ -607,23 +675,59 @@ const InterviewRoom = () => {
       });
 
       incoming.on('close', () => {
-        console.log('Admin ended the call');
-        setConnectionStatus('Call ended');
+        console.log('Call ended / closed');
         setCall(null);
+        callRef.current = null;
         setIncomingCall(false);
-        setCallState('ended');
+        setCallState('idle');
+        setConnectionStatus('Call disconnected - Ready to reconnect');
         remoteStreamRef.current = null;
       });
 
       incoming.on('error', (error) => {
         console.error('Call error:', error);
-        setConnectionStatus('Call failed');
+        setCall(null);
+        callRef.current = null;
+        setConnectionStatus('Call interrupted - Ready to reconnect');
         setCallState('idle');
       });
+
+      // Monitor underlying RTCPeerConnection for ICE / network drops
+      const pc = incoming.peerConnection;
+      if (pc) {
+        pc.oniceconnectionstatechange = () => {
+          const iceState = pc.iceConnectionState;
+          console.log('ICE connection state (student):', iceState);
+          if (iceState === 'connected' || iceState === 'completed') {
+            setConnectionStatus('Connected');
+            setCallState('connected');
+          } else if (iceState === 'disconnected') {
+            setConnectionStatus('Connection unstable, reconnecting...');
+          } else if (iceState === 'failed') {
+            setConnectionStatus('Connection lost - Waiting for reconnection');
+            try { incoming.close(); } catch (_) {}
+          }
+        };
+
+        pc.onconnectionstatechange = () => {
+          const connState = pc.connectionState;
+          console.log('Connection state (student):', connState);
+          if (connState === 'connected') {
+            setConnectionStatus('Connected');
+            setCallState('connected');
+          } else if (connState === 'disconnected') {
+            setConnectionStatus('Connection unstable, reconnecting...');
+          } else if (connState === 'failed') {
+            setConnectionStatus('Connection lost - Waiting for reconnection');
+            try { incoming.close(); } catch (_) {}
+          }
+        };
+      }
 
       // Answer AFTER registering handlers
       incoming.answer(localStreamRef.current);
       setCall(incoming);
+      callRef.current = incoming;
       setIncomingCall(false);
       setCallState('connected');
       setConnectionStatus('Connected');
@@ -764,6 +868,7 @@ const InterviewRoom = () => {
       console.log('Admin calling student directly via PeerJS, remotePeerId:', remotePeerIdRef.current);
       const outgoingCall = peerInstance.call(remotePeerIdRef.current, localStreamRef.current);
       setCall(outgoingCall);
+      callRef.current = outgoingCall;
       setConnectionStatus('Calling student...');
 
       outgoingCall.on('stream', (remoteStream) => {
@@ -783,19 +888,55 @@ const InterviewRoom = () => {
       });
 
       outgoingCall.on('close', () => {
-        setConnectionStatus('Call ended');
+        console.log('Call ended / closed (admin side)');
         setCall(null);
-        setCallState('ended');
+        callRef.current = null;
+        remoteStreamRef.current = null;
+        setCallState('idle');
         setIsCallInProgress(false);
+        setConnectionStatus('Call disconnected - Ready to reconnect');
       });
 
       outgoingCall.on('error', (err) => {
         console.error('Outgoing call error:', err);
-        setConnectionStatus('Call failed');
+        setCall(null);
+        callRef.current = null;
+        setConnectionStatus('Call interrupted - Ready to reconnect');
         setCallState('idle');
         setIsCallInProgress(false);
-        setError('Call failed: ' + err.message);
       });
+
+      // Monitor underlying RTCPeerConnection for ICE / network drops
+      const pc = outgoingCall.peerConnection;
+      if (pc) {
+        pc.oniceconnectionstatechange = () => {
+          const iceState = pc.iceConnectionState;
+          console.log('ICE connection state (admin):', iceState);
+          if (iceState === 'connected' || iceState === 'completed') {
+            setConnectionStatus('Connected');
+            setCallState('connected');
+          } else if (iceState === 'disconnected') {
+            setConnectionStatus('Connection unstable, reconnecting...');
+          } else if (iceState === 'failed') {
+            setConnectionStatus('Connection lost - Click Call Student to reconnect');
+            try { outgoingCall.close(); } catch (_) {}
+          }
+        };
+
+        pc.onconnectionstatechange = () => {
+          const connState = pc.connectionState;
+          console.log('Connection state (admin):', connState);
+          if (connState === 'connected') {
+            setConnectionStatus('Connected');
+            setCallState('connected');
+          } else if (connState === 'disconnected') {
+            setConnectionStatus('Connection unstable, reconnecting...');
+          } else if (connState === 'failed') {
+            setConnectionStatus('Connection lost - Click Call Student to reconnect');
+            try { outgoingCall.close(); } catch (_) {}
+          }
+        };
+      }
 
     } catch (error) {
       console.error('Start call error:', error);
