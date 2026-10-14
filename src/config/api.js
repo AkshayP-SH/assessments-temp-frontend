@@ -62,6 +62,13 @@ export const apiFetch = async (endpoint, options = {}) => {
     const { default: apiClient } = await import('../utils/apiInterceptor');
     
     // Convert fetch options to axios config
+    const isBinaryEndpoint = options.responseType === 'blob' || 
+                             options.responseType === 'arraybuffer' ||
+                             endpoint.includes('/export/students') || 
+                             endpoint.includes('/export/results') || 
+                             endpoint.includes('/violations/export') || 
+                             endpoint.includes('/shortlisted-pdf');
+
     const axiosConfig = {
       method: options.method || 'GET',
       url: getApiUrl(endpoint),
@@ -70,6 +77,12 @@ export const apiFetch = async (endpoint, options = {}) => {
       data: options.body,
       timeout: timeoutDuration,
     };
+
+    if (options.responseType) {
+      axiosConfig.responseType = options.responseType;
+    } else if (isBinaryEndpoint) {
+      axiosConfig.responseType = 'blob';
+    }
     
     // axios throws on non-2xx statuses, but fetch doesn't
     axiosConfig.validateStatus = () => true; 
@@ -83,9 +96,25 @@ export const apiFetch = async (endpoint, options = {}) => {
       statusText: axiosResponse.statusText,
       headers: new Headers(axiosResponse.headers),
       url: axiosResponse.config.url,
-      json: async () => axiosResponse.data,
-      text: async () => typeof axiosResponse.data === 'string' ? axiosResponse.data : JSON.stringify(axiosResponse.data),
-      blob: async () => new Blob([axiosResponse.data]),
+      json: async () => {
+        if (axiosResponse.data instanceof Blob) {
+          const text = await axiosResponse.data.text();
+          return JSON.parse(text);
+        }
+        return axiosResponse.data;
+      },
+      text: async () => {
+        if (axiosResponse.data instanceof Blob) {
+          return await axiosResponse.data.text();
+        }
+        return typeof axiosResponse.data === 'string' ? axiosResponse.data : JSON.stringify(axiosResponse.data);
+      },
+      blob: async () => {
+        if (axiosResponse.data instanceof Blob) {
+          return axiosResponse.data;
+        }
+        return new Blob([axiosResponse.data]);
+      },
       clone: function() { return { ...this }; },
     };
 
