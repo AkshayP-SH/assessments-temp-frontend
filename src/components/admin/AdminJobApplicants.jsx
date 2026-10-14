@@ -32,7 +32,6 @@ export default function AdminJobApplicants() {
     const { jobId } = useParams();
     const navigate = useNavigate();
     const [allTestResults, setAllTestResults] = useState([]);
-    const [testResults, setTestResults] = useState([]);
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState('');
@@ -278,7 +277,7 @@ export default function AdminJobApplicants() {
                 return applicant.assessmentStatus === 'passed' || applicant.displayStatus === 'passed';
             }
             if (statusFilter === 'failed') {
-                return applicant.assessmentStatus === 'failed' || applicant.displayStatus === 'failed' || applicant.appStatus === 'rejected';
+                return applicant.assessmentStatus === 'failed' || applicant.displayStatus === 'failed';
             }
             if (statusFilter === 'assessment_assigned') {
                 return applicant.displayStatus === 'assessment_assigned' || (applicant.assessmentStatus === 'not_attempted' && applicant.appStatus === 'assessment_assigned');
