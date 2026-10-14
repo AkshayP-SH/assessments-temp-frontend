@@ -8,6 +8,7 @@ import shnoorLogo from '../assets/shnoor-logo.png';
 import { useSEO } from '../hooks/useSEO';
 import { isBusinessEmail } from '../utils/emailValidation';
 import { useTimer } from '../hooks/useTimer';
+import { API_URL } from '../config/api';
 
 /* ─── Icon helpers ──────────────────────────────────────────────────────────── */
 const EyeOpen = () => (
@@ -98,7 +99,7 @@ const OrganisationSignup = () => {
 
     try {
       if (!showOtp) {
-        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/signup/organisation/send-otp`, {
+        const res = await fetch(`${API_URL}/api/signup/organisation/send-otp`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: formData.email, name: formData.orgName })
@@ -115,7 +116,7 @@ const OrganisationSignup = () => {
           setLoading(false);
           return;
         }
-        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/signup/organisation`, {
+        const res = await fetch(`${API_URL}/api/signup/organisation`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -409,7 +410,7 @@ const OrganisationSignup = () => {
                           setLoading(true);
                           setError('');
                           try {
-                            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/signup/organisation/send-otp`, {
+                            const res = await fetch(`${API_URL}/api/signup/organisation/send-otp`, {
                               method: 'POST',
                               headers: { 'Content-Type': 'application/json' },
                               body: JSON.stringify({ email: formData.email, name: formData.orgName })

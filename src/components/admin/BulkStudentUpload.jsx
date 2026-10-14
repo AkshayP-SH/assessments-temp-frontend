@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { Download } from 'lucide-react';
 import Button from '../Button';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+import { API_URL } from '../../config/api';
 
 function BulkStudentUpload({ clientId }) {
     const [file, setFile] = useState(null);

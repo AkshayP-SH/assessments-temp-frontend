@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Upload, FileText, Plus, Save, Trash2, ArrowLeft, CheckCircle, AlertCircle, Loader2, Pencil, Eye, AlignLeft, List, Code } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { toast } from 'react-toastify';
-import { apiFetch } from '../../config/api';
+import { API_URL, apiFetch } from '../../config/api';
 import CodingQuestionSelector from './CodingQuestionSelector';
 import TestInitStep from './TestInitStep';
 import TestManualStep from './TestManualStep';
@@ -809,9 +809,7 @@ const CreateTestSection = ({ onComplete, onSaved, editingTest, clientId, onBack 
 
         try {
             const token = localStorage.getItem('adminToken');
-            const cleanBaseUrl = import.meta.env.VITE_API_URL.endsWith('/')
-                ? import.meta.env.VITE_API_URL.slice(0, -1)
-                : import.meta.env.VITE_API_URL;
+            const cleanBaseUrl = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
 
             if (isEditMode && uploadedTestId) {
                 const formData = new FormData();

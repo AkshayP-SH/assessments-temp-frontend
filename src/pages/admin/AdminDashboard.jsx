@@ -7,7 +7,7 @@ import {
   BarChart3, UploadCloud, ShieldAlert, CreditCard, MessageSquare, Settings, ChevronLeft, ChevronRight, ChevronDown, User
 } from 'lucide-react';
 
-import { apiFetch } from '../../config/api';
+import { API_URL, apiFetch } from '../../config/api';
 import AdminHeader from '../../components/AdminHeader';
 import { useSEO } from '../../hooks/useSEO';
 
@@ -405,7 +405,7 @@ const AdminDashboard = () => {
     setLoadingFeedback(true);
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/feedback/test/${selectedExamId}${clientParam}`, {
+      const response = await fetch(`${API_URL}/api/feedback/test/${selectedExamId}${clientParam}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -918,7 +918,7 @@ const AdminDashboard = () => {
 
       const token = localStorage.getItem('adminToken');
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/export/shortlisted-pdf`,
+        `${API_URL}/api/export/shortlisted-pdf`,
         {
           examName,
           collegeName,

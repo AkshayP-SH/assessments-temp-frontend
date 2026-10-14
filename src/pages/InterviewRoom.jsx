@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Video, VideoOff, Mic, MicOff, Monitor, MonitorOff, PhoneOff, MessageSquare, Send, Phone } from 'lucide-react';
 import Peer from 'peerjs';
 import { io } from 'socket.io-client';
-import { apiFetch } from '../config/api';
+import { API_URL, apiFetch } from '../config/api';
 import { SOCKET_TRANSPORTS } from '../config/socket';
 
 const SOCKET_ENABLED = true;
@@ -269,12 +269,11 @@ const InterviewRoom = () => {
       }
 
       // Initialize Socket.IO — pass JWT in handshake so server can verify identity
-      const socketUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? window.location.origin : 'http://localhost:5000');
-      console.log('Connecting to socket URL:', socketUrl);
+      console.log('Connecting to socket URL:', API_URL);
 
       const jwtToken = localStorage.getItem('adminToken') || localStorage.getItem('studentAuthToken');
 
-      const socket = io(socketUrl, {
+      const socket = io(API_URL, {
         transports: [...SOCKET_TRANSPORTS],
         reconnection: true,
         reconnectionDelay: 1000,
@@ -343,7 +342,7 @@ const InterviewRoom = () => {
       });
 
       // Initialize PeerJS pointing to our own backend signaling server
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const apiUrl = API_URL;
       const isSecure = apiUrl.startsWith('https') || window.location.protocol === 'https:';
 
       let backendHost = window.location.hostname || 'localhost';

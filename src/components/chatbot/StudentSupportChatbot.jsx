@@ -1,10 +1,8 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { MessageCircle, X, ChevronLeft, Send, Upload, Image, AlertCircle, Check, RefreshCw, Bell } from 'lucide-react';
 import { CHATBOT_TOPICS, CHATBOT_QA, TOPIC_ICONS } from '../../data/chatbotData';
-import { apiFetch } from '../../config/api';
+import { API_URL, apiFetch } from '../../config/api';
 import { useSupportSocket } from '../../hooks/useSupportSocket';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const Icon = ({ d, className = 'w-5 h-5' }) => (
   <svg className={className} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">

@@ -2,8 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle, XCircle, ArrowLeft, RefreshCw, Plus, Building2, Users, Eye, EyeOff, Copy, ExternalLink, Pencil, Trash2 } from 'lucide-react';
 import AdminLayout from '../../components/AdminLayout';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+import { API_URL } from '../../config/api';
 
 const adminHeaders = () => ({
   'Content-Type': 'application/json',

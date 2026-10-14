@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Video, Calendar, Clock, AlertCircle } from 'lucide-react';
 import { io } from 'socket.io-client';
-import { apiFetch } from '../config/api';
+import { API_URL, apiFetch } from '../config/api';
 import { clearStorageKeepTheme } from '../utils/theme';
 import { SOCKET_TRANSPORTS } from '../config/socket';
 
@@ -33,8 +33,7 @@ const StudentInterviews = () => {
   }, []);
 
   const initializeSocket = () => {
-    const socketUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-    const socket = io(socketUrl, {
+    const socket = io(API_URL, {
       transports: [...SOCKET_TRANSPORTS],
       reconnection: true,
       reconnectionAttempts: 10,

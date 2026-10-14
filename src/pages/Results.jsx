@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { CheckCircle, MessageSquare, Star } from 'lucide-react';
+import { API_URL } from '../config/api';
 
 const Result = () => {
     const location = useLocation();
@@ -51,7 +52,7 @@ const Result = () => {
 
             const token = localStorage.getItem('studentAuthToken');
             
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/feedback`, {
+            const response = await fetch(`${API_URL}/api/feedback`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
