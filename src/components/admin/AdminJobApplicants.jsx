@@ -1,5 +1,5 @@
 // src/components/admin/AdminJobApplicants.jsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import AdminLayout from '../AdminLayout';
 import {
@@ -14,6 +14,9 @@ const STATUS_CONFIG = {
     assessment_assigned: { label: 'Test Assigned' },
     shortlisted: { label: 'Shortlisted' },
     rejected: { label: 'Rejected' },
+    passed: { label: 'Passed' },
+    failed: { label: 'Failed' },
+    in_progress: { label: 'In Progress' },
     // Legacy statuses — normalized in display
     submitted: { label: 'Test Assigned' },
     screening: { label: 'Test Assigned' },
@@ -47,21 +50,7 @@ export default function AdminJobApplicants() {
             });
             const data = await res.json();
             if (data.success) {
-                setAllTestResults(data.data);
-
-                let filtered = data.data;
-                if (statusFilter === 'passed') {
-                    filtered = data.data.filter(i => i.passed === true);
-                } else if (statusFilter === 'failed') {
-                    filtered = data.data.filter(i => i.passed === false);
-                } else if (statusFilter === 'assessment_assigned') {
-                    filtered = data.data.filter(i =>
-                        ['assessment_assigned', 'submitted', 'screening', 'assessment_completed'].includes(i.status)
-                    );
-                } else if (statusFilter) {
-                    filtered = data.data.filter(i => i.status === statusFilter);
-                }
-                setTestResults(filtered);
+                setAllTestResults(data.data || []);
             } else {
                 setError(data.message || 'Failed to load data');
             }
@@ -80,26 +69,57 @@ export default function AdminJobApplicants() {
 
     useEffect(() => {
         fetchData();
-         
-    }, [jobId, statusFilter]);
+    }, [jobId]);
 
-    const getAppStatusBadge = (status) => {
-        // Normalize legacy statuses to the 3 valid ones
+    const getAppStatusBadge = (applicantOrStatus) => {
+        const status = typeof applicantOrStatus === 'string'
+            ? applicantOrStatus
+            : (applicantOrStatus?.displayStatus || applicantOrStatus?.status);
+
+        // Normalize legacy statuses
         const normalized = (status === 'submitted' || status === 'screening' || status === 'assessment_completed')
             ? 'assessment_assigned'
             : status;
 
-        const colorMap = {
-            assessment_assigned: 'bg-shnoor-lavender text-shnoor-indigo border-shnoor-indigo',
-            shortlisted: 'bg-shnoor-successLight text-shnoor-success border-shnoor-success',
-            rejected: 'bg-shnoor-dangerLight text-shnoor-danger border-shnoor-danger',
-        };
-        const label = STATUS_CONFIG[normalized]?.label || normalized;
-        return (
-            <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold border ${colorMap[normalized] || 'bg-gray-100 text-gray-700 border-gray-300'}`}>
-                {label}
-            </span>
-        );
+        switch (normalized) {
+            case 'shortlisted':
+                return (
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-shnoor-successLight text-shnoor-success border border-shnoor-success">
+                        Shortlisted
+                    </span>
+                );
+            case 'rejected':
+                return (
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-shnoor-dangerLight text-shnoor-danger border border-shnoor-danger">
+                        Rejected
+                    </span>
+                );
+            case 'failed':
+                return (
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-shnoor-dangerLight text-shnoor-danger border border-shnoor-danger">
+                        Failed
+                    </span>
+                );
+            case 'passed':
+                return (
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-shnoor-successLight text-shnoor-success border border-shnoor-success">
+                        Passed
+                    </span>
+                );
+            case 'in_progress':
+                return (
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-300">
+                        In Progress
+                    </span>
+                );
+            case 'assessment_assigned':
+            default:
+                return (
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-shnoor-lavender text-shnoor-indigo border border-shnoor-indigo">
+                        Test Assigned
+                    </span>
+                );
+        }
     };
 
     const formatDate = (d) => {
@@ -125,12 +145,13 @@ export default function AdminJobApplicants() {
     };
 
     const handleOpenInterviewSchedule = (row) => {
-        if (row.status !== 'shortlisted') {
+        if (row.status !== 'shortlisted' && row.appStatus !== 'shortlisted' && row.displayStatus !== 'shortlisted') {
             alert('Only shortlisted candidates can be scheduled for interview.');
             return;
         }
 
-        if (!row.test_id) {
+        const effectiveTestId = row.test_id || (row.tests && row.tests[0]?.test_id);
+        if (!effectiveTestId) {
             alert('Cannot schedule interview: no linked assessment test found for this row.');
             return;
         }
@@ -141,21 +162,170 @@ export default function AdminJobApplicants() {
                 name: row.full_name,
                 email: row.email
             },
-            testId: row.test_id,
+            testId: effectiveTestId,
             applicationId: row.application_id
         });
         setShowInterviewModal(true);
     };
 
-    const exportEnrolledStudents = () => {
-        const normalizeStatus = (s) =>
-            (s === 'submitted' || s === 'screening' || s === 'assessment_completed') ? 'assessment_assigned' : s;
+    // Group all applicant rows by student + application and compute their real assessment status
+    const allApplicants = useMemo(() => {
+        const map = new Map();
 
+        for (const r of allTestResults) {
+            const key = `${r.student_id}-${r.application_id}`;
+            if (!map.has(key)) {
+                map.set(key, {
+                    student_id: r.student_id,
+                    full_name: r.full_name,
+                    email: r.email,
+                    application_id: r.application_id,
+                    test_id: r.test_id,
+                    status: r.status,
+                    passed_assessment: r.passed_assessment,
+                    assessment_score: r.assessment_score,
+                    tests: []
+                });
+            }
+            if (r.test_id !== null) {
+                map.get(key).tests.push(r);
+            }
+        }
+
+        return Array.from(map.values()).map(app => {
+            const attemptedTests = app.tests.filter(t => t.submitted_at !== null);
+            const hasAttempted = attemptedTests.length > 0;
+
+            // Check if any attempted test is failed
+            const anyTestFailed = attemptedTests.some(t =>
+                t.passed === false ||
+                (t.percentage !== null && t.passing_percentage !== null && Number(t.percentage) < Number(t.passing_percentage))
+            );
+
+            // Check if all attempted tests are passed
+            const allAttemptedTestsPassed = attemptedTests.length > 0 && attemptedTests.every(t =>
+                t.passed === true ||
+                (t.percentage !== null && t.passing_percentage !== null && Number(t.percentage) >= Number(t.passing_percentage))
+            );
+
+            const allCompleted = app.tests.length > 0 && attemptedTests.length >= app.tests.length;
+
+            let assessmentStatus = 'not_attempted';
+            if (app.passed_assessment === true) {
+                assessmentStatus = 'passed';
+            } else if (app.passed_assessment === false || anyTestFailed) {
+                assessmentStatus = 'failed';
+            } else if (allCompleted && allAttemptedTestsPassed) {
+                assessmentStatus = 'passed';
+            } else if (hasAttempted) {
+                assessmentStatus = 'in_progress';
+            }
+
+            let appStatus = app.status;
+            if (['submitted', 'screening', 'assessment_completed'].includes(appStatus)) {
+                appStatus = 'assessment_assigned';
+            }
+
+            // Determine effective primary display status:
+            // 1. Shortlisted -> 'shortlisted'
+            // 2. Rejected -> 'rejected'
+            // 3. Assessment Failed -> 'failed'
+            // 4. Assessment Passed -> 'passed'
+            // 5. In Progress -> 'in_progress'
+            // 6. Default -> 'assessment_assigned'
+            let displayStatus = 'assessment_assigned';
+            if (appStatus === 'shortlisted') {
+                displayStatus = 'shortlisted';
+            } else if (appStatus === 'rejected') {
+                displayStatus = assessmentStatus === 'failed' ? 'failed' : 'rejected';
+            } else if (assessmentStatus === 'failed') {
+                displayStatus = 'failed';
+            } else if (assessmentStatus === 'passed') {
+                displayStatus = 'passed';
+            } else if (assessmentStatus === 'in_progress') {
+                displayStatus = 'in_progress';
+            } else {
+                displayStatus = 'assessment_assigned';
+            }
+
+            let avgPercentage = null;
+            if (attemptedTests.length > 0) {
+                const sum = attemptedTests.reduce((acc, t) => acc + (parseFloat(t.percentage) || 0), 0);
+                avgPercentage = (sum / attemptedTests.length).toFixed(1);
+            } else if (app.assessment_score !== null && app.assessment_score !== undefined) {
+                avgPercentage = parseFloat(app.assessment_score).toFixed(1);
+            }
+
+            return {
+                ...app,
+                appStatus,
+                assessmentStatus,
+                displayStatus,
+                hasAttempted,
+                avgPercentage,
+                attemptedTestCount: attemptedTests.length,
+                totalTestCount: app.tests.length
+            };
+        });
+    }, [allTestResults]);
+
+    // Enrolled students filtered by status filter
+    const enrolledStudents = useMemo(() => {
+        if (!statusFilter) return allApplicants;
+
+        return allApplicants.filter(applicant => {
+            if (statusFilter === 'passed') {
+                return applicant.assessmentStatus === 'passed' || applicant.displayStatus === 'passed';
+            }
+            if (statusFilter === 'failed') {
+                return applicant.assessmentStatus === 'failed' || applicant.displayStatus === 'failed' || applicant.appStatus === 'rejected';
+            }
+            if (statusFilter === 'assessment_assigned') {
+                return applicant.displayStatus === 'assessment_assigned' || (applicant.assessmentStatus === 'not_attempted' && applicant.appStatus === 'assessment_assigned');
+            }
+            if (statusFilter === 'shortlisted') {
+                return applicant.appStatus === 'shortlisted' || applicant.displayStatus === 'shortlisted';
+            }
+            if (statusFilter === 'rejected') {
+                return applicant.appStatus === 'rejected' || applicant.displayStatus === 'rejected';
+            }
+            return applicant.displayStatus === statusFilter || applicant.appStatus === statusFilter;
+        });
+    }, [allApplicants, statusFilter]);
+
+    // Assessment result rows filtered by status filter
+    const testResultRows = useMemo(() => {
+        const attempted = allTestResults.filter(r => r.test_id !== null && (r.submitted_at !== null || r.percentage !== null));
+        if (!statusFilter) return attempted;
+
+        return attempted.filter(r => {
+            if (statusFilter === 'passed') {
+                return r.passed === true;
+            }
+            if (statusFilter === 'failed') {
+                return r.passed === false;
+            }
+            if (statusFilter === 'shortlisted') {
+                return r.status === 'shortlisted';
+            }
+            if (statusFilter === 'rejected') {
+                return r.status === 'rejected';
+            }
+            if (statusFilter === 'assessment_assigned') {
+                return ['assessment_assigned', 'submitted', 'screening', 'assessment_completed'].includes(r.status);
+            }
+            return r.status === statusFilter;
+        });
+    }, [allTestResults, statusFilter]);
+
+    const exportEnrolledStudents = () => {
         const exportData = enrolledStudents.map(r => ({
             'Student ID': r.student_id,
             'Name': r.full_name,
             'Email': r.email,
-            'Status': STATUS_CONFIG[normalizeStatus(r.status)]?.label || r.status
+            'Score': r.avgPercentage !== null ? `${r.avgPercentage}%` : 'Not Attempted',
+            'Assessment Result': r.assessmentStatus === 'passed' ? 'Pass' : r.assessmentStatus === 'failed' ? 'Fail' : 'Not Attempted',
+            'Status': STATUS_CONFIG[r.displayStatus]?.label || r.displayStatus
         }));
 
         const wb = XLSX.utils.book_new();
@@ -165,6 +335,8 @@ export default function AdminJobApplicants() {
             { wch: 15 }, // Student ID
             { wch: 25 }, // Name
             { wch: 35 }, // Email
+            { wch: 18 }, // Score
+            { wch: 20 }, // Assessment Result
             { wch: 20 }  // Status
         ];
 
@@ -189,7 +361,8 @@ export default function AdminJobApplicants() {
                 'Date Attempted': formatDate(r.submitted_at),
                 'Score': r.obtained_marks !== null ? `${parseFloat(r.obtained_marks).toFixed(2)}/${parseFloat(r.total_marks).toFixed(2)} (${parseFloat(r.percentage).toFixed(1)}%)` : 'Not attempted',
                 'Test Status': r.passed ? 'Pass' : 'Fail',
-                'Application Status': r.status === 'shortlisted' ? 'Shortlisted' : r.status === 'rejected' ? 'Not Shortlisted' : 'Pending',                'No Face': r.no_face_count || 0,
+                'Application Status': r.status === 'shortlisted' ? 'Shortlisted' : r.status === 'rejected' ? 'Not Shortlisted' : 'Pending',
+                'No Face': r.no_face_count || 0,
                 'Multi Faces': r.multi_face_count || 0,
                 'Phone': r.phone_count || 0,
                 'Noise': r.noise_count || 0,
@@ -227,19 +400,6 @@ export default function AdminJobApplicants() {
         XLSX.writeFile(wb, fileName);
     };
 
-    const enrolledStudents = (() => {
-        const seen = new Set();
-        return allTestResults.filter(r => {
-            const key = `${r.student_id}-${r.application_id}`;
-            if (seen.has(key)) return false;
-            seen.add(key);
-            return true;
-        });
-    })();
-
-    const testResultRows = testResults.filter(r => r.test_id !== null && r.submitted_at !== null);
-
-    const allTestResultRows = allTestResults.filter(r => r.test_id !== null && r.submitted_at !== null);
     const tabs = [
         {
             id: 'enrolled',
@@ -251,7 +411,7 @@ export default function AdminJobApplicants() {
             id: 'results',
             label: 'Assessment Results',
             icon: ClipboardList,
-            count: allTestResultRows.length,
+            count: testResultRows.length,
         },
     ];
 
@@ -404,8 +564,20 @@ export default function AdminJobApplicants() {
                             enrolledStudents.length === 0 ? (
                                 <div className="text-center py-20">
                                     <UserCheck size={52} className="mx-auto mb-4 text-shnoor-indigoMedium opacity-25" />
-                                    <p className="font-semibold text-xl text-shnoor-navy mb-2">No Enrolled Students</p>
-                                    <p className="text-sm text-shnoor-indigoMedium">Applications will appear here once students apply</p>
+                                    <p className="font-semibold text-xl text-shnoor-navy mb-2">
+                                        {statusFilter ? `No ${STATUS_CONFIG[statusFilter]?.label || statusFilter} Candidates` : 'No Enrolled Students'}
+                                    </p>
+                                    <p className="text-sm text-shnoor-indigoMedium mb-4">
+                                        {statusFilter ? 'Try selecting a different status filter to view other candidates.' : 'Applications will appear here once students apply'}
+                                    </p>
+                                    {statusFilter && (
+                                        <button
+                                            onClick={() => setStatusFilter('')}
+                                            className="px-4 py-2 bg-shnoor-lavender text-shnoor-indigo hover:bg-shnoor-lavender/70 font-semibold rounded-lg text-sm transition-colors"
+                                        >
+                                            View All Statuses
+                                        </button>
+                                    )}
                                 </div>
                             ) : (
                                 <div className="overflow-x-auto">
@@ -415,7 +587,9 @@ export default function AdminJobApplicants() {
                                                 <th className="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider text-white">Student ID</th>
                                                 <th className="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider text-white">Name</th>
                                                 <th className="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider text-white">Email</th>
+                                                <th className="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider text-white">Score</th>
                                                 <th className="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider text-white">Status</th>
+                                                <th className="px-6 py-3 text-center text-xs font-bold uppercase tracking-wider text-white">Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-shnoor-mist">
@@ -424,7 +598,35 @@ export default function AdminJobApplicants() {
                                                     <td className="px-6 py-4 text-sm font-semibold text-shnoor-navy">{r.student_id}</td>
                                                     <td className="px-6 py-4 text-sm font-semibold text-shnoor-navy">{r.full_name}</td>
                                                     <td className="px-6 py-4 text-sm text-shnoor-indigoMedium">{r.email}</td>
-                                                    <td className="px-6 py-4">{getAppStatusBadge(r.status)}</td>
+                                                    <td className="px-6 py-4 text-sm">
+                                                        {r.avgPercentage !== null ? (
+                                                            <span className={`font-bold ${r.assessmentStatus === 'passed' ? 'text-shnoor-success' : r.assessmentStatus === 'failed' ? 'text-shnoor-danger' : 'text-shnoor-navy'}`}>
+                                                                {r.avgPercentage}%
+                                                            </span>
+                                                        ) : (
+                                                            <span className="text-shnoor-soft font-medium">Not attempted</span>
+                                                        )}
+                                                    </td>
+                                                    <td className="px-6 py-4">{getAppStatusBadge(r)}</td>
+                                                    <td className="px-6 py-4 text-center">
+                                                        {r.displayStatus === 'shortlisted' ? (
+                                                            <button
+                                                                onClick={() => handleOpenInterviewSchedule(r.tests[0] || r)}
+                                                                className="px-3.5 py-1.5 bg-shnoor-indigo hover:bg-shnoor-indigoDark text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer"
+                                                            >
+                                                                Interview
+                                                            </button>
+                                                        ) : r.hasAttempted ? (
+                                                            <button
+                                                                onClick={() => setActiveTab('results')}
+                                                                className="px-3 py-1.5 bg-shnoor-lavender hover:bg-shnoor-lavender/70 text-shnoor-indigo text-xs font-semibold rounded-lg transition-colors cursor-pointer"
+                                                            >
+                                                                View Result
+                                                            </button>
+                                                        ) : (
+                                                            <span className="text-xs text-shnoor-soft italic">Pending Test</span>
+                                                        )}
+                                                    </td>
                                                 </tr>
                                             ))}
                                         </tbody>

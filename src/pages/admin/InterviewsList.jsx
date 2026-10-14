@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Video, Calendar, Clock, Users, Trash2, Edit2 } from 'lucide-react';
+import { Video, Calendar, Clock, Users, Trash2, Edit2, Mail } from 'lucide-react';
 import Select from 'react-select';
+import { toast } from 'react-toastify';
 import { apiFetch } from '../../config/api';
 import Card from '../../components/Card';
 import Button from '../../components/Button';
@@ -10,6 +11,7 @@ const InterviewsList = () => {
   const navigate = useNavigate();
   const [interviews, setInterviews] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [sendingEmailId, setSendingEmailId] = useState(null);
   const [filter, setFilter] = useState({
     status: '',
     date: new Date().toISOString().split('T')[0]
@@ -89,14 +91,37 @@ const InterviewsList = () => {
       const data = await response.json();
 
       if (data.success) {
-        alert('Interview deleted successfully');
+        toast.success('Interview deleted successfully');
         fetchInterviews(); // Refresh the list
       } else {
-        alert(data.message || 'Failed to delete interview');
+        toast.error(data.message || 'Failed to delete interview');
       }
     } catch (error) {
       console.error('Delete interview error:', error);
-      alert('Failed to delete interview');
+      toast.error('Failed to delete interview');
+    }
+  };
+
+  const handleResendEmail = async (interviewId, targetLabel) => {
+    try {
+      setSendingEmailId(interviewId);
+      const response = await apiFetch(`api/interviews/${interviewId}/resend-email`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+        }
+      });
+      const data = await response.json();
+      if (data.success) {
+        toast.success(data.message || `Interview email sent successfully to ${targetLabel}`);
+      } else {
+        toast.error(data.message || 'Failed to send interview email');
+      }
+    } catch (err) {
+      console.error('Resend email error:', err);
+      toast.error('Error sending interview email');
+    } finally {
+      setSendingEmailId(null);
     }
   };
 
@@ -131,15 +156,15 @@ const InterviewsList = () => {
 
       const data = await response.json();
       if (data.success) {
-        alert('Interview rescheduled successfully');
+        toast.success('Interview rescheduled successfully');
         setEditing(null);
         fetchInterviews();
       } else {
-        alert(data.message || 'Failed to reschedule interview');
+        toast.error(data.message || 'Failed to reschedule interview');
       }
     } catch (error) {
       console.error('Reschedule interview error:', error);
-      alert('Failed to reschedule interview');
+      toast.error('Failed to reschedule interview');
     }
   };
 
@@ -379,6 +404,15 @@ const InterviewsList = () => {
                     title="Edit schedule"
                   >
                     <Edit2 size={16} />
+                  </button>
+
+                  <button
+                    onClick={() => handleResendEmail(interview.id, interview.student_email || interview.student_name)}
+                    disabled={sendingEmailId === interview.id}
+                    className="h-10 w-10 flex items-center justify-center text-blue-600 border border-theme-border hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-lg transition-colors shrink-0 cursor-pointer disabled:opacity-50"
+                    title="Resend email to candidate"
+                  >
+                    <Mail size={16} className={sendingEmailId === interview.id ? "animate-pulse" : ""} />
                   </button>
 
                   <button

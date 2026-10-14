@@ -36,10 +36,37 @@ window.alert = (message) => {
     theme: "colored",
   };
 
-  if (message && message.toLowerCase().includes('success')) {
+  const str = String(message || '').toLowerCase();
+
+  const isError = str.includes('fail') ||
+                  str.includes('error') ||
+                  str.includes('cannot') ||
+                  str.includes('could not') ||
+                  str.includes('invalid') ||
+                  str.includes('not found') ||
+                  str.includes('wrong') ||
+                  str.includes('unauthorized') ||
+                  str.includes('forbidden');
+
+  const isSuccess = str.includes('success') ||
+                    str.includes('sent') ||
+                    str.includes('scheduled') ||
+                    str.includes('created') ||
+                    str.includes('updated') ||
+                    str.includes('deleted') ||
+                    str.includes('saved') ||
+                    str.includes('added') ||
+                    str.includes('removed') ||
+                    str.includes('copied') ||
+                    str.includes('done') ||
+                    str.includes('complete');
+
+  if (isError) {
+    toast.error(message, options);
+  } else if (isSuccess) {
     toast.success(message, options);
   } else {
-    toast.error(message, options);
+    toast.info(message, options);
   }
 };
 
