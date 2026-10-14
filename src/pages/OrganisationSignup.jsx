@@ -105,6 +105,9 @@ const OrganisationSignup = () => {
         });
         const data = await res.json();
         if (!res.ok || !data.success) throw new Error(data.message || 'Failed to send OTP');
+        if (data.devOtp) {
+          setFormData(prev => ({ ...prev, otp: data.devOtp }));
+        }
         setShowOtp(true);
       } else {
         if (!formData.otp) {

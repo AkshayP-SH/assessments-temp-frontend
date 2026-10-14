@@ -44,7 +44,9 @@ const InstituteRegistrationControl = ({ institute, onClose, onUpdate }) => {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        onUpdate();
+        if (typeof onUpdate === 'function') {
+          onUpdate();
+        }
         onClose();
       } else {
         setError(data.message || 'Failed to update registration control');

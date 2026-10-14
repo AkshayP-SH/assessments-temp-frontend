@@ -2793,6 +2793,7 @@ const AdminDashboard = () => {
                   setShowRegistrationControlModal(false);
                   setSelectedInstituteForRegistration(null);
                 }}
+                onUpdate={fetchAllInstitutes}
               />
             )}
 
