@@ -1,3 +1,4 @@
+import { formatDate, formatTime } from '../utils/dateTime';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Video, Calendar, Clock, AlertCircle } from 'lucide-react';
@@ -155,14 +156,12 @@ const StudentInterviews = () => {
 
     // Format in IST timezone
     return {
-      date: date.toLocaleDateString('en-IN', {
-        timeZone: 'Asia/Kolkata',
+      date: formatDate(date, 'en-IN', {
         month: 'short',
         day: 'numeric',
         year: 'numeric'
       }),
-      time: date.toLocaleTimeString('en-IN', {
-        timeZone: 'Asia/Kolkata',
+      time: formatTime(date, 'en-IN', {
         hour: '2-digit',
         minute: '2-digit',
         hour12: true

@@ -1,3 +1,4 @@
+import { formatDate } from '../utils/dateTime';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { LogOut, Clock, BookOpen, AlertCircle, FileText, X, Video, Briefcase, ArrowRight, CheckCircle2 } from 'lucide-react';
@@ -712,7 +713,7 @@ const Dashboard = () => {
                                     <div className="w-6 h-6 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center mr-2.5 flex-shrink-0 text-slate-500 dark:text-slate-400">
                                       <Clock size={13} />
                                     </div>
-                                    <span className="truncate">From: <strong className="text-slate-800 dark:text-slate-200">{new Date(test.startDateTime).toLocaleDateString()}</strong></span>
+                                    <span className="truncate">From: <strong className="text-slate-800 dark:text-slate-200">{formatDate(test.startDateTime)}</strong></span>
                                   </div>
                                 )}
                                 {test.endDateTime && (
@@ -720,7 +721,7 @@ const Dashboard = () => {
                                     <div className="w-6 h-6 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center mr-2.5 flex-shrink-0 text-slate-500 dark:text-slate-400">
                                       <Clock size={13} />
                                     </div>
-                                    <span className="truncate">Until: <strong className="text-slate-800 dark:text-slate-200">{new Date(test.endDateTime).toLocaleDateString()}</strong></span>
+                                    <span className="truncate">Until: <strong className="text-slate-800 dark:text-slate-200">{formatDate(test.endDateTime)}</strong></span>
                                   </div>
                                 )}
                               </div>
@@ -751,9 +752,9 @@ const Dashboard = () => {
                                 {test.alreadyTaken
                                   ? `Completed (${test.attemptsTaken}/${test.maxAttempts} attempts)`
                                   : test.testStatus === 'upcoming'
-                                    ? `Available from ${new Date(test.startDateTime).toLocaleDateString()}`
+                                    ? `Available from ${formatDate(test.startDateTime)}`
                                     : test.testStatus === 'expired'
-                                      ? `Expired on ${new Date(test.endDateTime).toLocaleDateString()}`
+                                      ? `Expired on ${formatDate(test.endDateTime)}`
                                       : isInProgress
                                         ? 'Resume Test'
                                         : `Take Test (${test.attemptsRemaining} attempts left)`}

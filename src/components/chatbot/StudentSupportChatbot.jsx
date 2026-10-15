@@ -1,3 +1,4 @@
+import { formatDate, formatTime } from '../../utils/dateTime';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { MessageCircle, X, ChevronLeft, Send, Upload, Image, AlertCircle, Check, RefreshCw, Bell } from 'lucide-react';
 import { CHATBOT_TOPICS, CHATBOT_QA, TOPIC_ICONS } from '../../data/chatbotData';
@@ -581,7 +582,7 @@ const StudentSupportChatbot = () => {
 
   const formatTime = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleTimeString('en-US', {
+    return formatTime(date, 'en-US', {
       hour: '2-digit',
       minute: '2-digit',
       hour12: true
@@ -599,7 +600,7 @@ const StudentSupportChatbot = () => {
     } else if (date.toDateString() === yesterday.toDateString()) {
       return 'Yesterday';
     } else {
-      return date.toLocaleDateString('en-US', {
+      return formatDate(date, 'en-US', {
         month: 'short',
         day: 'numeric',
         year: date.getFullYear() !== today.getFullYear() ? 'numeric' : undefined

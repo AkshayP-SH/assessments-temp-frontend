@@ -1,3 +1,4 @@
+import { formatDate } from '../../utils/dateTime';
 import React, { Suspense, lazy, useEffect, useState } from 'react';
 import {
   FileSpreadsheet, Plus, Trash2, CheckCircle2,
@@ -165,7 +166,7 @@ const ExamsTab = ({
                   const attempts = test.attempts || 0;
                   const passedCount = test.passedCount ?? test.passed_count ?? test.passed ?? 0;
                   const passRate = test.passRate ?? (attempts > 0 ? Math.round((passedCount / attempts) * 100) : 0);
-                  const formattedDate = test.date || (test.created_at ? new Date(test.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Sep 18, 2026');
+                  const formattedDate = test.date || (test.created_at ? formatDate(test.created_at, 'en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Sep 18, 2026');
                   const isPublished = test.status === 'published';
 
                   // Card top accent indicator and border in uniform blue/indigo

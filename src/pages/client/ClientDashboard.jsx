@@ -1,3 +1,4 @@
+import { formatDate } from '../../utils/dateTime';
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useClientAuth } from '../../contexts/ClientAuthContext';
@@ -469,7 +470,7 @@ const ClientDashboard = () => {
                               <td className="py-3 px-4 text-shnoor-soft">{s.institute_name}</td>
                               <td className="py-3 px-4 text-shnoor-soft">{s.course}</td>
                               <td className="py-3 px-4 text-shnoor-soft text-xs">
-                                {s.created_at ? new Date(s.created_at).toLocaleDateString('en-IN') : '—'}
+                                {s.created_at ? formatDate(s.created_at, 'en-IN') : '—'}
                               </td>
                             </tr>
                           ))}

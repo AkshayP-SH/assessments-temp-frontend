@@ -1,3 +1,4 @@
+import { formatDate } from '../../utils/dateTime';
 import React from 'react';
 import {
   Building2, Search, Plus, Loader2, FileSpreadsheet,
@@ -318,13 +319,13 @@ const InstitutesTab = ({
                           {institute.registration_start_time && (
                             <p className="flex items-center text-xs text-slate-500 dark:text-slate-400">
                               <Calendar size={12} className="mr-2 text-slate-400" />
-                              Start: {new Date(institute.registration_start_time).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })}
+                              Start: {formatDate(institute.registration_start_time, 'en-IN')}
                             </p>
                           )}
                           {institute.registration_deadline && (
                             <p className="flex items-center text-xs text-slate-500 dark:text-slate-400">
                               <Calendar size={12} className="mr-2 text-slate-400" />
-                              Deadline: {new Date(institute.registration_deadline).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })}
+                              Deadline: {formatDate(institute.registration_deadline, 'en-IN')}
                             </p>
                           )}
                         </div>

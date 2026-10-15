@@ -1,3 +1,4 @@
+import { formatDate } from '../../utils/dateTime';
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle, XCircle, ArrowLeft, RefreshCw, Plus, Building2, Users, Eye, EyeOff, Copy, ExternalLink, Pencil, Trash2 } from 'lucide-react';
@@ -839,9 +840,9 @@ const ClientDetailPanel = ({ client, onClose, onStatusChange, onDelete, onClient
                   {client.payment_status || 'UNPAID'}
                 </p>
               </div>
-              <div><span className="text-[#9A9AC9] block mb-1">Created On</span><p className="font-semibold text-gray-900">{new Date(client.created_at).toLocaleDateString('en-IN')}</p></div>
-              <div><span className="text-[#9A9AC9] block mb-1">Start Date</span><p className="font-semibold text-gray-900">{client.subscription_start_date ? new Date(client.subscription_start_date).toLocaleDateString('en-IN') : '-'}</p></div>
-              <div><span className="text-[#9A9AC9] block mb-1">Expiry Date</span><p className="font-semibold text-gray-900">{client.subscription_end_date ? new Date(client.subscription_end_date).toLocaleDateString('en-IN') : '-'}</p></div>
+              <div><span className="text-[#9A9AC9] block mb-1">Created On</span><p className="font-semibold text-gray-900">{formatDate(client.created_at, 'en-IN')}</p></div>
+              <div><span className="text-[#9A9AC9] block mb-1">Start Date</span><p className="font-semibold text-gray-900">{client.subscription_start_date ? formatDate(client.subscription_start_date, 'en-IN') : '-'}</p></div>
+              <div><span className="text-[#9A9AC9] block mb-1">Expiry Date</span><p className="font-semibold text-gray-900">{client.subscription_end_date ? formatDate(client.subscription_end_date, 'en-IN') : '-'}</p></div>
             </div>
           </div>
         </div>
@@ -1096,7 +1097,7 @@ const AdminClients = ({ isEmbedded = false }) => {
                           </span>
                         </td>
                         <td className="px-5 py-4 text-[#9A9AC9] dark:text-gray-400">
-                          {client.subscription_end_date ? new Date(client.subscription_end_date).toLocaleDateString('en-GB') : '-'}
+                          {client.subscription_end_date ? formatDate(client.subscription_end_date, 'en-GB') : '-'}
                         </td>
                         <td className="px-5 py-4 font-semibold text-gray-900 dark:text-gray-200">
                           <span className={`${daysLeft === 'Expired' ? 'text-red-600 dark:text-red-400' : (parseInt(daysLeft) <= 7 ? 'text-amber-500 dark:text-amber-400' : 'text-gray-900 dark:text-gray-200')}`}>

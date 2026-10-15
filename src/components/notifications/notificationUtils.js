@@ -1,3 +1,4 @@
+import { formatDate } from '../../utils/dateTime';
 import { createElement } from 'react';
 import {
   Bell, MessageSquare, BookOpen, Video, Briefcase, ShieldAlert, CreditCard, Building2,
@@ -24,5 +25,5 @@ export const formatRelativeTime = (iso) => {
   if (diffMin < 60) return `${diffMin}m ago`;
   if (diffMin < 1440) return `${Math.floor(diffMin / 60)}h ago`;
   if (diffMin < 10080) return `${Math.floor(diffMin / 1440)}d ago`;
-  return new Date(iso).toLocaleDateString();
+  return formatDate(iso);
 };

@@ -1,3 +1,4 @@
+import { formatTime } from '../../utils/dateTime';
 import { useEffect, useRef } from 'react';
 import { X, AlertTriangle, Info, Clock } from 'lucide-react';
 
@@ -140,7 +141,7 @@ const StudentMessageAlert = ({
             <div className="flex items-center space-x-2 text-sm text-gray-500">
               <Clock size={14} />
               <span>
-                Received at {new Date(message.timestamp).toLocaleTimeString('en-US', {
+                Received at {formatTime(message.timestamp, 'en-US', {
                   hour: '2-digit',
                   minute: '2-digit',
                   hour12: false

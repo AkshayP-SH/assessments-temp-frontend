@@ -1,3 +1,4 @@
+import { formatDateTime } from '../../utils/dateTime';
 import React from 'react';
 import { X, Loader2, Plus, Users, Calendar, Pencil } from 'lucide-react';
 
@@ -51,7 +52,7 @@ const TestHistoryModal = ({
                     <Calendar size={14} className="text-slate-400" />
                     <span className="text-slate-500">On:</span>
                     <span className="font-semibold text-slate-800">
-                      {testHistory?.createdAt && new Date(testHistory.createdAt).toLocaleString('en-US', {
+                      {testHistory?.createdAt && formatDateTime(testHistory.createdAt, 'en-US', {
                         year: 'numeric',
                         month: 'short',
                         day: 'numeric',
@@ -84,7 +85,7 @@ const TestHistoryModal = ({
                     <Calendar size={14} className="text-slate-400" />
                     <span className="text-slate-500">On:</span>
                     <span className="font-semibold text-slate-800">
-                      {testHistory?.updatedAt && new Date(testHistory.updatedAt).toLocaleString('en-US', {
+                      {testHistory?.updatedAt && formatDateTime(testHistory.updatedAt, 'en-US', {
                         year: 'numeric',
                         month: 'short',
                         day: 'numeric',

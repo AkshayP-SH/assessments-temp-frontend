@@ -1,3 +1,4 @@
+import { formatTime } from '../../utils/dateTime';
 import React from 'react';
 import LazyMonacoEditor from '../LazyMonacoEditor';
 import ErrorBoundary from '../ErrorBoundary';
@@ -88,7 +89,7 @@ const CodingEditorPanel = ({
               executionTime: result.executionTime + 'ms',
               error: result.error
             }],
-            timestamp: new Date().toLocaleTimeString()
+            timestamp: formatTime(new Date())
           }
         }));
       } else {
@@ -119,7 +120,7 @@ const CodingEditorPanel = ({
             running: false,
             results: results,
             summary: evaluation.summary,
-            timestamp: new Date().toLocaleTimeString()
+            timestamp: formatTime(new Date())
           }
         }));
       }
@@ -138,7 +139,7 @@ const CodingEditorPanel = ({
             executionTime: '0ms',
             error: error.message
           }],
-          timestamp: new Date().toLocaleTimeString()
+          timestamp: formatTime(new Date())
         }
       }));
     }
@@ -223,7 +224,7 @@ const CodingEditorPanel = ({
               totalTestCases: totalTestCases,
               percentage: percentage.toFixed(1)
             },
-            timestamp: new Date().toLocaleTimeString(),
+            timestamp: formatTime(new Date()),
             isLoading: false
           }
         }));
@@ -267,7 +268,7 @@ const CodingEditorPanel = ({
               totalTestCases: 1,
               percentage: '0.0'
             },
-            timestamp: new Date().toLocaleTimeString(),
+            timestamp: formatTime(new Date()),
             running: false
           }
         }));
@@ -293,7 +294,7 @@ const CodingEditorPanel = ({
             totalTestCases: 1,
             percentage: '0.0'
           },
-          timestamp: new Date().toLocaleTimeString(),
+          timestamp: formatTime(new Date()),
           running: false
         }
       }));

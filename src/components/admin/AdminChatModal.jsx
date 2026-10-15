@@ -1,3 +1,4 @@
+import { formatTime } from '../../utils/dateTime';
 import { useState, useEffect, useRef } from 'react';
 import { X, Send, AlertTriangle, Info, MessageCircle, Clock } from 'lucide-react';
 
@@ -139,7 +140,7 @@ const AdminChatModal = ({
   };
 
   const formatTime = (timestamp) => {
-    return new Date(timestamp).toLocaleTimeString('en-US', {
+    return formatTime(timestamp, 'en-US', {
       hour: '2-digit',
       minute: '2-digit',
       hour12: false

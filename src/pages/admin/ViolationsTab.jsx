@@ -1,3 +1,4 @@
+import { formatDateTime } from '../../utils/dateTime';
 import React from 'react';
 import { Download, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import Select from 'react-select';
@@ -166,7 +167,7 @@ const ViolationsTab = ({
                           Medium: {student.medium_severity_count}
                         </span>
                         <span className="text-shnoor-indigoMedium">
-                          Last: {new Date(student.last_violation).toLocaleString()}
+                          Last: {formatDateTime(student.last_violation)}
                         </span>
                       </div>
                     </div>

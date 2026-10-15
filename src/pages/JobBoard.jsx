@@ -1,4 +1,5 @@
 // src/pages/JobBoard.jsx
+import { formatDateTime } from '../utils/dateTime';
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, Briefcase, Building2, Clock, ArrowLeft, Loader2, RefreshCw, Search, CheckCircle2, CheckCircle, X, Code, Link2, Calendar, FileText, Info, Bookmark } from 'lucide-react';
@@ -13,7 +14,7 @@ import { useDebounce } from '../hooks/useDebounce';
 
 const fmtDeadline = (iso) =>
     iso
-        ? new Date(iso).toLocaleString('en-IN', {
+        ? formatDateTime(iso, 'en-IN', {
             weekday: 'long',
             year: 'numeric',
             month: 'long',

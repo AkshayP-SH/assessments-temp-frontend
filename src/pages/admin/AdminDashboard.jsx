@@ -1,3 +1,4 @@
+import { formatDate } from '../../utils/dateTime';
 import { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import axios from 'axios';
@@ -603,7 +604,7 @@ const AdminDashboard = () => {
           endDateTime: test.end_datetime,
           jobRole: test.job_role || '',
           description: test.description || '',
-          date: new Date(test.created_at).toLocaleDateString('en-US', {
+          date: formatDate(test.created_at, 'en-US', {
             year: 'numeric',
             month: 'short',
             day: 'numeric'
@@ -656,7 +657,7 @@ const AdminDashboard = () => {
           score: result.marks_obtained,
           total: result.total_marks,
           passingPercentage: result.passing_percentage || testObj?.passingPercentage || selectedExamDetails?.passingPercentage || 50,
-          date: result.submitted_at ? new Date(result.submitted_at).toLocaleDateString('en-IN', {
+          date: result.submitted_at ? formatDate(result.submitted_at, 'en-IN', {
             year: 'numeric',
             month: 'short',
             day: 'numeric'

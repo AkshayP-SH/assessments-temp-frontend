@@ -1,3 +1,4 @@
+import { formatDate, formatTime } from '../../utils/dateTime';
 import { useState } from 'react';
 import { MessageCircle, AlertTriangle, Info, Clock, ChevronDown, ChevronUp } from 'lucide-react';
 
@@ -58,7 +59,7 @@ const StudentWarningsSidebar = ({
   };
 
   const formatTime = (timestamp) => {
-    return new Date(timestamp).toLocaleTimeString('en-US', {
+    return formatTime(timestamp, 'en-US', {
       hour: '2-digit',
       minute: '2-digit',
       hour12: false
@@ -74,7 +75,7 @@ const StudentWarningsSidebar = ({
     if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
     const diffInHours = Math.floor(diffInMinutes / 60);
     if (diffInHours < 24) return `${diffInHours}h ago`;
-    return messageTime.toLocaleDateString();
+    return formatDate(messageTime);
   };
 
   const getMessagePreview = (message, maxLength = 50) => {

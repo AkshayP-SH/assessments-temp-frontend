@@ -1,3 +1,4 @@
+import { formatDateTime } from '../utils/dateTime';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import shnoorLogo from '../assets/shnoor-logo.webp';
@@ -91,7 +92,7 @@ const DEFAULT_PLANS = [
 
 const fmtDeadline = (iso) =>
   iso
-    ? new Date(iso).toLocaleString('en-IN', {
+    ? formatDateTime(iso, 'en-IN', {
         weekday: 'long',
         year: 'numeric',
         month: 'long',

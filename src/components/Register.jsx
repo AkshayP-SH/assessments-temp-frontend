@@ -1,3 +1,4 @@
+import { formatDate } from '../utils/dateTime';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
@@ -814,7 +815,7 @@ const Register = () => {
 
                 <div className="mt-6 pt-4 border-t border-shnoor-mist">
                   <p className="text-xs text-shnoor-soft">
-                    Last updated: {new Date().toLocaleDateString()}
+                    Last updated: {formatDate(new Date())}
                   </p>
                 </div>
               </div>

@@ -1,3 +1,4 @@
+import { formatDate } from '../../utils/dateTime';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CreditCard, AlertTriangle, CheckCircle, Calendar, Zap } from 'lucide-react';
@@ -152,7 +153,7 @@ const MySubscriptionTab = ({ quota: propQuota, user: propUser }) => {
               {user?.subscriptionEndDate ? (
                 <div>
                   <p className="font-semibold text-shnoor-indigo">
-                    {new Date(user.subscriptionEndDate).toLocaleDateString(undefined, {
+                    {formatDate(user.subscriptionEndDate, undefined, {
                       year: 'numeric', month: 'long', day: 'numeric'
                     })}
                   </p>

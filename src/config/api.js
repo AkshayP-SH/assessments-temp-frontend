@@ -4,7 +4,7 @@
 const configuredApiUrl = import.meta.env.VITE_API_URL;
 const API_BASE_URL = (configuredApiUrl || (import.meta.env.PROD
   ? window.location.origin
-  : 'http://localhost:5000')).replace(/\/+$/, '');
+  : 'http://localhost:5050')).replace(/\/+$/, '');
 
 // Timeout for API requests (30 seconds for cold starts)
 const API_TIMEOUT = 30000;

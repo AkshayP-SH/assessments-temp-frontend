@@ -1,3 +1,4 @@
+import { formatTime } from '../utils/dateTime';
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Video, VideoOff, Mic, MicOff, Monitor, MonitorOff, PhoneOff, MessageSquare, Send, Phone } from 'lucide-react';
@@ -346,8 +347,11 @@ const InterviewRoom = () => {
       const isSecure = apiUrl.startsWith('https') || window.location.protocol === 'https:';
 
       let backendHost = window.location.hostname || 'localhost';
-      // PeerJS runs on a dedicated port (see backend PEER_PORT) — default 5005
-      let backendPort = parseInt(import.meta.env.VITE_PEER_PORT || '5005', 10);
+      // Production PeerJS is reached through Nginx on HTTPS; local development uses its backend port.
+      let backendPort = parseInt(
+        import.meta.env.VITE_PEER_PORT || (import.meta.env.PROD ? '443' : '5054'),
+        10
+      );
       let peerPath = '/peerjs';
 
       try {
@@ -1472,7 +1476,7 @@ const InterviewRoom = () => {
                         {msg.text}
                       </p>
                       <p className="text-xs opacity-60 mt-1">
-                        {new Date(msg.timestamp).toLocaleTimeString([], {
+                        {formatTime(msg.timestamp, [], {
                           hour: '2-digit',
                           minute: '2-digit'
                         })}

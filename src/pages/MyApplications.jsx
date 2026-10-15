@@ -1,3 +1,4 @@
+import { formatDate } from '../utils/dateTime';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, ArrowLeft, Briefcase, Loader2, RefreshCw, CheckCircle, Clock, FileText, AlertTriangle, XCircle, Trophy, PlayCircle, Award, ChevronDown, Building, MoreHorizontal, Archive, XSquare, Flag, User } from 'lucide-react';
@@ -39,7 +40,7 @@ const StatusBadge = ({ status }) => {
 
 const fmtDate = (iso) => {
     if (!iso) return '—';
-    return new Date(iso).toLocaleDateString('en-IN', {
+    return formatDate(iso, 'en-IN', {
         year: 'numeric',
         month: 'short',
         day: 'numeric'

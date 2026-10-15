@@ -1,3 +1,4 @@
+import { formatTime } from '../../utils/dateTime';
 import { useState, memo } from 'react';
 import { ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
 
@@ -162,7 +163,7 @@ const QuestionPaletteSidebar = memo(({
                     <div key={msg.id || idx} className="bg-blue-50 border border-blue-200 rounded-lg p-2">
                       <p className="text-xs text-gray-700 leading-relaxed">{msg.message}</p>
                       <p className="text-xs text-gray-400 mt-1">
-                        {new Date(msg.timestamp).toLocaleTimeString('en-US', {
+                        {formatTime(msg.timestamp, 'en-US', {
                           hour: '2-digit',
                           minute: '2-digit',
                           hour12: false,

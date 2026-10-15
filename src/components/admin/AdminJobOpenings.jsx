@@ -1,4 +1,5 @@
 // src/components/admin/AdminJobOpenings.jsx
+import { formatDateTime } from '../../utils/dateTime';
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Briefcase, Plus, Send, Trash2, X, Building2, Clock, ExternalLink, CheckCircle, XCircle, Loader2, AlertCircle, ChevronDown, ChevronUp, Users, Link as LinkIcon, TestTube } from 'lucide-react';
@@ -23,7 +24,7 @@ const adminHeaders = () => {
 };
 
 const fmtDate = (iso) =>
-    iso ? new Date(iso).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : '—';
+    iso ? formatDateTime(iso, 'en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : '—';
 
 // ── Component ────────────────────────────────────────────────────────────────
 export default function AdminJobOpenings({ clientId }) {

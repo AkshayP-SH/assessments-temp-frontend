@@ -1,3 +1,4 @@
+import { formatDate } from '../../utils/dateTime';
 import React, { useState, useEffect, useRef } from 'react';
 import { apiFetch, getApiUrl } from '../../config/api';
 import { Save, AlertTriangle, Clock, Video, UploadCloud, Trash2, RefreshCw, CheckCircle2, Film, Info } from 'lucide-react';
@@ -345,7 +346,7 @@ const SystemSettingsTab = () => {
                                         <div>
                                             <span className="text-gray-400 block">Uploaded On</span>
                                             <span className="font-semibold text-gray-700">
-                                                {companyVideo.uploaded_at ? new Date(companyVideo.uploaded_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : 'Recently'}
+                                                {companyVideo.uploaded_at ? formatDate(companyVideo.uploaded_at, undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : 'Recently'}
                                             </span>
                                         </div>
                                     </div>
@@ -536,4 +537,4 @@ const SystemSettingsTab = () => {
     );
 };
 
-export default SystemSettingsTab;
+export default SystemSettingsTab;

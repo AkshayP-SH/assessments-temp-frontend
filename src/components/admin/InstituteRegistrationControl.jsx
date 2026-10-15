@@ -1,3 +1,4 @@
+import { formatDateTime } from '../../utils/dateTime';
 import { useState } from 'react';
 import { Lock, Unlock, Pause, X, Save, AlertCircle } from 'lucide-react';
 import { apiFetch } from '../../config/api';
@@ -6,11 +7,11 @@ import CustomDateTimePicker from './CustomDateTimePicker';
 const InstituteRegistrationControl = ({ institute, onClose, onUpdate }) => {
   const [formData, setFormData] = useState({
     registration_status: institute.registration_status || 'open',
-    registration_start_time: institute.registration_start_time 
-      ? new Date(institute.registration_start_time) 
+    registration_start_time: institute.registration_start_time
+      ? new Date(institute.registration_start_time)
       : null,
-    registration_deadline: institute.registration_deadline 
-      ? new Date(institute.registration_deadline) 
+    registration_deadline: institute.registration_deadline
+      ? new Date(institute.registration_deadline)
       : null
   });
   const [isSaving, setIsSaving] = useState(false);
@@ -116,12 +117,12 @@ const InstituteRegistrationControl = ({ institute, onClose, onUpdate }) => {
             const deadline = institute.registration_deadline ? new Date(institute.registration_deadline) : null;
             const notYetOpen = startTime && now < startTime;
             const deadlinePassed = deadline && now > deadline;
-            
+
             let effectiveStatus = institute.registration_status || 'open';
             let statusText = effectiveStatus;
             let statusColor = getStatusColor(effectiveStatus);
             let statusIcon = getStatusIcon(effectiveStatus);
-            
+
             if (notYetOpen) {
               effectiveStatus = 'not_yet_open';
               statusText = 'Not Yet Open';
@@ -134,7 +135,7 @@ const InstituteRegistrationControl = ({ institute, onClose, onUpdate }) => {
               statusColor = 'bg-rose-50/70 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800 text-rose-900 dark:text-rose-200';
               statusIcon = <Lock className="w-5 h-5 text-rose-600 dark:text-rose-400" />;
             }
-            
+
             return (
               <div className={`border rounded-xl p-4 transition-all ${statusColor}`}>
                 <div className="flex items-center gap-3">
@@ -148,8 +149,7 @@ const InstituteRegistrationControl = ({ institute, onClose, onUpdate }) => {
                 </div>
                 {institute.registration_start_time && (
                   <p className="text-xs mt-2.5 text-slate-700 dark:text-slate-300">
-                    <span className="font-bold">Start:</span> {new Date(institute.registration_start_time).toLocaleString('en-IN', { 
-                      timeZone: 'Asia/Kolkata',
+                    <span className="font-bold">Start:</span> {formatDateTime(institute.registration_start_time, 'en-IN', {
                       dateStyle: 'medium',
                       timeStyle: 'short'
                     })} IST
@@ -158,8 +158,7 @@ const InstituteRegistrationControl = ({ institute, onClose, onUpdate }) => {
                 )}
                 {institute.registration_deadline && (
                   <p className="text-xs mt-1.5 text-slate-700 dark:text-slate-300">
-                    <span className="font-bold">Deadline:</span> {new Date(institute.registration_deadline).toLocaleString('en-IN', { 
-                      timeZone: 'Asia/Kolkata',
+                    <span className="font-bold">Deadline:</span> {formatDateTime(institute.registration_deadline, 'en-IN', {
                       dateStyle: 'medium',
                       timeStyle: 'short'
                     })} IST

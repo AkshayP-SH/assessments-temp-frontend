@@ -1,3 +1,4 @@
+import { formatDate } from '../../utils/dateTime';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   User,
@@ -314,7 +315,7 @@ export default function AdminProfile() {
   const formatDate = (dateStr) => {
     if (!dateStr) return '—';
     try {
-      return new Date(dateStr).toLocaleDateString('en-US', {
+      return formatDate(dateStr, 'en-US', {
         year: 'numeric',
         month: 'short',
         day: 'numeric'

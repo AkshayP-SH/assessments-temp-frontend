@@ -1,3 +1,4 @@
+import { formatDate } from '../../utils/dateTime';
 import React, { useMemo } from 'react';
 import {
   ArrowLeft, FileSpreadsheet, Download, CheckSquare, ChevronDown,
@@ -666,7 +667,7 @@ const ResultsTab = React.memo(({
                           </div>
                         )}
                         <p className="text-xs text-slate-400 mt-1">
-                          {new Date(feedback.created_at).toLocaleDateString()}
+                          {formatDate(feedback.created_at)}
                         </p>
                       </div>
                     </div>

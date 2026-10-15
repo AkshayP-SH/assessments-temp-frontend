@@ -1,3 +1,4 @@
+import { formatDate, formatTime } from '../../utils/dateTime';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Mail, MailOpen, Trash2, ChevronDown, CheckCheck, User, AlertCircle, X, Send, Building, MessageCircle, Paperclip, Smile, CheckCircle, Clock, BarChart3, TrendingUp, ThumbsUp, ThumbsDown, Star } from 'lucide-react';
@@ -587,7 +588,7 @@ const StudentMessages = ({ isEmbedded = false }) => {
     if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
     if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
     if (diff < 604800000) return `${Math.floor(diff / 86400000)}d ago`;
-    return date.toLocaleDateString('en-US', {
+    return formatDate(date, 'en-US', {
       month: 'short', day: 'numeric',
       year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
     });
@@ -595,7 +596,7 @@ const StudentMessages = ({ isEmbedded = false }) => {
 
   const formatTime = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+    return formatTime(date, 'en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
   };
 
   const unreadCount = messages.reduce((total, msg) => total + (parseInt(msg.unread_count) || 0), 0);
@@ -842,7 +843,7 @@ const StudentMessages = ({ isEmbedded = false }) => {
                           <p className="text-sm text-theme-text italic break-words">"{feedback.feedback_comments}"</p>
                         )}
                         <p className="text-xs text-theme-muted mt-2">
-                          Submitted {new Date(feedback.feedback_submitted_at).toLocaleDateString()}
+                          Submitted {formatDate(feedback.feedback_submitted_at)}
                         </p>
                       </div>
                     ))}
