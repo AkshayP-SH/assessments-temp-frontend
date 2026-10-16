@@ -1,4 +1,4 @@
-import { formatDateTime } from '../../utils/dateTime';
+import { formatDateTime as formatDateTimeUtil } from '../../utils/dateTime';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Video, Calendar, Clock, Users, Trash2, Edit2, Mail } from 'lucide-react';
@@ -171,7 +171,7 @@ const InterviewsList = () => {
 
   const formatDateTime = (datetime) => {
     // Format date and time in IST timezone (same as test scheduling)
-    return formatDateTime(datetime, 'en-IN', {
+    return formatDateTimeUtil(datetime, 'en-IN', {
       timeZone: 'Asia/Kolkata',
       year: 'numeric',
       month: 'short',

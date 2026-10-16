@@ -1,5 +1,5 @@
 // src/components/admin/AdminJobApplicants.jsx
-import { formatDate } from '../../utils/dateTime';
+import { formatDate as formatDateTimeUtil } from '../../utils/dateTime';
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import AdminLayout from '../AdminLayout';
@@ -124,7 +124,7 @@ export default function AdminJobApplicants() {
 
     const formatDate = (d) => {
         if (!d) return 'N/A';
-        return formatDate(d, 'en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        return formatDateTimeUtil(d, 'en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
     };
 
     const getResultBadge = (passed, percentage) => {

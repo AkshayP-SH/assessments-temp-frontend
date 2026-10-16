@@ -346,29 +346,29 @@ const ExamsTab = ({
                             ) : (
                               <>
                                 <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setEditingTest(test);
-                                  setShowCreateTest(true);
-                                }}
-                                className="h-full flex-1 inline-flex items-center justify-center gap-1.5 bg-slate-50 dark:bg-[#1E1E38] hover:bg-indigo-50/70 dark:hover:bg-indigo-950/40 text-slate-700 dark:text-slate-200 hover:text-[#403f75] dark:hover:text-indigo-300 text-xs sm:text-sm font-bold rounded-xl transition-all cursor-pointer border border-slate-200/90 dark:border-slate-700 hover:border-indigo-200/80 shadow-2xs btn-action-gesture"
-                              >
-                                <Edit2 size={14} />
-                                <span>Edit</span>
-                              </button>
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleTogglePublish(test.id, test.status);
-                                }}
-                                className="btn-publish h-full flex-1 inline-flex items-center justify-center gap-1.5 bg-gradient-to-r from-[#403f75] to-[#57569b] hover:from-[#343360] hover:to-[#4a4988] active:scale-98 text-white text-xs sm:text-sm font-bold rounded-xl transition-all shadow-md shadow-[#403f75]/20 cursor-pointer btn-action-gesture"
-                              >
-                                <CheckCircle2 size={14} className="text-white" />
-                                <span>Publish</span>
-                              </button>
-                            </>
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditingTest(test);
+                                    setShowCreateTest(true);
+                                  }}
+                                  className="h-full flex-1 inline-flex items-center justify-center gap-1.5 bg-slate-50 dark:bg-[#1E1E38] hover:bg-indigo-50/70 dark:hover:bg-indigo-950/40 text-slate-700 dark:text-slate-200 hover:text-[#403f75] dark:hover:text-indigo-300 text-xs sm:text-sm font-bold rounded-xl transition-all cursor-pointer border border-slate-200/90 dark:border-slate-700 hover:border-indigo-200/80 shadow-2xs btn-action-gesture"
+                                >
+                                  <Edit2 size={14} />
+                                  <span>Edit</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleTogglePublish(test.id, test.status);
+                                  }}
+                                  className="btn-publish h-full flex-1 inline-flex items-center justify-center gap-1.5 bg-gradient-to-r from-[#403f75] to-[#57569b] hover:from-[#343360] hover:to-[#4a4988] active:scale-98 text-white text-xs sm:text-sm font-bold rounded-xl transition-all shadow-md shadow-[#403f75]/20 cursor-pointer btn-action-gesture"
+                                >
+                                  <CheckCircle2 size={14} className="text-white" />
+                                  <span>Publish</span>
+                                </button>
+                              </>
                             )}
 
                             {/* Delete Button with high-visibility hover state */}
@@ -389,7 +389,7 @@ const ExamsTab = ({
                       </div>
                     </div>
                   );
-              })}
+                })}
               </div>
 
               {/* Pagination */}

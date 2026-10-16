@@ -1,5 +1,5 @@
 import { formatDate } from '../../utils/dateTime';
-import { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef, lazy, Suspense } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -320,10 +320,33 @@ const AdminDashboard = () => {
     return saved === null ? true : saved === 'true';
   });
   const [isSidebarHovered, setIsSidebarHovered] = useState(false);
+  const justToggledRef = useRef(false);
 
   const isExpanded = isSidebarExpanded || isSidebarHovered;
 
-  const toggleSidebarExpanded = () => {
+  const handleSidebarMouseEnter = (e) => {
+    // Ignore touch events so touch devices (iPad Pro, etc.) don't get stuck in ghost hover
+    if (e && e.pointerType === 'touch') return;
+    if (typeof window !== 'undefined' && window.matchMedia && !window.matchMedia('(hover: hover)').matches) return;
+    if (justToggledRef.current) return;
+    if (!isSidebarExpanded) {
+      setIsSidebarHovered(true);
+    }
+  };
+
+  const handleSidebarMouseLeave = () => {
+    justToggledRef.current = false;
+    setIsSidebarHovered(false);
+  };
+
+  const toggleSidebarExpanded = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    // Instantly close hover so clicking collapse immediately collapses the menu
+    justToggledRef.current = true;
+    setIsSidebarHovered(false);
     setIsSidebarExpanded(prev => {
       const next = !prev;
       localStorage.setItem('adminSidebarExpanded', String(next));
@@ -391,9 +414,56 @@ const AdminDashboard = () => {
     setStatusFilter('all');
   };
 
+  const [singleExamDetails, setSingleExamDetails] = useState(null);
+
   // Derived state: Get students for the selected exam
   const selectedExamStudents = selectedExamId ? (studentsData[selectedExamId] || []) : [];
-  const selectedExamDetails = tests.find(t => t.id === selectedExamId);
+  const selectedExamDetails = tests.find(t => String(t.id) === String(selectedExamId)) || singleExamDetails;
+
+  // If exam is opened directly by URL and not yet in tests list, fetch its details
+  useEffect(() => {
+    if (!selectedExamId) {
+      setSingleExamDetails(null);
+      return;
+    }
+    const alreadyInList = tests.find(t => String(t.id) === String(selectedExamId));
+    if (alreadyInList) {
+      setSingleExamDetails(null);
+      return;
+    }
+
+    let isCancelled = false;
+    const fetchSingleExam = async () => {
+      try {
+        const token = localStorage.getItem('adminToken');
+        const res = await apiFetch(`api/tests/${selectedExamId}${clientParam}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (res.ok && data.success && data.test && !isCancelled) {
+          const t = data.test;
+          const mcqCount = Array.isArray(t.questions) ? t.questions.length : 0;
+          const codingCount = Array.isArray(t.codingQuestions) ? t.codingQuestions.length : 0;
+          setSingleExamDetails({
+            id: t.id,
+            name: t.title,
+            questions: t.question_count ?? (mcqCount + codingCount),
+            date: formatDate(t.created_at, 'en-US', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric'
+            }),
+            passingPercentage: t.passing_percentage || 50
+          });
+        }
+      } catch (err) {
+        console.error('Error fetching single exam details:', err);
+      }
+    };
+
+    fetchSingleExam();
+    return () => { isCancelled = true; };
+  }, [selectedExamId, tests, clientParam]);
 
   // Fetch feedback when feedback tab is selected
   useEffect(() => {
@@ -637,7 +707,7 @@ const AdminDashboard = () => {
 
       const data = await response.json();
       if (response.ok && data.success && Array.isArray(data.results)) {
-        const testObj = tests.find(t => t.id === testId);
+        const testObj = tests.find(t => String(t.id) === String(testId));
         const filtered = data.results.filter(result => {
           if (result.test_id && (result.test_id === testId || String(result.test_id) === String(testId))) {
             return true;
@@ -2226,32 +2296,65 @@ const AdminDashboard = () => {
 
         {/* Client Admin — Usage Stats Bar */}
         {!isSuperAdmin && quota && (
-          <div className="bg-white border-b border-shnoor-mist">
-            <div className="w-full px-4 sm:px-6 lg:pr-6 lg:pl-[88px] py-2 flex flex-wrap items-center gap-4">
-              {[
-                { label: 'Tests', used: quota.tests?.used, max: quota.tests?.max },
-                { label: 'Institutes', used: quota.institutes?.used, max: quota.institutes?.max },
-                { label: 'Students', used: quota.students?.used, max: quota.students?.max },
-              ].map(({ label, used, max }) => {
-                const isUnlimited = max == null || Number(max) === -1;
-                const numericMax = Number(max);
-                const numericUsed = Number(used) || 0;
-                const pct = isUnlimited || numericMax === 0
-                  ? 0
-                  : Math.min(100, Math.round((numericUsed / numericMax) * 100));
-                const warn = pct >= 90;
-                return (
-                  <div key={label} className="flex items-center gap-2 min-w-[140px]">
-                    <span className="text-xs text-shnoor-soft w-16 flex-shrink-0">{label}</span>
-                    <div className="flex-1 h-1.5 bg-shnoor-lavender rounded-full overflow-hidden">
-                      <div className={`h-full rounded-full transition-all ${warn ? 'bg-shnoor-danger' : 'bg-shnoor-indigo'}`} style={{ width: `${pct}%` }} />
+          <div className="bg-white dark:bg-[#1A1A32] border-b border-shnoor-mist dark:border-slate-800 transition-colors">
+            <div className={`w-full px-3 sm:px-6 ${isExpanded ? 'lg:pl-[280px] lg:pr-6' : 'lg:pl-[88px] lg:pr-6'} py-2 transition-all duration-300 ease-in-out`}>
+              {/* Mobile View: 3 equal micro-cards in 1 neat row */}
+              <div className="grid grid-cols-3 gap-2 sm:hidden">
+                {[
+                  { label: 'Tests', used: quota.tests?.used, max: quota.tests?.max },
+                  { label: 'Institutes', used: quota.institutes?.used, max: quota.institutes?.max },
+                  { label: 'Students', used: quota.students?.used, max: quota.students?.max },
+                ].map(({ label, used, max }) => {
+                  const isUnlimited = max == null || Number(max) === -1;
+                  const numericMax = Number(max);
+                  const numericUsed = Number(used) || 0;
+                  const pct = isUnlimited || numericMax === 0
+                    ? 0
+                    : Math.min(100, Math.round((numericUsed / numericMax) * 100));
+                  const warn = pct >= 90;
+                  return (
+                    <div key={label} className="bg-slate-50 dark:bg-slate-800/60 p-1.5 rounded-lg border border-slate-200/60 dark:border-slate-700/60 flex flex-col gap-1">
+                      <div className="flex items-center justify-between text-[11px] leading-tight">
+                        <span className="font-semibold text-slate-500 dark:text-slate-400 truncate">{label}</span>
+                        <span className={`font-bold flex-shrink-0 ml-1 ${warn ? 'text-shnoor-danger' : 'text-shnoor-indigoMedium dark:text-indigo-300'}`}>
+                          {numericUsed}/{isUnlimited ? '∞' : max}
+                        </span>
+                      </div>
+                      <div className="w-full h-1.5 bg-shnoor-lavender dark:bg-slate-700 rounded-full overflow-hidden">
+                        <div className={`h-full rounded-full transition-all ${warn ? 'bg-shnoor-danger' : 'bg-shnoor-indigo dark:bg-indigo-400'}`} style={{ width: `${pct}%` }} />
+                      </div>
                     </div>
-                    <span className={`text-xs font-medium flex-shrink-0 ${warn ? 'text-shnoor-danger' : 'text-shnoor-indigoMedium'}`}>
-                      {numericUsed}/{isUnlimited ? 'Unlimited' : max}
-                    </span>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
+
+              {/* Tablet & Desktop View: Inline flex layout */}
+              <div className="hidden sm:flex flex-wrap items-center gap-4 lg:gap-6">
+                {[
+                  { label: 'Tests', used: quota.tests?.used, max: quota.tests?.max },
+                  { label: 'Institutes', used: quota.institutes?.used, max: quota.institutes?.max },
+                  { label: 'Students', used: quota.students?.used, max: quota.students?.max },
+                ].map(({ label, used, max }) => {
+                  const isUnlimited = max == null || Number(max) === -1;
+                  const numericMax = Number(max);
+                  const numericUsed = Number(used) || 0;
+                  const pct = isUnlimited || numericMax === 0
+                    ? 0
+                    : Math.min(100, Math.round((numericUsed / numericMax) * 100));
+                  const warn = pct >= 90;
+                  return (
+                    <div key={label} className="flex items-center gap-2 min-w-[140px]">
+                      <span className="text-xs text-shnoor-soft dark:text-slate-400 w-16 flex-shrink-0 font-medium">{label}</span>
+                      <div className="flex-1 h-1.5 bg-shnoor-lavender dark:bg-slate-700/80 rounded-full overflow-hidden">
+                        <div className={`h-full rounded-full transition-all ${warn ? 'bg-shnoor-danger' : 'bg-shnoor-indigo dark:bg-indigo-400'}`} style={{ width: `${pct}%` }} />
+                      </div>
+                      <span className={`text-xs font-semibold flex-shrink-0 ${warn ? 'text-shnoor-danger' : 'text-shnoor-indigoMedium dark:text-indigo-300'}`}>
+                        {numericUsed}/{isUnlimited ? 'Unlimited' : max}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         )}
@@ -2262,28 +2365,27 @@ const AdminDashboard = () => {
 
             {/* Subscription Expiry Banner */}
             {!isSuperAdmin && daysRemaining !== null && daysRemaining <= 7 && (
-              <div className={`mb-4 p-4 rounded-xl shadow-sm border flex items-center justify-between animate-fade-in ${daysRemaining <= 1
-                ? 'bg-red-50 border-red-200 text-red-800'
-                : 'bg-yellow-50 border-yellow-200 text-yellow-800'
+              <div className={`mb-4 p-3.5 sm:p-4 rounded-xl shadow-sm border flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 animate-fade-in ${daysRemaining <= 1
+                ? 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-900/50 text-red-800 dark:text-red-300'
+                : 'bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-900/50 text-amber-900 dark:text-amber-300'
                 }`}>
-                <div className="flex items-center">
-                  <AlertCircle size={20} className={`mr-3 ${daysRemaining <= 1 ? 'text-red-500' : 'text-yellow-600'}`} />
+                <div className="flex items-start sm:items-center gap-3">
+                  <AlertCircle size={20} className={`flex-shrink-0 mt-0.5 sm:mt-0 ${daysRemaining <= 1 ? 'text-red-500' : 'text-amber-600 dark:text-amber-400'}`} />
                   <div>
-                    <h4 className="font-bold">Subscription Alert</h4>
-                    <p className="text-sm mt-0.5">
+                    <h4 className="font-bold text-sm sm:text-base leading-snug">Subscription Alert</h4>
+                    <p className="text-xs sm:text-sm mt-0.5 leading-relaxed opacity-90">
                       {daysRemaining <= 0
                         ? 'Your subscription has expired. Please renew to avoid losing access.'
                         : `Your subscription will expire in ${daysRemaining} day${daysRemaining === 1 ? '' : 's'}. Renew now to avoid interruption.`
                       }
                     </p>
-
                   </div>
                 </div>
                 <button
                   onClick={() => navigate('/client/subscription-plans')}
-                  className={`px-4 py-2 rounded-lg text-sm font-bold shadow-sm transition-colors ${daysRemaining <= 1
+                  className={`w-full sm:w-auto px-4 py-2 rounded-lg text-xs sm:text-sm font-bold shadow-sm transition-all flex-shrink-0 cursor-pointer active:scale-98 text-center justify-center ${daysRemaining <= 1
                     ? 'bg-red-600 hover:bg-red-700 text-white'
-                    : 'bg-yellow-500 hover:bg-yellow-600 text-white'
+                    : 'bg-amber-500 hover:bg-amber-600 text-white'
                     }`}
                 >
                   Renew Now
@@ -2295,8 +2397,8 @@ const AdminDashboard = () => {
             {/* Desktop sidebar */}
             <aside
               aria-label="Module Navigation"
-              onMouseEnter={() => setIsSidebarHovered(true)}
-              onMouseLeave={() => setIsSidebarHovered(false)}
+              onMouseEnter={handleSidebarMouseEnter}
+              onMouseLeave={handleSidebarMouseLeave}
               className={`hidden lg:flex fixed left-0 top-[60px] sm:top-[68px] bottom-0 ${isExpanded ? 'w-64' : 'w-[72px]'
                 } bg-white/95 dark:bg-[#1A1A32]/95 backdrop-blur-xl border-r border-slate-200/90 dark:border-slate-800 z-40 transition-all duration-300 ease-in-out flex-col py-4 shadow-sm overflow-hidden select-none`}
             >
@@ -2305,7 +2407,7 @@ const AdminDashboard = () => {
                 <button
                   type="button"
                   onClick={toggleSidebarExpanded}
-                  className={`w-full flex items-center ${isExpanded ? 'justify-between px-3' : 'justify-center px-0'} h-10 rounded-xl border border-slate-200/90 dark:border-[#383860] bg-slate-100 dark:bg-[#25254A] hover:bg-slate-200 dark:hover:bg-[#303060] text-slate-700 dark:text-white shadow-2xs transition-all duration-200 cursor-pointer group`}
+                  className={`w-full flex items-center ${isExpanded ? 'justify-between px-3' : 'justify-center px-0'} h-10 rounded-xl border border-slate-200/90 dark:border-[#383860] bg-slate-100 dark:bg-[#25254A] hover:bg-slate-200 dark:hover:bg-[#303060] text-slate-700 dark:text-white shadow-2xs transition-all duration-200 cursor-pointer touch-manipulation group`}
                   title={isSidebarExpanded ? 'Collapse Sidebar' : 'Pin / Expand Sidebar'}
                   aria-label={isSidebarExpanded ? 'Collapse Sidebar' : 'Pin / Expand Sidebar'}
                 >
@@ -2378,9 +2480,12 @@ const AdminDashboard = () => {
               </div>
             </aside>
 
-            {/* Mobile tabs */}
-            <div className="lg:hidden mb-6 w-full">
-              <div className="bg-white/95 dark:bg-[#1A1A32]/95 backdrop-blur-md p-1.5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-2xs inline-flex flex-nowrap items-center gap-1.5 max-w-full overflow-x-auto scrollbar-none" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            {/* Mobile / Tablet tabs with smooth horizontal scroll */}
+            <div
+              className="lg:hidden mb-4 -mx-4 px-4 sm:mx-0 sm:px-0 overflow-x-auto scrollbar-none touch-pan-x"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
+            >
+              <div className="bg-white/95 dark:bg-[#1A1A32]/95 backdrop-blur-md p-1 md:p-1.5 rounded-xl md:rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-2xs inline-flex flex-nowrap items-center gap-1 md:gap-1.5 min-w-max">
                 {sidebarNavItems.map((tab) => {
                   const isActive = (showCreateTest || selectedExamId) ? tab.id === 'exams' : activeTab === tab.id;
                   const Icon = tab.icon;
@@ -2397,8 +2502,8 @@ const AdminDashboard = () => {
                           setActiveTab(tab.id);
                         }
                       }}
-                      className={`group inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-[13px] font-semibold rounded-xl nav-gesture-item whitespace-nowrap flex-shrink-0 cursor-pointer ${isActive
-                        ? 'bg-gradient-to-r from-[#403f75] to-[#57569b] text-white font-bold shadow-md shadow-[#403f75]/20 scale-[1.02]'
+                      className={`group inline-flex items-center gap-1.5 sm:gap-2 md:gap-2.5 px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 md:py-2.5 text-xs sm:text-[13px] md:text-sm font-semibold rounded-lg sm:rounded-xl nav-gesture-item whitespace-nowrap flex-shrink-0 cursor-pointer transition-all ${isActive
+                        ? 'bg-[#403f75] dark:bg-indigo-600 text-white font-bold shadow-xs'
                         : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/90 dark:hover:bg-slate-800/70'
                         }`}
                     >

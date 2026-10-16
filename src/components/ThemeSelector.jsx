@@ -105,13 +105,13 @@ const ThemeSelector = ({ className = '', variant = 'dark' }) => {
         ref={triggerRef}
         type="button"
         onClick={() => setIsOpen((open) => !open)}
-        className={`theme-selector-trigger theme-selector-trigger--${variant} flex h-10 w-10 sm:h-11 sm:w-11 min-w-[40px] min-h-[40px] items-center justify-center rounded-xl outline-none focus:outline-none transition-all ${className}`}
+        className={`theme-selector-trigger theme-selector-trigger--${variant} flex items-center justify-center rounded-xl outline-none focus:outline-none transition-all ${className || 'h-10 w-10 sm:h-11 sm:w-11 min-w-[40px] min-h-[40px]'}`}
         aria-label="Change theme"
         aria-haspopup="menu"
         aria-expanded={isOpen}
         title="Change theme"
       >
-        <ActiveIcon className="w-5 h-5 stroke-[2.2]" />
+        <ActiveIcon className="w-4 h-4 sm:w-4.5 sm:h-4.5 stroke-[2.2]" />
       </button>
 
       {isOpen && (

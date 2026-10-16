@@ -304,10 +304,10 @@ const LandingPage = () => {
           </div>
 
           {/* Desktop Nav Links */}
-          <div className="hidden lg:flex items-center gap-1 bg-theme-panel/70 border border-theme-border/40 rounded-full px-2 py-1.5">
+          <div className="hidden xl:flex items-center gap-1 bg-theme-panel/70 border border-theme-border/40 rounded-full px-2 py-1.5">
             {NAV_LINKS.map(link => (
               <a key={link.href} href={link.href} onClick={(e) => scrollToSection(e, link.href)}
-                className="px-4 py-2 text-sm font-semibold text-theme-muted hover:text-theme-text transition-colors rounded-full hover:bg-theme-card">
+                className="px-3.5 2xl:px-4 py-2 text-sm font-semibold text-theme-muted hover:text-theme-text transition-colors rounded-full hover:bg-theme-card">
                 {link.label}
               </a>
             ))}
@@ -324,8 +324,8 @@ const LandingPage = () => {
                 Get Started
               </button>
             </Link>
-            {/* Mobile hamburger */}
-            <button className="lg:hidden flex flex-col justify-center items-center gap-1.5 min-w-[44px] min-h-[44px] p-2 flex-shrink-0 rounded-xl hover:bg-theme-panel transition-colors text-theme-text" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
+            {/* Tablet / Mobile hamburger */}
+            <button className="xl:hidden flex flex-col justify-center items-center gap-1.5 min-w-[44px] min-h-[44px] p-2 flex-shrink-0 rounded-xl hover:bg-theme-panel transition-colors text-theme-text" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
               <span className={`block w-5 h-0.5 bg-current transition-transform duration-300 ${mobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`} />
               <span className={`block w-5 h-0.5 bg-current transition-opacity duration-300 ${mobileMenuOpen ? 'opacity-0' : ''}`} />
               <span className={`block w-5 h-0.5 bg-current transition-transform duration-300 ${mobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
@@ -333,9 +333,9 @@ const LandingPage = () => {
           </div>
         </div>
 
-        {/* Mobile dropdown */}
+        {/* Tablet / Mobile dropdown */}
         {mobileMenuOpen && (
-          <div className="lg:hidden bg-theme-card border-t border-theme-border/60 px-4 py-2 animate-fadeIn flex flex-col gap-1">
+          <div className="xl:hidden bg-theme-card border-t border-theme-border/60 px-4 py-2 animate-fadeIn flex flex-col gap-1 shadow-lg">
             {NAV_LINKS.map(link => (
               <a key={link.href} href={link.href} onClick={(e) => scrollToSection(e, link.href)}
                 className="flex items-center px-4 py-3 min-h-[44px] text-sm font-semibold text-theme-muted hover:text-theme-text hover:bg-theme-panel rounded-xl transition-colors">

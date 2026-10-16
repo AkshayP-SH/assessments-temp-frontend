@@ -25,7 +25,7 @@ const AdminHeader = ({ viewAsControl, title }) => {
   // when the tab is in the background)
   useEffect(() => {
     if (!('Notification' in window) || Notification.permission !== 'default') return undefined;
-    const handleClick = () => Notification.requestPermission().catch(() => {});
+    const handleClick = () => Notification.requestPermission().catch(() => { });
     document.addEventListener('click', handleClick, { once: true });
     return () => document.removeEventListener('click', handleClick);
   }, []);
@@ -49,17 +49,17 @@ const AdminHeader = ({ viewAsControl, title }) => {
     <>
       <div className="w-full sticky top-0 z-50">
         <header className="admin-header w-full h-[60px] sm:h-[68px] shadow-sm sticky top-0 z-50 rounded-none border-b border-gray-200 bg-white/95 dark:bg-[#1A1A32]/95 backdrop-blur-md">
-          <div className="w-full px-4 sm:px-6 lg:px-6 h-full flex items-center justify-between gap-4">
+          <div className="w-full px-2.5 sm:px-6 lg:px-6 h-full flex items-center justify-between gap-2 sm:gap-4">
             {/* Left: Brand Logo & Title + Tenant Scope Switcher */}
-            <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
-              <div className="site-header-logo w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center flex-shrink-0 bg-white border border-[#D1D1E6] dark:border-transparent shadow-2xs">
+            <div className="flex items-center gap-2 sm:gap-3 flex-shrink min-w-0">
+              <div className="site-header-logo w-8 h-8 sm:w-10 sm:h-10 rounded-xl overflow-hidden flex items-center justify-center flex-shrink-0 bg-white border border-[#D1D1E6] dark:border-transparent shadow-2xs">
                 <OrganizationLogo className="w-full h-full object-contain" />
               </div>
-              <div className="flex-shrink-0">
-                <h1 className="admin-header-title font-extrabold text-base sm:text-lg lg:text-xl leading-tight whitespace-nowrap text-slate-900 dark:text-white tracking-tight">
+              <div className="min-w-0">
+                <h1 className="admin-header-title font-extrabold text-xs sm:text-base lg:text-lg xl:text-xl leading-tight truncate text-slate-900 dark:text-white tracking-tight">
                   {title || 'SHNOOR Assessments'}
                 </h1>
-                <p className="admin-header-subtitle text-xs font-semibold text-[#403f75] dark:text-indigo-400 whitespace-nowrap leading-tight mt-0.5">
+                <p className="admin-header-subtitle text-[9px] sm:text-xs font-semibold text-[#403f75] dark:text-indigo-400 truncate leading-tight mt-0.5">
                   {isClientPortal ? 'Client Portal' : 'Admin Dashboard'}
                 </p>
               </div>
@@ -77,7 +77,7 @@ const AdminHeader = ({ viewAsControl, title }) => {
             {/* Right Side: Desktop Navigation */}
             <div className="hidden sm:flex items-center gap-2 flex-shrink-0">
               <div className="flex items-center bg-slate-100/90 dark:bg-[#1E1E38] p-1 rounded-xl border border-slate-200/90 dark:border-slate-700/80 shadow-2xs gap-0.5">
-                <ThemeSelector variant="light" className="!rounded-lg !w-9 !h-9 !p-0 !border-0 !shadow-none !bg-transparent hover:bg-white/80 dark:hover:bg-slate-750 transition-all text-slate-600 dark:text-slate-300" />
+                <ThemeSelector variant="light" className="!rounded-lg !w-9 !h-9 !min-w-0 !min-h-0 !p-0 !border-0 !shadow-none !bg-transparent hover:bg-white/80 dark:hover:bg-slate-750 transition-all text-slate-600 dark:text-slate-300" />
 
                 <div className="h-5 w-[1px] bg-slate-300/80 dark:bg-slate-700 mx-1" />
 
@@ -112,25 +112,41 @@ const AdminHeader = ({ viewAsControl, title }) => {
               </button>
             </div>
 
-            {/* Mobile Menu Toggle Button */}
-            <div className="sm:hidden flex items-center gap-2 flex-shrink-0">
-              <div className="admin-header-mobile-toggle">
-                <ThemeSelector variant="light" />
-                <NotificationBell
-                  role="admin"
-                  viewAllPath={`${basePath}/notifications`}
-                  showToasts={false}
-                  buttonClassName="admin-header-menu-btn relative"
-                  iconSize={20}
-                  dropdownClassName="w-72"
+            {/* Mobile Controls */}
+            <div className="sm:hidden flex items-center gap-1.5 flex-shrink-0">
+              <NotificationBell
+                role="admin"
+                viewAllPath={`${basePath}/notifications`}
+                showToasts={false}
+                buttonClassName="relative w-8 h-8 rounded-xl flex items-center justify-center border border-slate-200/90 dark:border-slate-700/80 shadow-2xs transition-all text-slate-600 dark:text-slate-300 bg-slate-100/90 dark:bg-[#1E1E38] hover:bg-white/80 dark:hover:bg-slate-700"
+                dropdownClassName="w-72"
+              />
+
+              <div className="flex items-center bg-slate-100/90 dark:bg-[#1E1E38] p-0.5 rounded-xl border border-slate-200/90 dark:border-slate-700/80 shadow-2xs flex-shrink-0">
+                <ThemeSelector
+                  variant="light"
+                  className="!rounded-lg !w-7 !h-7 !min-w-0 !min-h-0 !p-0 !border-0 !shadow-none !bg-transparent hover:bg-white/80 dark:hover:bg-slate-700 transition-all text-slate-600 dark:text-slate-300"
                 />
-                <button
-                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  className="admin-header-menu-btn"
-                >
-                  {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
-                </button>
               </div>
+
+              <button
+                onClick={handleLogout}
+                className="h-8 px-2 min-[400px]:px-2.5 text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-50/90 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 border border-rose-200/80 dark:border-rose-800/60 rounded-xl transition-all flex items-center justify-center shadow-2xs cursor-pointer flex-shrink-0 active:scale-98 whitespace-nowrap"
+                title="Logout"
+                aria-label="Logout"
+              >
+                <LogOut size={14} className="min-[400px]:mr-1 text-rose-600 dark:text-rose-400" />
+                <span className="hidden min-[400px]:inline">Logout</span>
+              </button>
+
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="w-8 h-8 rounded-xl flex items-center justify-center border border-slate-200/90 dark:border-slate-700/80 text-slate-600 dark:text-slate-300 bg-slate-100/90 dark:bg-[#1E1E38] cursor-pointer flex-shrink-0"
+                title="More menu"
+                aria-label="Toggle menu"
+              >
+                {mobileMenuOpen ? <X size={16} /> : <Menu size={16} />}
+              </button>
             </div>
 
             {/* Mobile Menu Dropdown */}
@@ -143,7 +159,7 @@ const AdminHeader = ({ viewAsControl, title }) => {
                 )}
                 <button
                   type="button"
-                  className="admin-header-mobile-btn"
+                  className="admin-header-mobile-btn justify-center gap-2"
                   onClick={() => {
                     navigate(`${basePath}/live-proctoring`);
                     setMobileMenuOpen(false);

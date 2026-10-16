@@ -1,4 +1,4 @@
-import { formatDate } from '../utils/dateTime';
+import { formatDate as formatDateTimeUtil } from '../utils/dateTime';
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   User,
@@ -469,7 +469,7 @@ export default function StudentProfile() {
   const formatDate = (dateStr) => {
     if (!dateStr) return '—';
     try {
-      return formatDate(dateStr, 'en-US', {
+      return formatDateTimeUtil(dateStr, 'en-US', {
         year: 'numeric',
         month: 'short',
         day: 'numeric'
