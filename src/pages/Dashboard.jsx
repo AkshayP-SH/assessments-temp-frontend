@@ -486,7 +486,7 @@ const Dashboard = () => {
       />
 
       {/* Main content */}
-      <main className={`w-full max-w-[1600px] mx-auto px-3 sm:px-6 lg:pr-8 ${isSidebarExpanded ? 'lg:pl-[288px]' : 'lg:pl-[96px]'} pt-2.5 sm:pt-6 pb-12 transition-all duration-300 ease-in-out`}>
+      <main className={`w-full max-w-[1600px] mx-auto px-3 sm:px-6 xl:pr-8 ${isSidebarExpanded ? 'xl:pl-[288px]' : 'xl:pl-[96px]'} pt-2.5 sm:pt-6 pb-12 transition-all duration-300 ease-in-out`}>
         {/* Sidebar Navigation */}
         <StudentSidebar
           activeTab={activeTab}
@@ -517,7 +517,7 @@ const Dashboard = () => {
               const pendingCount = totalCount - completedCount;
 
               return (
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 perspective-1000">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 perspective-1000">
                   <div className="bg-white dark:bg-[#1A1A32] border border-indigo-100/90 dark:border-slate-800 rounded-2xl p-4 sm:p-5 card-3d-lift shimmer-hover transform-style-3d border-glow-hover animate-entry-3d stagger-1">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Total Assigned</span>
@@ -612,7 +612,7 @@ const Dashboard = () => {
                     <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 mt-2">Try adjusting your search or filters to see more tests.</p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-6">
                     {filteredTests.map((test) => {
                       const isCompleted = test.alreadyTaken || test.testStatus === 'expired';
                       const isInProgress = test.isAvailable && !test.alreadyTaken && testsWithProgress.has(test.id);

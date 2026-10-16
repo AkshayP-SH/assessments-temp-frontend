@@ -113,11 +113,10 @@ const CustomDropdown = memo(({
               tabIndex={-1}
               onClick={() => selectOption(option)}
               onMouseEnter={() => setActiveIndex(options.indexOf(option))}
-className={`w-full text-left px-3 py-2 text-xs sm:text-sm transition-colors flex items-center justify-between ${
-                String(value) === String(option.value)
+              className={`w-full text-left px-3 py-2 text-xs sm:text-sm transition-colors flex items-center justify-between ${String(value) === String(option.value)
                   ? 'bg-theme-accent text-white font-bold'
                   : 'text-theme-inv-muted hover:bg-theme-accent/50 font-medium'
-              } ${activeIndex === options.indexOf(option) ? 'ring-2 ring-inset ring-theme-accent' : ''}`}
+                } ${activeIndex === options.indexOf(option) ? 'ring-2 ring-inset ring-theme-accent' : ''}`}
             >
               <span className="truncate">{option.label}</span>
             </button>
@@ -239,28 +238,30 @@ const ExamSearchFilter = memo(({
           </div>
 
           {/* Controls */}
-          <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+          <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto">
             {/* Custom Sort Dropdown */}
             <CustomDropdown
               value={sortBy}
               onChange={handleSortChange}
               options={sortOptions}
               placeholder="Sort"
-              buttonClassName="!h-11 !px-4 !rounded-xl !bg-slate-50 dark:!bg-slate-800 !border-slate-200/80 dark:!border-slate-700 !text-slate-700 dark:!text-slate-200 !text-sm font-bold hover:!bg-slate-100 dark:hover:!bg-slate-700 transition-all"
+              className="w-full sm:w-auto"
+              minWidth="min-w-0 sm:min-w-[130px]"
+              buttonClassName="!h-11 !px-3.5 sm:!px-4 !rounded-xl !bg-slate-50 dark:!bg-slate-800 !border-slate-200/80 dark:!border-slate-700 !text-slate-700 dark:!text-slate-200 !text-xs sm:!text-sm font-bold hover:!bg-slate-100 dark:hover:!bg-slate-700 transition-all justify-between"
             />
 
             <button
               type="button"
               onClick={() => setShowFilters(!showFilters)}
-              className={`h-11 px-4 rounded-xl border text-sm font-bold flex items-center gap-2 transition-all cursor-pointer ${showFilters
+              className={`h-11 px-3.5 sm:px-4 rounded-xl border text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer w-full sm:w-auto ${showFilters
                 ? 'bg-[#403f75] text-white border-[#403f75] shadow-xs'
                 : 'bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border-slate-200/80 dark:border-slate-700'
                 }`}
             >
-              <Filter size={16} />
+              <Filter size={15} />
               <span>Filter</span>
               {activeFilterBadges.length > 0 && !showFilters && (
-                <span className="ml-0.5 px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900 text-[#403f75] dark:text-indigo-200 text-xs rounded-full font-bold">
+                <span className="ml-0.5 px-1.5 py-0.5 bg-indigo-100 dark:bg-indigo-900 text-[#403f75] dark:text-indigo-200 text-[10px] sm:text-xs rounded-full font-bold">
                   {activeFilterBadges.length}
                 </span>
               )}
@@ -270,7 +271,7 @@ const ExamSearchFilter = memo(({
               <button
                 type="button"
                 onClick={clearFilters}
-className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg font-medium bg-theme-hdr text-shnoor-danger hover:bg-theme-accent transition-all border border-shnoor-danger shadow-sm flex-shrink-0"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg font-medium bg-theme-hdr text-shnoor-danger hover:bg-theme-accent transition-all border border-shnoor-danger shadow-sm flex-shrink-0"
                 title="Clear all filters"
               >
                 <X size={15} />
@@ -281,7 +282,7 @@ className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg font-medium 
         </div>
 
         {activeFilterBadges.length > 0 && !showFilters && (
-<div className="flex flex-wrap gap-2 mt-2 pt-2 border-t border-theme-stroke">
+          <div className="flex flex-wrap gap-2 mt-2 pt-2 border-t border-theme-stroke">
             {activeFilterBadges.map((badge) => (
               <span
                 key={badge.key}
@@ -294,7 +295,7 @@ className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg font-medium 
         )}
 
         {showFilters && (
-<div className="flex flex-wrap gap-2 pt-3 mt-3 border-t border-theme-stroke animate-in slide-in-from-top-2 duration-200">
+          <div className="flex flex-wrap gap-2 pt-3 mt-3 border-t border-theme-stroke animate-in slide-in-from-top-2 duration-200">
             {showPublishedFilter && (
               <CustomDropdown
                 value={filters.published}

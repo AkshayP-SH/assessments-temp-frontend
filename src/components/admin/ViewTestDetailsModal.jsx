@@ -1,4 +1,4 @@
-import { formatDateTime } from '../../utils/dateTime';
+import { formatDateTime as formatDateTimeUtil } from '../../utils/dateTime';
 import { X, Calendar, Clock, FileText, Target, Users, Award, Edit3 } from 'lucide-react';
 import Button from '../Button';
 
@@ -8,7 +8,7 @@ const ViewTestDetailsModal = ({ test, onClose, onEdit }) => {
   const formatDateTime = (dateTimeString) => {
     if (!dateTimeString) return 'Not set';
     const date = new Date(dateTimeString);
-    return formatDateTime(date, 'en-US', {
+    return formatDateTimeUtil(date, 'en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',

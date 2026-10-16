@@ -36,12 +36,12 @@ export default function StudentSidebar({ activeTab, onTabChange, badges = {}, on
 
   return (
     <>
-      {/* Desktop sidebar */}
+      {/* Desktop sidebar (laptops and large desktops) */}
       <aside
         aria-label="Student Navigation Rail"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        className={`hidden lg:flex fixed left-0 top-[60px] sm:top-[68px] bottom-0 ${isExpanded ? 'w-64' : 'w-[72px]'
+        className={`hidden xl:flex fixed left-0 top-[60px] sm:top-[68px] bottom-0 ${isExpanded ? 'w-64' : 'w-[72px]'
           } bg-white/95 dark:bg-[#1A1A32]/95 backdrop-blur-xl border-r border-slate-200/90 dark:border-slate-800 z-40 transition-all duration-300 ease-in-out flex-col py-4 shadow-sm overflow-hidden select-none`}
       >
         {/* Top Control Bar with Collapse Toggle Button */}
@@ -126,11 +126,13 @@ export default function StudentSidebar({ activeTab, onTabChange, badges = {}, on
         </div>
       </aside>
 
-      {/* Mobile tabs */}
-      <div className="lg:hidden mb-3 w-full overflow-x-auto scrollbar-none">
+      {/* Mobile & Tablet tabs */}
+      <div
+        className="xl:hidden mb-3.5 sm:mb-4 w-full overflow-x-auto scrollbar-none md:flex md:justify-center"
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+      >
         <div
-          className="bg-white/95 dark:bg-[#1A1A32]/95 backdrop-blur-md p-1 rounded-xl border border-slate-200/90 dark:border-slate-800 shadow-2xs inline-flex flex-nowrap items-center gap-1 min-w-max"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          className="bg-white/95 dark:bg-[#1A1A32]/95 backdrop-blur-md p-1 md:p-1.5 rounded-xl md:rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-2xs inline-flex flex-nowrap items-center gap-1 md:gap-1.5 min-w-max"
         >
           {STUDENT_TABS.map((tab) => {
             const isActive = activeTab === tab.id;
@@ -145,22 +147,22 @@ export default function StudentSidebar({ activeTab, onTabChange, badges = {}, on
                   if (tab.path) navigate(tab.path);
                   if (onTabChange) onTabChange(tab.id);
                 }}
-                className={`group inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-[13px] font-semibold rounded-xl transition-all duration-150 whitespace-nowrap flex-shrink-0 cursor-pointer ${isActive
+                className={`group inline-flex items-center gap-2 md:gap-2.5 px-3.5 sm:px-4 md:px-5 py-2 md:py-2.5 text-xs sm:text-[13px] md:text-sm font-semibold rounded-xl md:rounded-xl transition-all duration-150 whitespace-nowrap flex-shrink-0 cursor-pointer ${isActive
                   ? 'bg-[#403f75] dark:bg-indigo-600 text-white font-bold shadow-xs'
                   : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/90 dark:hover:bg-slate-800/70'
                   }`}
               >
                 <Icon
                   size={15}
-                  className={`flex-shrink-0 transition-transform duration-150 group-hover:scale-105 ${isActive
+                  className={`flex-shrink-0 transition-transform duration-150 group-hover:scale-105 md:w-[17px] md:h-[17px] ${isActive
                     ? 'text-white'
                     : 'text-slate-500 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-white'
                     }`}
                 />
-                <span>{tab.label}</span>
+                <span className="md:font-bold">{tab.label}</span>
                 {badgeCount != null && badgeCount > 0 && (
                   <span
-                    className={`px-1.5 py-0.2 text-[10px] font-black rounded-full ${isActive ? 'bg-white text-[#403f75]' : 'bg-[#403f75] text-white'
+                    className={`px-1.5 py-0.2 md:px-2 md:py-0.5 text-[10px] md:text-xs font-black rounded-full ${isActive ? 'bg-white text-[#403f75]' : 'bg-[#403f75] text-white'
                       }`}
                   >
                     {badgeCount > 99 ? '99+' : badgeCount}

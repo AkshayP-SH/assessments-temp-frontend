@@ -1,4 +1,4 @@
-import { formatDate, formatTime } from '../../utils/dateTime';
+import { formatDate as formatDateTimeUtil, formatTime as formatTimeUtil } from '../../utils/dateTime';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Mail, MailOpen, Trash2, ChevronDown, CheckCheck, User, AlertCircle, X, Send, Building, MessageCircle, Paperclip, Smile, CheckCircle, Clock, BarChart3, TrendingUp, ThumbsUp, ThumbsDown, Star } from 'lucide-react';
@@ -588,7 +588,7 @@ const StudentMessages = ({ isEmbedded = false }) => {
     if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
     if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
     if (diff < 604800000) return `${Math.floor(diff / 86400000)}d ago`;
-    return formatDate(date, 'en-US', {
+    return formatDateTimeUtil(date, 'en-US', {
       month: 'short', day: 'numeric',
       year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
     });
@@ -596,7 +596,7 @@ const StudentMessages = ({ isEmbedded = false }) => {
 
   const formatTime = (dateString) => {
     const date = new Date(dateString);
-    return formatTime(date, 'en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+    return formatTimeUtil(date, 'en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
   };
 
   const unreadCount = messages.reduce((total, msg) => total + (parseInt(msg.unread_count) || 0), 0);
